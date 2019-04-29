@@ -1099,7 +1099,7 @@ Public Class frmMainTabbed
             End If 'Common controller
             EnableDisableUIEx(UIMode.ReleaseOther, GetType(EMA_SupertrendStrategy))
 
-            _EMASupertrendStrategyToExecute = New EMA_SupertrendStrategy(_commonController, 3, _EMA_SupertrendUserInputs, 8, _cts)
+            _EMASupertrendStrategyToExecute = New EMA_SupertrendStrategy(_commonController, 3, _EMA_SupertrendUserInputs, 5, _cts)
             OnHeartbeatEx(String.Format("Running strategy:{0}", _EMASupertrendStrategyToExecute.ToString), New List(Of Object) From {_EMASupertrendStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()
