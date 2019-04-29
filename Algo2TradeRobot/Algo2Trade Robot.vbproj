@@ -1,0 +1,304 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{781EEE01-32EF-4A22-AE65-D7CB9BC17890}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>Algo2Trade_Robot.My.MyApplication</StartupObject>
+    <RootNamespace>Algo2Trade_Robot</RootNamespace>
+    <AssemblyName>Algo2TradeRobot</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>WindowsForms</MyType>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>Algo2TradeRobot.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>Algo2TradeRobot.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionExplicit>On</OptionExplicit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionCompare>Binary</OptionCompare>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionStrict>Off</OptionStrict>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>algo2tradericon 24x24.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Bulb">
+      <HintPath>..\..\LEDBulb\Bulb\bin\Debug\Bulb.exe</HintPath>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\packages\NLog.4.5.10\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="Syncfusion.Core.WinForms, Version=16.4460.0.42, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Syncfusion\4.6\Syncfusion.Core.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Syncfusion.Licensing">
+      <HintPath>..\..\Syncfusion\4.6\Syncfusion.Licensing.dll</HintPath>
+    </Reference>
+    <Reference Include="Syncfusion.SfDataGrid.WinForms">
+      <HintPath>..\..\Syncfusion\4.6\Syncfusion.SfDataGrid.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Syncfusion.SfInput.WinForms, Version=16.4460.0.42, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Syncfusion\4.6\Syncfusion.SfInput.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Syncfusion.SfListView.WinForms, Version=16.4460.0.42, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Syncfusion\4.6\Syncfusion.SfListView.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="UIAutomationTypes" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+    <Import Include="System.Threading.Tasks" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AmiSignal\AmiSignalStrategy.vb" />
+    <Compile Include="AmiSignal\AmiSignalStrategyInstrument.vb" />
+    <Compile Include="AmiSignal\AmiSignalUserInputs.vb" />
+    <Compile Include="AmiSignal\frmAmiSignalSettings.Designer.vb">
+      <DependentUpon>frmAmiSignalSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="AmiSignal\frmAmiSignalSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AmiSignal\frmAmiSignalTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmAmiSignalTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="AmiSignal\frmAmiSignalTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common.vb" />
+    <Compile Include="EMA_Supertrend\EMA_SupertrendStrategy.vb" />
+    <Compile Include="EMA_Supertrend\EMA_SupertrendStrategyInstrument.vb" />
+    <Compile Include="EMA_Supertrend\EMA_SupertrendStrategyUserInputs.vb" />
+    <Compile Include="EMA_Supertrend\frmEMA_SupertrendSettings.Designer.vb">
+      <DependentUpon>frmEMA_SupertrendSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="EMA_Supertrend\frmEMA_SupertrendSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EMA_Supertrend\frmEMA_SupertrendTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmEMA_SupertrendTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="EMA_Supertrend\frmEMA_SupertrendTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAbout.Designer.vb">
+      <DependentUpon>frmAbout.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAbout.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAdvancedOptions.Designer.vb">
+      <DependentUpon>frmAdvancedOptions.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAdvancedOptions.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMainTabbed.Designer.vb">
+      <DependentUpon>frmMainTabbed.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmMainTabbed.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MomentumReversal\frmMomentumReversalSettings.Designer.vb">
+      <DependentUpon>frmMomentumReversalSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="MomentumReversal\frmMomentumReversalSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmUserDetails.Designer.vb">
+      <DependentUpon>frmUserDetails.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmUserDetails.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MomentumReversal\frmMomentumReversalTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmMomentumReversalTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="MomentumReversal\frmMomentumReversalTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MomentumReversal\MomentumReversalStrategy.vb" />
+    <Compile Include="MomentumReversal\MomentumReversalStrategyInstrument.vb" />
+    <Compile Include="MomentumReversal\MomentumReversalUserInputs.vb" />
+    <Compile Include="NearFarHedging\frmNearFarHedgingSettings.Designer.vb">
+      <DependentUpon>frmNearFarHedgingSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="NearFarHedging\frmNearFarHedgingSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NearFarHedging\frmNearFarHedgingTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmNearFarHedgingTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="NearFarHedging\frmNearFarHedgingTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NearFarHedging\NearFarHedgingStrategy.vb" />
+    <Compile Include="NearFarHedging\NearFarHedgingStrategyInstrument.vb" />
+    <Compile Include="NearFarHedging\NearFarHedgingStrategyUserInputs.vb" />
+    <Compile Include="OHL\frmOHLSettings.Designer.vb">
+      <DependentUpon>frmOHLSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="OHL\frmOHLSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OHL\frmOHLTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmOHLTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="OHL\frmOHLTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OHL\OHLStrategyInstrument.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="OHL\OHLStrategy.vb" />
+    <Compile Include="OHL\OHLUserInputs.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AmiSignal\frmAmiSignalSettings.resx">
+      <DependentUpon>frmAmiSignalSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AmiSignal\frmAmiSignalTradableInstrumentList.resx">
+      <DependentUpon>frmAmiSignalTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EMA_Supertrend\frmEMA_SupertrendSettings.resx">
+      <DependentUpon>frmEMA_SupertrendSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EMA_Supertrend\frmEMA_SupertrendTradableInstrumentList.resx">
+      <DependentUpon>frmEMA_SupertrendTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAbout.resx">
+      <DependentUpon>frmAbout.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAdvancedOptions.resx">
+      <DependentUpon>frmAdvancedOptions.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMainTabbed.resx">
+      <DependentUpon>frmMainTabbed.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MomentumReversal\frmMomentumReversalSettings.resx">
+      <DependentUpon>frmMomentumReversalSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmUserDetails.resx">
+      <DependentUpon>frmUserDetails.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MomentumReversal\frmMomentumReversalTradableInstrumentList.resx">
+      <DependentUpon>frmMomentumReversalTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NearFarHedging\frmNearFarHedgingSettings.resx">
+      <DependentUpon>frmNearFarHedgingSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NearFarHedging\frmNearFarHedgingTradableInstrumentList.resx">
+      <DependentUpon>frmNearFarHedgingTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OHL\frmOHLSettings.resx">
+      <DependentUpon>frmOHLSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OHL\frmOHLTradableInstrumentList.resx">
+      <DependentUpon>frmOHLTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="My Project\app.manifest" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Algo2TradeCore\Algo2TradeCore.vbproj">
+      <Project>{854af4dd-f649-4cbe-9f92-6fea031892a9}</Project>
+      <Name>Algo2TradeCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.vbproj">
+      <Project>{0524d87f-b8bf-4cc2-b955-49950110fe9a}</Project>
+      <Name>Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="algo2tradericon 24x24.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+</Project>
