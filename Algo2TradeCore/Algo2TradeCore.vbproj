@@ -90,12 +90,14 @@
     <Compile Include="Entities\Indicators\BollingerConsumer.vb" />
     <Compile Include="Entities\Indicators\EMAConsumer.vb" />
     <Compile Include="Entities\Indicators\SMAConsumer.vb" />
-    <Compile Include="Entities\Indicators\SpreadConsumer.vb" />
+    <Compile Include="Entities\Indicators\SpreadRatioConsumer.vb" />
     <Compile Include="Entities\Indicators\SupertrendConsumer.vb" />
     <Compile Include="Entities\IUserMargin.vb" />
+    <Compile Include="Entities\PayloadToPairConsumer.vb" />
     <Compile Include="Entities\PlaceOrderParameters.vb" />
     <Compile Include="Entities\IBrokerageAttributes.vb" />
     <Compile Include="Calculator\APIBrokerageCalculator.vb" />
+    <Compile Include="Entities\PairPayload.vb" />
     <Compile Include="Entities\ZerodhaBrokerageAttributes.vb" />
     <Compile Include="Calculator\ZerodhaBrokerageCalculator.vb" />
     <Compile Include="ChartHandler\ChartStyle\CandleStickChart.vb" />

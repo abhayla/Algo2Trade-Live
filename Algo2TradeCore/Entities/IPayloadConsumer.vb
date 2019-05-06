@@ -6,6 +6,7 @@
         Enum ConsumerType
             Chart = 1
             Indicator
+            Pair
         End Enum
     End Interface
 End Namespace

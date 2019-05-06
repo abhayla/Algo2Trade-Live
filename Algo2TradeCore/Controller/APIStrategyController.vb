@@ -137,6 +137,7 @@ Namespace Controller
             _userMarginFilename = Path.Combine(My.Application.Info.DirectoryPath, String.Format("UserMargin_{0}.Margin.a2t", Now.ToString("yy_MM_dd")))
         End Sub
         Public MustOverride Function GetErrorResponse(ByVal response As Object) As String
+        Public MustOverride Function CreateDummySingleInstrument(ByVal supportedTradingSymbol As String, ByVal instrumentToken As UInteger, ByVal sampleInstrument As IInstrument) As IInstrument
         Public MustOverride Async Function CloseTickerIfConnectedAsync() As Task
         Public MustOverride Async Function CloseFetcherIfConnectedAsync(ByVal forceClose As Boolean) As Task
         Public MustOverride Async Function CloseCollectorIfConnectedAsync(ByVal forceClose As Boolean) As Task
@@ -505,6 +506,16 @@ Namespace Controller
         End Function
         Public Function GetUserMargin() As Dictionary(Of Enums.TypeOfExchage, Decimal)
             Return _currentUser.DaysStartingCapitals
+        End Function
+        Public Function GetChartCreator(ByVal instrumentIdentifier As String) As Chart
+            If instrumentIdentifier IsNot Nothing AndAlso
+                _rawPayloadCreators IsNot Nothing AndAlso
+                _rawPayloadCreators.Count > 0 AndAlso
+                _rawPayloadCreators.ContainsKey(instrumentIdentifier) Then
+                Return _rawPayloadCreators(instrumentIdentifier)
+            Else
+                Return Nothing
+            End If
         End Function
     End Class
 End Namespace

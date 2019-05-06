@@ -867,6 +867,13 @@ Namespace Controller
         '    End If
 
         'End Function
+        Public Overrides Function CreateDummySingleInstrument(supportedTradingSymbol As String, ByVal instrumentToken As UInteger, ByVal sampleInstrument As IInstrument) As IInstrument
+            If supportedTradingSymbol IsNot Nothing AndAlso _APIAdapter IsNot Nothing Then
+                Return _APIAdapter.CreateSingleInstrument(supportedTradingSymbol, instrumentToken, sampleInstrument)
+            Else
+                Return Nothing
+            End If
+        End Function
         Public Overrides Async Function GetOrderDetailsAsync() As Task(Of Concurrent.ConcurrentBag(Of IBusinessOrder))
             Dim ret As Concurrent.ConcurrentBag(Of IBusinessOrder) = Nothing
             _cts.Token.ThrowIfCancellationRequested()
@@ -1098,6 +1105,7 @@ Namespace Controller
                                     For Each strategyToRun In _AllStrategies
                                         _cts.Token.ThrowIfCancellationRequested()
                                         Await strategyToRun.ProcessOrderAsync(orderData).ConfigureAwait(False)
+                                        strategyToRun.IsFirstTimeInformationCollected = True
                                     Next
                                 End If
                             Next
@@ -1105,6 +1113,13 @@ Namespace Controller
                     Case Else
                         Throw New NotImplementedException
                 End Select
+            Else
+                If _AllStrategies IsNot Nothing AndAlso _AllStrategies.Count > 0 Then
+                    For Each strategyToRun In _AllStrategies
+                        _cts.Token.ThrowIfCancellationRequested()
+                        strategyToRun.IsFirstTimeInformationCollected = True
+                    Next
+                End If
             End If
         End Sub
 

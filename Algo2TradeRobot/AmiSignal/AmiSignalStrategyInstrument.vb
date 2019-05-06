@@ -60,6 +60,13 @@ Public Class AmiSignalStrategyInstrument
                     Throw Me.ParentStrategy.ParentController.OrphanException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
+                If Not Me.ParentStrategy.IsFirstTimeInformationCollected Then
+                    logger.Debug("Information collector is not completed till now")
+                    Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
+                    Continue While
+                End If
+
+                _cts.Token.ThrowIfCancellationRequested()
                 Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
                 If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
                     Dim placeOrderResponse As Object = Nothing
@@ -67,22 +74,31 @@ Public Class AmiSignalStrategyInstrument
                        EntrySignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
                        placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.Market Then
                         placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketMISOrder, Nothing).ConfigureAwait(False)
-                        EntrySignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
-                        EntrySignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
+                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                            placeOrderResponse("data").ContainsKey("order_id") Then
+                            EntrySignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
+                            EntrySignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
+                        End If
                     End If
                     If TargetSignals IsNot Nothing AndAlso TargetSignals.Count > 0 AndAlso placeOrderTrigger.Item2.Supporting.Count > 0 AndAlso
-                       TargetSignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
-                       placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.Limit Then
+                        TargetSignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
+                        placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.Limit Then
                         placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularLimitMISOrder, Nothing).ConfigureAwait(False)
-                        TargetSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
-                        TargetSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
+                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                            placeOrderResponse("data").ContainsKey("order_id") Then
+                            TargetSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
+                            TargetSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
+                        End If
                     End If
                     If StoplossSignals IsNot Nothing AndAlso StoplossSignals.Count > 0 AndAlso placeOrderTrigger.Item2.Supporting.Count > 0 AndAlso
                        StoplossSignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
                        placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.SL_M Then
                         placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularSLMMISOrder, Nothing).ConfigureAwait(False)
-                        StoplossSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
-                        StoplossSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
+                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                            placeOrderResponse("data").ContainsKey("order_id") Then
+                            StoplossSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
+                            StoplossSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
+                        End If
                     End If
                     SerializeSignalCollections()
                 End If
@@ -116,6 +132,9 @@ Public Class AmiSignalStrategyInstrument
         Dim amiUserSettings As AmiSignalUserInputs = Me.ParentStrategy.UserSettings
 
         Dim unusedEntrySignals As IEnumerable(Of KeyValuePair(Of String, AmiSignal)) = GetUnUsedSignals(EntrySignals)
+        If unusedEntrySignals IsNot Nothing AndAlso unusedEntrySignals.Count > 0 Then
+            logger.Debug(Utilities.Strings.JsonSerialize(unusedEntrySignals))
+        End If
         Dim unusedTargetSignals As IEnumerable(Of KeyValuePair(Of String, AmiSignal)) = GetUnUsedSignals(TargetSignals)
         Dim unusedStoplossSignals As IEnumerable(Of KeyValuePair(Of String, AmiSignal)) = GetUnUsedSignals(StoplossSignals)
 
@@ -128,6 +147,7 @@ Public Class AmiSignalStrategyInstrument
                 If CType(Me.ParentStrategy, AmiSignalStrategy).GetNumberOfLogicalActiveInstruments >= amiUserSettings.MaxNumberOfOpenPositions Then
                     logger.Error(String.Format("{0} - {1} Number of trade is running. So this signal cannot execute. {2}", Me.TradableInstrument.TradingSymbol, Me.ParentStrategy.GetNumberOfActiveInstruments, If(currentEntrySignal.Direction = IOrder.TypeOfTransaction.Buy, "BUY", "SHORT")))
                     EntrySignals(currentEntrySignal.UniqueIdentifier).Used = True
+                    SerializeSignalCollections()
                 Else
                     If currentEntrySignal.OrderType = IOrder.TypeOfOrder.Market AndAlso currentEntrySignal.OrderTimestamp = Date.MinValue Then
                         dummyPayload = New OHLCPayload(OHLCPayload.PayloadSource.None) With {.SnapshotDateTime = Now}
@@ -145,6 +165,7 @@ Public Class AmiSignalStrategyInstrument
                 If CType(Me.ParentStrategy, AmiSignalStrategy).GetNumberOfLogicalActiveInstruments >= amiUserSettings.MaxNumberOfOpenPositions Then
                     logger.Error(String.Format("{0} - {1} Number of trade is running. So this signal cannot execute. {2}", Me.TradableInstrument.TradingSymbol, Me.ParentStrategy.GetNumberOfActiveInstruments, If(currentTargetSignal.Direction = IOrder.TypeOfTransaction.Buy, "BUY", "SHORT")))
                     TargetSignals(currentTargetSignal.UniqueIdentifier).Used = True
+                    SerializeSignalCollections()
                 Else
                     If currentTargetSignal.OrderType = IOrder.TypeOfOrder.Limit AndAlso currentTargetSignal.OrderTimestamp = Date.MinValue Then
                         dummyPayload = New OHLCPayload(OHLCPayload.PayloadSource.None) With {.SnapshotDateTime = Now.AddSeconds(3)}
@@ -163,6 +184,7 @@ Public Class AmiSignalStrategyInstrument
                 If CType(Me.ParentStrategy, AmiSignalStrategy).GetNumberOfLogicalActiveInstruments >= amiUserSettings.MaxNumberOfOpenPositions Then
                     logger.Error(String.Format("{0} - {1} Number of trade is running. So this signal cannot execute. {2}", Me.TradableInstrument.TradingSymbol, Me.ParentStrategy.GetNumberOfActiveInstruments, If(currentStoplossSignal.Direction = IOrder.TypeOfTransaction.Buy, "BUY", "SHORT")))
                     StoplossSignals(currentStoplossSignal.UniqueIdentifier).Used = True
+                    SerializeSignalCollections()
                 Else
                     If currentStoplossSignal.OrderType = IOrder.TypeOfOrder.SL_M AndAlso currentStoplossSignal.OrderTimestamp = Date.MinValue Then
                         dummyPayload = New OHLCPayload(OHLCPayload.PayloadSource.None) With {.SnapshotDateTime = Now.AddSeconds(6)}
@@ -191,6 +213,7 @@ Public Class AmiSignalStrategyInstrument
                 logger.Error(String.Format("{0} - Trade is running. So another stoploss signal cannot execute.", Me.TradableInstrument.TradingSymbol))
                 StoplossSignals(unusedStoplossSignals.FirstOrDefault.Key).Used = True
             End If
+            SerializeSignalCollections()
         Else
             Dim currentSignal As AmiSignal = Nothing
             If unusedEntrySignals IsNot Nothing AndAlso unusedEntrySignals.Count > 0 Then
@@ -205,6 +228,7 @@ Public Class AmiSignalStrategyInstrument
                 logger.Error(String.Format("{0} - Outside market hours. Trade Start Time:{1}, Last Trade Entry Time:{2}", Me.TradableInstrument.TradingSymbol, amiUserSettings.TradeStartTime.ToString, amiUserSettings.LastTradeEntryTime.ToString))
                 StoplossSignals(unusedStoplossSignals.FirstOrDefault.Key).Used = True
             End If
+            SerializeSignalCollections()
         End If
 
         'Below portion have to be done in every place order trigger
@@ -243,7 +267,7 @@ Public Class AmiSignalStrategyInstrument
             Dim allCancelableOrders As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = GetAllCancelableOrders(IOrder.TypeOfTransaction.None)
             If allCancelableOrders IsNot Nothing AndAlso allCancelableOrders.Count > 0 Then
                 For Each cancelableOrder In allCancelableOrders
-                    If cancelableOrder.Item2.OrderType = IOrder.TypeOfOrder.Limit AndAlso Not cancelableOrder.Item2.Status = IOrder.TypeOfStatus.Complete Then
+                    If cancelableOrder.Item2.OrderType = IOrder.TypeOfOrder.Limit AndAlso Not cancelableOrder.Item2.Status=IOrder.TypeOfStatus.Complete Then
                         Dim price As Decimal = Decimal.MinValue
                         If cancelableOrder.Item2.TransactionType = IOrder.TypeOfTransaction.Buy Then
                             price = Me.TradableInstrument.LastTick.LastPrice + Utilities.Numbers.ConvertFloorCeling((Me.TradableInstrument.LastTick.LastPrice * 0.3 / 100), Me.TradableInstrument.TickSize, Utilities.Numbers.NumberManipulation.RoundOfType.Floor)
@@ -286,25 +310,25 @@ Public Class AmiSignalStrategyInstrument
                     End If
 
                     Dim associatedOrders As List(Of IOrder) = GetOrdersFromUniqueID(uniqueID)
-
-                    associatedOrders = associatedOrders.FindAll(Function(x)
-                                                                    Return x.OrderType = IOrder.TypeOfOrder.Market OrElse
-                                                                    (x.OrderType <> IOrder.TypeOfOrder.Market AndAlso x.Status <> IOrder.TypeOfStatus.Rejected)
-                                                                End Function)
-                    If associatedOrders IsNot Nothing AndAlso associatedOrders.Count = 3 Then
-                        Dim openOrderCount As Integer = 0
-                        For Each order In associatedOrders
-                            If order.Status = IOrder.TypeOfStatus.Open OrElse order.Status = IOrder.TypeOfStatus.TriggerPending Then
-                                openOrderCount += 1
-                            End If
-                        Next
-                        If openOrderCount = 1 Then
-                            If parentOrder.OrderType = IOrder.TypeOfOrder.Limit OrElse parentOrder.OrderType = IOrder.TypeOfOrder.SL_M Then
-                                isSignalShouldCancel = True
+                    If associatedOrders IsNot Nothing AndAlso associatedOrders.Count > 0 Then
+                        associatedOrders = associatedOrders.FindAll(Function(x)
+                                                                        Return x.OrderType = IOrder.TypeOfOrder.Market OrElse
+                                                                        (x.OrderType <> IOrder.TypeOfOrder.Market AndAlso x.Status <> IOrder.TypeOfStatus.Rejected)
+                                                                    End Function)
+                        If associatedOrders IsNot Nothing AndAlso associatedOrders.Count = 3 Then
+                            Dim openOrderCount As Integer = 0
+                            For Each order In associatedOrders
+                                If order.Status = IOrder.TypeOfStatus.Open OrElse order.Status = IOrder.TypeOfStatus.TriggerPending Then
+                                    openOrderCount += 1
+                                End If
+                            Next
+                            If openOrderCount = 1 Then
+                                If parentOrder.OrderType = IOrder.TypeOfOrder.Limit OrElse parentOrder.OrderType = IOrder.TypeOfOrder.SL_M Then
+                                    isSignalShouldCancel = True
+                                End If
                             End If
                         End If
                     End If
-
                     If isSignalShouldCancel Then
                         'Below portion have to be done in every cancel order trigger
                         Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(parentOrder.Tag)

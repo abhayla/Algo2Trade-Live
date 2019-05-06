@@ -213,6 +213,20 @@ Namespace ChartHandler.ChartStyle
                         '    Throw ex
                         'End Try
                         'Try
+                        '    If _subscribedStrategyInstruments.FirstOrDefault.DependendStrategyInstruments.FirstOrDefault.IsPairInstrument Then
+                        '        Dim outputConsumer As PayloadToPairConsumer = _subscribedStrategyInstruments.FirstOrDefault.DependendStrategyInstruments.FirstOrDefault.RawPayloadDependentConsumers.FirstOrDefault
+                        '        If outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
+                        '            For Each payload In outputConsumer.ConsumerPayloads.OrderBy(Function(x)
+                        '                                                                            Return x.Key
+                        '                                                                        End Function)
+                        '                Debug.WriteLine(CType(payload.Value, PairPayload).ToString())
+                        '            Next
+                        '        End If
+                        '    End If
+                        'Catch ex As Exception
+                        '    Throw ex
+                        'End Try
+                        'Try
                         '    Dim outputConsumer As PayloadToIndicatorConsumer = _subscribedStrategyInstruments.FirstOrDefault.RawPayloadDependentConsumers.FirstOrDefault.OnwardLevelConsumers.FirstOrDefault
                         '    If outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
                         '        For Each payload In outputConsumer.ConsumerPayloads.OrderBy(Function(x)
@@ -427,6 +441,31 @@ Namespace ChartHandler.ChartStyle
                 '    Throw ex
                 'End Try
                 'Try
+                '    Dim outputConsumer As PayloadToIndicatorConsumer = _subscribedStrategyInstruments.FirstOrDefault.DependendStrategyInstruments.FirstOrDefault.RawPayloadDependentConsumers.FirstOrDefault.OnwardLevelConsumers.FirstOrDefault
+                '    If freshCandle AndAlso outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
+                '        For Each payload In outputConsumer.ConsumerPayloads.OrderBy(Function(x)
+                '                                                                        Return x.Key
+                '                                                                    End Function)
+                '            Debug.WriteLine(payload.Key.ToString & vbTab & CType(payload.Value, Indicators.SpreadRatioConsumer.SpreadRatioPayload).Spread.Value & vbTab & CType(payload.Value, Indicators.SpreadRatioConsumer.SpreadRatioPayload).Ratio.Value)
+                '        Next
+                '    End If
+                'Catch ex As Exception
+                '    Throw ex
+                'End Try
+                'Try
+                '    Dim outputConsumer As PayloadToIndicatorConsumer = _subscribedStrategyInstruments.FirstOrDefault.DependendStrategyInstruments.FirstOrDefault.RawPayloadDependentConsumers.FirstOrDefault.OnwardLevelConsumers.FirstOrDefault.OnwardLevelConsumers.FirstOrDefault
+                '    If freshCandle AndAlso outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
+                '        For Each payload In outputConsumer.ConsumerPayloads.OrderBy(Function(x)
+                '                                                                        Return x.Key
+                '                                                                    End Function)
+                '            Dim currentPayloadValue As Indicators.BollingerConsumer.BollingerPayload = payload.Value
+                '            Debug.WriteLine(String.Format("{0}{1}{2}{3}{4}{5}{6}", payload.Key.ToString, vbTab, currentPayloadValue.SMABollinger.Value, vbTab, currentPayloadValue.HighBollinger.Value, vbTab, currentPayloadValue.LowBollinger.Value))
+                '        Next
+                '    End If
+                'Catch ex As Exception
+                '    Throw ex
+                'End Try
+                'Try
                 '    Dim outputConsumer As PayloadToIndicatorConsumer = _subscribedStrategyInstruments.FirstOrDefault.RawPayloadDependentConsumers.FirstOrDefault.OnwardLevelConsumers.LastOrDefault
                 '    If freshCandle AndAlso outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
                 '        For Each payload In outputConsumer.ConsumerPayloads.OrderBy(Function(x)
@@ -434,6 +473,22 @@ Namespace ChartHandler.ChartStyle
                 '                                                                    End Function)
                 '            Debug.WriteLine(payload.Key.ToString + "   " + CType(payload.Value, Indicators.SupertrendConsumer.SupertrendPayload).Supertrend.Value.ToString())
                 '        Next
+                '    End If
+                'Catch ex As Exception
+                '    Throw ex
+                'End Try
+                'Try
+                '    If freshCandle AndAlso _subscribedStrategyInstruments.FirstOrDefault.DependendStrategyInstruments.FirstOrDefault.IsPairInstrument Then
+                '        Dim outputConsumer As PayloadToPairConsumer = _subscribedStrategyInstruments.FirstOrDefault.DependendStrategyInstruments.FirstOrDefault.RawPayloadDependentConsumers.FirstOrDefault
+                '        If outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 AndAlso
+                '            outputConsumer.ConsumerPayloads.ContainsKey(Utilities.Time.GetDateTimeTillMinutes(tickData.Timestamp.Value)) Then
+                '            Dim currentCandleTime As Date = Utilities.Time.GetDateTimeTillMinutes(tickData.Timestamp.Value)
+                '            Debug.WriteLine(String.Format("{0}_{1}", Now.ToLongTimeString, outputConsumer.ConsumerPayloads(currentCandleTime).ToString))
+                '            Dim previousCandleTime As Date = currentCandleTime.AddMinutes(-1)
+                '            If outputConsumer.ConsumerPayloads.ContainsKey(previousCandleTime) Then
+                '                Debug.WriteLine(String.Format("{0}_{1}", Now.ToLongTimeString, outputConsumer.ConsumerPayloads(previousCandleTime).ToString))
+                '            End If
+                '        End If
                 '    End If
                 'Catch ex As Exception
                 '    Throw ex

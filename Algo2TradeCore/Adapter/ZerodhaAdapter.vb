@@ -112,6 +112,28 @@ Namespace Adapter
             End If
             Return ret
         End Function
+        Public Overrides Function CreateSingleInstrument(ByVal supportedTradingSymbol As String, ByVal instrumentToken As UInteger, ByVal sampleInstrument As IInstrument) As IInstrument
+            Dim ret As ZerodhaInstrument = Nothing
+            If supportedTradingSymbol IsNot Nothing Then
+                Dim dummyInstrument As Instrument = New Instrument With
+                    {
+                    .TradingSymbol = supportedTradingSymbol,
+                    .Exchange = sampleInstrument.RawExchange,
+                    .Expiry = Nothing,
+                    .ExchangeToken = instrumentToken,
+                    .InstrumentToken = instrumentToken,
+                    .InstrumentType = Nothing,
+                    .LastPrice = 0,
+                    .LotSize = 0,
+                    .Name = supportedTradingSymbol,
+                    .Segment = Nothing,
+                    .TickSize = sampleInstrument.TickSize
+                    }
+
+                ret = New ZerodhaInstrument(Me.ParentController, dummyInstrument.InstrumentToken) With {.WrappedInstrument = dummyInstrument}
+            End If
+            Return ret
+        End Function
 #End Region
 
 #Region "Quotes"

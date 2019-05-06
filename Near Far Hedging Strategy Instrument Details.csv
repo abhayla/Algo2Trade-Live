@@ -1,2 +1,2 @@
-Instrument Name,Number Of Lots,PL Offset(Brokerage),Stock Max Profit,Number of Trades
-CRUDEOILM,1,1800,3000,1
+Pair 1 Trading Symbol,Pair 1 Quantity,Pair 2 Trading Symbol,Pair 2 Quantity,PL Offset,Reverse Signal Exit,Reverse Signal Entry,Max Pair Loss,Max Pair Gain
+TATAMTRDVR,1,TATAMOTORS,1,3000,TRUE,TRUE,-2000,4000

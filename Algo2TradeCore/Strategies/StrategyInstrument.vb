@@ -124,7 +124,9 @@ Namespace Strategies
         Public Property OrderDetails As Concurrent.ConcurrentDictionary(Of String, IBusinessOrder)
         Public Property RawPayloadDependentConsumers As List(Of IPayloadConsumer)
         Public Property IsPairInstrument As Boolean
-        Public Property DependendStratrgyInstruments As IEnumerable(Of StrategyInstrument) 'Only used if it is a pair instrument
+        Public Property DependendStrategyInstruments As IEnumerable(Of StrategyInstrument) 'Only used if it is a pair instrument
+        Public Property ParentStrategyInstruments As IEnumerable(Of StrategyInstrument) 'Only used if it is a pair instrument
+        Public Property PairConsumerProtection As Boolean 'Only used if it is a pair instrument
         Public Sub New(ByVal associatedInstrument As IInstrument,
                        ByVal associatedParentStrategy As Strategy,
                        ByVal isPairInstrument As Boolean,
@@ -134,6 +136,7 @@ Namespace Strategies
             _cts = canceller
             OrderDetails = New Concurrent.ConcurrentDictionary(Of String, IBusinessOrder)
             Me.IsPairInstrument = isPairInstrument
+            Me.PairConsumerProtection = True
         End Sub
 
 #Region "Required Functions"
@@ -172,6 +175,20 @@ Namespace Strategies
                     '                                                  End Function)
 
                     'If lastExistingPayloads IsNot Nothing AndAlso lastExistingPayloads.Count > 0 Then ret = lastExistingPayloads.LastOrDefault.Value
+                    ret = XMinutePayloadConsumer.ConsumerPayloads(XMinutePayloadConsumer.ConsumerPayloads.Keys.Max)
+                End If
+            End If
+            Return ret
+        End Function
+        Public Function GetXMinuteCurrentCandle() As PairPayload
+            Dim ret As PairPayload = Nothing
+            If Me.RawPayloadDependentConsumers IsNot Nothing AndAlso Me.RawPayloadDependentConsumers.Count > 0 Then
+                Dim XMinutePayloadConsumer As PayloadToPairConsumer = RawPayloadDependentConsumers.Find(Function(x)
+                                                                                                            Return x.GetType Is GetType(PayloadToPairConsumer)
+                                                                                                        End Function)
+
+                If XMinutePayloadConsumer IsNot Nothing AndAlso
+                    XMinutePayloadConsumer.ConsumerPayloads IsNot Nothing AndAlso XMinutePayloadConsumer.ConsumerPayloads.Count > 0 Then
                     ret = XMinutePayloadConsumer.ConsumerPayloads(XMinutePayloadConsumer.ConsumerPayloads.Keys.Max)
                 End If
             End If
@@ -533,14 +550,75 @@ Namespace Strategies
                                     Else
                                         Await candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer).ConfigureAwait(False)
                                     End If
-                                    'Await candleCreator.IndicatorCreator.CalculateSpread(currentXMinute, consumer).ConfigureAwait(False)
-                                    'If consumer.OnwardLevelConsumers IsNot Nothing AndAlso consumer.OnwardLevelConsumers.Count > 0 Then
-                                    '    For Each dependendConsumer In consumer.OnwardLevelConsumers
-                                    '        Await candleCreator.IndicatorCreator.CalculateBollinger(currentXMinute, dependendConsumer).ConfigureAwait(False)
-                                    '    Next
-                                    'End If
                                     c += 1
                                 Next
+                            End If
+
+                            'Below block for pair strategy
+                            If Me.DependendStrategyInstruments IsNot Nothing AndAlso Me.DependendStrategyInstruments.Count > 0 Then
+                                For Each runningDependendStrategyInstrument In Me.DependendStrategyInstruments
+                                    If runningDependendStrategyInstrument.RawPayloadDependentConsumers IsNot Nothing AndAlso
+                                        runningDependendStrategyInstrument.RawPayloadDependentConsumers.Count > 0 Then
+                                        For Each runningDependendRawPayloadConsumer In runningDependendStrategyInstrument.RawPayloadDependentConsumers
+                                            If runningDependendRawPayloadConsumer.TypeOfConsumer = IPayloadConsumer.ConsumerType.Pair Then
+                                                If runningDependendRawPayloadConsumer.ConsumerPayloads Is Nothing Then runningDependendRawPayloadConsumer.ConsumerPayloads = New Concurrent.ConcurrentDictionary(Of Date, IPayload)
+                                                Dim currentMinutePairData As PairPayload = Nothing
+                                                currentMinutePairData = runningDependendRawPayloadConsumer.ConsumerPayloads.GetOrAdd(currentXMinute, currentMinutePairData)
+                                                If currentMinutePairData Is Nothing Then currentMinutePairData = New PairPayload
+                                                If Me.TradableInstrument.TradingSymbol = runningDependendStrategyInstrument.TradableInstrument.TradingSymbol.Split("_")(0) Then
+                                                    currentMinutePairData.Instrument1Payload = runningRawPayloadConsumer.ConsumerPayloads(currentXMinute)
+                                                ElseIf Me.TradableInstrument.TradingSymbol = runningDependendStrategyInstrument.TradableInstrument.TradingSymbol.Split("_")(1) Then
+                                                    currentMinutePairData.Instrument2Payload = runningRawPayloadConsumer.ConsumerPayloads(currentXMinute)
+                                                Else
+                                                    Throw New NotImplementedException("Pair strategy should not have any other instrument which is not matching with virtual instrument name")
+                                                End If
+                                                Try
+                                                    runningDependendRawPayloadConsumer.ConsumerPayloads.AddOrUpdate(currentXMinute, currentMinutePairData, Function(key, value) currentMinutePairData)
+                                                Catch ex As Exception
+                                                    logger.Error(ex.ToString)
+                                                    Throw ex
+                                                End Try
+                                            End If
+                                        Next
+                                    End If
+                                    Dim chartCreator As Chart = Me.ParentStrategy.ParentController.GetChartCreator(runningDependendStrategyInstrument.TradableInstrument.InstrumentIdentifier)
+                                    If chartCreator IsNot Nothing Then
+                                        Dim currentPayload As OHLCPayload = runningRawPayloadConsumer.ConsumerPayloads(currentXMinute)
+                                        Await runningDependendStrategyInstrument.PopulateChartAndIndicatorsAsync(chartCreator, currentPayload)
+                                    End If
+                                Next
+                            End If
+                            'End Block
+
+                        End If
+                    ElseIf runningRawPayloadConsumer.TypeOfConsumer = IPayloadConsumer.ConsumerType.Pair Then
+                        'This is also for pair
+                        If Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count > 0 Then
+                            Dim isAllHistoricalCompleted As Boolean = True
+                            For Each runningParentStrategyInstrument In Me.ParentStrategyInstruments
+                                isAllHistoricalCompleted = isAllHistoricalCompleted And runningParentStrategyInstrument.TradableInstrument.IsHistoricalCompleted
+                            Next
+                            If isAllHistoricalCompleted Then
+                                Dim currentXMinute As Date = Date.MinValue
+                                If PairConsumerProtection Then
+                                    currentXMinute = Now.AddDays(-30)
+                                    Me.PairConsumerProtection = False
+                                Else
+                                    currentXMinute = currentCandle.SnapshotDateTime
+                                End If
+                                If candleCreator.IndicatorCreator Is Nothing Then candleCreator.IndicatorCreator = New ChartHandler.Indicator.IndicatorManeger(Me.ParentStrategy.ParentController, candleCreator, _cts)
+                                If currentXMinute <> Date.MinValue Then
+                                    If runningRawPayloadConsumer.OnwardLevelConsumers IsNot Nothing AndAlso runningRawPayloadConsumer.OnwardLevelConsumers.Count > 0 Then
+                                        For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
+                                            Await candleCreator.IndicatorCreator.CalculateSpreadRatio(currentXMinute, consumer).ConfigureAwait(False)
+                                            If consumer.OnwardLevelConsumers IsNot Nothing AndAlso consumer.OnwardLevelConsumers.Count > 0 Then
+                                                For Each dependendConsumer In consumer.OnwardLevelConsumers
+                                                    Await candleCreator.IndicatorCreator.CalculateBollinger(currentXMinute, dependendConsumer).ConfigureAwait(False)
+                                                Next
+                                            End If
+                                        Next
+                                    End If
+                                End If
                             End If
                         End If
                     End If

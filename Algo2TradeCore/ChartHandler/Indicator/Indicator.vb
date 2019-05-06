@@ -125,7 +125,11 @@ Namespace ChartHandler.Indicator
                                                                           End Function) / requiredData.Count
                                 Case TypeOfField.Spread
                                     smaValue.SMA.Value = requiredData.Sum(Function(s)
-                                                                              Return CType(CType(s.Value, SpreadConsumer.SpreadPayload).Spread.Value, Decimal)
+                                                                              Return CType(CType(s.Value, SpreadRatioConsumer.SpreadRatioPayload).Spread.Value, Decimal)
+                                                                          End Function) / requiredData.Count
+                                Case TypeOfField.Ratio
+                                    smaValue.SMA.Value = requiredData.Sum(Function(s)
+                                                                              Return CType(CType(s.Value, SpreadRatioConsumer.SpreadRatioPayload).Ratio.Value, Decimal)
                                                                           End Function) / requiredData.Count
                             End Select
                         End If
@@ -376,7 +380,13 @@ Namespace ChartHandler.Indicator
                                     previousNInputData = requiredData.ToDictionary(Of Date, Decimal)(Function(x)
                                                                                                          Return x.Key
                                                                                                      End Function, Function(y)
-                                                                                                                       Return CType(y.Value, SpreadConsumer.SpreadPayload).Spread.Value
+                                                                                                                       Return CType(y.Value, SpreadRatioConsumer.SpreadRatioPayload).Spread.Value
+                                                                                                                   End Function)
+                                Case TypeOfField.Ratio
+                                    previousNInputData = requiredData.ToDictionary(Of Date, Decimal)(Function(x)
+                                                                                                         Return x.Key
+                                                                                                     End Function, Function(y)
+                                                                                                                       Return CType(y.Value, SpreadRatioConsumer.SpreadRatioPayload).Ratio.Value
                                                                                                                    End Function)
                             End Select
                             If previousNInputData.Count > 2 Then
@@ -399,7 +409,7 @@ Namespace ChartHandler.Indicator
                 Interlocked.Exchange(_BollingerLock, 0)
             End Try
         End Function
-        Public Async Function CalculateSpread(ByVal timeToCalculateFrom As Date, ByVal outputConsumer As SpreadConsumer) As Task
+        Public Async Function CalculateSpreadRatio(ByVal timeToCalculateFrom As Date, ByVal outputConsumer As SpreadRatioConsumer) As Task
             Try
                 While 1 = Interlocked.Exchange(_SpreadLock, 1)
                     Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
@@ -415,37 +425,76 @@ Namespace ChartHandler.Indicator
                                                                                                         End Function).ToList
 
                     For Each runningInputDate In requiredDataSet
-                        If outputConsumer.ConsumerPayloads Is Nothing Then outputConsumer.ConsumerPayloads = New Concurrent.ConcurrentDictionary(Of Date, IPayload)
-                        Dim spreadValue As SpreadConsumer.SpreadPayload = Nothing
+                        Dim currentPayload As PairPayload = outputConsumer.ParentConsumer.ConsumerPayloads(runningInputDate)
+                        If outputConsumer.ConsumerPayloads Is Nothing Then
+                            If currentPayload.Instrument1Payload IsNot Nothing AndAlso currentPayload.Instrument2Payload IsNot Nothing Then
+                                outputConsumer.ConsumerPayloads = New Concurrent.ConcurrentDictionary(Of Date, IPayload)
+                                If currentPayload.Instrument2Payload.ClosePrice.Value > currentPayload.Instrument1Payload.ClosePrice.Value Then
+                                    outputConsumer.HigherContract = currentPayload.Instrument2Payload
+                                    outputConsumer.LowerContract = currentPayload.Instrument1Payload
+                                Else
+                                    outputConsumer.HigherContract = currentPayload.Instrument1Payload
+                                    outputConsumer.LowerContract = currentPayload.Instrument2Payload
+                                End If
+                            Else
+                                Exit Function
+                            End If
+                        End If
+
+                        Dim spreadValue As SpreadRatioConsumer.SpreadRatioPayload = Nothing
                         If Not outputConsumer.ConsumerPayloads.TryGetValue(runningInputDate, spreadValue) Then
-                            spreadValue = New SpreadConsumer.SpreadPayload
+                            spreadValue = New SpreadRatioConsumer.SpreadRatioPayload
                         End If
-                        Dim farContractData As Decimal = Decimal.MinValue
-                        If outputConsumer.ParentConsumer.ConsumerPayloads.ContainsKey(runningInputDate) Then
-                            Select Case outputConsumer.FarSpreadField
+
+                        Dim higher As OHLCPayload = Nothing
+                        Dim lower As OHLCPayload = Nothing
+
+                        If currentPayload.Instrument1Payload IsNot Nothing Then
+                            If currentPayload.Instrument1Payload.TradingSymbol = outputConsumer.HigherContract.TradingSymbol Then
+                                higher = currentPayload.Instrument1Payload
+                            ElseIf currentPayload.Instrument1Payload.TradingSymbol = outputConsumer.LowerContract.TradingSymbol Then
+                                lower = currentPayload.Instrument1Payload
+                            End If
+                        End If
+
+                        If currentPayload.Instrument2Payload IsNot Nothing Then
+                            If currentPayload.Instrument2Payload.TradingSymbol = outputConsumer.HigherContract.TradingSymbol Then
+                                higher = currentPayload.Instrument2Payload
+                            ElseIf currentPayload.Instrument2Payload.TradingSymbol = outputConsumer.LowerContract.TradingSymbol Then
+                                lower = currentPayload.Instrument2Payload
+                            End If
+                        End If
+
+                        If higher IsNot Nothing AndAlso lower IsNot Nothing Then
+                            Select Case outputConsumer.SpreadRatioField
                                 Case TypeOfField.Close
-                                    farContractData = CType(outputConsumer.ParentConsumer.ConsumerPayloads(runningInputDate), OHLCPayload).ClosePrice.Value
+                                    spreadValue.Spread.Value = higher.ClosePrice.Value - lower.ClosePrice.Value
+                                    spreadValue.Ratio.Value = higher.ClosePrice.Value / lower.ClosePrice.Value
                             End Select
-                        End If
-                        Dim nearContractData As Decimal = Decimal.MinValue
-                        If outputConsumer.AnotherParentConsumer.ConsumerPayloads IsNot Nothing AndAlso
-                            outputConsumer.AnotherParentConsumer.ConsumerPayloads.Count > 0 AndAlso
-                            outputConsumer.AnotherParentConsumer.ConsumerPayloads.ContainsKey(runningInputDate) Then
-                            Select Case outputConsumer.NearSpreadField
-                                Case TypeOfField.Close
-                                    nearContractData = CType(outputConsumer.AnotherParentConsumer.ConsumerPayloads(runningInputDate), OHLCPayload).ClosePrice.Value
-                            End Select
-                        End If
-                        If farContractData <> Decimal.MinValue AndAlso nearContractData <> Decimal.MinValue Then
-                            spreadValue.Spread.Value = farContractData - nearContractData
-                        Else
-                            spreadValue.Spread.Value = 0
+                        ElseIf higher Is Nothing OrElse lower Is Nothing Then
+                            Dim previousSpreadValues As IEnumerable(Of KeyValuePair(Of Date, IPayload)) = Nothing
+                            Dim previousSpreadValue As SpreadRatioConsumer.SpreadRatioPayload = Nothing
+                            If outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
+                                previousSpreadValues = outputConsumer.ConsumerPayloads.Where(Function(x)
+                                                                                                 Return x.Key < runningInputDate
+                                                                                             End Function)
+                                If previousSpreadValues IsNot Nothing AndAlso previousSpreadValues.Count > 0 Then
+                                    previousSpreadValue = previousSpreadValues.OrderBy(Function(y)
+                                                                                           Return y.Key
+                                                                                       End Function).LastOrDefault.Value
+                                End If
+                            End If
+                            If previousSpreadValue IsNot Nothing Then
+                                spreadValue.Spread.Value = previousSpreadValue.Spread.Value
+                                spreadValue.Ratio.Value = previousSpreadValue.Ratio.Value
+                            Else
+                                spreadValue.Spread.Value = 0
+                                spreadValue.Ratio.Value = 0
+                            End If
                         End If
                         outputConsumer.ConsumerPayloads.AddOrUpdate(runningInputDate, spreadValue, Function(key, value) spreadValue)
                     Next
                 End If
-            Catch ex As Exception
-                Throw ex
             Finally
                 Interlocked.Exchange(_SpreadLock, 0)
             End Try

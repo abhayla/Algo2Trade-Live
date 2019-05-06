@@ -34,49 +34,46 @@ Public Class NearFarHedgingStrategy
         Dim retTradableInstrumentsAsPerStrategy As List(Of IInstrument) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
-        If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
 
+        Dim userInputs As NearFarHedgingStrategyUserInputs = CType(Me.UserSettings, NearFarHedgingStrategyUserInputs)
+        If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             'Get Strategy Instruments
-            Dim userInputs As NearFarHedgingStrategyUserInputs = CType(Me.UserSettings, NearFarHedgingStrategyUserInputs)
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = Nothing
-                    Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
-                                                                                                         Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
-                                                                                                             x.RawInstrumentType = "FUT" AndAlso (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX" OrElse x.RawExchange = "CDS")
-                                                                                                     End Function)
+                    Dim dummyRunningTradableInstrument1 As IInstrument = Nothing
+                    Dim dummyRunningTradableInstrument2 As IInstrument = Nothing
 
-                    Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date = Now.Date Then
-                                                                               Return x.Expiry.Value
-                                                                           Else
-                                                                               Return Date.MaxValue
-                                                                           End If
-                                                                       End Function)
+                    dummyRunningTradableInstrument1 = dummyAllInstruments.Find(Function(x)
+                                                                                   Return x.TradingSymbol = instrument.Value.Pair1TradingSymbol
+                                                                               End Function)
 
-                    Dim minNextExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                               If x.Expiry.Value.Date > minExpiry.Date Then
-                                                                                   Return x.Expiry.Value
-                                                                               Else
-                                                                                   Return Date.MaxValue
-                                                                               End If
-                                                                           End Function)
+                    dummyRunningTradableInstrument2 = dummyAllInstruments.Find(Function(x)
+                                                                                   Return x.TradingSymbol = instrument.Value.Pair2TradingSymbol
+                                                                               End Function)
 
-                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
-                                                                                Return x.Expiry = minExpiry
-                                                                            End Function)
-                    _cts.Token.ThrowIfCancellationRequested()
-                    ret = True
+                    'If dummyRunningTradableInstrument1.RawInstrumentName = dummyRunningTradableInstrument2.RawInstrumentName Then
+                    '    If dummyRunningTradableInstrument1.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
+                    '        dummyRunningTradableInstrument2.InstrumentType = IInstrument.TypeOfInstrument.Futures Then
+
+                    '    End If
+                    'End If
+
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
-                    If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
 
-                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
-                                                                                Return x.Expiry = minNextExpiry
-                                                                            End Function)
+                    runningTradableInstrument = dummyRunningTradableInstrument1
                     If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
+                    _cts.Token.ThrowIfCancellationRequested()
+
+                    runningTradableInstrument = dummyRunningTradableInstrument2
+                    If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
+                    _cts.Token.ThrowIfCancellationRequested()
+
+                    ret = True
                 Next
+
                 TradableInstrumentsAsPerStrategy = retTradableInstrumentsAsPerStrategy
             End If
         End If
@@ -99,16 +96,9 @@ Public Class NearFarHedgingStrategy
 
             'Now create the fresh handlers
             For Each runningTradableInstrument In retTradableInstrumentsAsPerStrategy
-                Dim isPairInstrument As Boolean = False
-                Dim anotherContract As IInstrument = retTradableInstrumentsAsPerStrategy.Find(Function(x)
-                                                                                                  Return x.RawInstrumentName = runningTradableInstrument.RawInstrumentName AndAlso
-                                                                                                    x.TradingSymbol <> runningTradableInstrument.TradingSymbol
-                                                                                              End Function)
-                If anotherContract IsNot Nothing Then isPairInstrument = True
-
                 _cts.Token.ThrowIfCancellationRequested()
                 If retTradableStrategyInstruments Is Nothing Then retTradableStrategyInstruments = New List(Of NearFarHedgingStrategyInstrument)
-                Dim runningTradableStrategyInstrument As New NearFarHedgingStrategyInstrument(runningTradableInstrument, Me, isPairInstrument, _cts)
+                Dim runningTradableStrategyInstrument As New NearFarHedgingStrategyInstrument(runningTradableInstrument, Me, False, _cts)
                 AddHandler runningTradableStrategyInstrument.HeartbeatEx, AddressOf OnHeartbeatEx
                 AddHandler runningTradableStrategyInstrument.WaitingForEx, AddressOf OnWaitingForEx
                 AddHandler runningTradableStrategyInstrument.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
@@ -118,22 +108,59 @@ Public Class NearFarHedgingStrategy
                 'If runningTradableInstrument.FirstLevelConsumers Is Nothing Then runningTradableInstrument.FirstLevelConsumers = New List(Of StrategyInstrument)
                 'runningTradableInstrument.FirstLevelConsumers.Add(runningTradableStrategyInstrument)
             Next
+
+            'Loop instrument1_instrument_2
+            Dim lastUniqueInstrumentToken As UInteger = 0
+            For Each instrument In userInputs.InstrumentsData
+                Dim uniqueInstrumentToken As UInteger = Utilities.Numbers.GetUniqueNumber()
+                If uniqueInstrumentToken = lastUniqueInstrumentToken Then uniqueInstrumentToken += 1
+                If retTradableStrategyInstruments IsNot Nothing AndAlso retTradableStrategyInstruments.Count > 0 Then
+                    Dim parentStrategyInstrument1 As NearFarHedgingStrategyInstrument =
+                        retTradableStrategyInstruments.Find(Function(x)
+                                                                Return x.TradableInstrument.TradingSymbol = instrument.Value.Pair1TradingSymbol
+                                                            End Function)
+
+                    Dim parentStrategyInstrument2 As NearFarHedgingStrategyInstrument =
+                        retTradableStrategyInstruments.Find(Function(x)
+                                                                Return x.TradableInstrument.TradingSymbol = instrument.Value.Pair2TradingSymbol
+                                                            End Function)
+
+                    Dim virtualStrategyInstrument As New NearFarHedgingStrategyInstrument(Me.ParentController.CreateDummySingleInstrument(instrument.Value.VirtualInstrumentName, uniqueInstrumentToken, parentStrategyInstrument1.TradableInstrument), Me, True, _cts)
+                    AddHandler virtualStrategyInstrument.HeartbeatEx, AddressOf OnHeartbeatEx
+                    AddHandler virtualStrategyInstrument.WaitingForEx, AddressOf OnWaitingForEx
+                    AddHandler virtualStrategyInstrument.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
+                    AddHandler virtualStrategyInstrument.DocumentDownloadCompleteEx, AddressOf OnDocumentDownloadCompleteEx
+
+                    Dim virtualParentStrategyInstruments As List(Of NearFarHedgingStrategyInstrument) = New List(Of NearFarHedgingStrategyInstrument)
+                    virtualParentStrategyInstruments.Add(parentStrategyInstrument1)
+                    virtualParentStrategyInstruments.Add(parentStrategyInstrument2)
+                    virtualStrategyInstrument.ParentStrategyInstruments = virtualParentStrategyInstruments
+
+                    Dim dependentStrategyInstruments As List(Of NearFarHedgingStrategyInstrument) = New List(Of NearFarHedgingStrategyInstrument)
+                    dependentStrategyInstruments.Add(virtualStrategyInstrument)
+                    parentStrategyInstrument1.DependendStrategyInstruments = dependentStrategyInstruments
+                    parentStrategyInstrument2.DependendStrategyInstruments = dependentStrategyInstruments
+
+                    retTradableStrategyInstruments.Add(virtualStrategyInstrument)
+                End If
+                lastUniqueInstrumentToken = uniqueInstrumentToken
+            Next
             TradableStrategyInstruments = retTradableStrategyInstruments
 
-            'Adding dependend pair instrumnents to a strategy instrument
-            If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
-                For Each runningStrategyInstrument In TradableStrategyInstruments
-                    If runningStrategyInstrument.IsPairInstrument Then
-                        Dim pairInstruments As IEnumerable(Of StrategyInstrument) = TradableStrategyInstruments.Where(Function(x)
-                                                                                                                          Return x.TradableInstrument.RawInstrumentName = runningStrategyInstrument.TradableInstrument.RawInstrumentName AndAlso
-                                                                                                                                x.TradableInstrument.TradingSymbol <> runningStrategyInstrument.TradableInstrument.TradingSymbol
-                                                                                                                      End Function)
-                        If pairInstruments IsNot Nothing AndAlso pairInstruments.Count > 0 Then
-                            runningStrategyInstrument.DependendStratrgyInstruments = pairInstruments
-                        End If
-                    End If
-                Next
-            End If
+            ''Adding dependend pair instrumnents to a strategy instrument
+            'If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
+            '    For Each runningStrategyInstrument In TradableStrategyInstruments
+            '        If runningStrategyInstrument.IsPairInstrument Then
+            '            Dim pairInstruments As IEnumerable(Of StrategyInstrument) = TradableStrategyInstruments.Where(Function(x)
+            '                                                                                                              Return x.TradableInstrument.RawInstrumentName = runningStrategyInstrument.TradableInstrument.RawInstrumentName AndAlso
+            '                                                                                                                    x.TradableInstrument.TradingSymbol <> runningStrategyInstrument.TradableInstrument.TradingSymbol
+            '                                                                                                          End Function)
+            '            If pairInstruments IsNot Nothing AndAlso pairInstruments.Count > 0 Then
+            '                runningStrategyInstrument.DependendStrategyInstruments = pairInstruments
+            '            End If
+            '        End If
+            '    Next
+            'End If
         Else
             Throw New ApplicationException(String.Format("Cannot run this strategy as no strategy instruments could be created from the tradable instruments, stratgey:{0}", Me.ToString))
         End If

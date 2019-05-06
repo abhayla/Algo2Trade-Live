@@ -45,6 +45,7 @@ Namespace Adapter
         Public MustOverride Async Function GetUserMarginsAsync() As Task(Of Dictionary(Of Enums.TypeOfExchage, IUserMargin))
         Public MustOverride Async Function GetAllQuotesAsync(ByVal instruments As IEnumerable(Of IInstrument)) As Task(Of IEnumerable(Of IQuote))
         Public MustOverride Sub SetAPIAccessToken(ByVal apiAccessToken As String)
+        Public MustOverride Function CreateSingleInstrument(ByVal supportedTradingSymbol As String, ByVal instrumentToken As UInteger, ByVal sampleInstrument As IInstrument) As IInstrument
         Public MustOverride Async Function ModifyStoplossOrderAsync(ByVal orderId As String, ByVal triggerPrice As Decimal) As Task(Of Dictionary(Of String, Object))
         Public MustOverride Async Function ModifyTargetOrderAsync(ByVal orderId As String, ByVal price As Decimal) As Task(Of Dictionary(Of String, Object))
         Public MustOverride Async Function CancelBOOrderAsync(ByVal orderId As String, ByVal parentOrderID As String) As Task(Of Dictionary(Of String, Object))

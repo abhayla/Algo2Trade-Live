@@ -23,6 +23,7 @@
             Supertrend
             Bollinger
             Spread
+            Ratio
         End Enum
         Enum CrossDirection
             Above = 1

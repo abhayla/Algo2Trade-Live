@@ -83,6 +83,7 @@ Namespace Strategies
         Public Property ExitAllTrades As Boolean
         Public ReadOnly Property MaxNumberOfDaysForHistoricalFetch As Integer
         Public ReadOnly Property IsStrategyCandleStickBased As Boolean
+        Public Property IsFirstTimeInformationCollected As Boolean
 
         Protected _cts As CancellationTokenSource
         Public Sub New(ByVal associatedParentController As APIStrategyController,
@@ -96,6 +97,7 @@ Namespace Strategies
             Me.IsStrategyCandleStickBased = isStrategyCandleStickBased
             Me.UserSettings = userSettings
             Me.MaxNumberOfDaysForHistoricalFetch = maxNumberOfDaysForHistoricalFetch
+            Me.IsFirstTimeInformationCollected = False
             Me.SignalManager = New SignalStateManager(associatedParentController, Me, canceller)
             AddHandler Me.SignalManager.NewItemAdded, AddressOf OnNewItemAdded
             _cts = canceller

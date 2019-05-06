@@ -29,6 +29,9 @@
             Public Property HighBollinger As Field
             Public Property SMABollinger As Field
             Public Property LowBollinger As Field
+            Public Overrides Function ToString() As String
+                Return String.Format("SMA:{0}, High:{1}, Low:{2}", Me.SMABollinger.Value, Me.HighBollinger.Value, Me.LowBollinger.Value)
+            End Function
         End Class
     End Class
 End Namespace
