@@ -1473,9 +1473,10 @@ Namespace Strategies
         Private _placeOrderLock As Integer = 0
         Protected Async Function TakePaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
             Dim ret As IBusinessOrder = Nothing
-            Try
-                If 0 = Interlocked.Read(_placeOrderLock) Then
-                    Interlocked.Increment(_placeOrderLock)
+            'logger.Debug(String.Format("Before Place Lock:{0}, {1}", Interlocked.Read(_placeOrderLock), Me.TradableInstrument.TradingSymbol))
+            If 0 = Interlocked.Exchange(_placeOrderLock, 1) Then
+                'logger.Debug(String.Format("After Place Lock:{0}, {1}", Interlocked.Read(_placeOrderLock), Me.TradableInstrument.TradingSymbol))
+                Try
                     Dim activityTag As String = GenerateTag(Now)
                     Dim parentPlaceOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = data
                     If parentPlaceOrderTrigger IsNot Nothing AndAlso parentPlaceOrderTrigger.Item1 = ExecuteCommandAction.Take Then
@@ -1527,19 +1528,19 @@ Namespace Strategies
                         'Me.OrderDetails.AddOrUpdate(parentBOrder.ParentOrderIdentifier, parentBOrder, Function(key, value) parentBOrder)
                         ret = OrderDetails(parentBOrder.ParentOrderIdentifier)
                     End If
-                End If
-            Finally
-                Interlocked.Decrement(_placeOrderLock)
-            End Try
+                Finally
+                    'logger.Debug("Releasing lock")
+                    Interlocked.Exchange(_placeOrderLock, 0)
+                End Try
+            End If
             Return ret
         End Function
 
         Private _cancelOrderLock As Integer = 0
         Protected Async Function CancelPaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
             Dim ret As IBusinessOrder = Nothing
-            Try
-                If 0 = Interlocked.Read(_cancelOrderLock) Then
-                    Interlocked.Increment(_cancelOrderLock)
+            If 0 = Interlocked.Exchange(_cancelOrderLock, 1) Then
+                Try
                     Dim exitOrdersTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String) = data
                     If exitOrdersTrigger IsNot Nothing AndAlso exitOrdersTrigger.Item1 = ExecuteCommandAction.Take Then
                         Dim potentialExitOrders As List(Of IOrder) = Nothing
@@ -1570,18 +1571,18 @@ Namespace Strategies
                             ret = parentBusinessOrder
                         End If
                     End If
-                End If
-            Finally
-                Interlocked.Decrement(_cancelOrderLock)
-            End Try
+                Finally
+                    Interlocked.Exchange(_cancelOrderLock, 0)
+                End Try
+            End If
             Return ret
         End Function
 
         Private _forceCancelOrderLock As Integer = 0
         Protected Async Function ForceCancelPaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
             Dim ret As IBusinessOrder = Nothing
-            Try
-                If 0 = Interlocked.Exchange(_forceCancelOrderLock, 1) Then
+            If 0 = Interlocked.Exchange(_forceCancelOrderLock, 1) Then
+                Try
                     Dim exitOrdersTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = data
                     If exitOrdersTrigger IsNot Nothing AndAlso exitOrdersTrigger.Count > 0 Then
                         Dim potentialExitOrders As List(Of IOrder) = Nothing
@@ -1614,10 +1615,10 @@ Namespace Strategies
                             End If
                         Next
                     End If
-                End If
-            Finally
-                Interlocked.Exchange(_forceCancelOrderLock, 0)
-            End Try
+                Finally
+                    Interlocked.Exchange(_forceCancelOrderLock, 0)
+                End Try
+            End If
             Return ret
         End Function
 #End Region
