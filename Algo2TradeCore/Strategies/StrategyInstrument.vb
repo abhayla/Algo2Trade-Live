@@ -416,7 +416,7 @@ Namespace Strategies
         Public Function GetParentFromChildOrder(ByVal childOrder As IOrder) As IBusinessOrder
             Dim ret As IBusinessOrder = Nothing
             If childOrder IsNot Nothing AndAlso childOrder.ParentOrderIdentifier IsNot Nothing AndAlso
-                OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+                OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 AndAlso OrderDetails.ContainsKey(childOrder.ParentOrderIdentifier) Then
                 ret = OrderDetails(childOrder.ParentOrderIdentifier)
             End If
             Return ret
@@ -508,6 +508,72 @@ Namespace Strategies
             End If
             Return tradeCount
         End Function
+        Public Function GetTotalPLOfAnOrderAfterBrokerage(ByVal parentOrderId As String) As Decimal
+            Dim plOfDay As Decimal = 0
+            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 AndAlso OrderDetails.ContainsKey(parentOrderId) Then
+                Dim parentBusinessOrder As IBusinessOrder = OrderDetails(parentOrderId)
+                Dim calculateWithLTP As Boolean = False
+                If parentBusinessOrder.SLOrder IsNot Nothing AndAlso parentBusinessOrder.SLOrder.Count > 0 Then
+                    calculateWithLTP = True
+                End If
+                If parentBusinessOrder.TargetOrder IsNot Nothing AndAlso parentBusinessOrder.TargetOrder.Count > 0 Then
+                    calculateWithLTP = True
+                End If
+
+                If parentBusinessOrder.AllOrder IsNot Nothing AndAlso parentBusinessOrder.AllOrder.Count > 0 Then
+                    For Each order In parentBusinessOrder.AllOrder
+                        _cts.Token.ThrowIfCancellationRequested()
+                        If order.Status = IOrder.TypeOfStatus.Cancelled OrElse order.Status = IOrder.TypeOfStatus.Complete Then
+                            Dim buyPrice As Decimal = Decimal.MinValue
+                            Dim sellPrice As Decimal = Decimal.MinValue
+                            If parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                buyPrice = parentBusinessOrder.ParentOrder.AveragePrice
+                                sellPrice = order.AveragePrice
+                            ElseIf parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                sellPrice = parentBusinessOrder.ParentOrder.AveragePrice
+                                buyPrice = order.AveragePrice
+                            End If
+                            plOfDay += _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, sellPrice, order.Quantity)
+                        ElseIf Not order.Status = IOrder.TypeOfStatus.Rejected Then
+                            calculateWithLTP = True
+                        End If
+                    Next
+                Else
+                    calculateWithLTP = True
+                End If
+
+                If calculateWithLTP AndAlso parentBusinessOrder.ParentOrder IsNot Nothing AndAlso parentBusinessOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                    For Each slOrder In parentBusinessOrder.SLOrder
+                        If Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso Not slOrder.Status = IOrder.TypeOfStatus.Complete Then
+                            Dim buyPrice As Decimal = Decimal.MinValue
+                            Dim sellPrice As Decimal = Decimal.MinValue
+                            If parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                buyPrice = parentBusinessOrder.ParentOrder.AveragePrice
+                                sellPrice = Me.TradableInstrument.LastTick.LastPrice
+                            ElseIf parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                sellPrice = parentBusinessOrder.ParentOrder.AveragePrice
+                                buyPrice = Me.TradableInstrument.LastTick.LastPrice
+                            End If
+                            plOfDay += _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, sellPrice, slOrder.Quantity)
+                        End If
+                    Next
+                End If
+                Return plOfDay
+            Else
+                Return 0
+            End If
+        End Function
+        Public Function GetOverallPLAfterBrokerage() As Decimal
+            Dim plOfDay As Decimal = 0
+            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+                For Each parentOrderId In OrderDetails.Keys
+                    plOfDay += GetTotalPLOfAnOrderAfterBrokerage(parentOrderId)
+                Next
+                Return plOfDay
+            Else
+                Return 0
+            End If
+        End Function
 #End Region
 
 #Region "Public Overridable Functions"
@@ -532,23 +598,23 @@ Namespace Strategies
         Public Overridable Async Function HandleTickTriggerToUIETCAsync() As Task
             Await Me.ParentStrategy.SignalManager.UIRefresh(Me, False).ConfigureAwait(False)
         End Function
-        Public Overridable Async Function PopulateChartAndIndicatorsAsync(ByVal candleCreator As Chart, ByVal currentCandle As OHLCPayload) As Task
+        Public Overridable Sub PopulateChartAndIndicators(ByVal candleCreator As Chart, ByVal currentCandle As OHLCPayload)
             'logger.Debug("PopulateChartAndIndicatorsAsync, parameters:{0},{1}", candleCreator.ToString, currentCandle.ToString)
             If RawPayloadDependentConsumers IsNot Nothing AndAlso RawPayloadDependentConsumers.Count > 0 Then
                 For Each runningRawPayloadConsumer In RawPayloadDependentConsumers
                     If runningRawPayloadConsumer.TypeOfConsumer = IPayloadConsumer.ConsumerType.Chart Then
-                        Dim currentXMinute As Date = Await candleCreator.ConvertTimeframeAsync(CType(runningRawPayloadConsumer, PayloadToChartConsumer).Timeframe,
+                        Dim currentXMinute As Date = candleCreator.ConvertTimeframe(CType(runningRawPayloadConsumer, PayloadToChartConsumer).Timeframe,
                                                                     currentCandle,
-                                                                    runningRawPayloadConsumer).ConfigureAwait(False)
+                                                                    runningRawPayloadConsumer)
                         If candleCreator.IndicatorCreator Is Nothing Then candleCreator.IndicatorCreator = New ChartHandler.Indicator.IndicatorManeger(Me.ParentStrategy.ParentController, candleCreator, _cts)
-                        If currentXMinute <> Date.MinValue Then
+                        If currentXMinute <> Date.MaxValue Then
                             Dim c As Integer = 1
                             If runningRawPayloadConsumer.OnwardLevelConsumers IsNot Nothing AndAlso runningRawPayloadConsumer.OnwardLevelConsumers.Count > 0 Then
                                 For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
                                     If c < 3 Then
-                                        Await candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer).ConfigureAwait(False)
+                                        candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
                                     Else
-                                        Await candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer).ConfigureAwait(False)
+                                        candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer)
                                     End If
                                     c += 1
                                 Next
@@ -561,30 +627,35 @@ Namespace Strategies
                                         runningDependendStrategyInstrument.RawPayloadDependentConsumers.Count > 0 Then
                                         For Each runningDependendRawPayloadConsumer In runningDependendStrategyInstrument.RawPayloadDependentConsumers
                                             If runningDependendRawPayloadConsumer.TypeOfConsumer = IPayloadConsumer.ConsumerType.Pair Then
-                                                If runningDependendRawPayloadConsumer.ConsumerPayloads Is Nothing Then runningDependendRawPayloadConsumer.ConsumerPayloads = New Concurrent.ConcurrentDictionary(Of Date, IPayload)
-                                                Dim currentMinutePairData As PairPayload = Nothing
-                                                currentMinutePairData = runningDependendRawPayloadConsumer.ConsumerPayloads.GetOrAdd(currentXMinute, currentMinutePairData)
-                                                If currentMinutePairData Is Nothing Then currentMinutePairData = New PairPayload
-                                                If Me.TradableInstrument.TradingSymbol = runningDependendStrategyInstrument.TradableInstrument.TradingSymbol.Split("_")(0) Then
-                                                    currentMinutePairData.Instrument1Payload = runningRawPayloadConsumer.ConsumerPayloads(currentXMinute)
-                                                ElseIf Me.TradableInstrument.TradingSymbol = runningDependendStrategyInstrument.TradableInstrument.TradingSymbol.Split("_")(1) Then
-                                                    currentMinutePairData.Instrument2Payload = runningRawPayloadConsumer.ConsumerPayloads(currentXMinute)
-                                                Else
-                                                    Throw New NotImplementedException("Pair strategy should not have any other instrument which is not matching with virtual instrument name")
+                                                If runningRawPayloadConsumer.ConsumerPayloads IsNot Nothing AndAlso runningRawPayloadConsumer.ConsumerPayloads.Count > 0 Then
+                                                    Dim requiredDataSet As IEnumerable(Of Date) = runningRawPayloadConsumer.ConsumerPayloads.Keys.Where(Function(x)
+                                                                                                                                                            Return x >= currentXMinute
+                                                                                                                                                        End Function)
+
+                                                    For Each runningInputDate In requiredDataSet.OrderBy(Function(x)
+                                                                                                             Return x
+                                                                                                         End Function)
+                                                        If runningDependendRawPayloadConsumer.ConsumerPayloads Is Nothing Then runningDependendRawPayloadConsumer.ConsumerPayloads = New Concurrent.ConcurrentDictionary(Of Date, IPayload)
+                                                        Dim currentMinutePairData As PairPayload = Nothing
+                                                        currentMinutePairData = runningDependendRawPayloadConsumer.ConsumerPayloads.GetOrAdd(runningInputDate, currentMinutePairData)
+                                                        If currentMinutePairData Is Nothing Then currentMinutePairData = New PairPayload
+                                                        If Me.TradableInstrument.TradingSymbol = runningDependendStrategyInstrument.TradableInstrument.TradingSymbol.Split("_")(0) Then
+                                                            currentMinutePairData.Instrument1Payload = runningRawPayloadConsumer.ConsumerPayloads(runningInputDate)
+                                                        ElseIf Me.TradableInstrument.TradingSymbol = runningDependendStrategyInstrument.TradableInstrument.TradingSymbol.Split("_")(1) Then
+                                                            currentMinutePairData.Instrument2Payload = runningRawPayloadConsumer.ConsumerPayloads(runningInputDate)
+                                                        Else
+                                                            Throw New NotImplementedException("Pair strategy should not have any other instrument which is not matching with virtual instrument name")
+                                                        End If
+                                                        runningDependendRawPayloadConsumer.ConsumerPayloads.AddOrUpdate(runningInputDate, currentMinutePairData, Function(key, value) currentMinutePairData)
+                                                    Next
                                                 End If
-                                                Try
-                                                    runningDependendRawPayloadConsumer.ConsumerPayloads.AddOrUpdate(currentXMinute, currentMinutePairData, Function(key, value) currentMinutePairData)
-                                                Catch ex As Exception
-                                                    logger.Error(ex.ToString)
-                                                    Throw ex
-                                                End Try
                                             End If
                                         Next
                                     End If
                                     Dim chartCreator As Chart = Me.ParentStrategy.ParentController.GetChartCreator(runningDependendStrategyInstrument.TradableInstrument.InstrumentIdentifier)
                                     If chartCreator IsNot Nothing Then
                                         Dim currentPayload As OHLCPayload = runningRawPayloadConsumer.ConsumerPayloads(currentXMinute)
-                                        Await runningDependendStrategyInstrument.PopulateChartAndIndicatorsAsync(chartCreator, currentPayload)
+                                        runningDependendStrategyInstrument.PopulateChartAndIndicators(chartCreator, currentPayload)
                                     End If
                                 Next
                             End If
@@ -592,7 +663,7 @@ Namespace Strategies
 
                         End If
                     ElseIf runningRawPayloadConsumer.TypeOfConsumer = IPayloadConsumer.ConsumerType.Pair Then
-                        'This is also for pair
+                        'This Is also for pair
                         If Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count > 0 Then
                             Dim isAllHistoricalCompleted As Boolean = True
                             For Each runningParentStrategyInstrument In Me.ParentStrategyInstruments
@@ -610,10 +681,10 @@ Namespace Strategies
                                 If currentXMinute <> Date.MinValue Then
                                     If runningRawPayloadConsumer.OnwardLevelConsumers IsNot Nothing AndAlso runningRawPayloadConsumer.OnwardLevelConsumers.Count > 0 Then
                                         For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                            Await candleCreator.IndicatorCreator.CalculateSpreadRatio(currentXMinute, consumer).ConfigureAwait(False)
+                                            candleCreator.IndicatorCreator.CalculateSpreadRatio(currentXMinute, consumer)
                                             If consumer.OnwardLevelConsumers IsNot Nothing AndAlso consumer.OnwardLevelConsumers.Count > 0 Then
                                                 For Each dependendConsumer In consumer.OnwardLevelConsumers
-                                                    Await candleCreator.IndicatorCreator.CalculateBollinger(currentXMinute, dependendConsumer).ConfigureAwait(False)
+                                                    candleCreator.IndicatorCreator.CalculateBollinger(currentXMinute, dependendConsumer)
                                                 Next
                                             End If
                                         Next
@@ -624,15 +695,7 @@ Namespace Strategies
                     End If
                 Next
             End If
-        End Function
-        Public Overridable Async Function PopulateChartAndIndicatorsAsync(ByVal candleCreator As Chart, ByVal currentCandles As List(Of OHLCPayload)) As Task
-            'logger.Debug("PopulateChartAndIndicatorsAsync, parameters:{0},{1}", candleCreator.ToString, currentCandle.ToString)
-            If currentCandles IsNot Nothing AndAlso currentCandles.Count > 0 Then
-                For Each currentCandle In currentCandles
-                    Await PopulateChartAndIndicatorsAsync(candleCreator, currentCandle).ConfigureAwait(False)
-                Next
-            End If
-        End Function
+        End Sub
         Public Overridable Async Function ProcessOrderAsync(ByVal orderData As IBusinessOrder) As Task
             'logger.Debug("ProcessOrderAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
             Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
@@ -794,7 +857,7 @@ Namespace Strategies
                 'Debug.WriteLine("Error from UI refresh")
             End Try
         End Function
-        Protected Overridable Function GetAllActiveOrders(ByVal signalDirection As IOrder.TypeOfTransaction) As List(Of IOrder)
+        Public Overridable Function GetAllActiveOrders(ByVal signalDirection As IOrder.TypeOfTransaction) As List(Of IOrder)
             Dim ret As List(Of IOrder) = Nothing
             'Dim direction As String = Nothing
             'If signalDirection = IOrder.TypeOfTransaction.Buy Then
@@ -831,7 +894,7 @@ Namespace Strategies
             End If
             Return ret
         End Function
-        Protected Overridable Function GetActiveOrder(ByVal signalDirection As IOrder.TypeOfTransaction) As IBusinessOrder
+        Public Overridable Function GetActiveOrder(ByVal signalDirection As IOrder.TypeOfTransaction) As IBusinessOrder
             'logger.Debug("GetActiveOrder, parameters:Nothing")
             Dim ret As IBusinessOrder = Nothing
             Dim allActiveOrders As List(Of IOrder) = GetAllActiveOrders(signalDirection)
@@ -881,10 +944,13 @@ Namespace Strategies
 
 #Region "Public MustOverride Functions"
         Public MustOverride Async Function MonitorAsync() As Task
+        Public MustOverride Async Function MonitorAsync(ByVal command As ExecuteCommands, ByVal data As Object) As Task
         Protected MustOverride Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+        Protected MustOverride Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean, ByVal data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
         Protected MustOverride Async Function IsTriggerReceivedForModifyStoplossOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
         Protected MustOverride Async Function IsTriggerReceivedForModifyTargetOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
         Protected MustOverride Async Function IsTriggerReceivedForExitOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
+        Protected MustOverride Async Function IsTriggerReceivedForExitOrderAsync(ByVal forcePrint As Boolean, ByVal data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
         Protected MustOverride Async Function ForceExitSpecificTradeAsync(ByVal order As IOrder, ByVal reason As String) As Task
 #End Region
 
@@ -1399,6 +1465,159 @@ Namespace Strategies
             If Not allOKWithoutException Then
                 Throw lastException
             End If
+            Return ret
+        End Function
+#End Region
+
+#Region "Paper Trade"
+        Private _placeOrderLock As Integer = 0
+        Protected Async Function TakePaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
+            Dim ret As IBusinessOrder = Nothing
+            Try
+                If 0 = Interlocked.Read(_placeOrderLock) Then
+                    Interlocked.Increment(_placeOrderLock)
+                    Dim activityTag As String = GenerateTag(Now)
+                    Dim parentPlaceOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = data
+                    If parentPlaceOrderTrigger IsNot Nothing AndAlso parentPlaceOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                        Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
+                        While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
+                            Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                        End While
+
+                        activityTag = GenerateFreshTagForNewSignal(activityTag, parentPlaceOrderTrigger.Item3.SignalCandle.SnapshotDateTime)
+
+                        If parentPlaceOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+
+                        Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, parentPlaceOrderTrigger.Item3.SignalCandle.SnapshotDateTime, parentPlaceOrderTrigger.Item3.EntryDirection, Now, parentPlaceOrderTrigger.Item4).ConfigureAwait(False)
+
+                        Dim parentOrder As PaperOrder = New PaperOrder
+                        parentOrder.AveragePrice = Me.TradableInstrument.LastTick.LastPrice
+                        parentOrder.Quantity = parentPlaceOrderTrigger.Item3.Quantity
+                        parentOrder.Status = IOrder.TypeOfStatus.Complete
+                        parentOrder.InstrumentIdentifier = Me.TradableInstrument.InstrumentIdentifier
+                        parentOrder.OrderIdentifier = Utilities.Numbers.GetUniqueNumber()
+                        parentOrder.ParentOrderIdentifier = Nothing
+                        parentOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
+                        parentOrder.TransactionType = parentPlaceOrderTrigger.Item3.EntryDirection
+                        parentOrder.TimeStamp = Now
+                        parentOrder.Tag = activityTag
+
+                        Dim slOrder As PaperOrder = New PaperOrder
+                        slOrder.TriggerPrice = parentPlaceOrderTrigger.Item3.TriggerPrice
+                        slOrder.Quantity = parentPlaceOrderTrigger.Item3.Quantity
+                        slOrder.Status = IOrder.TypeOfStatus.TriggerPending
+                        slOrder.InstrumentIdentifier = Me.TradableInstrument.InstrumentIdentifier
+                        slOrder.OrderIdentifier = Utilities.Numbers.GetUniqueNumber()
+                        slOrder.ParentOrderIdentifier = parentOrder.OrderIdentifier
+                        slOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
+                        slOrder.TransactionType = If(parentPlaceOrderTrigger.Item3.EntryDirection = IOrder.TypeOfTransaction.Buy, IOrder.TypeOfTransaction.Sell, IOrder.TypeOfTransaction.Buy)
+                        slOrder.TimeStamp = Now
+                        slOrder.Tag = activityTag
+
+                        Dim slOrderList As List(Of IOrder) = New List(Of IOrder)
+                        slOrderList.Add(slOrder)
+                        Dim parentBOrder As BusinessOrder = New BusinessOrder
+                        parentBOrder.ParentOrder = parentOrder
+                        parentBOrder.SLOrder = slOrderList
+                        parentBOrder.ParentOrderIdentifier = parentOrder.OrderIdentifier
+
+                        Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, parentBOrder.ParentOrderIdentifier, Now).ConfigureAwait(False)
+                        logger.Debug("Order Placed {0}, Time:{1}", Me.TradableInstrument.TradingSymbol, Now.ToString)
+                        Await ProcessOrderAsync(parentBOrder).ConfigureAwait(False)
+                        'Me.OrderDetails.AddOrUpdate(parentBOrder.ParentOrderIdentifier, parentBOrder, Function(key, value) parentBOrder)
+                        ret = OrderDetails(parentBOrder.ParentOrderIdentifier)
+                    End If
+                End If
+            Finally
+                Interlocked.Decrement(_placeOrderLock)
+            End Try
+            Return ret
+        End Function
+
+        Private _cancelOrderLock As Integer = 0
+        Protected Async Function CancelPaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
+            Dim ret As IBusinessOrder = Nothing
+            Try
+                If 0 = Interlocked.Read(_cancelOrderLock) Then
+                    Interlocked.Increment(_cancelOrderLock)
+                    Dim exitOrdersTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String) = data
+                    If exitOrdersTrigger IsNot Nothing AndAlso exitOrdersTrigger.Item1 = ExecuteCommandAction.Take Then
+                        Dim potentialExitOrders As List(Of IOrder) = Nothing
+                        If exitOrdersTrigger.Item1 = ExecuteCommandAction.Take Then
+
+                            Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
+                            While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
+                                Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                            End While
+
+                            Dim parentBusinessOrder As IBusinessOrder = GetParentFromChildOrder(exitOrdersTrigger.Item3)
+                            Await Me.ParentStrategy.SignalManager.HandleCancelActivity(exitOrdersTrigger.Item3.Tag, Me, Nothing, Now, exitOrdersTrigger.Item4).ConfigureAwait(False)
+                            CType(exitOrdersTrigger.Item3, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                            CType(exitOrdersTrigger.Item3, PaperOrder).AveragePrice = Me.TradableInstrument.LastTick.LastPrice
+                            Await Me.ParentStrategy.SignalManager.ActivateCancelActivity(exitOrdersTrigger.Item3.Tag, Me, Nothing, Now).ConfigureAwait(False)
+                            Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
+                            logger.Debug("Order Exited {0}", Me.TradableInstrument.TradingSymbol)
+
+                            If parentBusinessOrder.SLOrder.Count = 1 Then
+                                parentBusinessOrder.SLOrder = Nothing
+                            Else
+                                Throw New ApplicationException("Check why there is more than one sl order")
+                            End If
+
+                            If potentialExitOrders Is Nothing Then potentialExitOrders = New List(Of IOrder)
+                            potentialExitOrders.Add(exitOrdersTrigger.Item3)
+                            parentBusinessOrder.AllOrder = potentialExitOrders
+                            ret = parentBusinessOrder
+                        End If
+                    End If
+                End If
+            Finally
+                Interlocked.Decrement(_cancelOrderLock)
+            End Try
+            Return ret
+        End Function
+
+        Private _forceCancelOrderLock As Integer = 0
+        Protected Async Function ForceCancelPaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
+            Dim ret As IBusinessOrder = Nothing
+            Try
+                If 0 = Interlocked.Exchange(_forceCancelOrderLock, 1) Then
+                    Dim exitOrdersTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = data
+                    If exitOrdersTrigger IsNot Nothing AndAlso exitOrdersTrigger.Count > 0 Then
+                        Dim potentialExitOrders As List(Of IOrder) = Nothing
+                        For Each runningExitOrder In exitOrdersTrigger
+                            If runningExitOrder.Item1 = ExecuteCommandAction.Take Then
+
+                                Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
+                                While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
+                                    Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                                End While
+
+                                Dim parentBusinessOrder As IBusinessOrder = GetParentFromChildOrder(runningExitOrder.Item2)
+                                Await Me.ParentStrategy.SignalManager.HandleCancelActivity(runningExitOrder.Item2.Tag, Me, Nothing, Now, runningExitOrder.Item3).ConfigureAwait(False)
+                                CType(runningExitOrder.Item2, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                CType(runningExitOrder.Item2, PaperOrder).AveragePrice = Me.TradableInstrument.LastTick.LastPrice
+                                Await Me.ParentStrategy.SignalManager.ActivateCancelActivity(runningExitOrder.Item2.Tag, Me, Nothing, Now).ConfigureAwait(False)
+                                Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
+                                logger.Debug("Order Exited {0}", Me.TradableInstrument.TradingSymbol)
+
+                                If parentBusinessOrder.SLOrder.Count = 1 Then
+                                    parentBusinessOrder.SLOrder = Nothing
+                                Else
+                                    Throw New ApplicationException("Check why there is more than one sl order")
+                                End If
+
+                                If potentialExitOrders Is Nothing Then potentialExitOrders = New List(Of IOrder)
+                                potentialExitOrders.Add(runningExitOrder.Item2)
+                                parentBusinessOrder.AllOrder = potentialExitOrders
+                                ret = parentBusinessOrder
+                            End If
+                        Next
+                    End If
+                End If
+            Finally
+                Interlocked.Exchange(_forceCancelOrderLock, 0)
+            End Try
             Return ret
         End Function
 #End Region

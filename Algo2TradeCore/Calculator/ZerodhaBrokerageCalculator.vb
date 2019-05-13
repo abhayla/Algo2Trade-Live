@@ -97,8 +97,8 @@ Namespace Calculator
             Dim r = Convert.ToInt32(g * v * 0.0001)
             Dim s = Math.Round((0.000021 * o), (2))
             Dim l = Math.Round((0.000019 * o), (2))
-            Dim c = Math.Round((0.000002 * o), (2))
-            Dim p = Math.Round((0.18 * (a + s)), (2))
+            Dim c = 0
+            Dim p = Math.Round((0.18 * (a + l)), (2))
 
             ret.Turnover = o
             ret.Brokerage = a
@@ -131,7 +131,7 @@ Namespace Calculator
             Else
                 i = If(m * t * v * 0.0001 > 20, 20, Math.Round((m * t * v * 0.0001), 2))
             End If
-            Dim n = Nothing
+            Dim n = 0
             If g * t * v > 200000.0 Then
                 n = 20
             Else
@@ -145,24 +145,25 @@ Namespace Calculator
             Dim s = 0.00
             Dim l = 0.00
             Dim c = 0.00
-            s = If(e = "a", Math.Round((0.000036 * o), 2), Math.Round((0.0000105 * o), 2))
+            's = If(e = "a", Math.Round((0.000036 * o), 2), Math.Round((0.0000105 * o), 2))
+            s = 0.0001 * g * v * t
             l = If(e = "a", Math.Round((0.000026 * o), 2), Math.Round((0.0000005 * o), 2))
-            c = Math.Round((0.00001 * o), 2)
+            'c = Math.Round((0.00001 * o), 2)
             If stockName = "RBDPMOLEIN" And o >= 100000.0 Then
                 Dim p = Convert.ToInt32(Math.Round((o / 100000.0), 2))
                 s = p
             End If
             If stockName = "CASTORSEED" Then
                 l = Math.Round((0.000005 * o), 2)
-                c = Math.Round((0.00001 * o), 2)
+                'c = Math.Round((0.00001 * o), 2)
             ElseIf stockName = "RBDPMOLEIN" Then
                 l = Math.Round((0.00001 * o), 2)
-                c = Math.Round((0.00001 * o), 2)
+                'c = Math.Round((0.00001 * o), 2)
             ElseIf stockName = "PEPPER" Then
                 l = Math.Round((0.0000005 * o), 2)
-                c = Math.Round((0.00001 * o), 2)
+                'c = Math.Round((0.00001 * o), 2)
             End If
-            Dim d = Math.Round((0.18 * (a + s)), 2)
+            Dim d = Math.Round((0.18 * (a + l)), 2)
 
             ret.Turnover = o
             ret.CTT = r
@@ -170,7 +171,7 @@ Namespace Calculator
             ret.ExchangeFees = l
             ret.Clearing = c
             ret.GST = d
-            ret.TotalTax = a + r + s + d + ret.SEBI
+            ret.TotalTax = a + r + l + d + ret.SEBI
             Return ret
         End Function
 

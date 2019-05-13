@@ -86,6 +86,6 @@ Namespace ChartHandler.ChartStyle
         Public Property IndicatorCreator As IndicatorManeger
         Public MustOverride Async Function GetChartFromHistoricalAsync(ByVal historicalCandlesJSONDict As Dictionary(Of String, Object)) As Task
         Public MustOverride Async Function GetChartFromTickAsync(ByVal tickData As ITick) As Task
-        Public MustOverride Async Function ConvertTimeframeAsync(ByVal timeframe As Integer, ByVal currentPayload As OHLCPayload, ByVal outputConsumer As PayloadToChartConsumer) As Task(Of Date)
+        Public MustOverride Function ConvertTimeframe(ByVal timeframe As Integer, ByVal currentPayload As OHLCPayload, ByVal outputConsumer As PayloadToChartConsumer) As Date
     End Class
 End Namespace

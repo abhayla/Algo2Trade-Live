@@ -11,11 +11,11 @@ Public Class NearFarHedgingStrategyInstrument
     Implements IDisposable
 
     Private lastPrevPayloadPlaceOrder As String = ""
-    Private ReadOnly _apiKey As String = "700121864:AAHjes45V0kEPBDLIfnZzsatH5NhRwIjciw"
-    Private ReadOnly _chaitId As String = "-337360611"
-    Private ReadOnly _dummySpreadRatioConsumer As SpreadRatioConsumer
-    Private ReadOnly _dummySpreadBollingerConsumer As BollingerConsumer
-    Private ReadOnly _dummyRatioBollingerConsumer As BollingerConsumer
+    'Private ReadOnly _apiKey As String = "700121864:AAHjes45V0kEPBDLIfnZzsatH5NhRwIjciw"
+    'Private ReadOnly _chaitId As String = "-337360611"
+    Public ReadOnly DummySpreadRatioConsumer As SpreadRatioConsumer
+    Public ReadOnly DummySpreadBollingerConsumer As BollingerConsumer
+    Public ReadOnly DummyRatioBollingerConsumer As BollingerConsumer
     Public Sub New(ByVal associatedInstrument As IInstrument,
                    ByVal associatedParentStrategy As Strategy,
                    ByVal isPairInstrumnet As Boolean,
@@ -49,9 +49,9 @@ Public Class NearFarHedgingStrategyInstrument
                 spreadRatioData.OnwardLevelConsumers.Add(ratioBollinger)
                 pairConsumer.OnwardLevelConsumers.Add(spreadRatioData)
                 RawPayloadDependentConsumers.Add(pairConsumer)
-                _dummySpreadRatioConsumer = New SpreadRatioConsumer(pairConsumer, TypeOfField.Close)
-                _dummySpreadBollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerMultiplier, TypeOfField.Spread)
-                _dummyRatioBollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerMultiplier, TypeOfField.Ratio)
+                DummySpreadRatioConsumer = New SpreadRatioConsumer(pairConsumer, TypeOfField.Close)
+                DummySpreadBollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerMultiplier, TypeOfField.Spread)
+                DummyRatioBollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerMultiplier, TypeOfField.Ratio)
             Else
                 Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
             End If
@@ -61,53 +61,130 @@ Public Class NearFarHedgingStrategyInstrument
         Try
             If Me.IsPairInstrument Then
                 Dim lastTriggerTime As Date = Date.MinValue
+                Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
                 While True
                     If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
                         Throw Me.ParentStrategy.ParentController.OrphanException
                     End If
 
                     _cts.Token.ThrowIfCancellationRequested()
-                    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                    If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
-                        If Not Utilities.Time.IsDateTimeEqualTillMinutes(placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime, lastTriggerTime) Then
-                            lastTriggerTime = placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime
-                            GenerateTelegramMessageAsync(String.Format("Signal:{0}, SignalTime:{6}, {1}:{2}, {3}:{4}, Timestamp:{5}",
-                                                                    placeOrderTrigger.Item2.EntryDirection.ToString,
-                                                                    Me.ParentStrategyInstruments.FirstOrDefault.TradableInstrument.TradingSymbol,
-                                                                    Me.ParentStrategyInstruments.FirstOrDefault.TradableInstrument.LastTick.LastPrice,
-                                                                    Me.ParentStrategyInstruments.LastOrDefault.TradableInstrument.TradingSymbol,
-                                                                    Me.ParentStrategyInstruments.LastOrDefault.TradableInstrument.LastTick.LastPrice,
-                                                                    Now, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime.ToString))
+                    Dim placeOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False, Nothing).ConfigureAwait(False)
+                    If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Count > 0 Then
+                        For Each runningPlaceOrderTrigger In placeOrderTrigger
+                            runningPlaceOrderTrigger.Item2.MonitorAsync(StrategyInstrument.ExecuteCommands.PlaceCOMarketMISOrder, runningPlaceOrderTrigger)
+                        Next
+                        'Dim tasks = placeOrderTrigger.Select(Async Function(x)
+                        '                                         Await x.Item2.MonitorAsync(StrategyInstrument.ExecuteCommands.PlaceCOMarketMISOrder, x).ConfigureAwait(False)
+                        '                                         Return True
+                        '                                     End Function)
+                        'Await Task.WhenAll(tasks).ConfigureAwait(False)
+                    End If
+
+                    _cts.Token.ThrowIfCancellationRequested()
+
+                    Dim cancelOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)) = Await IsTriggerReceivedForExitOrderAsync(False, Nothing).ConfigureAwait(False)
+                    If cancelOrderTrigger IsNot Nothing AndAlso cancelOrderTrigger.Count > 0 Then
+                        For Each runningCancelOrderTrigger In cancelOrderTrigger
+                            runningCancelOrderTrigger.Item2.MonitorAsync(StrategyInstrument.ExecuteCommands.CancelCOOrder, runningCancelOrderTrigger)
+                        Next
+                        'Dim tasks = cancelOrderTrigger.Select(Async Function(x)
+                        '                                          Await x.Item2.MonitorAsync(StrategyInstrument.ExecuteCommands.CancelCOOrder, x).ConfigureAwait(False)
+                        '                                          Return True
+                        '                                      End Function)
+                        'Await Task.WhenAll(tasks).ConfigureAwait(False)
+                    End If
+
+                    _cts.Token.ThrowIfCancellationRequested()
+
+                    If Me.GetPairPLAfterBrokerage >= hedgingUserInputs.InstrumentsData(Me.TradableInstrument.TradingSymbol).MaxPairGain Then
+                        If Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count > 0 Then
+                            For Each runningParentStrategyInstrument In Me.ParentStrategyInstruments
+                                Await runningParentStrategyInstrument.ForceExitAllTradesAsync("MTM Reached").ConfigureAwait(False)
+                            Next
                         End If
                     End If
-                    '_cts.Token.ThrowIfCancellationRequested()
-                    'Dim modifyStoplossOrdersTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
-                    'If modifyStoplossOrdersTrigger IsNot Nothing AndAlso modifyStoplossOrdersTrigger.Count > 0 Then
-                    '    Dim modifyOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
-                    '    'If modifyOrderResponse IsNot Nothing Then
-                    '    '    _sendParentOrderDetailsOfOrderId = Nothing
-                    '    '    Dim modifyStoplossOrderTrigger As Tuple(Of ExecuteCommandAction, IOrder, Decimal, String) = modifyStoplossOrdersTrigger.LastOrDefault
-                    '    '    Dim parentBusinessOrder As IBusinessOrder = GetParentFromChildOrder(modifyStoplossOrderTrigger.Item2)
-                    '    '    If parentBusinessOrder IsNot Nothing AndAlso parentBusinessOrder.ParentOrder IsNot Nothing Then
-                    '    '        If modifyStoplossOrderTrigger.Item4 = "Normal SL movement according to SL%" Then
-                    '    '            GenerateTelegramMessageAsync(String.Format("{0}, {1} - Order Executed, Direction: {2}, Quantity: {3}, Actual Entry Price:{4}, Actual SL Price: {5}", Now, Me.TradableInstrument.TradingSymbol, parentBusinessOrder.ParentOrder.TransactionType, parentBusinessOrder.ParentOrder.Quantity, parentBusinessOrder.ParentOrder.AveragePrice, modifyStoplossOrderTrigger.Item3))
-                    '    '        Else
-                    '    '            GenerateTelegramMessageAsync(String.Format("{0}, {1} - Order Modified, Direction: {2}, Quantity: {3}, Actual Entry Price:{4}, Actual SL Price: {5}, Remarks:{6}", Now, Me.TradableInstrument.TradingSymbol, parentBusinessOrder.ParentOrder.TransactionType, parentBusinessOrder.ParentOrder.Quantity, parentBusinessOrder.ParentOrder.AveragePrice, modifyStoplossOrderTrigger.Item3, modifyStoplossOrderTrigger.Item4))
-                    '    '        End If
-                    '    '    End If
-                    '    'End If
-                    'End If
-                    '_cts.Token.ThrowIfCancellationRequested()
-                    'Dim exitOrdersTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Await IsTriggerReceivedForExitOrderAsync(False).ConfigureAwait(False)
-                    'If exitOrdersTrigger IsNot Nothing AndAlso exitOrdersTrigger.Count > 0 Then
-                    '    Dim exitOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.CancelCOOrder, Nothing).ConfigureAwait(False)
-                    '    'If exitOrderResponse IsNot Nothing Then
-                    '    '    GenerateTelegramMessageAsync(String.Format("{0}, {1} - Order Exit Placed, Remarks:{2}", Now, Me.TradableInstrument.TradingSymbol, exitOrdersTrigger.LastOrDefault.Item3))
-                    '    'End If
-                    'End If
-                    '_cts.Token.ThrowIfCancellationRequested()
+
+                    _cts.Token.ThrowIfCancellationRequested()
                     Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
                 End While
+                _cts.Token.ThrowIfCancellationRequested()
+            End If
+        Catch ex As Exception
+            'To log exceptions getting created from this function as the bubble up of the exception
+            'will anyways happen to Strategy.MonitorAsync but it will not be shown until all tasks exit
+            logger.Error("Strategy Instrument:{0}, error:{1}", Me.ToString, ex.ToString)
+            Throw ex
+        End Try
+    End Function
+    Public Overrides Async Function MonitorAsync(ByVal command As ExecuteCommands, ByVal data As Object) As Task
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+        Try
+            If Not Me.IsPairInstrument Then
+                If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
+                    Throw Me.ParentStrategy.ParentController.OrphanException
+                End If
+
+                _cts.Token.ThrowIfCancellationRequested()
+
+                Select Case command
+                    Case ExecuteCommands.PlaceCOMarketMISOrder
+                        Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = data
+                        If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take AndAlso Not Me.IsActiveInstrument Then
+                            Dim placeOrderData As IBusinessOrder = Await TakePaperTradeAsync(placeOrderTrigger).ConfigureAwait(False)
+                            If placeOrderData IsNot Nothing AndAlso placeOrderData.ParentOrder IsNot Nothing Then
+                                _cts.Token.ThrowIfCancellationRequested()
+                                GenerateTelegramMessageAsync(String.Format("Order placed. {0}{1},{2}Trading Symbol:{3}, Direction:{4}, Entry Price:{5}, Quantity:{6},{7}Timestamp:{8}",
+                                                                    placeOrderTrigger.Item4,
+                                                                    "",
+                                                                    vbNewLine,
+                                                                    placeOrderData.ParentOrder.Tradingsymbol,
+                                                                    placeOrderData.ParentOrder.TransactionType.ToString,
+                                                                    placeOrderData.ParentOrder.AveragePrice,
+                                                                    placeOrderData.ParentOrder.Quantity,
+                                                                    vbNewLine,
+                                                                    Now.ToString))
+                            End If
+                        End If
+
+                    Case ExecuteCommands.CancelCOOrder
+                        Dim cancelOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String) = data
+                        If cancelOrderTrigger IsNot Nothing AndAlso cancelOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                            Dim cancelOrderData As IBusinessOrder = Await Me.CancelPaperTradeAsync(cancelOrderTrigger).ConfigureAwait(False)
+                            If cancelOrderData IsNot Nothing AndAlso cancelOrderData.ParentOrder IsNot Nothing AndAlso
+                                    cancelOrderData.AllOrder IsNot Nothing AndAlso cancelOrderData.AllOrder.Count > 0 Then
+                                For Each runningSLOrder In cancelOrderData.AllOrder
+                                    _cts.Token.ThrowIfCancellationRequested()
+                                    Dim buyPrice As Decimal = Decimal.MinValue
+                                    Dim sellPrice As Decimal = Decimal.MinValue
+                                    If cancelOrderData.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                        buyPrice = cancelOrderData.ParentOrder.AveragePrice
+                                        sellPrice = runningSLOrder.AveragePrice
+                                    ElseIf cancelOrderData.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                        sellPrice = cancelOrderData.ParentOrder.AveragePrice
+                                        buyPrice = runningSLOrder.AveragePrice
+                                    End If
+                                    _cts.Token.ThrowIfCancellationRequested()
+                                    GenerateTelegramMessageAsync(String.Format("Order exited. Trading Symbol:{0}, Direction:{1}, Entry Price:{2}, Exit Price:{3}, Quantity:{4},{5}PL: {6},{7}Timestamp:{8}",
+                                                                                   runningSLOrder.Tradingsymbol,
+                                                                                   cancelOrderData.ParentOrder.TransactionType.ToString,
+                                                                                   cancelOrderData.ParentOrder.AveragePrice,
+                                                                                   runningSLOrder.AveragePrice,
+                                                                                   runningSLOrder.Quantity,
+                                                                                   vbNewLine,
+                                                                                   _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, sellPrice, runningSLOrder.Quantity),
+                                                                                   vbNewLine,
+                                                                                   Now.ToString))
+                                Next
+                            End If
+                        End If
+
+                End Select
+
+
+                _cts.Token.ThrowIfCancellationRequested()
+                'Exit Order
+
+                _cts.Token.ThrowIfCancellationRequested()
             End If
         Catch ex As Exception
             'To log exceptions getting created from this function as the bubble up of the exception
@@ -117,122 +194,211 @@ Public Class NearFarHedgingStrategyInstrument
         End Try
     End Function
 
-    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-        Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean, ByVal data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
+        Dim ret As List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)) = Nothing
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
-        Dim runningCandlePayload As PairPayload = GetXMinuteCurrentCandle()
         Dim capitalAtDayStart As Decimal = Me.ParentStrategy.ParentController.GetUserMargin(TypeOfExchage.NSE)
-        Dim spreadRatioConsumer As SpreadRatioConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummySpreadRatioConsumer)
-        Dim spreadBollingerConsumer As BollingerConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummySpreadBollingerConsumer)
-        Dim ratioBollingerConsumer As BollingerConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRatioBollingerConsumer)
+        Dim potentialSignalData As Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload) = GetCurrentSignal(False)
+        Dim runningCandlePayload As PairPayload = Nothing
+        Dim currentCandlePayload As OHLCPayload = Nothing
+        If potentialSignalData IsNot Nothing Then
+            runningCandlePayload = potentialSignalData.Item3
+            currentCandlePayload = potentialSignalData.Item4
+        End If
 
         Try
-            If runningCandlePayload IsNot Nothing AndAlso
+            If Me.IsPairInstrument AndAlso runningCandlePayload IsNot Nothing AndAlso
                 runningCandlePayload.Instrument1Payload IsNot Nothing AndAlso runningCandlePayload.Instrument2Payload IsNot Nothing AndAlso
-                runningCandlePayload.Instrument1Payload.PreviousPayload IsNot Nothing AndAlso runningCandlePayload.Instrument2Payload.PreviousPayload IsNot Nothing Then
-                If Not runningCandlePayload.Instrument1Payload.PreviousPayload.ToString = lastPrevPayloadPlaceOrder Then
+                runningCandlePayload.Instrument1Payload.PreviousPayload IsNot Nothing AndAlso runningCandlePayload.Instrument2Payload.PreviousPayload IsNot Nothing AndAlso
+                currentCandlePayload IsNot Nothing AndAlso currentCandlePayload.PreviousPayload IsNot Nothing Then
+                If Not currentCandlePayload.PreviousPayload.ToString = lastPrevPayloadPlaceOrder Then
                     lastPrevPayloadPlaceOrder = runningCandlePayload.Instrument1Payload.PreviousPayload.ToString
                     logger.Debug("PlaceOrder-> Potential Signal Candle is:Intrument1:{0}", runningCandlePayload.Instrument1Payload.PreviousPayload.ToString)
                     logger.Debug("PlaceOrder-> Potential Signal Candle is:Intrument2:{0}", runningCandlePayload.Instrument2Payload.PreviousPayload.ToString)
-                    logger.Debug(CType(spreadRatioConsumer.ConsumerPayloads(runningCandlePayload.Instrument1Payload.PreviousPayload.SnapshotDateTime), SpreadRatioConsumer.SpreadRatioPayload).ToString)
-                    logger.Debug(CType(spreadBollingerConsumer.ConsumerPayloads(runningCandlePayload.Instrument1Payload.PreviousPayload.SnapshotDateTime), BollingerConsumer.BollingerPayload).ToString)
-                    logger.Debug(CType(ratioBollingerConsumer.ConsumerPayloads(runningCandlePayload.Instrument1Payload.PreviousPayload.SnapshotDateTime), BollingerConsumer.BollingerPayload).ToString)
+                    Dim potentialSignalDataForLog As Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload) = GetCurrentSignal(True)
+                    logger.Debug("PlaceOrder Parameters-> Trade Start Time:{0}, Last Trade Entry Time:{1}, Running Candle Time: {2}, IsActiveInstrument:{3}, PairConsumerProtection:{4}, UseBothSignal:{5}, IsSignalReceived:{6}, MTM:{7}, Pair PL:{8}",
+                                 hedgingUserInputs.TradeStartTime.ToString,
+                                 hedgingUserInputs.LastTradeEntryTime.ToString,
+                                 currentCandlePayload.SnapshotDateTime.ToString,
+                                 IsLogicalActiveInstrument,
+                                 PairConsumerProtection,
+                                 hedgingUserInputs.UseBothSignal,
+                                 If(potentialSignalDataForLog Is Nothing, "False", potentialSignalDataForLog.Item1),
+                                 hedgingUserInputs.InstrumentsData(Me.TradableInstrument.TradingSymbol).MaxPairGain,
+                                 GetPairPLAfterBrokerage)
                 End If
             End If
         Catch ex As Exception
             logger.Error(ex)
         End Try
 
+        Dim virtualInstrument As IInstrument = Nothing
+        If Me.IsPairInstrument Then
+            virtualInstrument = Me.TradableInstrument
+        Else
+            virtualInstrument = Me.DependendStrategyInstruments.FirstOrDefault.TradableInstrument
+        End If
+
         Dim parameters As PlaceOrderParameters = Nothing
         If Now >= hedgingUserInputs.TradeStartTime AndAlso Now <= hedgingUserInputs.LastTradeEntryTime AndAlso runningCandlePayload IsNot Nothing AndAlso
             (runningCandlePayload.Instrument1Payload IsNot Nothing OrElse runningCandlePayload.Instrument2Payload IsNot Nothing) AndAlso
-            Not IsActiveInstrument() AndAlso Not Me.PairConsumerProtection AndAlso
-            Me.ParentStrategy.GetTotalPL() > capitalAtDayStart * Math.Abs(hedgingUserInputs.MaxLossPercentagePerDay) * -1 / 100 AndAlso
-            Me.ParentStrategy.GetTotalPL() < capitalAtDayStart * Math.Abs(hedgingUserInputs.MaxProfitPercentagePerDay) / 100 AndAlso
-            spreadRatioConsumer IsNot Nothing AndAlso spreadBollingerConsumer IsNot Nothing AndAlso ratioBollingerConsumer IsNot Nothing Then
-            Dim currentCandle As OHLCPayload = Nothing
-            If runningCandlePayload.Instrument1Payload IsNot Nothing AndAlso
-                runningCandlePayload.Instrument1Payload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
-                runningCandlePayload.Instrument1Payload.PreviousPayload IsNot Nothing AndAlso
-                runningCandlePayload.Instrument1Payload.SnapshotDateTime >= hedgingUserInputs.TradeStartTime Then
-                currentCandle = runningCandlePayload.Instrument1Payload
-            ElseIf runningCandlePayload.Instrument2Payload IsNot Nothing AndAlso
-                runningCandlePayload.Instrument2Payload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
-                runningCandlePayload.Instrument2Payload.PreviousPayload IsNot Nothing AndAlso
-                runningCandlePayload.Instrument2Payload.SnapshotDateTime >= hedgingUserInputs.TradeStartTime Then
-                currentCandle = runningCandlePayload.Instrument2Payload
-            End If
+            Not IsLogicalActiveInstrument() AndAlso Me.IsPairInstrument AndAlso currentCandlePayload IsNot Nothing AndAlso
+            Me.GetPairPLAfterBrokerage < hedgingUserInputs.InstrumentsData(virtualInstrument.TradingSymbol).MaxPairGain Then
+            'Me.ParentStrategy.GetTotalPL() > capitalAtDayStart * Math.Abs(hedgingUserInputs.MaxLossPercentagePerDay) * -1 / 100 Then
+            'Me.ParentStrategy.GetTotalPL() < capitalAtDayStart * Math.Abs(hedgingUserInputs.MaxProfitPercentagePerDay) / 100 AndAlso
 
-            If currentCandle IsNot Nothing AndAlso currentCandle.PreviousPayload IsNot Nothing AndAlso
-                spreadRatioConsumer.ConsumerPayloads IsNot Nothing AndAlso spreadRatioConsumer.ConsumerPayloads.Count > 0 AndAlso
-                spreadBollingerConsumer.ConsumerPayloads IsNot Nothing AndAlso spreadBollingerConsumer.ConsumerPayloads.Count > 0 AndAlso
-                ratioBollingerConsumer.ConsumerPayloads IsNot Nothing AndAlso ratioBollingerConsumer.ConsumerPayloads.Count > 0 AndAlso
-                spreadRatioConsumer.ConsumerPayloads.ContainsKey(currentCandle.PreviousPayload.SnapshotDateTime) AndAlso
-                spreadBollingerConsumer.ConsumerPayloads.ContainsKey(currentCandle.PreviousPayload.SnapshotDateTime) AndAlso
-                ratioBollingerConsumer.ConsumerPayloads.ContainsKey(currentCandle.PreviousPayload.SnapshotDateTime) Then
-                Dim signalCandleTime As Date = currentCandle.PreviousPayload.SnapshotDateTime
-                Dim potentialSignalData As Tuple(Of Boolean, IOrder.TypeOfTransaction) = Nothing
-                potentialSignalData = CheckSignal(spreadRatioConsumer.ConsumerPayloads(signalCandleTime),
-                                                  spreadBollingerConsumer.ConsumerPayloads(signalCandleTime),
-                                                  ratioBollingerConsumer.ConsumerPayloads(signalCandleTime))
+            If currentCandlePayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso currentCandlePayload.PreviousPayload IsNot Nothing Then
                 If potentialSignalData IsNot Nothing AndAlso potentialSignalData.Item1 Then
-                    If potentialSignalData.Item2 = IOrder.TypeOfTransaction.Buy Then
-                        parameters = New PlaceOrderParameters(currentCandle.PreviousPayload) With
-                                     {
-                                       .EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                       .Quantity = 1,
-                                       .Price = 0
-                                     }
-                    ElseIf potentialSignalData.Item2 = IOrder.TypeOfTransaction.Sell Then
-                        parameters = New PlaceOrderParameters(currentCandle.PreviousPayload) With
-                                     {
-                                       .EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                       .Quantity = 1,
-                                       .Price = 0
-                                     }
+                    Dim triggerPrice As Decimal = Decimal.MinValue
+                    Dim quantity As Integer = 0
+
+                    If Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count = 2 Then
+                        For Each runningParentStrategyInstrument In Me.ParentStrategyInstruments
+                            If Not runningParentStrategyInstrument.IsActiveInstrument Then
+                                Dim pair1StrategyInstrument As NearFarHedgingStrategyInstrument = Me.ParentStrategyInstruments.FirstOrDefault
+                                Dim pair2StrategyInstrument As NearFarHedgingStrategyInstrument = Me.ParentStrategyInstruments.LastOrDefault
+                                Dim higherContract As NearFarHedgingStrategyInstrument = Nothing
+                                Dim lowerContract As NearFarHedgingStrategyInstrument = Nothing
+                                If pair1StrategyInstrument.TradableInstrument.LastTick.LastPrice > pair2StrategyInstrument.TradableInstrument.LastTick.LastPrice Then
+                                    higherContract = pair1StrategyInstrument
+                                    lowerContract = pair2StrategyInstrument
+                                Else
+                                    higherContract = pair2StrategyInstrument
+                                    lowerContract = pair1StrategyInstrument
+                                End If
+
+                                If runningParentStrategyInstrument.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Cash Then
+                                    Dim myPair As NearFarHedgingStrategyInstrument = GetAnotherPairStrategyInstrument()
+                                    If myPair IsNot Nothing Then
+                                        quantity = Math.Floor(runningParentStrategyInstrument.TradableInstrument.LastTick.LastPrice * myPair.TradableInstrument.LastTick.LastPrice)
+                                    Else
+                                        quantity = Math.Floor(runningParentStrategyInstrument.TradableInstrument.LastTick.LastPrice)
+                                    End If
+                                ElseIf runningParentStrategyInstrument.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Futures Then
+                                    quantity = runningParentStrategyInstrument.TradableInstrument.LotSize
+                                End If
+
+                                If hedgingUserInputs.InstrumentsData(Me.TradableInstrument.TradingSymbol).Pair1TradingSymbol = runningParentStrategyInstrument.TradableInstrument.TradingSymbol Then
+                                    quantity = quantity * hedgingUserInputs.InstrumentsData(Me.TradableInstrument.TradingSymbol).Pair1Quantity
+                                Else
+                                    quantity = quantity * hedgingUserInputs.InstrumentsData(Me.TradableInstrument.TradingSymbol).Pair2Quantity
+                                End If
+                                triggerPrice = 0
+
+                                If higherContract.TradableInstrument.TradingSymbol = runningParentStrategyInstrument.TradableInstrument.TradingSymbol Then
+                                    parameters = New PlaceOrderParameters(currentCandlePayload.PreviousPayload) With
+                                                         {
+                                                           .EntryDirection = potentialSignalData.Item2,
+                                                           .Quantity = Math.Floor(quantity),
+                                                           .TriggerPrice = triggerPrice
+                                                         }
+                                ElseIf lowerContract.TradableInstrument.TradingSymbol = runningParentStrategyInstrument.TradableInstrument.TradingSymbol Then
+                                    parameters = New PlaceOrderParameters(currentCandlePayload.PreviousPayload) With
+                                                         {
+                                                           .EntryDirection = If(potentialSignalData.Item2 = IOrder.TypeOfTransaction.Buy, IOrder.TypeOfTransaction.Sell, IOrder.TypeOfTransaction.Buy),
+                                                           .Quantity = Math.Floor(quantity),
+                                                           .TriggerPrice = triggerPrice
+                                                         }
+                                End If
+                                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)(ExecuteCommandAction.Take, runningParentStrategyInstrument, parameters, String.Format("Signal Time:{0}, Signal Direction:{1}", currentCandlePayload.PreviousPayload.SnapshotDateTime.ToString, potentialSignalData.Item2.ToString)))
+                            End If
+                        Next
                     End If
                 End If
             End If
         End If
-
-        'Below portion have to be done in every place order trigger
-        If parameters IsNot Nothing Then
-            Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
-            If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
-                If currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
-                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException IsNot Nothing AndAlso
-                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "Condition Satisfied")
-                ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
-                    'ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
-                    '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters)(ExecuteCommandAction.Take, parameters)
-                Else
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "Condition Satisfied")
-                End If
-            Else
-                ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
-            End If
-        Else
-            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
-        End If
         Return ret
     End Function
 
+    Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+        Throw New NotImplementedException
+    End Function
+
     Protected Overrides Async Function IsTriggerReceivedForModifyStoplossOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         Throw New NotImplementedException()
     End Function
 
     Protected Overrides Async Function IsTriggerReceivedForModifyTargetOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         Throw New NotImplementedException()
     End Function
 
-    Protected Overrides Async Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+    Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
         Throw New NotImplementedException()
+    End Function
+
+    Protected Overrides Async Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+        Dim ret As List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)) = Nothing
+        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim potentialSignalData As Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload) = GetCurrentSignal(False)
+        Dim runningCandlePayload As PairPayload = Nothing
+        Dim currentCandlePayload As OHLCPayload = Nothing
+        If potentialSignalData IsNot Nothing Then
+            runningCandlePayload = potentialSignalData.Item3
+            currentCandlePayload = potentialSignalData.Item4
+        End If
+
+        If Me.IsPairInstrument AndAlso Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count > 0 Then
+            For Each runningParentStrategyInstrument In Me.ParentStrategyInstruments
+                Dim allActiveOrders As List(Of IOrder) = runningParentStrategyInstrument.GetAllActiveOrders(IOrder.TypeOfTransaction.None)
+                If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 AndAlso runningParentStrategyInstrument.TradableInstrument.IsHistoricalCompleted Then
+                    Dim parentOrders As List(Of IOrder) = allActiveOrders.FindAll(Function(x)
+                                                                                      Return x.ParentOrderIdentifier Is Nothing
+                                                                                  End Function)
+                    If parentOrders IsNot Nothing AndAlso parentOrders.Count > 0 Then
+                        For Each parentOrder In parentOrders
+                            Dim parentBusinessOrder As IBusinessOrder = runningParentStrategyInstrument.OrderDetails(parentOrder.OrderIdentifier)
+                            If parentBusinessOrder.SLOrder IsNot Nothing AndAlso parentBusinessOrder.SLOrder.Count > 0 Then
+                                For Each slOrder In parentBusinessOrder.SLOrder
+                                    Dim tradeWillExit As Boolean = False
+                                    If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
+                                    Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
+                                    Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
+                                        If potentialSignalData IsNot Nothing AndAlso potentialSignalData.Item1 Then
+                                            Dim isHigherContract As Boolean = False
+                                            If Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count = 2 Then
+                                                Dim pair1StrategyInstrument As NearFarHedgingStrategyInstrument = Me.ParentStrategyInstruments.FirstOrDefault
+                                                Dim pair2StrategyInstrument As NearFarHedgingStrategyInstrument = Me.ParentStrategyInstruments.LastOrDefault
+                                                Dim higherContract As NearFarHedgingStrategyInstrument = Nothing
+                                                If pair1StrategyInstrument.TradableInstrument.LastTick.LastPrice > pair2StrategyInstrument.TradableInstrument.LastTick.LastPrice Then
+                                                    higherContract = pair1StrategyInstrument
+                                                Else
+                                                    higherContract = pair2StrategyInstrument
+                                                End If
+                                                If runningParentStrategyInstrument.TradableInstrument.TradingSymbol = higherContract.TradableInstrument.TradingSymbol Then
+                                                    isHigherContract = True
+                                                Else
+                                                    isHigherContract = False
+                                                End If
+                                            End If
+
+                                            If isHigherContract Then
+                                                If potentialSignalData.Item2 = slOrder.TransactionType Then
+                                                    tradeWillExit = True
+                                                End If
+                                            Else
+                                                If potentialSignalData.Item2 <> slOrder.TransactionType Then
+                                                    tradeWillExit = True
+                                                End If
+                                            End If
+                                        End If
+                                    End If
+                                    If tradeWillExit Then
+                                        If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String))
+                                        ret.Add(New Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)(ExecuteCommandAction.Take, runningParentStrategyInstrument, slOrder, "Opposite Direction signal"))
+                                    End If
+                                Next
+                            End If
+                        Next
+                    End If
+                End If
+            Next
+        End If
+        Return ret
     End Function
 
     Protected Overrides Async Function ForceExitSpecificTradeAsync(order As IOrder, reason As String) As Task
@@ -243,7 +409,35 @@ Public Class NearFarHedgingStrategyInstrument
             {
                 New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, order, reason)
             }
-            Dim exitOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.ForceCancelCOOrder, cancellableOrder).ConfigureAwait(False)
+
+            Dim orderData As IBusinessOrder = Await ForceCancelPaperTradeAsync(cancellableOrder).ConfigureAwait(False)
+            If orderData IsNot Nothing AndAlso orderData.ParentOrder IsNot Nothing AndAlso
+               orderData.AllOrder IsNot Nothing AndAlso orderData.AllOrder.Count > 0 Then
+                For Each runningSLOrder In orderData.AllOrder
+                    Dim buyPrice As Decimal = Decimal.MinValue
+                    Dim sellPrice As Decimal = Decimal.MinValue
+                    If orderData.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        buyPrice = orderData.ParentOrder.AveragePrice
+                        sellPrice = runningSLOrder.AveragePrice
+                    ElseIf orderData.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        sellPrice = orderData.ParentOrder.AveragePrice
+                        buyPrice = runningSLOrder.AveragePrice
+                    End If
+                    GenerateTelegramMessageAsync(String.Format("{9} Order exited. Trading Symbol:{0}, Direction:{1}, Entry Price:{2}, Exit Price:{3}, Quantity:{4},{5}PL: {6},{7}Timestamp:{8}",
+                                                               runningSLOrder.Tradingsymbol,
+                                                               orderData.ParentOrder.TransactionType.ToString,
+                                                               orderData.ParentOrder.AveragePrice,
+                                                               runningSLOrder.AveragePrice,
+                                                               runningSLOrder.Quantity,
+                                                               vbNewLine,
+                                                               _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, sellPrice, runningSLOrder.Quantity),
+                                                               vbNewLine,
+                                                               Now.ToString,
+                                                               reason))
+                Next
+            End If
+
+            'Dim exitOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.ForceCancelCOOrder, cancellableOrder).ConfigureAwait(False)
             'If exitOrderResponse IsNot Nothing Then
             '    GenerateTelegramMessageAsync(String.Format("{0}, {1} - Order Exit Placed, Remarks:{2}", Now, Me.TradableInstrument.TradingSymbol, reason))
             'End If
@@ -251,28 +445,37 @@ Public Class NearFarHedgingStrategyInstrument
     End Function
 
     Private Async Function GenerateTelegramMessageAsync(ByVal message As String) As Task
-        Console.WriteLine(message)
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Using tSender As New Utilities.Notification.Telegram(_apiKey, _chaitId, _cts)
-            Await tSender.SendMessageGetAsync(Utilities.Strings.EncodeString(message)).ConfigureAwait(False)
-        End Using
+        logger.Debug("Telegram Message:{0}", message)
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+        If hedgingUserInputs.TelegramAPIKey IsNot Nothing AndAlso Not hedgingUserInputs.TelegramAPIKey.Trim = "" AndAlso
+            hedgingUserInputs.TelegramChatID IsNot Nothing AndAlso Not hedgingUserInputs.TelegramChatID.Trim = "" Then
+            Using tSender As New Utilities.Notification.Telegram(hedgingUserInputs.TelegramAPIKey.Trim, hedgingUserInputs.TelegramChatID, _cts)
+                Await tSender.SendMessageGetAsync(Utilities.Strings.EncodeString(message)).ConfigureAwait(False)
+            End Using
+        End If
     End Function
 
     Private Function CheckSignal(ByVal spreadRatioData As SpreadRatioConsumer.SpreadRatioPayload,
                                  ByVal spreadBollingerData As BollingerConsumer.BollingerPayload,
-                                 ByVal ratioBollingerData As BollingerConsumer.BollingerPayload) As Tuple(Of Boolean, IOrder.TypeOfTransaction)
+                                 ByVal ratioBollingerData As BollingerConsumer.BollingerPayload,
+                                 ByVal forcePrint As Boolean) As Tuple(Of Boolean, IOrder.TypeOfTransaction)
         Dim ret As Tuple(Of Boolean, IOrder.TypeOfTransaction) = Nothing
+        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
         If spreadRatioData IsNot Nothing AndAlso spreadBollingerData IsNot Nothing AndAlso ratioBollingerData IsNot Nothing Then
+            If forcePrint Then
+                logger.Debug("{0}, {1}, {2}", spreadRatioData.ToString, spreadBollingerData.ToString, ratioBollingerData.ToString)
+            End If
             Dim spreadSignal As Tuple(Of Boolean, IOrder.TypeOfTransaction) = Nothing
             Dim ratioSignal As Tuple(Of Boolean, IOrder.TypeOfTransaction) = Nothing
             If spreadRatioData.Spread IsNot Nothing AndAlso
                 spreadBollingerData.HighBollinger IsNot Nothing AndAlso
                 spreadBollingerData.LowBollinger IsNot Nothing Then
                 If spreadRatioData.Spread.Value > spreadBollingerData.HighBollinger.Value Then
-                    logger.Debug("Spread Value:{0}, Bollinger High:{1}, Bollinger Low:{2}", spreadRatioData.Spread.Value, spreadBollingerData.HighBollinger.Value, spreadBollingerData.LowBollinger.Value)
+                    'logger.Debug("Spread Value:{0}, Bollinger High:{1}, Bollinger Low:{2}", spreadRatioData.Spread.Value, spreadBollingerData.HighBollinger.Value, spreadBollingerData.LowBollinger.Value)
                     spreadSignal = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, IOrder.TypeOfTransaction.Sell)
                 ElseIf spreadRatioData.Spread.Value < spreadBollingerData.LowBollinger.Value Then
-                    logger.Debug("Spread Value:{0}, Bollinger High:{1}, Bollinger Low:{2}", spreadRatioData.Spread.Value, spreadBollingerData.HighBollinger.Value, spreadBollingerData.LowBollinger.Value)
+                    'logger.Debug("Spread Value:{0}, Bollinger High:{1}, Bollinger Low:{2}", spreadRatioData.Spread.Value, spreadBollingerData.HighBollinger.Value, spreadBollingerData.LowBollinger.Value)
                     spreadSignal = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, IOrder.TypeOfTransaction.Buy)
                 End If
             End If
@@ -280,22 +483,137 @@ Public Class NearFarHedgingStrategyInstrument
                 ratioBollingerData.HighBollinger IsNot Nothing AndAlso
                 ratioBollingerData.LowBollinger IsNot Nothing Then
                 If spreadRatioData.Ratio.Value > ratioBollingerData.HighBollinger.Value Then
-                    logger.Debug("Ratio Value:{0}, Bollinger High:{1}, Bollinger Low:{2}", spreadRatioData.Ratio.Value, ratioBollingerData.HighBollinger.Value, ratioBollingerData.LowBollinger.Value)
+                    'logger.Debug("Ratio Value:{0}, Bollinger High:{1}, Bollinger Low:{2}", spreadRatioData.Ratio.Value, ratioBollingerData.HighBollinger.Value, ratioBollingerData.LowBollinger.Value)
                     ratioSignal = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, IOrder.TypeOfTransaction.Sell)
                 ElseIf spreadRatioData.Ratio.Value < ratioBollingerData.LowBollinger.Value Then
-                    logger.Debug("Ratio Value:{0}, Bollinger High:{1}, Bollinger Low:{2}", spreadRatioData.Ratio.Value, ratioBollingerData.HighBollinger.Value, ratioBollingerData.LowBollinger.Value)
+                    'logger.Debug("Ratio Value:{0}, Bollinger High:{1}, Bollinger Low:{2}", spreadRatioData.Ratio.Value, ratioBollingerData.HighBollinger.Value, ratioBollingerData.LowBollinger.Value)
                     ratioSignal = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, IOrder.TypeOfTransaction.Buy)
                 End If
             End If
-            'If spreadSignal IsNot Nothing AndAlso ratioSignal IsNot Nothing Then
-            'If spreadSignal.Item1 OrElse ratioSignal.Item1 Then
-            'If spreadSignal.Item2 = ratioSignal.Item2 Then
+            If hedgingUserInputs.UseBothSignal Then
+                If spreadSignal IsNot Nothing AndAlso ratioSignal IsNot Nothing Then
+                    If spreadSignal.Item1 AndAlso ratioSignal.Item1 Then
+                        If spreadSignal.Item2 = ratioSignal.Item2 Then
+                            ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, spreadSignal.Item2)
+                        End If
+                    End If
+                End If
+            Else
+                If spreadSignal IsNot Nothing AndAlso spreadSignal.Item1 Then ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, spreadSignal.Item2)
+                If ratioSignal IsNot Nothing AndAlso ratioSignal.Item1 Then ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, ratioSignal.Item2)
+            End If
+        End If
+        If forcePrint Then
+            If ret IsNot Nothing Then
+                logger.Debug("Signal Type:{0}, Is Signal Received:{1}, Signal Direction:{2}", If(hedgingUserInputs.UseBothSignal, "Both", "Anyone"), ret.Item1, ret.Item2.ToString)
+            Else
+                logger.Debug("Signal Type:{0}, Is Signal Received:False, Signal Direction:None", If(hedgingUserInputs.UseBothSignal, "Both", "Anyone"))
+            End If
+        End If
+        Return ret
+    End Function
 
-            If spreadSignal IsNot Nothing AndAlso spreadSignal.Item1 Then ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, spreadSignal.Item2)
-            If ratioSignal IsNot Nothing AndAlso ratioSignal.Item1 Then ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, ratioSignal.Item2)
-            'End If
-            'End If
-            'End If
+    Private Function GetCurrentSignal(ByVal forcePrint As Boolean) As Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload)
+        Dim ret As Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload) = Nothing
+        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+
+        Dim runningCandlePayload As PairPayload = Nothing
+        Dim spreadRatioConsumer As SpreadRatioConsumer = Nothing
+        Dim spreadBollingerConsumer As BollingerConsumer = Nothing
+        Dim ratioBollingerConsumer As BollingerConsumer = Nothing
+
+        If Me.IsPairInstrument Then
+            runningCandlePayload = GetXMinuteCurrentCandle()
+            spreadRatioConsumer = GetConsumer(Me.RawPayloadDependentConsumers, DummySpreadRatioConsumer)
+            spreadBollingerConsumer = GetConsumer(Me.RawPayloadDependentConsumers, DummySpreadBollingerConsumer)
+            ratioBollingerConsumer = GetConsumer(Me.RawPayloadDependentConsumers, DummyRatioBollingerConsumer)
+        Else
+            If Me.DependendStrategyInstruments IsNot Nothing AndAlso Me.DependendStrategyInstruments.Count > 0 Then
+                Dim virtualStrategyInstrument As NearFarHedgingStrategyInstrument = Me.DependendStrategyInstruments.FirstOrDefault
+                runningCandlePayload = virtualStrategyInstrument.GetXMinuteCurrentCandle()
+                spreadRatioConsumer = virtualStrategyInstrument.GetConsumer(virtualStrategyInstrument.RawPayloadDependentConsumers, virtualStrategyInstrument.DummySpreadRatioConsumer)
+                spreadBollingerConsumer = virtualStrategyInstrument.GetConsumer(virtualStrategyInstrument.RawPayloadDependentConsumers, virtualStrategyInstrument.DummySpreadBollingerConsumer)
+                ratioBollingerConsumer = virtualStrategyInstrument.GetConsumer(virtualStrategyInstrument.RawPayloadDependentConsumers, virtualStrategyInstrument.DummyRatioBollingerConsumer)
+            End If
+        End If
+
+        If runningCandlePayload IsNot Nothing Then
+            Dim currentCandle As OHLCPayload = Nothing
+            If runningCandlePayload.Instrument1Payload IsNot Nothing AndAlso
+                                    runningCandlePayload.Instrument1Payload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
+                                    runningCandlePayload.Instrument1Payload.PreviousPayload IsNot Nothing AndAlso
+                                    runningCandlePayload.Instrument1Payload.SnapshotDateTime >= hedgingUserInputs.TradeStartTime Then
+                currentCandle = runningCandlePayload.Instrument1Payload
+            ElseIf runningCandlePayload.Instrument2Payload IsNot Nothing AndAlso
+                                    runningCandlePayload.Instrument2Payload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
+                                    runningCandlePayload.Instrument2Payload.PreviousPayload IsNot Nothing AndAlso
+                                    runningCandlePayload.Instrument2Payload.SnapshotDateTime >= hedgingUserInputs.TradeStartTime Then
+                currentCandle = runningCandlePayload.Instrument2Payload
+            End If
+            If currentCandle IsNot Nothing AndAlso currentCandle.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso currentCandle.PreviousPayload IsNot Nothing AndAlso
+                spreadRatioConsumer.ConsumerPayloads IsNot Nothing AndAlso spreadRatioConsumer.ConsumerPayloads.Count > 0 AndAlso
+                spreadBollingerConsumer.ConsumerPayloads IsNot Nothing AndAlso spreadBollingerConsumer.ConsumerPayloads.Count > 0 AndAlso
+                ratioBollingerConsumer.ConsumerPayloads IsNot Nothing AndAlso ratioBollingerConsumer.ConsumerPayloads.Count > 0 AndAlso
+                spreadRatioConsumer.ConsumerPayloads.ContainsKey(currentCandle.PreviousPayload.SnapshotDateTime) AndAlso
+                spreadBollingerConsumer.ConsumerPayloads.ContainsKey(currentCandle.PreviousPayload.SnapshotDateTime) AndAlso
+                ratioBollingerConsumer.ConsumerPayloads.ContainsKey(currentCandle.PreviousPayload.SnapshotDateTime) Then
+                Dim signalCandleTime As Date = currentCandle.PreviousPayload.SnapshotDateTime
+                Dim potentialSignalData As Tuple(Of Boolean, IOrder.TypeOfTransaction) = Nothing
+                potentialSignalData = CheckSignal(spreadRatioConsumer.ConsumerPayloads(signalCandleTime),
+                                              spreadBollingerConsumer.ConsumerPayloads(signalCandleTime),
+                                              ratioBollingerConsumer.ConsumerPayloads(signalCandleTime), forcePrint)
+
+                If potentialSignalData IsNot Nothing Then
+                    ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload)(potentialSignalData.Item1, potentialSignalData.Item2, runningCandlePayload, currentCandle)
+                Else
+                    ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload)(False, IOrder.TypeOfTransaction.None, runningCandlePayload, currentCandle)
+                End If
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Function IsLogicalActiveInstrument() As Boolean
+        Dim ret As Boolean = False
+        If Me.IsPairInstrument Then
+            If Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count >= 2 Then
+                ret = True
+                For Each runningParentStrategyInstrumentStrategy In Me.ParentStrategyInstruments
+                    ret = ret And runningParentStrategyInstrumentStrategy.IsActiveInstrument
+                Next
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Function GetAnotherPairStrategyInstrument() As NearFarHedgingStrategyInstrument
+        Dim ret As NearFarHedgingStrategyInstrument = Nothing
+        If Not Me.IsPairInstrument Then
+            If Me.DependendStrategyInstruments IsNot Nothing AndAlso Me.DependendStrategyInstruments.Count > 0 Then
+                Dim virtualStrategyInstrument As NearFarHedgingStrategyInstrument = Me.DependendStrategyInstruments.FirstOrDefault
+                If virtualStrategyInstrument.IsPairInstrument Then
+                    If virtualStrategyInstrument.ParentStrategyInstruments IsNot Nothing AndAlso
+                        virtualStrategyInstrument.ParentStrategyInstruments.Count > 0 Then
+                        For Each runningStrategyInstrument In virtualStrategyInstrument.ParentStrategyInstruments
+                            If Me.TradableInstrument.TradingSymbol <> runningStrategyInstrument.TradableInstrument.TradingSymbol Then
+                                ret = runningStrategyInstrument
+                                Exit For
+                            End If
+                        Next
+                    End If
+                End If
+            End If
+        End If
+        Return ret
+    End Function
+    Public Function GetPairPLAfterBrokerage() As Decimal
+        Dim ret As Decimal = 0
+        If Me.IsPairInstrument Then
+            If Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count > 0 Then
+                For Each runningParentStrategyInstrument In Me.ParentStrategyInstruments
+                    ret += runningParentStrategyInstrument.GetOverallPLAfterBrokerage
+                Next
+            End If
         End If
         Return ret
     End Function

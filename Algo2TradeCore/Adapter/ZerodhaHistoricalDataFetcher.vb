@@ -20,7 +20,7 @@ Namespace Adapter
         Public Event FetcherError(ByVal instrumentIdentifier As String, ByVal msg As String)
         'The below functions are needed to allow the derived classes to raise the above two events
         Protected Overridable Async Function OnFetcherCandlesAsync(ByVal instrumentIdentifier As String, ByVal historicalCandlesJSONDict As Dictionary(Of String, Object)) As Task
-            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+            Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
             RaiseEvent FetcherCandles(instrumentIdentifier, historicalCandlesJSONDict)
         End Function
         Protected Overridable Sub OnFetcherError(ByVal instrumentIdentifier As String, ByVal msg As String)
@@ -92,7 +92,6 @@ Namespace Adapter
                         Exit While
                     End If
                     Dim sw As New Stopwatch
-                    sw.Start()
                     _isPollRunning = True
                     _cts.Token.ThrowIfCancellationRequested()
                     lastTimeWhenDone = Now
@@ -111,7 +110,7 @@ Namespace Adapter
                                                                               If errorMessage IsNot Nothing Then
                                                                                   individualFetcher.OnFetcherError(x.InstrumentIdentifier, errorMessage)
                                                                               Else
-                                                                                  Await individualFetcher.OnFetcherCandlesAsync(x.InstrumentIdentifier, tempRet).ConfigureAwait(False)
+                                                                                  individualFetcher.OnFetcherCandlesAsync(x.InstrumentIdentifier, tempRet)
                                                                               End If
                                                                           Else
                                                                               'TO DO: Uncomment this
@@ -129,15 +128,16 @@ Namespace Adapter
                                                                   End Function)
                         'OnHeartbeat("Polling historical candles")
                         logger.Debug("Polling historical candles")
+                        sw.Start()
                         Await Task.WhenAll(tasks).ConfigureAwait(False)
+                        sw.Stop()
+                        Console.WriteLine(String.Format("Get Historical and Calling candle processor time:{0}", sw.ElapsedMilliseconds))
                         If Me.ParentController.APIConnection Is Nothing OrElse apiConnectionBeingUsed Is Nothing OrElse
                         (Me.ParentController.APIConnection IsNot Nothing AndAlso apiConnectionBeingUsed IsNot Nothing AndAlso
                         Not Me.ParentController.APIConnection.Equals(apiConnectionBeingUsed)) Then
                             Debug.WriteLine("Exiting start polling")
                             Exit While
                         End If
-                        sw.Stop()
-                        Console.WriteLine(sw.Elapsed.Seconds)
                     End If
                     _cts.Token.ThrowIfCancellationRequested()
 

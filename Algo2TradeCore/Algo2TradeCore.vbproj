@@ -93,6 +93,7 @@
     <Compile Include="Entities\Indicators\SpreadRatioConsumer.vb" />
     <Compile Include="Entities\Indicators\SupertrendConsumer.vb" />
     <Compile Include="Entities\IUserMargin.vb" />
+    <Compile Include="Entities\PaperOrder.vb" />
     <Compile Include="Entities\PayloadToPairConsumer.vb" />
     <Compile Include="Entities\PlaceOrderParameters.vb" />
     <Compile Include="Entities\IBrokerageAttributes.vb" />

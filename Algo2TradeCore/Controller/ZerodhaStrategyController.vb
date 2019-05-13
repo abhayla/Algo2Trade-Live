@@ -996,14 +996,7 @@ Namespace Controller
 
         Public Async Sub OnFetcherCandlesAsync(ByVal instrumentIdentifier As String, ByVal historicalCandlesJSONDict As Dictionary(Of String, Object))
             'logger.Debug("OnFetcherCandlesAsync, parameteres:{0},{1}",instrumentIdentifier, Utils.JsonSerialize(historicalCandlesJSONDict))
-            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-            'ctr += 1
-            'If ctr >= 0 AndAlso _subscribedStrategyInstruments IsNot Nothing AndAlso _subscribedStrategyInstruments.Count > 0 Then
-            '    For Each runningStrategyInstrument In _subscribedStrategyInstruments(instrumentIdentifier)
-            '        _rawPayloadCreators(runningStrategyInstrument.TradableInstrument.InstrumentIdentifier).GetChartFromHistoricalAsync(historicalCandlesJSONDict)
-            '        Exit For
-            '    Next
-            'End If
+            Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
             If _rawPayloadCreators IsNot Nothing AndAlso _rawPayloadCreators.ContainsKey(instrumentIdentifier) Then
                 _rawPayloadCreators(instrumentIdentifier).GetChartFromHistoricalAsync(historicalCandlesJSONDict)
             End If
@@ -1053,7 +1046,7 @@ Namespace Controller
             MyBase.OnTickerReconnect()
         End Sub
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
-            'logger.Debug("OnTickerTickAsync, tickData:{0}", Utils.JsonSerialize(tickData))
+            'Console.WriteLine("OnTickerTickAsync, tickData:{0}", Utils.JsonSerialize(tickData))
             Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
             Dim runningTick As New ZerodhaTick() With {.WrappedTick = tickData}
             Dim runningInstruments As IEnumerable(Of IInstrument) = _AllStrategyUniqueInstruments.Where(Function(x)

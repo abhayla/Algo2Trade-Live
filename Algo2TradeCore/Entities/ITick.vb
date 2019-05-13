@@ -10,6 +10,7 @@
         ReadOnly Property AveragePrice As Decimal
         ReadOnly Property LastPrice As Decimal
         ReadOnly Property Timestamp As Date?
+        ReadOnly Property LastTradeTime As Date?
 
         ReadOnly Property Broker As APISource
     End Interface

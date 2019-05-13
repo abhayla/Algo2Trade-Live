@@ -45,6 +45,9 @@ Public Class MomentumReversalStrategyInstrument
             End If
         End If
     End Sub
+    Public Overrides Function MonitorAsync(ByVal command As ExecuteCommands, ByVal data As Object) As Task
+        Throw New NotImplementedException()
+    End Function
     Public Overrides Async Function MonitorAsync() As Task
         Try
             'Dim slDelayCtr As Integer = 0
@@ -275,6 +278,12 @@ Public Class MomentumReversalStrategyInstrument
             Next
         End If
         Return ret
+    End Function
+    Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
+        Throw New NotImplementedException()
+    End Function
+    Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
+        Throw New NotImplementedException()
     End Function
     Protected Overrides Async Function IsTriggerReceivedForModifyTargetOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)

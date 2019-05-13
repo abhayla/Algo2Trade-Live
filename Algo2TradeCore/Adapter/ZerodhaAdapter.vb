@@ -29,11 +29,10 @@ Namespace Adapter
         Public Overrides Function CalculatePLWithBrokerage(ByVal intrument As IInstrument,
                                                             ByVal buy As Double,
                                                             ByVal sell As Double,
-                                                            ByVal quantity As Integer,
-                                                            ByVal exchange As String) As Decimal
+                                                            ByVal quantity As Integer) As Decimal
             Dim ret As Decimal = Nothing
             Dim brokerageAttributes As IBrokerageAttributes = Nothing
-            Select Case exchange
+            Select Case intrument.RawExchange
                 Case "NSE"
                     brokerageAttributes = Calculator.GetIntradayEquityBrokerage(buy, sell, quantity)
                 Case "NFO"

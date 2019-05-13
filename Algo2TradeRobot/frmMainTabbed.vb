@@ -285,6 +285,12 @@ Public Class frmMainTabbed
         If File.Exists(ControllerUserInputs.Filename) Then
             _commonControllerUserInput = Utilities.Strings.DeserializeToCollection(Of ControllerUserInputs)(ControllerUserInputs.Filename)
         End If
+        Dim formRemarks As String = Nothing
+        If _commonControllerUserInput IsNot Nothing AndAlso _commonControllerUserInput.FormRemarks IsNot Nothing AndAlso
+            _commonControllerUserInput.FormRemarks.Trim <> "" Then
+            formRemarks = _commonControllerUserInput.FormRemarks.Trim
+        End If
+        Me.Text = String.Format("Algo2Trade Robot v{0}{1}", My.Application.Info.Version, If(formRemarks IsNot Nothing, String.Format(" - {0}", formRemarks), ""))
     End Sub
 
 #Region "Momentum Reversal"
@@ -1815,7 +1821,12 @@ Public Class frmMainTabbed
         If Not Common.IsZerodhaUserDetailsPopulated(_commonControllerUserInput) Then
             miUserDetails_Click(sender, e)
         End If
-        Me.Text = String.Format("Algo2Trade Robot v{0}", My.Application.Info.Version)
+        Dim formRemarks As String = Nothing
+        If _commonControllerUserInput IsNot Nothing AndAlso _commonControllerUserInput.FormRemarks IsNot Nothing AndAlso
+            _commonControllerUserInput.FormRemarks.Trim <> "" Then
+            formRemarks = _commonControllerUserInput.FormRemarks.Trim
+        End If
+        Me.Text = String.Format("Algo2Trade Robot v{0}{1}", My.Application.Info.Version, If(formRemarks IsNot Nothing, String.Format(" - {0}", formRemarks), ""))
         EnableDisableUIEx(UIMode.Idle, GetType(OHLStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(MomentumReversalStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(AmiSignalStrategy))

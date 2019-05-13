@@ -37,6 +37,7 @@ Public Class frmAdvancedOptions
                 dtpckrCDSExchangeStartTime.Value = _UserInputs.ExchangeDetails("CDS").ExchangeStartTime
                 dtpckrCDSExchangeEndTime.Value = _UserInputs.ExchangeDetails("CDS").ExchangeEndTime
             End If
+            txtRemarks.Text = _UserInputs.FormRemarks
         End If
     End Sub
 
@@ -55,6 +56,7 @@ Public Class frmAdvancedOptions
             {"CDS", New Exchange(Enums.TypeOfExchage.CDS) With
             {.ExchangeStartTime = dtpckrCDSExchangeStartTime.Value, .ExchangeEndTime = dtpckrCDSExchangeEndTime.Value}}
         }
+        _UserInputs.FormRemarks = txtRemarks.Text
         Utilities.Strings.SerializeFromCollection(Of ControllerUserInputs)(ControllerUserInputs.Filename, _UserInputs)
     End Sub
 

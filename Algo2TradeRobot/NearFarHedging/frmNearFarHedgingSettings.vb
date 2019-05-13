@@ -41,6 +41,13 @@ Public Class frmNearFarHedgingSettings
             txtBollingerPeriod.Text = _NearFarHedgingSettings.BollingerPeriod
             txtBollingerMultiplier.Text = _NearFarHedgingSettings.BollingerMultiplier
             txtInstrumentDetalis.Text = _NearFarHedgingSettings.InstrumentDetailsFilePath
+            If _NearFarHedgingSettings.UseBothSignal Then
+                rdbBoth.Checked = True
+            Else
+                rdbAnyOne.Checked = True
+            End If
+            txtTelegramAPI.Text = _NearFarHedgingSettings.TelegramAPIKey
+            txtTelegramChatID.Text = _NearFarHedgingSettings.TelegramChatID
         End If
     End Sub
     Private Sub SaveSettings()
@@ -53,6 +60,13 @@ Public Class frmNearFarHedgingSettings
         _NearFarHedgingSettings.BollingerPeriod = txtBollingerPeriod.Text
         _NearFarHedgingSettings.BollingerMultiplier = txtBollingerMultiplier.Text
         _NearFarHedgingSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+        If rdbAnyOne.Checked Then
+            _NearFarHedgingSettings.UseBothSignal = False
+        ElseIf rdbBoth.Checked Then
+            _NearFarHedgingSettings.UseBothSignal = True
+        End If
+        _NearFarHedgingSettings.TelegramAPIKey = txtTelegramAPI.Text
+        _NearFarHedgingSettings.TelegramChatID = txtTelegramChatID.Text
 
         Utilities.Strings.SerializeFromCollection(Of NearFarHedgingStrategyUserInputs)(_NearFarHedgingSettingsFilename, _NearFarHedgingSettings)
     End Sub
@@ -79,6 +93,7 @@ Public Class frmNearFarHedgingSettings
     End Sub
 
     Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
+        opnFileSettings.Filter = "|*.csv"
         opnFileSettings.ShowDialog()
     End Sub
 

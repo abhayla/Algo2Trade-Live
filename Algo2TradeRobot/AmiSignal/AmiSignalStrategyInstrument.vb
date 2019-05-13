@@ -126,6 +126,15 @@ Public Class AmiSignalStrategyInstrument
             SerializeSignalCollections()
         End Try
     End Function
+    Public Overrides Function MonitorAsync(ByVal command As ExecuteCommands, ByVal data As Object) As Task
+        Throw New NotImplementedException()
+    End Function
+    Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
+        Throw New NotImplementedException()
+    End Function
+    Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
+        Throw New NotImplementedException()
+    End Function
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
         Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
@@ -267,7 +276,7 @@ Public Class AmiSignalStrategyInstrument
             Dim allCancelableOrders As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = GetAllCancelableOrders(IOrder.TypeOfTransaction.None)
             If allCancelableOrders IsNot Nothing AndAlso allCancelableOrders.Count > 0 Then
                 For Each cancelableOrder In allCancelableOrders
-                    If cancelableOrder.Item2.OrderType = IOrder.TypeOfOrder.Limit AndAlso Not cancelableOrder.Item2.Status=IOrder.TypeOfStatus.Complete Then
+                    If cancelableOrder.Item2.OrderType = IOrder.TypeOfOrder.Limit AndAlso Not cancelableOrder.Item2.Status = IOrder.TypeOfStatus.Complete Then
                         Dim price As Decimal = Decimal.MinValue
                         If cancelableOrder.Item2.TransactionType = IOrder.TypeOfTransaction.Buy Then
                             price = Me.TradableInstrument.LastTick.LastPrice + Utilities.Numbers.ConvertFloorCeling((Me.TradableInstrument.LastTick.LastPrice * 0.3 / 100), Me.TradableInstrument.TickSize, Utilities.Numbers.NumberManipulation.RoundOfType.Floor)

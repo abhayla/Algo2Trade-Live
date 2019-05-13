@@ -48,8 +48,18 @@ Partial Class frmNearFarHedgingSettings
         Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
         Me.btnSaveNearFarHedgingSettings = New System.Windows.Forms.Button()
         Me.opnFileSettings = New System.Windows.Forms.OpenFileDialog()
+        Me.grpSignal = New System.Windows.Forms.GroupBox()
+        Me.rdbBoth = New System.Windows.Forms.RadioButton()
+        Me.rdbAnyOne = New System.Windows.Forms.RadioButton()
+        Me.grpTelegram = New System.Windows.Forms.GroupBox()
+        Me.txtTelegramChatID = New System.Windows.Forms.TextBox()
+        Me.lblTelegramChatID = New System.Windows.Forms.Label()
+        Me.txtTelegramAPI = New System.Windows.Forms.TextBox()
+        Me.lblTelegramAPI = New System.Windows.Forms.Label()
         Me.grpIndicator.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
+        Me.grpSignal.SuspendLayout()
+        Me.grpTelegram.SuspendLayout()
         Me.SuspendLayout()
         '
         'grpIndicator
@@ -60,7 +70,7 @@ Partial Class frmNearFarHedgingSettings
         Me.grpIndicator.Controls.Add(Me.lblBollingerPeriod)
         Me.grpIndicator.Location = New System.Drawing.Point(464, 6)
         Me.grpIndicator.Name = "grpIndicator"
-        Me.grpIndicator.Size = New System.Drawing.Size(289, 271)
+        Me.grpIndicator.Size = New System.Drawing.Size(289, 95)
         Me.grpIndicator.TabIndex = 16
         Me.grpIndicator.TabStop = False
         Me.grpIndicator.Text = "Indicator Settings"
@@ -293,11 +303,95 @@ Partial Class frmNearFarHedgingSettings
         'opnFileSettings
         '
         '
+        'grpSignal
+        '
+        Me.grpSignal.Controls.Add(Me.rdbBoth)
+        Me.grpSignal.Controls.Add(Me.rdbAnyOne)
+        Me.grpSignal.Location = New System.Drawing.Point(464, 101)
+        Me.grpSignal.Name = "grpSignal"
+        Me.grpSignal.Size = New System.Drawing.Size(289, 82)
+        Me.grpSignal.TabIndex = 17
+        Me.grpSignal.TabStop = False
+        Me.grpSignal.Text = "Signal Type"
+        '
+        'rdbBoth
+        '
+        Me.rdbBoth.AutoSize = True
+        Me.rdbBoth.Location = New System.Drawing.Point(13, 56)
+        Me.rdbBoth.Name = "rdbBoth"
+        Me.rdbBoth.Size = New System.Drawing.Size(58, 21)
+        Me.rdbBoth.TabIndex = 1
+        Me.rdbBoth.TabStop = True
+        Me.rdbBoth.Text = "Both"
+        Me.rdbBoth.UseVisualStyleBackColor = True
+        '
+        'rdbAnyOne
+        '
+        Me.rdbAnyOne.AutoSize = True
+        Me.rdbAnyOne.Location = New System.Drawing.Point(13, 29)
+        Me.rdbAnyOne.Name = "rdbAnyOne"
+        Me.rdbAnyOne.Size = New System.Drawing.Size(77, 21)
+        Me.rdbAnyOne.TabIndex = 0
+        Me.rdbAnyOne.TabStop = True
+        Me.rdbAnyOne.Text = "Anyone"
+        Me.rdbAnyOne.UseVisualStyleBackColor = True
+        '
+        'grpTelegram
+        '
+        Me.grpTelegram.Controls.Add(Me.txtTelegramChatID)
+        Me.grpTelegram.Controls.Add(Me.lblTelegramChatID)
+        Me.grpTelegram.Controls.Add(Me.txtTelegramAPI)
+        Me.grpTelegram.Controls.Add(Me.lblTelegramAPI)
+        Me.grpTelegram.Location = New System.Drawing.Point(463, 183)
+        Me.grpTelegram.Name = "grpTelegram"
+        Me.grpTelegram.Size = New System.Drawing.Size(289, 95)
+        Me.grpTelegram.TabIndex = 18
+        Me.grpTelegram.TabStop = False
+        Me.grpTelegram.Text = "Telegram Details"
+        '
+        'txtTelegramChatID
+        '
+        Me.txtTelegramChatID.Location = New System.Drawing.Point(75, 56)
+        Me.txtTelegramChatID.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtTelegramChatID.Name = "txtTelegramChatID"
+        Me.txtTelegramChatID.Size = New System.Drawing.Size(200, 22)
+        Me.txtTelegramChatID.TabIndex = 32
+        '
+        'lblTelegramChatID
+        '
+        Me.lblTelegramChatID.AutoSize = True
+        Me.lblTelegramChatID.Location = New System.Drawing.Point(9, 60)
+        Me.lblTelegramChatID.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblTelegramChatID.Name = "lblTelegramChatID"
+        Me.lblTelegramChatID.Size = New System.Drawing.Size(54, 17)
+        Me.lblTelegramChatID.TabIndex = 35
+        Me.lblTelegramChatID.Text = "Chat ID"
+        '
+        'txtTelegramAPI
+        '
+        Me.txtTelegramAPI.Location = New System.Drawing.Point(75, 24)
+        Me.txtTelegramAPI.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtTelegramAPI.Name = "txtTelegramAPI"
+        Me.txtTelegramAPI.Size = New System.Drawing.Size(201, 22)
+        Me.txtTelegramAPI.TabIndex = 30
+        '
+        'lblTelegramAPI
+        '
+        Me.lblTelegramAPI.AutoSize = True
+        Me.lblTelegramAPI.Location = New System.Drawing.Point(10, 28)
+        Me.lblTelegramAPI.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblTelegramAPI.Name = "lblTelegramAPI"
+        Me.lblTelegramAPI.Size = New System.Drawing.Size(57, 17)
+        Me.lblTelegramAPI.TabIndex = 31
+        Me.lblTelegramAPI.Text = "API Key"
+        '
         'frmNearFarHedgingSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(878, 282)
+        Me.Controls.Add(Me.grpTelegram)
+        Me.Controls.Add(Me.grpSignal)
         Me.Controls.Add(Me.grpIndicator)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnSaveNearFarHedgingSettings)
@@ -311,6 +405,10 @@ Partial Class frmNearFarHedgingSettings
         Me.grpIndicator.PerformLayout()
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
+        Me.grpSignal.ResumeLayout(False)
+        Me.grpSignal.PerformLayout()
+        Me.grpTelegram.ResumeLayout(False)
+        Me.grpTelegram.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -339,4 +437,12 @@ Partial Class frmNearFarHedgingSettings
     Friend WithEvents ImageList1 As ImageList
     Friend WithEvents btnSaveNearFarHedgingSettings As Button
     Friend WithEvents opnFileSettings As OpenFileDialog
+    Friend WithEvents grpSignal As GroupBox
+    Friend WithEvents rdbBoth As RadioButton
+    Friend WithEvents rdbAnyOne As RadioButton
+    Friend WithEvents grpTelegram As GroupBox
+    Friend WithEvents txtTelegramChatID As TextBox
+    Friend WithEvents lblTelegramChatID As Label
+    Friend WithEvents txtTelegramAPI As TextBox
+    Friend WithEvents lblTelegramAPI As Label
 End Class

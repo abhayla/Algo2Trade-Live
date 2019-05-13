@@ -19,6 +19,9 @@
             End Sub
             Public Property TradingSymbol As String Implements IPayload.TradingSymbol
             Public Property SMA As Field
+            Public Overrides Function ToString() As String
+                Return String.Format("SMA:{0}", Me.SMA.Value)
+            End Function
         End Class
     End Class
 End Namespace

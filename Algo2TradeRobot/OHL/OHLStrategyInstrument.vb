@@ -41,6 +41,9 @@ Public Class OHLStrategyInstrument
         End If
         _OHLStrategyProtect = 0
     End Sub
+    Public Overrides Function MonitorAsync(ByVal command As ExecuteCommands, ByVal data As Object) As Task
+        Throw New NotImplementedException()
+    End Function
     Public Overrides Async Function MonitorAsync() As Task
         Try
             'Dim slDelayCtr As Integer = 0
@@ -238,6 +241,12 @@ Public Class OHLStrategyInstrument
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         Throw New NotImplementedException
         Return ret
+    End Function
+    Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
+        Throw New NotImplementedException()
+    End Function
+    Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
+        Throw New NotImplementedException()
     End Function
     Protected Overrides Async Function ForceExitSpecificTradeAsync(order As IOrder, ByVal reason As String) As Task
         If order IsNot Nothing AndAlso Not order.Status = IOrder.TypeOfStatus.Complete Then

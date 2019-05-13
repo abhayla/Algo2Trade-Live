@@ -58,6 +58,9 @@ Public Class EMA_SupertrendStrategyInstrument
             End If
         End If
     End Sub
+    Public Overrides Function MonitorAsync(ByVal command As ExecuteCommands, ByVal data As Object) As Task
+        Throw New NotImplementedException()
+    End Function
     Public Overrides Async Function MonitorAsync() As Task
         Try
             While True
@@ -110,7 +113,12 @@ Public Class EMA_SupertrendStrategyInstrument
             Throw ex
         End Try
     End Function
-
+    Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
+        Throw New NotImplementedException()
+    End Function
+    Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
+        Throw New NotImplementedException()
+    End Function
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
         Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)

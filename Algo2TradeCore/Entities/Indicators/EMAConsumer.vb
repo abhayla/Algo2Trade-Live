@@ -20,6 +20,9 @@
             Public Sub New()
                 Me.EMA = New Field(TypeOfField.EMA)
             End Sub
+            Public Overrides Function ToString() As String
+                Return String.Format("EMA:{0}", Me.EMA.Value)
+            End Function
         End Class
     End Class
 End Namespace

@@ -8,6 +8,9 @@ Public Class NearFarHedgingStrategyUserInputs
     Inherits StrategyUserInputs
     Public Property BollingerPeriod As Integer
     Public Property BollingerMultiplier As Integer
+    Public Property UseBothSignal As Boolean
+    Public Property TelegramAPIKey As String
+    Public Property TelegramChatID As String
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
     <Serializable>
@@ -33,7 +36,7 @@ Public Class NearFarHedgingStrategyUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"PAIR 1 TRADING SYMBOL", "PAIR 1 QUANTITY", "PAIR 2 TRADING SYMBOL", "PAIR 2 QUANTITY", "PL OFFSET", "REVERSE SIGNAL EXIT", "REVERSE SIGNAL ENTRY", "MAX PAIR LOSS", "MAX PAIR GAIN"}
+                        Dim excelColumnList As New List(Of String) From {"PAIR 1 TRADING SYMBOL", "PAIR 1 QUANTITY MULTIPLIER", "PAIR 2 TRADING SYMBOL", "PAIR 2 QUANTITY MULTIPLIER", "PL OFFSET", "REVERSE SIGNAL EXIT", "REVERSE SIGNAL ENTRY", "MAX PAIR LOSS", "MAX PAIR GAIN"}
 
                         For colCtr = 0 To 8
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then

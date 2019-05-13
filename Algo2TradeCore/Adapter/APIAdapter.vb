@@ -38,7 +38,7 @@ Namespace Adapter
             Me.ParentController = associatedParentController
             _cts = canceller
         End Sub
-        Public MustOverride Function CalculatePLWithBrokerage(ByVal instrument As IInstrument, ByVal buy As Double, ByVal sell As Double, ByVal quantity As Integer, ByVal exchange As String) As Decimal
+        Public MustOverride Function CalculatePLWithBrokerage(ByVal instrument As IInstrument, ByVal buy As Double, ByVal sell As Double, ByVal quantity As Integer) As Decimal
         Public MustOverride Async Function GetAllInstrumentsAsync() As Task(Of IEnumerable(Of IInstrument))
         Public MustOverride Async Function GetAllTradesAsync() As Task(Of IEnumerable(Of ITrade))
         Public MustOverride Async Function GetAllOrdersAsync() As Task(Of IEnumerable(Of IOrder))

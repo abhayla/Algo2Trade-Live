@@ -50,18 +50,23 @@ Partial Class frmAdvancedOptions
         Me.lblNSEExchangeStartTime = New System.Windows.Forms.Label()
         Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
         Me.btnSaveDelaySettings = New System.Windows.Forms.Button()
+        Me.tabRemarks = New System.Windows.Forms.TabPage()
+        Me.txtRemarks = New System.Windows.Forms.TextBox()
+        Me.lblRemarks = New System.Windows.Forms.Label()
         Me.tabMain.SuspendLayout()
         Me.tabDelaySettings.SuspendLayout()
         Me.tabExchangeDetailsSettings.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
+        Me.tabRemarks.SuspendLayout()
         Me.SuspendLayout()
         '
         'tabMain
         '
         Me.tabMain.Controls.Add(Me.tabDelaySettings)
         Me.tabMain.Controls.Add(Me.tabExchangeDetailsSettings)
+        Me.tabMain.Controls.Add(Me.tabRemarks)
         Me.tabMain.Location = New System.Drawing.Point(0, 0)
         Me.tabMain.Name = "tabMain"
         Me.tabMain.SelectedIndex = 0
@@ -331,6 +336,35 @@ Partial Class frmAdvancedOptions
         Me.btnSaveDelaySettings.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         Me.btnSaveDelaySettings.UseVisualStyleBackColor = True
         '
+        'tabRemarks
+        '
+        Me.tabRemarks.Controls.Add(Me.txtRemarks)
+        Me.tabRemarks.Controls.Add(Me.lblRemarks)
+        Me.tabRemarks.Location = New System.Drawing.Point(4, 25)
+        Me.tabRemarks.Name = "tabRemarks"
+        Me.tabRemarks.Size = New System.Drawing.Size(416, 282)
+        Me.tabRemarks.TabIndex = 2
+        Me.tabRemarks.Text = "Remarks"
+        Me.tabRemarks.UseVisualStyleBackColor = True
+        '
+        'txtRemarks
+        '
+        Me.txtRemarks.Location = New System.Drawing.Point(117, 20)
+        Me.txtRemarks.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtRemarks.Name = "txtRemarks"
+        Me.txtRemarks.Size = New System.Drawing.Size(288, 22)
+        Me.txtRemarks.TabIndex = 11
+        '
+        'lblRemarks
+        '
+        Me.lblRemarks.AutoSize = True
+        Me.lblRemarks.Location = New System.Drawing.Point(9, 21)
+        Me.lblRemarks.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblRemarks.Name = "lblRemarks"
+        Me.lblRemarks.Size = New System.Drawing.Size(100, 17)
+        Me.lblRemarks.TabIndex = 12
+        Me.lblRemarks.Text = "Form Remarks"
+        '
         'frmAdvancedOptions
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
@@ -354,6 +388,8 @@ Partial Class frmAdvancedOptions
         Me.GroupBox2.PerformLayout()
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
+        Me.tabRemarks.ResumeLayout(False)
+        Me.tabRemarks.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -384,4 +420,7 @@ Partial Class frmAdvancedOptions
     Friend WithEvents dtpckrCDSExchangeStartTime As DateTimePicker
     Friend WithEvents lblCDSExchangeStartTime As Label
     Friend WithEvents btnSaveDelaySettings As Button
+    Friend WithEvents tabRemarks As TabPage
+    Friend WithEvents txtRemarks As TextBox
+    Friend WithEvents lblRemarks As Label
 End Class

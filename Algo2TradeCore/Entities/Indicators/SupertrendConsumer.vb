@@ -25,6 +25,9 @@ Namespace Entities.Indicators
             Public Property FinalLowerBand As Decimal
             Public Property Supertrend As Field
             Public Property SupertrendColor As Color
+            Public Overrides Function ToString() As String
+                Return String.Format("Supertrend:{0}, Color:{1}", Me.Supertrend.Value, Me.SupertrendColor.ToString)
+            End Function
         End Class
     End Class
 End Namespace

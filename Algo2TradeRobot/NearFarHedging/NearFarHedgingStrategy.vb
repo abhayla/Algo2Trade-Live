@@ -180,7 +180,9 @@ Public Class NearFarHedgingStrategy
             Dim tasks As New List(Of Task)()
             For Each tradableStrategyInstrument As NearFarHedgingStrategyInstrument In TradableStrategyInstruments
                 _cts.Token.ThrowIfCancellationRequested()
-                tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
+                If tradableStrategyInstrument.IsPairInstrument Then
+                    tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
+                End If
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
@@ -202,15 +204,15 @@ Public Class NearFarHedgingStrategy
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf ExitAllTrades Then
-            logger.Warn("Exit All Button")
-            ret = New Tuple(Of Boolean, String)(True, "Button Exit")
-        ElseIf Me.GetTotalPL <= capitalAtDayStart * Math.Abs(Me.UserSettings.MaxLossPercentagePerDay) * -1 / 100 Then
-            logger.Warn("MTM Reached")
-            ret = New Tuple(Of Boolean, String)(True, "Max Loss % Per Day Reached")
-        ElseIf Me.GetTotalPL >= capitalAtDayStart * Math.Abs(Me.UserSettings.MaxProfitPercentagePerDay) / 100 Then
-            logger.Warn("MTM Reached")
-            ret = New Tuple(Of Boolean, String)(True, "Max Profit % Per Day Reached")
+            'ElseIf ExitAllTrades Then
+            '    logger.Warn("Exit All Button")
+            '    ret = New Tuple(Of Boolean, String)(True, "Button Exit")
+            'ElseIf Me.GetTotalPL <= capitalAtDayStart * Math.Abs(Me.UserSettings.MaxLossPercentagePerDay) * -1 / 100 Then
+            '    logger.Warn("MTM Reached")
+            '    ret = New Tuple(Of Boolean, String)(True, "Max Loss % Per Day Reached")
+            'ElseIf Me.GetTotalPL >= capitalAtDayStart * Math.Abs(Me.UserSettings.MaxProfitPercentagePerDay) / 100 Then
+            '    logger.Warn("MTM Reached")
+            '    ret = New Tuple(Of Boolean, String)(True, "Max Profit % Per Day Reached")
         End If
         Return ret
     End Function

@@ -17,7 +17,7 @@
         Private _SEBI As Decimal
         Public Property SEBI As Decimal
             Get
-                _SEBI = 0.0000015 * Turnover
+                _SEBI = 0.000001 * Turnover
                 Return _SEBI
             End Get
             Set(value As Decimal)

@@ -16,6 +16,9 @@
             End Sub
             Public Property TradingSymbol As String Implements IPayload.TradingSymbol
             Public Property ATR As Field
+            Public Overrides Function ToString() As String
+                Return String.Format("ATR:{0}", Me.ATR.Value)
+            End Function
         End Class
     End Class
 End Namespace
