@@ -77,7 +77,7 @@ Namespace Adapter
                 _ticker.Subscribe(Tokens:=subscriptionList)
                 _cts.Token.ThrowIfCancellationRequested()
                 _ticker.SetMode(Tokens:=subscriptionList, Mode:=Constants.MODE_FULL)
-                OnHeartbeat(String.Format("Subscribed:{0} instruments", subscriptionList.Count))
+                OnHeartbeat(String.Format("Subscribed:{0} instruments for ticker", subscriptionList.Count))
             End If
         End Function
         Public Overrides Function ToString() As String

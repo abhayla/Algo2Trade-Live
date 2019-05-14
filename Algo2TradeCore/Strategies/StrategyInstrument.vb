@@ -1480,6 +1480,10 @@ Namespace Strategies
                     Dim activityTag As String = GenerateTag(Now)
                     Dim parentPlaceOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = data
                     If parentPlaceOrderTrigger IsNot Nothing AndAlso parentPlaceOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                        While Me.IsActiveInstrument
+                            Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                        End While
+
                         Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
                         While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
                             Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
@@ -1537,10 +1541,12 @@ Namespace Strategies
         End Function
 
         Private _cancelOrderLock As Integer = 0
+        Public PairStrategyCancellationRequest As Boolean = False
         Protected Async Function CancelPaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
             Dim ret As IBusinessOrder = Nothing
             If 0 = Interlocked.Exchange(_cancelOrderLock, 1) Then
                 Try
+                    PairStrategyCancellationRequest = True
                     Dim exitOrdersTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String) = data
                     If exitOrdersTrigger IsNot Nothing AndAlso exitOrdersTrigger.Item1 = ExecuteCommandAction.Take Then
                         Dim potentialExitOrders As List(Of IOrder) = Nothing
@@ -1573,6 +1579,7 @@ Namespace Strategies
                     End If
                 Finally
                     Interlocked.Exchange(_cancelOrderLock, 0)
+                    PairStrategyCancellationRequest = False
                 End Try
             End If
             Return ret

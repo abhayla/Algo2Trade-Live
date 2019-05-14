@@ -135,8 +135,10 @@ Namespace Strategies
                 Dim runningInstrumentIdentifiers As List(Of String) = Nothing
                 For Each runningTradableStrategyInstruments In TradableStrategyInstruments
                     _cts.Token.ThrowIfCancellationRequested()
-                    If runningInstrumentIdentifiers Is Nothing Then runningInstrumentIdentifiers = New List(Of String)
-                    runningInstrumentIdentifiers.Add(runningTradableStrategyInstruments.TradableInstrument.InstrumentIdentifier)
+                    If Not runningTradableStrategyInstruments.IsPairInstrument Then
+                        If runningInstrumentIdentifiers Is Nothing Then runningInstrumentIdentifiers = New List(Of String)
+                        runningInstrumentIdentifiers.Add(runningTradableStrategyInstruments.TradableInstrument.InstrumentIdentifier)
+                    End If
                 Next
                 _cts.Token.ThrowIfCancellationRequested()
                 Await usableTicker.SubscribeAsync(runningInstrumentIdentifiers).ConfigureAwait(False)

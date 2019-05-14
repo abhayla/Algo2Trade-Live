@@ -129,7 +129,8 @@ Public Class NearFarHedgingStrategyInstrument
                 Select Case command
                     Case ExecuteCommands.PlaceCOMarketMISOrder
                         Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = data
-                        If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take AndAlso Not Me.IsActiveInstrument Then
+                        If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take AndAlso
+                            (Not Me.IsActiveInstrument OrElse (Me.IsActiveInstrument AndAlso Me.PairStrategyCancellationRequest)) Then
                             Dim placeOrderData As IBusinessOrder = Await TakePaperTradeAsync(placeOrderTrigger).ConfigureAwait(False)
                             If placeOrderData IsNot Nothing AndAlso placeOrderData.ParentOrder IsNot Nothing Then
                                 _cts.Token.ThrowIfCancellationRequested()
@@ -149,7 +150,9 @@ Public Class NearFarHedgingStrategyInstrument
                     Case ExecuteCommands.CancelCOOrder
                         Dim cancelOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String) = data
                         If cancelOrderTrigger IsNot Nothing AndAlso cancelOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+
                             Dim cancelOrderData As IBusinessOrder = Await Me.CancelPaperTradeAsync(cancelOrderTrigger).ConfigureAwait(False)
+
                             If cancelOrderData IsNot Nothing AndAlso cancelOrderData.ParentOrder IsNot Nothing AndAlso
                                     cancelOrderData.AllOrder IsNot Nothing AndAlso cancelOrderData.AllOrder.Count > 0 Then
                                 For Each runningSLOrder In cancelOrderData.AllOrder
@@ -255,7 +258,7 @@ Public Class NearFarHedgingStrategyInstrument
 
                     If Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count = 2 Then
                         For Each runningParentStrategyInstrument In Me.ParentStrategyInstruments
-                            If Not runningParentStrategyInstrument.IsActiveInstrument Then
+                            If Not runningParentStrategyInstrument.IsActiveInstrument OrElse (runningParentStrategyInstrument.IsActiveInstrument AndAlso runningParentStrategyInstrument.PairStrategyCancellationRequest) Then
                                 Dim pair1StrategyInstrument As NearFarHedgingStrategyInstrument = Me.ParentStrategyInstruments.FirstOrDefault
                                 Dim pair2StrategyInstrument As NearFarHedgingStrategyInstrument = Me.ParentStrategyInstruments.LastOrDefault
                                 Dim higherContract As NearFarHedgingStrategyInstrument = Nothing
