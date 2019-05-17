@@ -312,6 +312,9 @@ Namespace Strategies
                                 instrumentActivity.Value.NotifyPropertyChanged("OverallPL")
                                 instrumentActivity.Value.NotifyPropertyChanged("TotalExecutedOrders")
                                 instrumentActivity.Value.NotifyPropertyChanged("ActiveSignal")
+                                instrumentActivity.Value.NotifyPropertyChanged("StrategyOverAllPLAfterBrokerage")
+                                instrumentActivity.Value.NotifyPropertyChanged("StrategyMaxDrawUp")
+                                instrumentActivity.Value.NotifyPropertyChanged("StrategyMaxDrawDown")
                             End If
                             If forceRefresh OrElse (associatedStrategyInstrument.TradableInstrument.LastTick IsNot Nothing AndAlso
                                 associatedStrategyInstrument.TradableInstrument.LastTick.Timestamp <> instrumentActivity.Value.GetDirtyTimestamp) Then

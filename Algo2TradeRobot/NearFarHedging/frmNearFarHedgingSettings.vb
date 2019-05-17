@@ -48,6 +48,7 @@ Public Class frmNearFarHedgingSettings
             End If
             txtTelegramAPI.Text = _NearFarHedgingSettings.TelegramAPIKey
             txtTelegramChatID.Text = _NearFarHedgingSettings.TelegramChatID
+            txtTelegramChatIDForPL.Text = _NearFarHedgingSettings.TelegramPLChatID
         End If
     End Sub
     Private Sub SaveSettings()
@@ -67,6 +68,7 @@ Public Class frmNearFarHedgingSettings
         End If
         _NearFarHedgingSettings.TelegramAPIKey = txtTelegramAPI.Text
         _NearFarHedgingSettings.TelegramChatID = txtTelegramChatID.Text
+        _NearFarHedgingSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
 
         Utilities.Strings.SerializeFromCollection(Of NearFarHedgingStrategyUserInputs)(_NearFarHedgingSettingsFilename, _NearFarHedgingSettings)
     End Sub

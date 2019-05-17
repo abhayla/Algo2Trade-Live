@@ -345,7 +345,8 @@ Public Class NearFarHedgingStrategyInstrument
             currentCandlePayload = potentialSignalData.Item4
         End If
 
-        If Me.IsPairInstrument AndAlso Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count > 0 Then
+        If Me.IsPairInstrument AndAlso Me.ParentStrategyInstruments IsNot Nothing AndAlso Me.ParentStrategyInstruments.Count > 0 AndAlso
+            hedgingUserInputs.InstrumentsData(Me.TradableInstrument.TradingSymbol).ReverseSignalExit Then
             For Each runningParentStrategyInstrument In Me.ParentStrategyInstruments
                 Dim allActiveOrders As List(Of IOrder) = runningParentStrategyInstrument.GetAllActiveOrders(IOrder.TypeOfTransaction.None)
                 If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 AndAlso runningParentStrategyInstrument.TradableInstrument.IsHistoricalCompleted Then
@@ -449,12 +450,17 @@ Public Class NearFarHedgingStrategyInstrument
 
     Private Async Function GenerateTelegramMessageAsync(ByVal message As String) As Task
         logger.Debug("Telegram Message:{0}", message)
+        If message.Contains("&") Then
+            message = message.Replace("&", "_")
+        End If
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
         If hedgingUserInputs.TelegramAPIKey IsNot Nothing AndAlso Not hedgingUserInputs.TelegramAPIKey.Trim = "" AndAlso
             hedgingUserInputs.TelegramChatID IsNot Nothing AndAlso Not hedgingUserInputs.TelegramChatID.Trim = "" Then
             Using tSender As New Utilities.Notification.Telegram(hedgingUserInputs.TelegramAPIKey.Trim, hedgingUserInputs.TelegramChatID, _cts)
-                Await tSender.SendMessageGetAsync(Utilities.Strings.EncodeString(message)).ConfigureAwait(False)
+                Dim encodedString As String = Utilities.Strings.EncodeString(message)
+                'logger.Debug("Encoded String:{0}", encodedString)
+                Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
             End Using
         End If
     End Function

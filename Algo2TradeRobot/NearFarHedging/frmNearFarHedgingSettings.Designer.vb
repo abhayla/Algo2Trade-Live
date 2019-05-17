@@ -56,6 +56,8 @@ Partial Class frmNearFarHedgingSettings
         Me.lblTelegramChatID = New System.Windows.Forms.Label()
         Me.txtTelegramAPI = New System.Windows.Forms.TextBox()
         Me.lblTelegramAPI = New System.Windows.Forms.Label()
+        Me.txtTelegramChatIDForPL = New System.Windows.Forms.TextBox()
+        Me.lblChatIDForPL = New System.Windows.Forms.Label()
         Me.grpIndicator.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.grpSignal.SuspendLayout()
@@ -309,7 +311,7 @@ Partial Class frmNearFarHedgingSettings
         Me.grpSignal.Controls.Add(Me.rdbAnyOne)
         Me.grpSignal.Location = New System.Drawing.Point(464, 101)
         Me.grpSignal.Name = "grpSignal"
-        Me.grpSignal.Size = New System.Drawing.Size(289, 82)
+        Me.grpSignal.Size = New System.Drawing.Size(289, 58)
         Me.grpSignal.TabIndex = 17
         Me.grpSignal.TabStop = False
         Me.grpSignal.Text = "Signal Type"
@@ -317,7 +319,7 @@ Partial Class frmNearFarHedgingSettings
         'rdbBoth
         '
         Me.rdbBoth.AutoSize = True
-        Me.rdbBoth.Location = New System.Drawing.Point(13, 56)
+        Me.rdbBoth.Location = New System.Drawing.Point(105, 29)
         Me.rdbBoth.Name = "rdbBoth"
         Me.rdbBoth.Size = New System.Drawing.Size(58, 21)
         Me.rdbBoth.TabIndex = 1
@@ -338,23 +340,25 @@ Partial Class frmNearFarHedgingSettings
         '
         'grpTelegram
         '
+        Me.grpTelegram.Controls.Add(Me.txtTelegramChatIDForPL)
+        Me.grpTelegram.Controls.Add(Me.lblChatIDForPL)
         Me.grpTelegram.Controls.Add(Me.txtTelegramChatID)
         Me.grpTelegram.Controls.Add(Me.lblTelegramChatID)
         Me.grpTelegram.Controls.Add(Me.txtTelegramAPI)
         Me.grpTelegram.Controls.Add(Me.lblTelegramAPI)
-        Me.grpTelegram.Location = New System.Drawing.Point(463, 183)
+        Me.grpTelegram.Location = New System.Drawing.Point(463, 159)
         Me.grpTelegram.Name = "grpTelegram"
-        Me.grpTelegram.Size = New System.Drawing.Size(289, 95)
+        Me.grpTelegram.Size = New System.Drawing.Size(289, 118)
         Me.grpTelegram.TabIndex = 18
         Me.grpTelegram.TabStop = False
         Me.grpTelegram.Text = "Telegram Details"
         '
         'txtTelegramChatID
         '
-        Me.txtTelegramChatID.Location = New System.Drawing.Point(75, 56)
+        Me.txtTelegramChatID.Location = New System.Drawing.Point(92, 56)
         Me.txtTelegramChatID.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTelegramChatID.Name = "txtTelegramChatID"
-        Me.txtTelegramChatID.Size = New System.Drawing.Size(200, 22)
+        Me.txtTelegramChatID.Size = New System.Drawing.Size(183, 22)
         Me.txtTelegramChatID.TabIndex = 32
         '
         'lblTelegramChatID
@@ -369,10 +373,10 @@ Partial Class frmNearFarHedgingSettings
         '
         'txtTelegramAPI
         '
-        Me.txtTelegramAPI.Location = New System.Drawing.Point(75, 24)
+        Me.txtTelegramAPI.Location = New System.Drawing.Point(92, 24)
         Me.txtTelegramAPI.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTelegramAPI.Name = "txtTelegramAPI"
-        Me.txtTelegramAPI.Size = New System.Drawing.Size(201, 22)
+        Me.txtTelegramAPI.Size = New System.Drawing.Size(184, 22)
         Me.txtTelegramAPI.TabIndex = 30
         '
         'lblTelegramAPI
@@ -384,6 +388,24 @@ Partial Class frmNearFarHedgingSettings
         Me.lblTelegramAPI.Size = New System.Drawing.Size(57, 17)
         Me.lblTelegramAPI.TabIndex = 31
         Me.lblTelegramAPI.Text = "API Key"
+        '
+        'txtTelegramChatIDForPL
+        '
+        Me.txtTelegramChatIDForPL.Location = New System.Drawing.Point(92, 87)
+        Me.txtTelegramChatIDForPL.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtTelegramChatIDForPL.Name = "txtTelegramChatIDForPL"
+        Me.txtTelegramChatIDForPL.Size = New System.Drawing.Size(183, 22)
+        Me.txtTelegramChatIDForPL.TabIndex = 36
+        '
+        'lblChatIDForPL
+        '
+        Me.lblChatIDForPL.AutoSize = True
+        Me.lblChatIDForPL.Location = New System.Drawing.Point(9, 91)
+        Me.lblChatIDForPL.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblChatIDForPL.Name = "lblChatIDForPL"
+        Me.lblChatIDForPL.Size = New System.Drawing.Size(75, 17)
+        Me.lblChatIDForPL.TabIndex = 37
+        Me.lblChatIDForPL.Text = "PL Chat ID"
         '
         'frmNearFarHedgingSettings
         '
@@ -445,4 +467,6 @@ Partial Class frmNearFarHedgingSettings
     Friend WithEvents lblTelegramChatID As Label
     Friend WithEvents txtTelegramAPI As TextBox
     Friend WithEvents lblTelegramAPI As Label
+    Friend WithEvents txtTelegramChatIDForPL As TextBox
+    Friend WithEvents lblChatIDForPL As Label
 End Class

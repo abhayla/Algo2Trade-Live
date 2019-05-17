@@ -11,6 +11,7 @@ Public Class NearFarHedgingStrategyUserInputs
     Public Property UseBothSignal As Boolean
     Public Property TelegramAPIKey As String
     Public Property TelegramChatID As String
+    Public Property TelegramPLChatID As String
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
     <Serializable>

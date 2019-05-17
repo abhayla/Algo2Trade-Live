@@ -185,6 +185,7 @@ Public Class NearFarHedgingStrategy
                 End If
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
+            tasks.Add(Task.Run(AddressOf GetOverAllPLDrawUpDrawDown, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
         Catch ex As Exception
             lastException = ex
@@ -215,5 +216,49 @@ Public Class NearFarHedgingStrategy
             '    ret = New Tuple(Of Boolean, String)(True, "Max Profit % Per Day Reached")
         End If
         Return ret
+    End Function
+
+    Private Async Function GetOverAllPLDrawUpDrawDown() As Task
+        Try
+            While True
+                If Me.ParentController.OrphanException IsNot Nothing Then
+                    Throw Me.ParentController.OrphanException
+                End If
+                _cts.Token.ThrowIfCancellationRequested()
+
+                If Me.GetTotalPLAfterBrokerage <> 0 OrElse Me.MaxDrawUp <> 0 OrElse Me.MaxDrawDown <> 0 Then
+                    Dim message As String = Nothing
+                    If Me.ParentController.UserInputs.FormRemarks IsNot Nothing AndAlso Not Me.ParentController.UserInputs.FormRemarks = "" Then
+                        message = String.Format("{0}{1}PL:{2}, MaxDrawUP:{3}, MaxDrawDown:{4}",
+                                                Me.ParentController.UserInputs.FormRemarks, vbNewLine,
+                                                Math.Round(Me.GetTotalPLAfterBrokerage, 2),
+                                                Math.Round(Me.MaxDrawUp, 2),
+                                                Math.Round(Me.MaxDrawDown, 2))
+                    Else
+                        message = String.Format("PL:{0}, MaxDrawUP:{1}, MaxDrawDown:{2}",
+                                                Math.Round(Me.GetTotalPLAfterBrokerage, 2),
+                                                Math.Round(Me.MaxDrawUp, 2),
+                                                Math.Round(Me.MaxDrawDown, 2))
+                    End If
+                    If message.Contains("&") Then
+                        message = message.Replace("&", "_")
+                    End If
+
+                    Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.UserSettings
+                    If hedgingUserInputs.TelegramAPIKey IsNot Nothing AndAlso Not hedgingUserInputs.TelegramAPIKey.Trim = "" AndAlso
+                        hedgingUserInputs.TelegramChatID IsNot Nothing AndAlso Not hedgingUserInputs.TelegramPLChatID.Trim = "" Then
+                        Using tSender As New Utilities.Notification.Telegram(hedgingUserInputs.TelegramAPIKey.Trim, hedgingUserInputs.TelegramPLChatID, _cts)
+                            Dim encodedString As String = Utilities.Strings.EncodeString(message)
+                            Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
+                        End Using
+                    End If
+                End If
+                _cts.Token.ThrowIfCancellationRequested()
+                Await Task.Delay(60000, _cts.Token).ConfigureAwait(False)
+            End While
+        Catch ex As Exception
+            logger.Error("Get OverAll PL DrawUp DrawDown message generation error: {0}", ex.ToString)
+            Throw ex
+        End Try
     End Function
 End Class

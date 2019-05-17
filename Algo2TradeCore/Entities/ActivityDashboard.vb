@@ -45,8 +45,44 @@ Namespace Entities
             Return _TotalExecutedOrders
         End Function
 
+        Private _StrategyOverAllPLAfterBrokerage As Decimal
+        <Display(Name:="Strategy PL After Brokerage", Order:=2)>
+        Public ReadOnly Property StrategyOverAllPLAfterBrokerage As Decimal
+            Get
+                _StrategyOverAllPLAfterBrokerage = ParentStrategyInstrument.ParentStrategy.GetTotalPLAfterBrokerage
+                Return _StrategyOverAllPLAfterBrokerage
+            End Get
+        End Property
+        Public Function GetDirtyStrategyOverAllPLAfterBrokerage() As Decimal
+            Return _StrategyOverAllPLAfterBrokerage
+        End Function
+
+        Private _StrategyMaxDrawUp As Decimal
+        <Display(Name:="Strategy Max Draw Up", Order:=3)>
+        Public ReadOnly Property StrategyMaxDrawUp As Decimal
+            Get
+                _StrategyMaxDrawUp = ParentStrategyInstrument.ParentStrategy.MaxDrawUp
+                Return _StrategyMaxDrawUp
+            End Get
+        End Property
+        Public Function GetDirtyStrategyMaxDrawUp() As Decimal
+            Return _StrategyMaxDrawUp
+        End Function
+
+        Private _StrategyMaxDrawDown As Decimal
+        <Display(Name:="Strategy Max Draw Down", Order:=4)>
+        Public ReadOnly Property StrategyMaxDrawDown As Decimal
+            Get
+                _StrategyMaxDrawDown = ParentStrategyInstrument.ParentStrategy.MaxDrawDown
+                Return _StrategyMaxDrawDown
+            End Get
+        End Property
+        Public Function GetDirtyStrategyMaxDrawDown() As Decimal
+            Return _StrategyMaxDrawDown
+        End Function
+
         Private _OverallPL As Decimal
-        <Display(Name:="Overall PL", Order:=2)>
+        <Display(Name:="Overall PL", Order:=5)>
         Public ReadOnly Property OverallPL As Decimal
             Get
                 _OverallPL = ParentStrategyInstrument.GetOverallPL()
@@ -58,7 +94,7 @@ Namespace Entities
         End Function
 
         Private _SignalPL As Decimal
-        <Display(Name:="Signal PL", Order:=3)>
+        <Display(Name:="Signal PL", Order:=6)>
         Public ReadOnly Property SignalPL As Decimal
             Get
                 If ParentOrderID IsNot Nothing Then
@@ -72,7 +108,7 @@ Namespace Entities
         End Function
 
         Private _ActiveSignal As Boolean
-        <Display(Name:="Active Signal", Order:=4)>
+        <Display(Name:="Active Signal", Order:=7)>
         Public ReadOnly Property ActiveSignal As Boolean
             Get
                 If ParentStrategyInstrument.IsActiveInstrument() Then
@@ -92,21 +128,21 @@ Namespace Entities
             Return _ActiveSignal
         End Function
 
-        <Display(Name:="Signal Generated Time", Order:=5)>
+        <Display(Name:="Signal Generated Time", Order:=8)>
         Public Property SignalGeneratedTime As Date
 
-        <Display(Name:="Signal Direction", Order:=6)>
+        <Display(Name:="Signal Direction", Order:=9)>
         Public Property SignalDirection As IOrder.TypeOfTransaction
 
         <System.ComponentModel.Browsable(False)>
         Public Property EntryActivity As Activity
-        <Display(Name:="Entry Request Time", Order:=7)>
+        <Display(Name:="Entry Request Time", Order:=10)>
         Public ReadOnly Property EntryRequestTime As Date
             Get
                 Return EntryActivity.RequestTime
             End Get
         End Property
-        <Display(Name:="Entry Request Status", Order:=8)>
+        <Display(Name:="Entry Request Status", Order:=11)>
         Public ReadOnly Property EntryRequestStatus As SignalStatusType
             Get
                 Return EntryActivity.RequestStatus
@@ -115,20 +151,20 @@ Namespace Entities
 
         <System.ComponentModel.Browsable(False)>
         Public Property TargetModifyActivity As Activity
-        <Display(Name:="Target Modify Request Time", Order:=9)>
+        <Display(Name:="Target Modify Request Time", Order:=12)>
         Public ReadOnly Property TargetModifyRequestTime As Date
             Get
                 Return TargetModifyActivity.RequestTime
             End Get
         End Property
-        <Display(Name:="Target Modify Request Status", Order:=10)>
+        <Display(Name:="Target Modify Request Status", Order:=13)>
         Public ReadOnly Property TargetModifyRequestStatus As SignalStatusType
             Get
                 Return TargetModifyActivity.RequestStatus
             End Get
         End Property
 
-        <Display(Name:="Target Modify Remarks", Order:=11)>
+        <Display(Name:="Target Modify Remarks", Order:=14)>
         Public ReadOnly Property TargetModifyRemarks As String
             Get
                 Return TargetModifyActivity.RequestRemarks
@@ -137,13 +173,13 @@ Namespace Entities
 
         <System.ComponentModel.Browsable(False)>
         Public Property StoplossModifyActivity As Activity
-        <Display(Name:="Stoploss Modify Request Time", Order:=12)>
+        <Display(Name:="Stoploss Modify Request Time", Order:=15)>
         Public ReadOnly Property StoplossModifyRequestTime As Date
             Get
                 Return StoplossModifyActivity.RequestTime
             End Get
         End Property
-        <Display(Name:="Stoploss Modify Request Status", Order:=13)>
+        <Display(Name:="Stoploss Modify Request Status", Order:=16)>
         Public ReadOnly Property StoplossModifyRequestStatus As SignalStatusType
             Get
                 Return StoplossModifyActivity.RequestStatus
@@ -152,20 +188,20 @@ Namespace Entities
 
         <System.ComponentModel.Browsable(False)>
         Public Property CancelActivity As Activity
-        <Display(Name:="Exit Request Time", Order:=14)>
+        <Display(Name:="Exit Request Time", Order:=17)>
         Public ReadOnly Property CancelRequestTime As Date
             Get
                 Return CancelActivity.RequestTime
             End Get
         End Property
-        <Display(Name:="Exit Request Status", Order:=15)>
+        <Display(Name:="Exit Request Status", Order:=18)>
         Public ReadOnly Property CancelRequestStatus As SignalStatusType
             Get
                 Return CancelActivity.RequestStatus
             End Get
         End Property
 
-        <Display(Name:="Exit Request Remarks", Order:=16)>
+        <Display(Name:="Exit Request Remarks", Order:=19)>
         Public ReadOnly Property CancelRequestRemarks As String
             Get
                 Return CancelActivity.RequestRemarks
@@ -173,7 +209,7 @@ Namespace Entities
         End Property
 
         Private _LastPrice As Decimal
-        <Display(Name:="Last Price", Order:=17)>
+        <Display(Name:="Last Price", Order:=20)>
         Public ReadOnly Property LastPrice As Decimal
             Get
                 If ParentStrategyInstrument.TradableInstrument.LastTick IsNot Nothing Then
@@ -187,7 +223,7 @@ Namespace Entities
         End Function
 
         Private _Timestamp As Date?
-        <Display(Name:="Timestamp", Order:=18)>
+        <Display(Name:="Timestamp", Order:=21)>
         Public ReadOnly Property Timestamp As Date?
             Get
                 If ParentStrategyInstrument.TradableInstrument.LastTick IsNot Nothing Then
@@ -201,7 +237,7 @@ Namespace Entities
         End Function
 
         Private _LastCandleTime As Date
-        <Display(Name:="Last Candle Time", Order:=19)>
+        <Display(Name:="Last Candle Time", Order:=22)>
         Public ReadOnly Property LastCandleTime As Date
             Get
                 If ParentStrategyInstrument.TradableInstrument.RawPayloads IsNot Nothing AndAlso
@@ -217,8 +253,9 @@ Namespace Entities
             Return _LastCandleTime
         End Function
 
-        <Display(Name:="Parent Order ID", Order:=20)>
+        <Display(Name:="Parent Order ID", Order:=23)>
         Public Property ParentOrderID As String
+
 
         <NonSerialized>
         Private _ParentStrategyInstrument As StrategyInstrument

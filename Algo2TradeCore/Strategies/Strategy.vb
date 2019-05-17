@@ -84,6 +84,8 @@ Namespace Strategies
         Public ReadOnly Property MaxNumberOfDaysForHistoricalFetch As Integer
         Public ReadOnly Property IsStrategyCandleStickBased As Boolean
         Public Property IsFirstTimeInformationCollected As Boolean
+        Public Property MaxDrawUp As Decimal = Decimal.MinValue
+        Public Property MaxDrawDown As Decimal = Decimal.MaxValue
 
         Protected _cts As CancellationTokenSource
         Public Sub New(ByVal associatedParentController As APIStrategyController,
@@ -123,6 +125,17 @@ Namespace Strategies
                     plOfDay += runningStrategyInstrument.GetOverallPL()
                 Next
             End If
+            Return plOfDay
+        End Function
+        Public Function GetTotalPLAfterBrokerage() As Decimal
+            Dim plOfDay As Decimal = 0
+            If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
+                For Each runningStrategyInstrument In TradableStrategyInstruments
+                    plOfDay += runningStrategyInstrument.GetOverallPLAfterBrokerage()
+                Next
+            End If
+            MaxDrawUp = Math.Max(MaxDrawUp, plOfDay)
+            MaxDrawDown = Math.Min(MaxDrawDown, plOfDay)
             Return plOfDay
         End Function
 #End Region
