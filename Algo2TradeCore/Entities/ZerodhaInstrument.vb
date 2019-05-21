@@ -90,6 +90,8 @@ Namespace Entities
 
         <ScriptIgnore()>
         Public Property RawPayloads As Concurrent.ConcurrentDictionary(Of Date, OHLCPayload) Implements IInstrument.RawPayloads
+        <ScriptIgnore()>
+        Public Property TickPayloads As Concurrent.ConcurrentBag(Of ITick) Implements IInstrument.TickPayloads
 
         Public Property IsHistoricalCompleted As Boolean Implements IInstrument.IsHistoricalCompleted
 

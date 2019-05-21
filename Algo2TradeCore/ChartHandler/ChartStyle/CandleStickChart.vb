@@ -258,6 +258,16 @@ Namespace ChartHandler.ChartStyle
                 End While
                 Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
 
+                'Add data to Tick Payload
+                If _subscribedStrategyInstruments IsNot Nothing AndAlso _subscribedStrategyInstruments.Count > 0 Then
+                    For Each runningSubscribedStrategyInstrument In _subscribedStrategyInstruments
+                        If runningSubscribedStrategyInstrument.ParentStrategy.IsTickPopulationNeeded Then
+                            _parentInstrument.TickPayloads.Add(tickData)
+                        End If
+                    Next
+                End If
+
+                'Processing candle from tick
                 Dim lastExistingPayload As OHLCPayload = Nothing
                 If _parentInstrument.RawPayloads IsNot Nothing AndAlso _parentInstrument.RawPayloads.Count > 0 Then
                     Dim lastExistingPayloads As IEnumerable(Of KeyValuePair(Of Date, OHLCPayload)) =

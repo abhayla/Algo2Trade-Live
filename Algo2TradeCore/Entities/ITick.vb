@@ -9,6 +9,7 @@
         ReadOnly Property Volume As Long
         ReadOnly Property AveragePrice As Decimal
         ReadOnly Property LastPrice As Decimal
+        ReadOnly Property OI As UInteger
         ReadOnly Property Timestamp As Date?
         ReadOnly Property LastTradeTime As Date?
 

@@ -83,6 +83,7 @@ Namespace Strategies
         Public Property ExitAllTrades As Boolean
         Public ReadOnly Property MaxNumberOfDaysForHistoricalFetch As Integer
         Public ReadOnly Property IsStrategyCandleStickBased As Boolean
+        Public ReadOnly Property IsTickPopulationNeeded As Boolean
         Public Property IsFirstTimeInformationCollected As Boolean
         Public Property MaxDrawUp As Decimal = Decimal.MinValue
         Public Property MaxDrawDown As Decimal = Decimal.MaxValue
@@ -93,13 +94,15 @@ Namespace Strategies
                        ByVal isStrategyCandleStickBased As Boolean,
                        ByVal userSettings As StrategyUserInputs,
                        ByVal maxNumberOfDaysForHistoricalFetch As Integer,
-                       ByVal canceller As CancellationTokenSource)
+                       ByVal canceller As CancellationTokenSource,
+                       Optional ByVal isTickPopulationNeeded As Boolean = False)
             Me.ParentController = associatedParentController
             Me.StrategyIdentifier = associatedStrategyIdentifier
             Me.IsStrategyCandleStickBased = isStrategyCandleStickBased
             Me.UserSettings = userSettings
             Me.MaxNumberOfDaysForHistoricalFetch = maxNumberOfDaysForHistoricalFetch
             Me.IsFirstTimeInformationCollected = False
+            Me.IsTickPopulationNeeded = isTickPopulationNeeded
             Me.SignalManager = New SignalStateManager(associatedParentController, Me, canceller)
             AddHandler Me.SignalManager.NewItemAdded, AddressOf OnNewItemAdded
             _cts = canceller

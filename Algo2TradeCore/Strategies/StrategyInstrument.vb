@@ -123,6 +123,7 @@ Namespace Strategies
         Public Property TradableInstrument As IInstrument
         Public Property OrderDetails As Concurrent.ConcurrentDictionary(Of String, IBusinessOrder)
         Public Property RawPayloadDependentConsumers As List(Of IPayloadConsumer)
+        Public Property TickPayloadDependentConsumers As List(Of IPayloadConsumer)
         Public Property IsPairInstrument As Boolean
         Public Property DependendStrategyInstruments As IEnumerable(Of StrategyInstrument) 'Only used if it is a pair instrument
         Public Property ParentStrategyInstruments As IEnumerable(Of StrategyInstrument) 'Only used if it is a pair instrument
@@ -693,6 +694,11 @@ Namespace Strategies
                             End If
                         End If
                     End If
+                Next
+            End If
+            If TickPayloadDependentConsumers IsNot Nothing AndAlso TickPayloadDependentConsumers.Count > 0 Then
+                For Each runningTickPayloadConsumer In TickPayloadDependentConsumers
+
                 Next
             End If
         End Sub

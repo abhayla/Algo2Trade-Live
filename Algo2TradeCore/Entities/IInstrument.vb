@@ -14,6 +14,7 @@
         ReadOnly Property Broker As APISource
         Property LastTick As ITick
         Property RawPayloads As Concurrent.ConcurrentDictionary(Of Date, OHLCPayload)
+        Property TickPayloads As Concurrent.ConcurrentBag(Of ITick)
         Property IsHistoricalCompleted As Boolean
         ReadOnly Property InstrumentType As TypeOfInstrument
         Property ExchangeDetails As Exchange

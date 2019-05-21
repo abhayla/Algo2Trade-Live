@@ -87,5 +87,14 @@ Namespace ChartHandler.ChartStyle
         Public MustOverride Async Function GetChartFromHistoricalAsync(ByVal historicalCandlesJSONDict As Dictionary(Of String, Object)) As Task
         Public MustOverride Async Function GetChartFromTickAsync(ByVal tickData As ITick) As Task
         Public MustOverride Function ConvertTimeframe(ByVal timeframe As Integer, ByVal currentPayload As OHLCPayload, ByVal outputConsumer As PayloadToChartConsumer) As Date
+        Public Overridable Function GetTickPayloads() As Concurrent.ConcurrentBag(Of ITick)
+            Dim ret As Concurrent.ConcurrentBag(Of ITick) = Nothing
+            If _parentInstrument IsNot Nothing Then
+                If _parentInstrument.TickPayloads IsNot Nothing AndAlso _parentInstrument.TickPayloads.Count > 0 Then
+                    ret = _parentInstrument.TickPayloads
+                End If
+            End If
+            Return ret
+        End Function
     End Class
 End Namespace

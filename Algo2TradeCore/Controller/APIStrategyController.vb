@@ -399,6 +399,7 @@ Namespace Controller
                                                                      candleStickBasedStrategyInstruments,
                                                                      _cts))
                         If runningStrategyUniqueInstruments.RawPayloads Is Nothing Then runningStrategyUniqueInstruments.RawPayloads = New Concurrent.ConcurrentDictionary(Of Date, OHLCPayload)
+                        If runningStrategyUniqueInstruments.TickPayloads Is Nothing Then runningStrategyUniqueInstruments.TickPayloads = New Concurrent.ConcurrentBag(Of ITick)
                     End If
                 Next
             End If

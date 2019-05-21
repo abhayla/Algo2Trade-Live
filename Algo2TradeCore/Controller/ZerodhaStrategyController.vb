@@ -1046,8 +1046,8 @@ Namespace Controller
             MyBase.OnTickerReconnect()
         End Sub
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
-            'Console.WriteLine("OnTickerTickAsync, tickData:{0}", Utils.JsonSerialize(tickData))
-            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+            Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+            'logger.Fatal("TickData, Token,{0},Date,{1},Time,{2},LastPrice,{3},Volume,{4},OI,{5}", tickData.InstrumentToken, tickData.Timestamp.Value.ToShortDateString, tickData.Timestamp.Value.ToLongTimeString, tickData.LastPrice, tickData.Volume, tickData.OI)
             Dim runningTick As New ZerodhaTick() With {.WrappedTick = tickData}
             Dim runningInstruments As IEnumerable(Of IInstrument) = _AllStrategyUniqueInstruments.Where(Function(x)
                                                                                                             Return x.InstrumentIdentifier = tickData.InstrumentToken

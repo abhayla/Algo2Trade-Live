@@ -48,6 +48,11 @@ Namespace Entities
                 Return WrappedTick.LastPrice
             End Get
         End Property
+        Public ReadOnly Property OI As UInteger Implements ITick.OI
+            Get
+                Return WrappedTick.OI
+            End Get
+        End Property
         Public ReadOnly Property Timestamp As Date? Implements ITick.Timestamp
             Get
                 Return WrappedTick.Timestamp

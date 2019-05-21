@@ -4,6 +4,7 @@ Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Strategies
 Imports Utilities.Numbers
 Imports NLog
+Imports Algo2TradeCore.Entities.Indicators
 
 Public Class OHLStrategyInstrument
     Inherits StrategyInstrument
@@ -31,13 +32,20 @@ Public Class OHLStrategyInstrument
         AddHandler _APIAdapter.WaitingFor, AddressOf OnWaitingFor
         AddHandler _APIAdapter.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
         AddHandler _APIAdapter.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
-        RawPayloadDependentConsumers = New List(Of IPayloadConsumer)
         If Me.ParentStrategy.IsStrategyCandleStickBased Then
+            RawPayloadDependentConsumers = New List(Of IPayloadConsumer)
             If Me.ParentStrategy.UserSettings.SignalTimeFrame > 0 Then
                 RawPayloadDependentConsumers.Add(New PayloadToChartConsumer(Me.ParentStrategy.UserSettings.SignalTimeFrame))
             Else
                 Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
             End If
+        End If
+        If Me.ParentStrategy.IsTickPopulationNeeded Then
+            TickPayloadDependentConsumers = New List(Of IPayloadConsumer)
+            Dim chartConsumer As PayloadToChartConsumer = New PayloadToChartConsumer(Me.ParentStrategy.UserSettings.SignalTimeFrame)
+            chartConsumer.OnwardLevelConsumers = New List(Of IPayloadConsumer) From
+            {New SMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).FastEMAPeriod, TypeOfField.Close)}
+            TickPayloadDependentConsumers.Add(chartConsumer)
         End If
         _OHLStrategyProtect = 0
     End Sub
@@ -59,29 +67,29 @@ Public Class OHLStrategyInstrument
                     Throw Me.ParentStrategy.ParentController.OrphanException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-                If Me.GetOverallPL() <= Math.Abs(OHLUserSettings.InstrumentsData(instrumentName).MaxLossPerStock) * -1 OrElse
-                    Me.GetOverallPL() >= Math.Abs(OHLUserSettings.InstrumentsData(instrumentName).MaxProfitPerStock) Then
-                    Debug.WriteLine("Force Cancel for stock pl")
-                    Await ForceExitAllTradesAsync("Force Cancel for stock pl").ConfigureAwait(False)
-                End If
-                _cts.Token.ThrowIfCancellationRequested()
-                Dim placeOrderDetails As Object = Nothing
-                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take AndAlso
-                    Interlocked.Read(_OHLStrategyProtect) = 0 Then
-                    Interlocked.Increment(_OHLStrategyProtect)
-                    placeOrderDetails = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOLimitMISOrder, Nothing).ConfigureAwait(False)
-                End If
-                _cts.Token.ThrowIfCancellationRequested()
-                'If slDelayCtr = 10 Then
-                '    slDelayCtr = 0
-                'Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal)) = Await IsTriggerReceivedForModifyStoplossOrderAsync().ConfigureAwait(False)
-                'If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
-                '    'Interlocked.Increment(_OHLStrategyProtector)
-                '    Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
-                'End If
+                'If Me.GetOverallPL() <= Math.Abs(OHLUserSettings.InstrumentsData(instrumentName).MaxLossPerStock) * -1 OrElse
+                '    Me.GetOverallPL() >= Math.Abs(OHLUserSettings.InstrumentsData(instrumentName).MaxProfitPerStock) Then
+                '    Debug.WriteLine("Force Cancel for stock pl")
+                '    Await ForceExitAllTradesAsync("Force Cancel for stock pl").ConfigureAwait(False)
                 'End If
                 '_cts.Token.ThrowIfCancellationRequested()
+                'Dim placeOrderDetails As Object = Nothing
+                'Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                'If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take AndAlso
+                '    Interlocked.Read(_OHLStrategyProtect) = 0 Then
+                '    Interlocked.Increment(_OHLStrategyProtect)
+                '    placeOrderDetails = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOLimitMISOrder, Nothing).ConfigureAwait(False)
+                'End If
+                '_cts.Token.ThrowIfCancellationRequested()
+                ''If slDelayCtr = 10 Then
+                ''    slDelayCtr = 0
+                ''Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal)) = Await IsTriggerReceivedForModifyStoplossOrderAsync().ConfigureAwait(False)
+                ''If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
+                ''    'Interlocked.Increment(_OHLStrategyProtector)
+                ''    Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
+                ''End If
+                ''End If
+                ''_cts.Token.ThrowIfCancellationRequested()
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
                 'slDelayCtr += 1
             End While
