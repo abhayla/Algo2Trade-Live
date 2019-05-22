@@ -26,6 +26,8 @@
             Ratio
             OI
             LastPrice
+            PivotHigh
+            PivotLow
         End Enum
         Enum CrossDirection
             Above = 1

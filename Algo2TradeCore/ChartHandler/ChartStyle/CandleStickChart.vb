@@ -348,6 +348,18 @@ Namespace ChartHandler.ChartStyle
                 '    Throw ex
                 'End Try
                 'Try
+                '    Dim outputConsumer As PayloadToIndicatorConsumer = _subscribedStrategyInstruments.FirstOrDefault.RawPayloadDependentConsumers.FirstOrDefault.OnwardLevelConsumers.LastOrDefault
+                '    If freshCandle AndAlso outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
+                '        For Each payload In outputConsumer.ConsumerPayloads.OrderBy(Function(x)
+                '                                                                        Return x.Key
+                '                                                                    End Function)
+                '            Debug.WriteLine(String.Format("{0}{1}{2}", payload.Key.ToString, ",", payload.Value.ToString))
+                '        Next
+                '    End If
+                'Catch ex As Exception
+                '    Throw ex
+                'End Try
+                'Try
                 '    If freshCandle AndAlso _subscribedStrategyInstruments.FirstOrDefault.DependendStrategyInstruments.FirstOrDefault.IsPairInstrument Then
                 '        Dim outputConsumer As PayloadToPairConsumer = _subscribedStrategyInstruments.FirstOrDefault.DependendStrategyInstruments.FirstOrDefault.RawPayloadDependentConsumers.FirstOrDefault
                 '        If outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 AndAlso

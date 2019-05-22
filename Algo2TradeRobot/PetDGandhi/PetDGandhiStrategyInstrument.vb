@@ -16,7 +16,7 @@ Public Class PetDGandhiStrategyInstrument
 #End Region
 
     Private ReadOnly _dummyEMAConsumer As EMAConsumer
-    Private ReadOnly _dummySlowEMAConsumer As EMAConsumer
+    Private ReadOnly _dummyPivotHighLowConsumer As PivotHighLowConsumer
 
     Public Sub New(ByVal associatedInstrument As IInstrument,
                    ByVal associatedParentStrategy As Strategy,
@@ -40,10 +40,11 @@ Public Class PetDGandhiStrategyInstrument
             If Me.ParentStrategy.UserSettings.SignalTimeFrame > 0 Then
                 Dim chartConsumer As PayloadToChartConsumer = New PayloadToChartConsumer(Me.ParentStrategy.UserSettings.SignalTimeFrame)
                 chartConsumer.OnwardLevelConsumers = New List(Of IPayloadConsumer) From
-                {New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiStrategyUserInputs).EMAPeriod, TypeOfField.Close)}
+                {New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiStrategyUserInputs).EMAPeriod, TypeOfField.Close),
+                New PivotHighLowConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiStrategyUserInputs).PivotHighLowStrict)}
                 RawPayloadDependentConsumers.Add(chartConsumer)
                 _dummyEMAConsumer = New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiStrategyUserInputs).EMAPeriod, TypeOfField.Close)
-                '_dummySlowEMAConsumer = New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).SlowEMAPeriod, TypeOfField.Close)
+                _dummyPivotHighLowConsumer = New PivotHighLowConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiStrategyUserInputs).PivotHighLowStrict)
             Else
                 Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
             End If

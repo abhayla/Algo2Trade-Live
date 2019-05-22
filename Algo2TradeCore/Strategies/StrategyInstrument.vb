@@ -611,11 +611,22 @@ Namespace Strategies
                         If currentXMinute <> Date.MaxValue Then
                             Dim c As Integer = 1
                             If runningRawPayloadConsumer.OnwardLevelConsumers IsNot Nothing AndAlso runningRawPayloadConsumer.OnwardLevelConsumers.Count > 0 Then
+                                ''EMA Supertrend Strategy
+                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
+                                '    If c < 3 Then
+                                '        candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
+                                '    Else
+                                '        candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer)
+                                '    End If
+                                '    c += 1
+                                'Next
+
+                                'PetDGandhi Strategy
                                 For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                    If c < 3 Then
+                                    If c = 1 Then
                                         candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
                                     Else
-                                        candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer)
+                                        candleCreator.IndicatorCreator.CalculatePivotHighLow(currentXMinute, consumer)
                                     End If
                                     c += 1
                                 Next
