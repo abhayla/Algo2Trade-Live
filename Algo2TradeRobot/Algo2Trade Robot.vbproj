@@ -223,6 +223,7 @@
     </Compile>
     <Compile Include="OHL\OHLStrategy.vb" />
     <Compile Include="OHL\OHLUserInputs.vb" />
+    <Compile Include="PetDGandhi\PetDGandhiStrategy.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AmiSignal\frmAmiSignalSettings.resx">
