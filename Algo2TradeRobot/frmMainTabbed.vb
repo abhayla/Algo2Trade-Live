@@ -1451,6 +1451,241 @@ Public Class frmMainTabbed
     End Sub
 #End Region
 
+#Region "Pet-D Gandhi Strategy"
+    Private _PetDGandhiUserInputs As PetDGandhiStrategyUserInputs = Nothing
+    Private _PetDGandhiDashboadList As BindingList(Of ActivityDashboard) = Nothing
+    Private _PetDGandhiTradableInstruments As IEnumerable(Of PetDGandhiStrategyInstrument) = Nothing
+    Private _PetDGandhiStrategyToExecute As PetDGandhiStrategy = Nothing
+    Private Sub sfdgvPetDGandhiMainDashboard_FilterPopupShowing(sender As Object, e As FilterPopupShowingEventArgs) Handles sfdgvPetDGandhiMainDashboard.FilterPopupShowing
+        ManipulateGridEx(GridMode.TouchupPopupFilter, e, GetType(PetDGandhiStrategy))
+    End Sub
+    Private Sub sfdgvPetDGandhiMainDashboard_AutoGeneratingColumn(sender As Object, e As AutoGeneratingColumnArgs) Handles sfdgvPetDGandhiMainDashboard.AutoGeneratingColumn
+        ManipulateGridEx(GridMode.TouchupAutogeneratingColumn, e, GetType(PetDGandhiStrategy))
+    End Sub
+    Private Async Function PetDGandhiWorkerAsync() As Task
+        If GetObjectText_ThreadSafe(btnPetDGandhiStart) = Common.LOGIN_PENDING Then
+            MsgBox("Cannot start as another strategy is loggin in")
+            Exit Function
+        End If
+
+        If _cts Is Nothing Then _cts = New CancellationTokenSource
+        _cts.Token.ThrowIfCancellationRequested()
+        _lastException = Nothing
+
+        Try
+            EnableDisableUIEx(UIMode.Active, GetType(PetDGandhiStrategy))
+            EnableDisableUIEx(UIMode.BlockOther, GetType(PetDGandhiStrategy))
+
+            OnHeartbeat("Validating Strategy user settings")
+            If File.Exists("PetDGandhiSettings.Strategy.a2t") Then
+                Dim fs As Stream = New FileStream("PetDGandhiSettings.Strategy.a2t", FileMode.Open)
+                Dim bf As BinaryFormatter = New BinaryFormatter()
+                _PetDGandhiUserInputs = CType(bf.Deserialize(fs), PetDGandhiStrategyUserInputs)
+                fs.Close()
+                _PetDGandhiUserInputs.InstrumentsData = Nothing
+                _PetDGandhiUserInputs.FillInstrumentDetails(_PetDGandhiUserInputs.InstrumentDetailsFilePath, _cts)
+            Else
+                Throw New ApplicationException("Settings file not found. Please complete your settings properly.")
+            End If
+            logger.Debug(Utilities.Strings.JsonSerialize(_PetDGandhiUserInputs))
+
+            If Not Common.IsZerodhaUserDetailsPopulated(_commonControllerUserInput) Then Throw New ApplicationException("Cannot proceed without API user details being entered")
+            Dim currentUser As ZerodhaUser = Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput)
+            logger.Debug(Utilities.Strings.JsonSerialize(currentUser))
+
+            If _commonController IsNot Nothing Then
+                _commonController.RefreshCancellationToken(_cts)
+            Else
+                _commonController = New ZerodhaStrategyController(currentUser, _commonControllerUserInput, _cts)
+
+                RemoveHandler _commonController.Heartbeat, AddressOf OnHeartbeat
+                RemoveHandler _commonController.WaitingFor, AddressOf OnWaitingFor
+                RemoveHandler _commonController.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+                RemoveHandler _commonController.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+                RemoveHandler _commonController.HeartbeatEx, AddressOf OnHeartbeatEx
+                RemoveHandler _commonController.WaitingForEx, AddressOf OnWaitingForEx
+                RemoveHandler _commonController.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
+                RemoveHandler _commonController.DocumentDownloadCompleteEx, AddressOf OnDocumentDownloadCompleteEx
+                RemoveHandler _commonController.TickerClose, AddressOf OnTickerClose
+                RemoveHandler _commonController.TickerConnect, AddressOf OnTickerConnect
+                RemoveHandler _commonController.TickerError, AddressOf OnTickerError
+                RemoveHandler _commonController.TickerErrorWithStatus, AddressOf OnTickerErrorWithStatus
+                RemoveHandler _commonController.TickerNoReconnect, AddressOf OnTickerNoReconnect
+                RemoveHandler _commonController.FetcherError, AddressOf OnFetcherError
+                RemoveHandler _commonController.CollectorError, AddressOf OnCollectorError
+                RemoveHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
+                RemoveHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+
+                AddHandler _commonController.Heartbeat, AddressOf OnHeartbeat
+                AddHandler _commonController.WaitingFor, AddressOf OnWaitingFor
+                AddHandler _commonController.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+                AddHandler _commonController.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+                AddHandler _commonController.HeartbeatEx, AddressOf OnHeartbeatEx
+                AddHandler _commonController.WaitingForEx, AddressOf OnWaitingForEx
+                AddHandler _commonController.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
+                AddHandler _commonController.DocumentDownloadCompleteEx, AddressOf OnDocumentDownloadCompleteEx
+                AddHandler _commonController.TickerClose, AddressOf OnTickerClose
+                AddHandler _commonController.TickerConnect, AddressOf OnTickerConnect
+                AddHandler _commonController.TickerError, AddressOf OnTickerError
+                AddHandler _commonController.TickerErrorWithStatus, AddressOf OnTickerErrorWithStatus
+                AddHandler _commonController.TickerNoReconnect, AddressOf OnTickerNoReconnect
+                AddHandler _commonController.TickerReconnect, AddressOf OnTickerReconnect
+                AddHandler _commonController.FetcherError, AddressOf OnFetcherError
+                AddHandler _commonController.CollectorError, AddressOf OnCollectorError
+                AddHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
+                AddHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+
+#Region "Login"
+                Dim loginMessage As String = Nothing
+                While True
+                    _cts.Token.ThrowIfCancellationRequested()
+                    _connection = Nothing
+                    loginMessage = Nothing
+                    Try
+                        OnHeartbeat("Attempting to get connection to Zerodha API")
+                        _cts.Token.ThrowIfCancellationRequested()
+                        _connection = Await _commonController.LoginAsync().ConfigureAwait(False)
+                        _cts.Token.ThrowIfCancellationRequested()
+                    Catch cx As OperationCanceledException
+                        loginMessage = cx.Message
+                        logger.Error(cx)
+                        Exit While
+                    Catch ex As Exception
+                        loginMessage = ex.Message
+                        logger.Error(ex)
+                    End Try
+                    If _connection Is Nothing Then
+                        If loginMessage IsNot Nothing AndAlso (loginMessage.ToUpper.Contains("password".ToUpper) OrElse loginMessage.ToUpper.Contains("api_key".ToUpper) OrElse loginMessage.ToUpper.Contains("username".ToUpper)) Then
+                            'No need to retry as its a password failure
+                            OnHeartbeat(String.Format("Loging process failed:{0}", loginMessage))
+                            Exit While
+                        Else
+                            OnHeartbeat(String.Format("Loging process failed:{0} | Waiting for 10 seconds before retrying connection", loginMessage))
+                            _cts.Token.ThrowIfCancellationRequested()
+                            Await Task.Delay(10000, _cts.Token).ConfigureAwait(False)
+                            _cts.Token.ThrowIfCancellationRequested()
+                        End If
+                    Else
+                        Exit While
+                    End If
+                End While
+                If _connection Is Nothing Then
+                    If loginMessage IsNot Nothing Then
+                        Throw New ApplicationException(String.Format("No connection to Zerodha API could be established | Details:{0}", loginMessage))
+                    Else
+                        Throw New ApplicationException("No connection to Zerodha API could be established")
+                    End If
+                End If
+#End Region
+
+                OnHeartbeat("Completing all pre-automation requirements")
+                _cts.Token.ThrowIfCancellationRequested()
+                Dim isPreProcessingDone As Boolean = Await _commonController.PrepareToRunStrategyAsync().ConfigureAwait(False)
+                _cts.Token.ThrowIfCancellationRequested()
+
+                If Not isPreProcessingDone Then Throw New ApplicationException("PrepareToRunStrategyAsync did not succeed, cannot progress")
+            End If 'Common controller
+            EnableDisableUIEx(UIMode.ReleaseOther, GetType(PetDGandhiStrategy))
+
+            _PetDGandhiStrategyToExecute = New PetDGandhiStrategy(_commonController, 5, _PetDGandhiUserInputs, 5, _cts)
+            OnHeartbeatEx(String.Format("Running strategy:{0}", _PetDGandhiStrategyToExecute.ToString), New List(Of Object) From {_PetDGandhiStrategyToExecute})
+
+            _cts.Token.ThrowIfCancellationRequested()
+            Await _commonController.SubscribeStrategyAsync(_PetDGandhiStrategyToExecute).ConfigureAwait(False)
+            _cts.Token.ThrowIfCancellationRequested()
+
+            _PetDGandhiTradableInstruments = _PetDGandhiStrategyToExecute.TradableStrategyInstruments
+            SetObjectText_ThreadSafe(linklblPetDGandhiTradableInstrument, String.Format("Tradable Instruments: {0}", _PetDGandhiTradableInstruments.Count))
+            SetObjectEnableDisable_ThreadSafe(linklblPetDGandhiTradableInstrument, True)
+            _cts.Token.ThrowIfCancellationRequested()
+
+            _PetDGandhiDashboadList = New BindingList(Of ActivityDashboard)(_PetDGandhiStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
+                                                                                                                                                          Return x.SignalGeneratedTime
+                                                                                                                                                      End Function).ToList)
+            SetSFGridDataBind_ThreadSafe(sfdgvPetDGandhiMainDashboard, _PetDGandhiDashboadList)
+            SetSFGridFreezFirstColumn_ThreadSafe(sfdgvPetDGandhiMainDashboard)
+            _cts.Token.ThrowIfCancellationRequested()
+
+            Await _PetDGandhiStrategyToExecute.MonitorAsync().ConfigureAwait(False)
+        Catch aex As AdapterBusinessException
+            logger.Error(aex)
+            If aex.ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
+                _lastException = aex
+            Else
+                MsgBox(String.Format("The following error occurred: {0}", aex.Message), MsgBoxStyle.Critical)
+            End If
+        Catch fex As ForceExitException
+            logger.Error(fex)
+            _lastException = fex
+        Catch cx As OperationCanceledException
+            logger.Error(cx)
+            MsgBox(String.Format("The following error occurred: {0}", cx.Message), MsgBoxStyle.Critical)
+        Catch ex As Exception
+            logger.Error(ex)
+            MsgBox(String.Format("The following error occurred: {0}", ex.Message), MsgBoxStyle.Critical)
+        Finally
+            ProgressStatus("No pending actions")
+            EnableDisableUIEx(UIMode.ReleaseOther, GetType(PetDGandhiStrategy))
+            EnableDisableUIEx(UIMode.Idle, GetType(PetDGandhiStrategy))
+        End Try
+        'If _cts Is Nothing OrElse _cts.IsCancellationRequested Then
+        'Following portion need to be done for any kind of exception. Otherwise if we start again without closing the form then
+        'it will not new object of controller. So orphan exception will throw exception again and information collector, historical data fetcher
+        'and ticker will not work.
+        If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseCollectorIfConnectedAsync(True).ConfigureAwait(False)
+        _commonController = Nothing
+        _connection = Nothing
+        _cts = Nothing
+        'End If
+    End Function
+    Private Async Sub btnPetDGandhiStart_Click(sender As Object, e As EventArgs) Handles btnPetDGandhiStart.Click
+        'Dim authenticationUserId As String = "YH8805"
+        'If Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper IsNot Nothing AndAlso
+        '    Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper <> "" AndAlso
+        '    (authenticationUserId <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper AndAlso
+        '    "DK4056" <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper) Then
+        '    MsgBox("You are not an authentic user. Kindly contact Algo2Trade", MsgBoxStyle.Critical)
+        '    Exit Sub
+        'End If
+
+        PreviousDayCleanup()
+        Await Task.Run(AddressOf PetDGandhiWorkerAsync).ConfigureAwait(False)
+
+        If _lastException IsNot Nothing Then
+            If _lastException.GetType.BaseType Is GetType(AdapterBusinessException) AndAlso
+                CType(_lastException, AdapterBusinessException).ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
+                Debug.WriteLine("Restart for permission")
+                logger.Debug("Restarting the application again as there is premission issue")
+                btnPetDGandhiStart_Click(sender, e)
+            ElseIf _lastException.GetType Is GetType(ForceExitException) Then
+                Debug.WriteLine("Restart for daily refresh")
+                logger.Debug("Restarting the application again for daily refresh")
+                btnPetDGandhiStart_Click(sender, e)
+            End If
+        End If
+    End Sub
+    Private Sub tmrPetDGandhiTickerStatus_Tick(sender As Object, e As EventArgs) Handles tmrPetDGandhiTickerStatus.Tick
+        FlashTickerBulbEx(GetType(PetDGandhiStrategy))
+    End Sub
+    Private Async Sub btnPetDGandhiStop_Click(sender As Object, e As EventArgs) Handles btnPetDGandhiStop.Click
+        SetObjectEnableDisable_ThreadSafe(linklblPetDGandhiTradableInstrument, False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseCollectorIfConnectedAsync(True).ConfigureAwait(False)
+        _cts.Cancel()
+    End Sub
+    Private Sub btnPetDGandhiSettings_Click(sender As Object, e As EventArgs) Handles btnPetDGandhiSettings.Click
+        Dim newForm As New frmPetDGandhiSettings(_PetDGandhiUserInputs)
+        newForm.ShowDialog()
+    End Sub
+    Private Sub linklblPetDGandhiTradableInstrument_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles linklblPetDGandhiTradableInstrument.LinkClicked
+        Dim newForm As New frmPetDGandhiTradableInstrumentList(_PetDGandhiTradableInstruments)
+        newForm.ShowDialog()
+    End Sub
+#End Region
+
 #Region "Common to all stratgeies"
 
 #Region "EX function"
@@ -1636,6 +1871,52 @@ Public Class frmMainTabbed
                     SetObjectEnableDisable_ThreadSafe(btnNearFarHedgingStop, False)
                     SetSFGridDataBind_ThreadSafe(sfdgvNearFarHedgingMainDashboard, Nothing)
             End Select
+        ElseIf source Is GetType(PetDGandhiStrategy) Then
+            Select Case mode
+                Case UIMode.Active
+                    SetObjectEnableDisable_ThreadSafe(btnPetDGandhiStart, False)
+                    SetObjectEnableDisable_ThreadSafe(btnPetDGandhiSettings, False)
+                    SetObjectEnableDisable_ThreadSafe(btnPetDGandhiStop, True)
+                Case UIMode.BlockOther
+                    If GetObjectText_ThreadSafe(btnOHLStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnOHLStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnOHLStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnMomentumReversalStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnMomentumReversalStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnMomentumReversalStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnAmiSignalStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnAmiSignalStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnAmiSignalStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnEMA_SupertrendStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnEMA_SupertrendStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnEMA_SupertrendStop, Common.LOGIN_PENDING)
+                    End If
+                Case UIMode.ReleaseOther
+                    If GetObjectText_ThreadSafe(btnOHLStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnOHLStart, "Start")
+                        SetObjectText_ThreadSafe(btnOHLStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnMomentumReversalStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnMomentumReversalStart, "Start")
+                        SetObjectText_ThreadSafe(btnMomentumReversalStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
+                        SetObjectText_ThreadSafe(btnAmiSignalStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnEMA_SupertrendStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnEMA_SupertrendStart, "Start")
+                        SetObjectText_ThreadSafe(btnEMA_SupertrendStop, "Stop")
+                    End If
+                Case UIMode.Idle
+                    SetObjectEnableDisable_ThreadSafe(btnPetDGandhiStart, True)
+                    SetObjectEnableDisable_ThreadSafe(btnPetDGandhiSettings, True)
+                    SetObjectEnableDisable_ThreadSafe(btnPetDGandhiStop, False)
+                    SetSFGridDataBind_ThreadSafe(sfdgvPetDGandhiMainDashboard, Nothing)
+            End Select
         End If
     End Sub
     Private Sub FlashTickerBulbEx(ByVal source As Object)
@@ -1656,6 +1937,9 @@ Public Class frmMainTabbed
         ElseIf source Is GetType(NearFarHedgingStrategy) Then
             blbTickerStatusCommon = blbNearFarHedgingTickerStatus
             tmrTickerStatusCommon = tmrNearFarHedgingTickerStatus
+        ElseIf source Is GetType(PetDGandhiStrategy) Then
+            blbTickerStatusCommon = blbPetDGandhiTickerStatus
+            tmrTickerStatusCommon = tmrPetDGandhiTickerStatus
         End If
 
         tmrTickerStatusCommon.Enabled = False
@@ -1687,6 +1971,8 @@ Public Class frmMainTabbed
             blbTickerStatusCommon = blbEMA_SupertrendTickerStatus
         ElseIf source Is GetType(NearFarHedgingStrategy) Then
             blbTickerStatusCommon = blbNearFarHedgingTickerStatus
+        ElseIf source Is GetType(PetDGandhiStrategy) Then
+            blbTickerStatusCommon = blbPetDGandhiTickerStatus
         End If
         blbTickerStatusCommon.Color = color
     End Sub
@@ -1708,6 +1994,8 @@ Public Class frmMainTabbed
             sfdgvCommon = sfdgvEMA_SupertrendMainDashboard
         ElseIf source Is GetType(NearFarHedgingStrategy) Then
             sfdgvCommon = sfdgvNearFarHedgingMainDashboard
+        ElseIf source Is GetType(PetDGandhiStrategy) Then
+            sfdgvCommon = sfdgvPetDGandhiMainDashboard
         End If
 
         Dim eFilterPopupShowingEventArgsCommon As FilterPopupShowingEventArgs = Nothing
@@ -1779,6 +2067,11 @@ Public Class frmMainTabbed
                 Case LogMode.One
                     SetListAddItem_ThreadSafe(lstNearFarHedgingLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
             End Select
+        ElseIf source IsNot Nothing AndAlso source.GetType Is GetType(PetDGandhiStrategy) Then
+            Select Case mode
+                Case LogMode.One
+                    SetListAddItem_ThreadSafe(lstPetDGandhiLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
+            End Select
         ElseIf source Is Nothing Then
             Select Case mode
                 Case LogMode.All
@@ -1787,6 +2080,7 @@ Public Class frmMainTabbed
                     SetListAddItem_ThreadSafe(lstAmiSignalLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
                     SetListAddItem_ThreadSafe(lstEMA_SupertrendLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
                     SetListAddItem_ThreadSafe(lstNearFarHedgingLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
+                    SetListAddItem_ThreadSafe(lstPetDGandhiLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
             End Select
         End If
     End Sub
@@ -1832,6 +2126,7 @@ Public Class frmMainTabbed
         EnableDisableUIEx(UIMode.Idle, GetType(AmiSignalStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(EMA_SupertrendStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(NearFarHedgingStrategy))
+        EnableDisableUIEx(UIMode.Idle, GetType(PetDGandhiStrategy))
         'tabMain.TabPages.Remove(tabOHL)
         'tabMain.TabPages.Remove(tabMomentumReversal)
         'tabMain.TabPages.Remove(tabAmiSignal)
@@ -1844,6 +2139,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(AmiSignalStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(EMA_SupertrendStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Pink)
+        ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Pink)
         OnHeartbeat("Ticker:Closed")
     End Sub
     Private Sub OnTickerConnect()
@@ -1852,6 +2148,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(AmiSignalStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(EMA_SupertrendStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Lime)
+        ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Lime)
         OnHeartbeat("Ticker:Connected")
     End Sub
     Private Sub OnTickerErrorWithStatus(ByVal isConnected As Boolean, ByVal errorMsg As String)
@@ -1861,6 +2158,7 @@ Public Class frmMainTabbed
             ColorTickerBulbEx(GetType(AmiSignalStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(EMA_SupertrendStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Pink)
+            ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Pink)
         End If
     End Sub
     Private Sub OnTickerError(ByVal errorMsg As String)
@@ -1875,6 +2173,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(AmiSignalStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(EMA_SupertrendStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Yellow)
+        ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Yellow)
         OnHeartbeat("Ticker:Reconnecting")
     End Sub
     Private Sub OnFetcherError(ByVal instrumentIdentifier As String, ByVal errorMsg As String)
@@ -1931,6 +2230,8 @@ Public Class frmMainTabbed
                     BindingListAdd_ThreadSafe(_EMA_SupertrendDashboadList, item)
                 Case GetType(NearFarHedgingStrategy)
                     BindingListAdd_ThreadSafe(_NearFarHedgingDashboadList, item)
+                Case GetType(PetDGandhiStrategy)
+                    BindingListAdd_ThreadSafe(_PetDGandhiDashboadList, item)
                 Case Else
                     Throw New NotImplementedException
             End Select
@@ -1968,6 +2269,12 @@ Public Class frmMainTabbed
                 _NearFarHedgingDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
                 SetSFGridDataBind_ThreadSafe(sfdgvNearFarHedgingMainDashboard, _NearFarHedgingDashboadList)
                 SetSFGridFreezFirstColumn_ThreadSafe(sfdgvNearFarHedgingMainDashboard)
+            Case GetType(PetDGandhiStrategy)
+                SetSFGridDataBind_ThreadSafe(sfdgvPetDGandhiMainDashboard, Nothing)
+                _PetDGandhiDashboadList = Nothing
+                _PetDGandhiDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
+                SetSFGridDataBind_ThreadSafe(sfdgvPetDGandhiMainDashboard, _PetDGandhiDashboadList)
+                SetSFGridFreezFirstColumn_ThreadSafe(sfdgvPetDGandhiMainDashboard)
             Case Else
                 Throw New NotImplementedException
         End Select

@@ -1063,13 +1063,13 @@ Namespace Controller
                 runningInstruments.FirstOrDefault.LastTick = runningTick
             End If
 
-            If change Then
-                logger.Fatal("TickData, Token,{0},Date,{1},Time,{2},LastPrice,{3},Volume,{4},OI,{5}",
-                         tickData.InstrumentToken, tickData.Timestamp.Value.ToShortDateString, tickData.Timestamp.Value.ToLongTimeString,
-                         tickData.LastPrice, tickData.Volume, tickData.OI)
-            End If
+            'If change Then
+            '    logger.Fatal("TickData, Token,{0},Date,{1},Time,{2},LastPrice,{3},Volume,{4},OI,{5}",
+            '             tickData.InstrumentToken, tickData.Timestamp.Value.ToShortDateString, tickData.Timestamp.Value.ToLongTimeString,
+            '             tickData.LastPrice, tickData.Volume, tickData.OI)
+            'End If
 
-            If change AndAlso _rawPayloadCreators IsNot Nothing AndAlso _rawPayloadCreators.ContainsKey(tickData.InstrumentToken) Then
+            If _rawPayloadCreators IsNot Nothing AndAlso _rawPayloadCreators.ContainsKey(tickData.InstrumentToken) Then
                 _rawPayloadCreators(tickData.InstrumentToken).GetChartFromTickAsync(runningTick)
             End If
             If _subscribedStrategyInstruments IsNot Nothing AndAlso _subscribedStrategyInstruments.Count > 0 AndAlso

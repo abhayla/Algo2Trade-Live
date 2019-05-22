@@ -386,18 +386,18 @@ Namespace Controller
                     If _rawPayloadCreators IsNot Nothing AndAlso _rawPayloadCreators.ContainsKey(runningStrategyUniqueInstruments.InstrumentIdentifier) Then
                         Continue For
                     End If
-                    'Dim candleStickBasedStrategyInstruments As IEnumerable(Of StrategyInstrument) =
-                    '    _subscribedStrategyInstruments(runningStrategyUniqueInstruments.InstrumentIdentifier).Where(Function(x)
-                    '                                                                                                    Return x.ParentStrategy.IsStrategyCandleStickBased
-                    '                                                                                                End Function)
-
-                    'indibar
                     Dim candleStickBasedStrategyInstruments As IEnumerable(Of StrategyInstrument) =
                         _subscribedStrategyInstruments(runningStrategyUniqueInstruments.InstrumentIdentifier).Where(Function(x)
-                                                                                                                        Return x.ParentStrategy.IsStrategyCandleStickBased OrElse
-                                                                                                                        x.ParentStrategy.IsTickPopulationNeeded
+                                                                                                                        Return x.ParentStrategy.IsStrategyCandleStickBased
                                                                                                                     End Function)
-                    'end indibar
+
+                    ''indibar
+                    'Dim candleStickBasedStrategyInstruments As IEnumerable(Of StrategyInstrument) =
+                    '    _subscribedStrategyInstruments(runningStrategyUniqueInstruments.InstrumentIdentifier).Where(Function(x)
+                    '                                                                                                    Return x.ParentStrategy.IsStrategyCandleStickBased OrElse
+                    '                                                                                                    x.ParentStrategy.IsTickPopulationNeeded
+                    '                                                                                                End Function)
+                    ''end indibar
 
                     If candleStickBasedStrategyInstruments IsNot Nothing AndAlso candleStickBasedStrategyInstruments.Count > 0 Then
                         If _rawPayloadCreators Is Nothing Then _rawPayloadCreators = New Dictionary(Of String, CandleStickChart)

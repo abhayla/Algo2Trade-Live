@@ -223,7 +223,21 @@
     </Compile>
     <Compile Include="OHL\OHLStrategy.vb" />
     <Compile Include="OHL\OHLUserInputs.vb" />
+    <Compile Include="PetDGandhi\frmPetDGandhiSettings.Designer.vb">
+      <DependentUpon>frmPetDGandhiSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PetDGandhi\frmPetDGandhiSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PetDGandhi\frmPetDGandhiTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmPetDGandhiTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="PetDGandhi\frmPetDGandhiTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="PetDGandhi\PetDGandhiStrategy.vb" />
+    <Compile Include="PetDGandhi\PetDGandhiStrategyInstrument.vb" />
+    <Compile Include="PetDGandhi\PetDGandhiStrategyUserInputs.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AmiSignal\frmAmiSignalSettings.resx">
@@ -273,6 +287,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="OHL\frmOHLTradableInstrumentList.resx">
       <DependentUpon>frmOHLTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PetDGandhi\frmPetDGandhiSettings.resx">
+      <DependentUpon>frmPetDGandhiSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PetDGandhi\frmPetDGandhiTradableInstrumentList.resx">
+      <DependentUpon>frmPetDGandhiTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
