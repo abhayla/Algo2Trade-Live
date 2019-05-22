@@ -14,7 +14,9 @@ Public Class OHLStrategyInstrument
     Public Shared Shadows logger As Logger = LogManager.GetCurrentClassLogger
 #End Region
 
-    Private _OHLStrategyProtect As Integer
+    Private ReadOnly _dummyOISMAConsumer As TickSMAConsumer
+    Private ReadOnly _dummyLastPriceSMAConsumer As TickSMAConsumer
+    Private _lastDirection As IOrder.TypeOfTransaction = IOrder.TypeOfTransaction.None
     Public Sub New(ByVal associatedInstrument As IInstrument,
                    ByVal associatedParentStrategy As Strategy,
                    ByVal isPairInstrumnet As Boolean,
@@ -44,54 +46,38 @@ Public Class OHLStrategyInstrument
             TickPayloadDependentConsumers = New List(Of IPayloadConsumer)
             Dim chartConsumer As PayloadToChartConsumer = New PayloadToChartConsumer(Me.ParentStrategy.UserSettings.SignalTimeFrame)
             chartConsumer.OnwardLevelConsumers = New List(Of IPayloadConsumer) From
-            {New SMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).FastEMAPeriod, TypeOfField.Close)}
+            {New TickSMAConsumer(chartConsumer, 50, TypeOfField.OI),
+            New TickSMAConsumer(chartConsumer, 50, TypeOfField.LastPrice)}
             TickPayloadDependentConsumers.Add(chartConsumer)
+
+            _dummyOISMAConsumer = New TickSMAConsumer(chartConsumer, 50, TypeOfField.OI)
+            _dummyLastPriceSMAConsumer = New TickSMAConsumer(chartConsumer, 50, TypeOfField.LastPrice)
         End If
-        _OHLStrategyProtect = 0
     End Sub
     Public Overrides Function MonitorAsync(ByVal command As ExecuteCommands, ByVal data As Object) As Task
         Throw New NotImplementedException()
     End Function
     Public Overrides Async Function MonitorAsync() As Task
         Try
-            'Dim slDelayCtr As Integer = 0
-            Dim OHLUserSettings As OHLUserInputs = Me.ParentStrategy.UserSettings
-            Dim instrumentName As String = Nothing
-            If Me.TradableInstrument.TradingSymbol.Contains("FUT") Then
-                instrumentName = Me.TradableInstrument.TradingSymbol.Remove(Me.TradableInstrument.TradingSymbol.Count - 8)
-            Else
-                instrumentName = Me.TradableInstrument.TradingSymbol
-            End If
             While True
                 If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
                     Throw Me.ParentStrategy.ParentController.OrphanException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-                'If Me.GetOverallPL() <= Math.Abs(OHLUserSettings.InstrumentsData(instrumentName).MaxLossPerStock) * -1 OrElse
-                '    Me.GetOverallPL() >= Math.Abs(OHLUserSettings.InstrumentsData(instrumentName).MaxProfitPerStock) Then
-                '    Debug.WriteLine("Force Cancel for stock pl")
-                '    Await ForceExitAllTradesAsync("Force Cancel for stock pl").ConfigureAwait(False)
-                'End If
-                '_cts.Token.ThrowIfCancellationRequested()
-                'Dim placeOrderDetails As Object = Nothing
-                'Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                'If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take AndAlso
-                '    Interlocked.Read(_OHLStrategyProtect) = 0 Then
-                '    Interlocked.Increment(_OHLStrategyProtect)
-                '    placeOrderDetails = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOLimitMISOrder, Nothing).ConfigureAwait(False)
-                'End If
-                '_cts.Token.ThrowIfCancellationRequested()
-                ''If slDelayCtr = 10 Then
-                ''    slDelayCtr = 0
-                ''Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal)) = Await IsTriggerReceivedForModifyStoplossOrderAsync().ConfigureAwait(False)
-                ''If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
-                ''    'Interlocked.Increment(_OHLStrategyProtector)
-                ''    Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
-                ''End If
-                ''End If
-                ''_cts.Token.ThrowIfCancellationRequested()
+                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                    If placeOrderTrigger.Item2.EntryDirection <> _lastDirection Then
+                        GenerateTelegramMessageAsync(String.Format("Trading Symbol:{0}, Direction:{1}, LTP:{2}, TimeStamp:{3}",
+                                                                     Me.TradableInstrument.TradingSymbol,
+                                                                     placeOrderTrigger.Item2.EntryDirection.ToString,
+                                                                     placeOrderTrigger.Item2.Price,
+                                                                     placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime.ToString))
+                        _lastDirection = placeOrderTrigger.Item2.EntryDirection
+                    End If
+                End If
+                _cts.Token.ThrowIfCancellationRequested()
+
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
-                'slDelayCtr += 1
             End While
         Catch ex As Exception
             'To log exceptions getting created from this function as the bubble up of the exception
@@ -101,18 +87,11 @@ Public Class OHLStrategyInstrument
         End Try
     End Function
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
-        Dim currentTime As Date = Now
         Dim OHLUserSettings As OHLUserInputs = Me.ParentStrategy.UserSettings
         Dim capitalAtDayStart As Decimal = Me.ParentStrategy.ParentController.GetUserMargin(Me.TradableInstrument.ExchangeDetails.ExchangeType)
-
-        Dim instrumentName As String = Nothing
-        If Me.TradableInstrument.TradingSymbol.Contains("FUT") Then
-            instrumentName = Me.TradableInstrument.TradingSymbol.Remove(Me.TradableInstrument.TradingSymbol.Count - 8)
-        Else
-            instrumentName = Me.TradableInstrument.TradingSymbol
-        End If
+        Dim instrumentName As String = Me.TradableInstrument.RawInstrumentName
 
         Dim parameters As PlaceOrderParameters = Nothing
         If Now < OHLUserSettings.LastTradeEntryTime AndAlso Not IsActiveInstrument() AndAlso
@@ -120,51 +99,27 @@ Public Class OHLStrategyInstrument
             Me.GetOverallPL() < Math.Abs(OHLUserSettings.InstrumentsData(instrumentName).MaxProfitPerStock) AndAlso
             Me.ParentStrategy.GetTotalPL() > capitalAtDayStart * Math.Abs(OHLUserSettings.MaxLossPercentagePerDay) * -1 / 100 AndAlso
             Me.ParentStrategy.GetTotalPL() < capitalAtDayStart * Math.Abs(OHLUserSettings.MaxProfitPercentagePerDay) / 100 Then
-            If TradableInstrument.LastTick.Timestamp IsNot Nothing AndAlso
-                currentTime.Hour = OHLUserSettings.TradeStartTime.Hour AndAlso currentTime.Minute = OHLUserSettings.TradeStartTime.Minute AndAlso
-                currentTime.Second >= OHLUserSettings.TradeStartTime.Second Then
 
-                Dim OHLTradePrice As Decimal = TradableInstrument.LastTick.LastPrice
-                Dim buffer As Decimal = Math.Round(ConvertFloorCeling(OHLTradePrice * 0.003, Convert.ToDouble(TradableInstrument.TickSize), RoundOfType.Floor), 2)
-                Dim entryPrice As Decimal = Nothing
-                Dim target As Decimal = Math.Round(ConvertFloorCeling(OHLTradePrice * OHLUserSettings.TargetPercentage / 100, Convert.ToDouble(TradableInstrument.TickSize), RoundOfType.Celing), 2)
-                Dim stoploss As Decimal = Math.Round(ConvertFloorCeling(OHLTradePrice * OHLUserSettings.StoplossPercentage / 100, Convert.ToDouble(TradableInstrument.TickSize), RoundOfType.Celing), 2)
-                Dim quantity As Integer = Nothing
-                If Me.TradableInstrument.RawInstrumentType.ToUpper = "FUT" Then
-                    quantity = Me.TradableInstrument.LotSize * OHLUserSettings.InstrumentsData(instrumentName).Quantity
-                Else
-                    If OHLUserSettings.InstrumentsData(instrumentName).Capital <> Decimal.MinValue AndAlso
-                        OHLUserSettings.InstrumentsData(instrumentName).Capital > 0 Then
-                        quantity = Math.Floor(OHLUserSettings.InstrumentsData(instrumentName).Capital / (Math.Floor(Me.TradableInstrument.LastTick.LastPrice / 13)))
-                    Else
-                        quantity = OHLUserSettings.InstrumentsData(instrumentName).Quantity
+            Dim OISignal As Tuple(Of Boolean, IOrder.TypeOfTransaction) = CheckSignal(_dummyOISMAConsumer)
+            If OISignal IsNot Nothing AndAlso OISignal.Item1 Then
+                Dim LTPSignal As Tuple(Of Boolean, IOrder.TypeOfTransaction) = CheckSignal(_dummyLastPriceSMAConsumer)
+                If LTPSignal IsNot Nothing AndAlso LTPSignal.Item1 Then
+                    Dim dummyPayload As OHLCPayload = New OHLCPayload(OHLCPayload.PayloadSource.None) With {
+                        .SnapshotDateTime = Me.TradableInstrument.LastTick.Timestamp
+                    }
+                    If LTPSignal.Item2 = IOrder.TypeOfTransaction.Buy Then
+                        parameters = New PlaceOrderParameters(dummyPayload) With
+                            {
+                            .EntryDirection = IOrder.TypeOfTransaction.Buy,
+                            .Price = Me.TradableInstrument.LastTick.LastPrice
+                            }
+                    ElseIf LTPSignal.Item2 = IOrder.TypeOfTransaction.Sell Then
+                        parameters = New PlaceOrderParameters(dummyPayload) With
+                            {
+                            .EntryDirection = IOrder.TypeOfTransaction.Sell,
+                            .Price = Me.TradableInstrument.LastTick.LastPrice
+                            }
                     End If
-                End If
-                Dim dummyPayload As OHLCPayload = Nothing
-                If TradableInstrument.LastTick.Open = TradableInstrument.LastTick.High Then
-                    entryPrice = OHLTradePrice - buffer
-                    dummyPayload = New OHLCPayload(OHLCPayload.PayloadSource.None) With {
-                        .SnapshotDateTime = TradableInstrument.LastTick.Timestamp
-                    }
-                    parameters = New PlaceOrderParameters(dummyPayload) With
-                                {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                .Quantity = quantity,
-                                .Price = entryPrice,
-                                .TriggerPrice = Nothing,
-                                .SquareOffValue = target,
-                                .StoplossValue = stoploss}
-                ElseIf TradableInstrument.LastTick.Open = TradableInstrument.LastTick.Low Then
-                    entryPrice = OHLTradePrice + buffer
-                    dummyPayload = New OHLCPayload(OHLCPayload.PayloadSource.None) With {
-                        .SnapshotDateTime = TradableInstrument.LastTick.Timestamp
-                    }
-                    parameters = New PlaceOrderParameters(dummyPayload) With
-                                {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                .Quantity = quantity,
-                                .Price = entryPrice,
-                                .TriggerPrice = Nothing,
-                                .SquareOffValue = target,
-                                .StoplossValue = stoploss}
                 End If
             End If
         End If
@@ -266,6 +221,63 @@ Public Class OHLStrategyInstrument
         End If
     End Function
 
+    Private Function CheckSignal(ByVal dummyConsumer As TickSMAConsumer) As Tuple(Of Boolean, IOrder.TypeOfTransaction)
+        Dim ret As Tuple(Of Boolean, IOrder.TypeOfTransaction) = Nothing
+        If dummyConsumer IsNot Nothing Then
+            Dim consumer As TickSMAConsumer = GetConsumer(Me.TickPayloadDependentConsumers, dummyConsumer)
+            If consumer IsNot Nothing AndAlso consumer.OutputPayload IsNot Nothing AndAlso consumer.OutputPayload.Count > 0 Then
+                Dim currentConsumerPayload As TickSMAConsumer.TickSMAPayload = consumer.OutputPayload.OrderBy(Function(x)
+                                                                                                                  Return x.TimeStamp
+                                                                                                              End Function).LastOrDefault
+
+                Dim requiredData As IEnumerable(Of TickSMAConsumer.TickSMAPayload) = Nothing
+                requiredData = consumer.OutputPayload.Where(Function(y)
+                                                                Return y.TimeStamp <= currentConsumerPayload.TimeStamp
+                                                            End Function)
+
+                Dim requiredDataSet As IEnumerable(Of TickSMAConsumer.TickSMAPayload) = Nothing
+                If requiredData IsNot Nothing AndAlso requiredData.Count > 0 Then
+                    requiredDataSet = requiredData.OrderByDescending(Function(x)
+                                                                         Return x.TimeStamp
+                                                                     End Function).Take(10)
+                End If
+
+                If requiredDataSet IsNot Nothing AndAlso requiredDataSet.Count = 10 Then
+                    Dim sum As Integer = requiredDataSet.Sum(Function(x)
+                                                                 Return x.Momentum
+                                                             End Function)
+
+                    Select Case consumer.SMAField
+                        Case TypeOfField.OI
+                            If sum = 10 Then
+                                ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, IOrder.TypeOfTransaction.None)
+                            End If
+                        Case TypeOfField.LastPrice
+                            If sum = 10 Then
+                                ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, IOrder.TypeOfTransaction.Buy)
+                            ElseIf sum = -10 Then
+                                ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, IOrder.TypeOfTransaction.Sell)
+                            End If
+                    End Select
+                End If
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Async Function GenerateTelegramMessageAsync(ByVal message As String) As Task
+        logger.Debug("Telegram Message:{0}", message)
+        If message.Contains("&") Then
+            message = message.Replace("&", "_")
+        End If
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+
+        Using tSender As New Utilities.Notification.Telegram("700121864:AAHjes45V0kEPBDLIfnZzsatH5NhRwIjciw", "-335771635", _cts)
+            Dim encodedString As String = Utilities.Strings.EncodeString(message)
+            logger.Debug("Encoded String:{0}", encodedString)
+            Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
+        End Using
+    End Function
 #Region "IDisposable Support"
     Private disposedValue As Boolean ' To detect redundant calls
 

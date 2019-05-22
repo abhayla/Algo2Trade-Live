@@ -262,7 +262,7 @@ Namespace ChartHandler.ChartStyle
                 If _subscribedStrategyInstruments IsNot Nothing AndAlso _subscribedStrategyInstruments.Count > 0 Then
                     For Each runningSubscribedStrategyInstrument In _subscribedStrategyInstruments
                         If runningSubscribedStrategyInstrument.ParentStrategy.IsTickPopulationNeeded Then
-                            _parentInstrument.TickPayloads.Add(tickData)
+                            runningSubscribedStrategyInstrument.PopulateChartAndIndicatorsFromTick(Me, tickData.Timestamp.Value)
                         End If
                     Next
                 End If

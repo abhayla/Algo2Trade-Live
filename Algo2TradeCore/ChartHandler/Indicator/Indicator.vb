@@ -451,6 +451,66 @@ Namespace ChartHandler.Indicator
                 Next
             End If
         End Sub
+        Public Sub CalculateTickSMA(ByVal outputConsumer As TickSMAConsumer)
+            Dim inputPayload As Concurrent.ConcurrentBag(Of ITick) = _parentChart.GetTickPayloads()
+            If outputConsumer IsNot Nothing AndAlso inputPayload IsNot Nothing AndAlso inputPayload.Count > 0 Then
+                Dim lastPayload As ITick = inputPayload.OrderBy(Function(x)
+                                                                    Return x.Timestamp
+                                                                End Function).LastOrDefault
+
+                If outputConsumer.OutputPayload Is Nothing Then outputConsumer.OutputPayload = New Concurrent.ConcurrentBag(Of TickSMAConsumer.TickSMAPayload)
+
+                Dim requiredData As IEnumerable(Of ITick) = Nothing
+                requiredData = inputPayload.Where(Function(y)
+                                                      Return y.Timestamp <= lastPayload.Timestamp
+                                                  End Function)
+
+                Dim requiredDataSet As IEnumerable(Of ITick) = Nothing
+                If requiredData IsNot Nothing AndAlso requiredData.Count > 0 Then
+                    requiredDataSet = requiredData.OrderByDescending(Function(x)
+                                                                         Return x.Timestamp
+                                                                     End Function).Take(outputConsumer.SMAPeriod)
+                End If
+
+                If requiredDataSet IsNot Nothing AndAlso requiredDataSet.Count > 0 Then
+                    Dim smaValue As TickSMAConsumer.TickSMAPayload = Nothing
+                    smaValue = New TickSMAConsumer.TickSMAPayload(lastPayload.Timestamp)
+                    smaValue.SupportedTick = lastPayload
+                    'Dim oistr As String = Nothing
+                    'Dim ltpstr As String = Nothing
+                    Select Case outputConsumer.SMAField
+                        Case TypeOfField.OI
+                            smaValue.SMA.Value = requiredDataSet.Sum(Function(s)
+                                                                         'oistr += s.Timestamp & "-" & s.OI & ","
+                                                                         Return CType(s.OI, Decimal)
+                                                                     End Function) / requiredDataSet.Count
+                        Case TypeOfField.LastPrice
+                            smaValue.SMA.Value = requiredDataSet.Sum(Function(s)
+                                                                         'ltpstr += s.Timestamp & "-" & s.LastPrice & ","
+                                                                         Return CType(s.LastPrice, Decimal)
+                                                                     End Function) / requiredDataSet.Count
+                    End Select
+                    smaValue.Momentum = -1
+                    Dim previousSMAValues As IEnumerable(Of TickSMAConsumer.TickSMAPayload) = Nothing
+                    Dim previousSMAValue As TickSMAConsumer.TickSMAPayload = Nothing
+                    If outputConsumer.OutputPayload IsNot Nothing AndAlso outputConsumer.OutputPayload.Count > 0 Then
+                        previousSMAValues = outputConsumer.OutputPayload.Where(Function(x)
+                                                                                   Return x.TimeStamp <= lastPayload.Timestamp
+                                                                               End Function)
+                        If previousSMAValues IsNot Nothing AndAlso previousSMAValues.Count > 0 Then
+                            previousSMAValue = previousSMAValues.OrderBy(Function(y)
+                                                                             Return y.TimeStamp
+                                                                         End Function).LastOrDefault
+                            If smaValue.SMA.Value > previousSMAValue.SMA.Value Then
+                                smaValue.Momentum = 1
+                            End If
+                        End If
+                    End If
+                    Console.WriteLine(String.Format("SMAField:{0}, {1}", outputConsumer.SMAField.ToString, smaValue.ToString))
+                    outputConsumer.OutputPayload.Add(smaValue)
+                End If
+            End If
+        End Sub
 #End Region
 
 #Region "Private Function"
