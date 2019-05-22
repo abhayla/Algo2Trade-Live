@@ -24,6 +24,8 @@
             Bollinger
             Spread
             Ratio
+            OI
+            LastPrice
         End Enum
         Enum CrossDirection
             Above = 1

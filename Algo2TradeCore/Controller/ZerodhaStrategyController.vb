@@ -1047,19 +1047,41 @@ Namespace Controller
         End Sub
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
             Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-            'logger.Fatal("TickData, Token,{0},Date,{1},Time,{2},LastPrice,{3},Volume,{4},OI,{5}", tickData.InstrumentToken, tickData.Timestamp.Value.ToShortDateString, tickData.Timestamp.Value.ToLongTimeString, tickData.LastPrice, tickData.Volume, tickData.OI)
+
             Dim runningTick As New ZerodhaTick() With {.WrappedTick = tickData}
             Dim runningInstruments As IEnumerable(Of IInstrument) = _AllStrategyUniqueInstruments.Where(Function(x)
                                                                                                             Return x.InstrumentIdentifier = tickData.InstrumentToken
                                                                                                         End Function)
+
+            Dim change As Boolean = False
             If runningInstruments IsNot Nothing AndAlso runningInstruments.Count > 0 Then
+                change = runningInstruments.FirstOrDefault.LastTick IsNot Nothing AndAlso
+                        (runningTick.OI <> runningInstruments.FirstOrDefault.LastTick.OI OrElse
+                        runningTick.Volume <> runningInstruments.FirstOrDefault.LastTick.Volume OrElse
+                        runningTick.LastPrice <> runningInstruments.FirstOrDefault.LastTick.LastPrice)
+
                 runningInstruments.FirstOrDefault.LastTick = runningTick
             End If
-            If _rawPayloadCreators IsNot Nothing AndAlso _rawPayloadCreators.ContainsKey(tickData.InstrumentToken) Then
+
+            If change Then
+                logger.Fatal("TickData, Token,{0},Date,{1},Time,{2},LastPrice,{3},Volume,{4},OI,{5}",
+                         tickData.InstrumentToken, tickData.Timestamp.Value.ToShortDateString, tickData.Timestamp.Value.ToLongTimeString,
+                         tickData.LastPrice, tickData.Volume, tickData.OI)
+            End If
+
+            If change AndAlso _rawPayloadCreators IsNot Nothing AndAlso _rawPayloadCreators.ContainsKey(tickData.InstrumentToken) Then
                 _rawPayloadCreators(tickData.InstrumentToken).GetChartFromTickAsync(runningTick)
             End If
             If _subscribedStrategyInstruments IsNot Nothing AndAlso _subscribedStrategyInstruments.Count > 0 AndAlso
                 _subscribedStrategyInstruments.ContainsKey(tickData.InstrumentToken) Then
+                'This loop is for population of ticks payload. As ticks payload depends on instrument so loop should exit after 1 iteration.
+                For Each runningStrategyInstrument In _subscribedStrategyInstruments(tickData.InstrumentToken)
+                    If runningStrategyInstrument.ParentStrategy.IsTickPopulationNeeded Then
+                        runningStrategyInstrument.TradableInstrument.TickPayloads.Add(runningTick)
+                    End If
+                    Exit For
+                Next
+
                 'This for loop needs to be after the tick is published
                 For Each runningStrategyInstrument In _subscribedStrategyInstruments(tickData.InstrumentToken)
                     runningStrategyInstrument.HandleTickTriggerToUIETCAsync()

@@ -696,9 +696,27 @@ Namespace Strategies
                     End If
                 Next
             End If
+            'If TickPayloadDependentConsumers IsNot Nothing AndAlso TickPayloadDependentConsumers.Count > 0 Then
+            '    For Each runningTickPayloadConsumer In TickPayloadDependentConsumers
+            '        If runningTickPayloadConsumer.OnwardLevelConsumers IsNot Nothing AndAlso runningTickPayloadConsumer.OnwardLevelConsumers.Count > 0 Then
+            '            If candleCreator.IndicatorCreator Is Nothing Then candleCreator.IndicatorCreator = New ChartHandler.Indicator.IndicatorManeger(Me.ParentStrategy.ParentController, candleCreator, _cts)
+            '            For Each consumer In runningTickPayloadConsumer.OnwardLevelConsumers
+            '                candleCreator.IndicatorCreator.CalculateTickSMA(currentCandle.SnapshotDateTime, consumer)
+            '            Next
+            '        End If
+            '    Next
+            'End If
+        End Sub
+        Public Overridable Sub PopulateChartAndIndicatorsFromTick(ByVal candleCreator As Chart, ByVal currentTimestamp As Date)
+            'logger.Debug("PopulateChartAndIndicatorsAsync, parameters:{0},{1}", candleCreator.ToString, currentCandle.ToString)
             If TickPayloadDependentConsumers IsNot Nothing AndAlso TickPayloadDependentConsumers.Count > 0 Then
                 For Each runningTickPayloadConsumer In TickPayloadDependentConsumers
-
+                    If runningTickPayloadConsumer.OnwardLevelConsumers IsNot Nothing AndAlso runningTickPayloadConsumer.OnwardLevelConsumers.Count > 0 Then
+                        If candleCreator.IndicatorCreator Is Nothing Then candleCreator.IndicatorCreator = New ChartHandler.Indicator.IndicatorManeger(Me.ParentStrategy.ParentController, candleCreator, _cts)
+                        For Each consumer In runningTickPayloadConsumer.OnwardLevelConsumers
+                            candleCreator.IndicatorCreator.CalculateTickSMA(consumer)
+                        Next
+                    End If
                 Next
             End If
         End Sub
