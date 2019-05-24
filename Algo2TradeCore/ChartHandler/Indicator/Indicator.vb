@@ -473,43 +473,59 @@ Namespace ChartHandler.Indicator
                     Dim runningPayload As OHLCPayload = outputConsumer.ParentConsumer.ConsumerPayloads(runningInputDate)
 
                     Dim pivotHigh As Decimal = 0
+                    Dim pivotHighSignalCandle As OHLCPayload = Nothing
                     Dim pivotLow As Decimal = 0
+                    Dim pivotLowSignalCandle As OHLCPayload = Nothing
                     If runningPayload.PreviousPayload IsNot Nothing AndAlso runningPayload.PreviousPayload.PreviousPayload IsNot Nothing Then
                         If outputConsumer.Strict Then
                             If runningPayload.PreviousPayload.HighPrice.Value > runningPayload.HighPrice.Value AndAlso
                                 runningPayload.PreviousPayload.HighPrice.Value > runningPayload.PreviousPayload.PreviousPayload.HighPrice.Value Then
                                 pivotHigh = runningPayload.PreviousPayload.HighPrice.Value
+                                pivotHighSignalCandle = runningPayload
                             Else
-                                pivotHigh = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotHigh.Value
+                                If outputConsumer.ConsumerPayloads.ContainsKey(runningPayload.PreviousPayload.SnapshotDateTime) Then
+                                    pivotHigh = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotHigh.Value
+                                    pivotHighSignalCandle = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotHighSignalCandle
+                                End If
                             End If
                             If runningPayload.PreviousPayload.LowPrice.Value < runningPayload.LowPrice.Value AndAlso
                                 runningPayload.PreviousPayload.LowPrice.Value < runningPayload.PreviousPayload.PreviousPayload.LowPrice.Value Then
                                 pivotLow = runningPayload.PreviousPayload.LowPrice.Value
+                                pivotLowSignalCandle = runningPayload
                             Else
-                                pivotLow = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotLow.Value
+                                If outputConsumer.ConsumerPayloads.ContainsKey(runningPayload.PreviousPayload.SnapshotDateTime) Then
+                                    pivotLow = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotLow.Value
+                                    pivotLowSignalCandle = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotLowSignalCandle
+                                End If
                             End If
                         Else
                             If runningPayload.PreviousPayload.HighPrice.Value >= runningPayload.HighPrice.Value AndAlso
                                 runningPayload.PreviousPayload.HighPrice.Value >= runningPayload.PreviousPayload.PreviousPayload.HighPrice.Value Then
                                 pivotHigh = runningPayload.PreviousPayload.HighPrice.Value
+                                pivotHighSignalCandle = runningPayload
                             Else
                                 If outputConsumer.ConsumerPayloads.ContainsKey(runningPayload.PreviousPayload.SnapshotDateTime) Then
                                     pivotHigh = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotHigh.Value
+                                    pivotHighSignalCandle = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotHighSignalCandle
                                 End If
                             End If
                             If runningPayload.PreviousPayload.LowPrice.Value <= runningPayload.LowPrice.Value AndAlso
                                 runningPayload.PreviousPayload.LowPrice.Value <= runningPayload.PreviousPayload.PreviousPayload.LowPrice.Value Then
                                 pivotLow = runningPayload.PreviousPayload.LowPrice.Value
+                                pivotLowSignalCandle = runningPayload
                             Else
                                 If outputConsumer.ConsumerPayloads.ContainsKey(runningPayload.PreviousPayload.SnapshotDateTime) Then
                                     pivotLow = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotLow.Value
+                                    pivotLowSignalCandle = CType(outputConsumer.ConsumerPayloads(runningPayload.PreviousPayload.SnapshotDateTime), PivotHighLowConsumer.PivotHighLowPayload).PivotLowSignalCandle
                                 End If
                             End If
                         End If
                     End If
 
                     pivotHighLowValue.PivotHigh.Value = pivotHigh
+                    pivotHighLowValue.PivotHighSignalCandle = pivotHighSignalCandle
                     pivotHighLowValue.PivotLow.Value = pivotLow
+                    pivotHighLowValue.PivotLowSignalCandle = pivotLowSignalCandle
 
                     outputConsumer.ConsumerPayloads.AddOrUpdate(runningInputDate, pivotHighLowValue, Function(key, value) pivotHighLowValue)
                 Next

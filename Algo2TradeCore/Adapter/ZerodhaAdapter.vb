@@ -39,6 +39,8 @@ Namespace Adapter
                     brokerageAttributes = Calculator.GetIntradayEquityFuturesBrokerage(buy, sell, quantity)
                 Case "MCX"
                     brokerageAttributes = Calculator.GetIntradayCommodityFuturesBrokerage(intrument, buy, sell, quantity)
+                Case "CDS"
+                    brokerageAttributes = Calculator.GetIntradayCurrencyFuturesBrokerage(buy, sell, quantity)
                 Case Else
                     Throw New NotImplementedException("Calculator not implemented")
             End Select

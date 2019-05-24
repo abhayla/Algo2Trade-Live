@@ -27,6 +27,7 @@ Public Class PetDGandhiStrategyUserInputs
         Public Property MaxStoplossPercentagePerTrade As Decimal
         Public Property MaxLossPerStock As Decimal
         Public Property MaxProfitPerStock As Decimal
+        Public Property SimilarDirectionTradeAfterTarget As Boolean
     End Class
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
         If filePath IsNot Nothing Then
@@ -38,9 +39,9 @@ Public Class PetDGandhiStrategyUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"INSTRUMENT NAME", "CASH", "FUTURES", "QUANTITY", "NUMBER OF TRADE", "MAX TARGET % PER TRADE", "MAX STOPLOSS % PER TRADE", "MAX PROFIT OF THE STOCK", "MAX LOSS OF THE STOCK"}
+                        Dim excelColumnList As New List(Of String) From {"INSTRUMENT NAME", "CASH", "FUTURES", "QUANTITY", "NUMBER OF TRADE", "MAX TARGET % PER TRADE", "MAX STOPLOSS % PER TRADE", "MAX PROFIT OF THE STOCK", "MAX LOSS OF THE STOCK", "SIMILAR DIRECTION TRADE AFTER TARGET"}
 
-                        For colCtr = 0 To 8
+                        For colCtr = 0 To 9
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -59,6 +60,7 @@ Public Class PetDGandhiStrategyUserInputs
                             Dim maxStoplossPercentagePerTrade As Decimal = Decimal.MinValue
                             Dim maxLossPerStock As Decimal = Decimal.MinValue
                             Dim maxProfitPerStock As Decimal = Decimal.MinValue
+                            Dim similarDirectionTradeAfterTarget As Boolean = False
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
@@ -172,6 +174,11 @@ Public Class PetDGandhiStrategyUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("Max Loss Per Stock cannot be blank for {0}", instrumentName))
                                     End If
+                                ElseIf columnCtr = 9 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        instrumentDetails(rowCtr, columnCtr).ToString.ToUpper = "TRUE" Then
+                                        similarDirectionTradeAfterTarget = True
+                                    End If
                                 End If
                             Next
                             If instrumentName IsNot Nothing Then
@@ -192,6 +199,7 @@ Public Class PetDGandhiStrategyUserInputs
                                 instrumentData.MaxStoplossPercentagePerTrade = maxStoplossPercentagePerTrade
                                 instrumentData.MaxLossPerStock = maxLossPerStock
                                 instrumentData.MaxProfitPerStock = maxProfitPerStock
+                                instrumentData.SimilarDirectionTradeAfterTarget = similarDirectionTradeAfterTarget
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
                                 If Me.InstrumentsData.ContainsKey(instrumentData.InstrumentName) Then
                                     Throw New ApplicationException(String.Format("Duplicate Instrument Name {0}", instrumentData.InstrumentName))

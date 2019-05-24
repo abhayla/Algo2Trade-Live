@@ -1,6 +1,4 @@
-﻿Imports System.Net.Http
-Imports System.Threading
-Imports Utilities.Network
+﻿Imports System.Threading
 Imports Algo2TradeCore.Controller
 Imports Algo2TradeCore.Entities
 
@@ -182,7 +180,35 @@ Namespace Calculator
 
         Public Overrides Function GetIntradayCurrencyFuturesBrokerage(buy As Decimal, sell As Decimal, quantity As Integer) As IBrokerageAttributes
             'logger.Debug("{0}->GetIntradayCurrencyFuturesBrokerage, parameters:{1},{2},{3}", Me.ToString, buy, sell, quantity)
-            Throw New NotImplementedException()
+            Dim ret As New ZerodhaBrokerageAttributes
+            Dim m = buy
+            Dim g = sell
+            Dim v = quantity * 1000
+            ret.Buy = buy
+            ret.Sell = sell
+            ret.Quantity = quantity * 1000
+            ret.Multiplier = 1
+            ret.CTT = 0
+
+            'Dim t = 1.5
+            'Dim e = 1.5
+
+            Dim t = Math.Round(((m + g) * v), (2))
+            Dim e = If((m * v * 0.0001) > 20, 20, Math.Round((m * v * 0.0001), (2)))
+            Dim o = If((g * v * 0.0001) > 20, 20, Math.Round((g * v * 0.0001), (2)))
+            Dim i = Math.Round((e + o), (2))
+            Dim a = Math.Round((0.000009 * t), (2))
+            Dim r = 0
+            Dim n = a + r
+            Dim s = Math.Round((0.18 * (i + n)), (2))
+
+            ret.Turnover = t
+            ret.Brokerage = i
+            ret.ExchangeFees = a
+            ret.Clearing = r
+            ret.GST = s
+            ret.TotalTax = ret.Brokerage + n + ret.GST + ret.SEBI
+            Return ret
         End Function
 
         Public Overrides Function GetIntradayCurrencyOptionsBrokerage(strikePrice As Decimal, buyPremium As Decimal, sellPremium As Decimal, quantity As Integer) As IBrokerageAttributes

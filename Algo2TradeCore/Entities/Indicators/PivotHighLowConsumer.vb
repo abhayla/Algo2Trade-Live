@@ -17,9 +17,13 @@
             End Sub
             Public Property TradingSymbol As String Implements IPayload.TradingSymbol
             Public Property PivotHigh As Field
+            Public Property PivotHighSignalCandle As OHLCPayload
             Public Property PivotLow As Field
+            Public Property PivotLowSignalCandle As OHLCPayload
             Public Overrides Function ToString() As String
-                Return String.Format("Pivot High:{0}, Pivot Low:{1}", Me.PivotHigh.Value, Me.PivotLow.Value)
+                Return String.Format("Pivot High:{0}, Pivot High Signal Candle:{1}, Pivot Low:{2}, Pivot Low Signal Candle:{3}",
+                                     Me.PivotHigh.Value, If(Me.PivotHighSignalCandle Is Nothing, "Nothing", Me.PivotHighSignalCandle.SnapshotDateTime.ToString),
+                                     Me.PivotLow.Value, If(Me.PivotLowSignalCandle Is Nothing, "Nothing", Me.PivotLowSignalCandle.SnapshotDateTime.ToString))
             End Function
         End Class
     End Class
