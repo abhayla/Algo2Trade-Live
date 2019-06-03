@@ -5,7 +5,7 @@ Imports Algo2TradeCore.Entities.UserSettings
 Imports Utilities.DAL
 
 <Serializable>
-Public Class PetDGandhiStrategyUserInputs
+Public Class PetDGandhiUserInputs
     Inherits StrategyUserInputs
 
     Public Property EMAPeriod As Integer

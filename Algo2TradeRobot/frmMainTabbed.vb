@@ -1217,7 +1217,7 @@ Public Class frmMainTabbed
 #End Region
 
 #Region "Near Far Hedging Strategy"
-    Private _NearFarHedgingUserInputs As NearFarHedgingStrategyUserInputs = Nothing
+    Private _NearFarHedgingUserInputs As NearFarHedgingUserInputs = Nothing
     Private _NearFarHedgingDashboadList As BindingList(Of ActivityDashboard) = Nothing
     Private _NearFarHedgingTradableInstruments As IEnumerable(Of NearFarHedgingStrategyInstrument) = Nothing
     Private _NearFarHedgingStrategyToExecute As NearFarHedgingStrategy = Nothing
@@ -1245,7 +1245,7 @@ Public Class frmMainTabbed
             If File.Exists("NearFarHedgingSettings.Strategy.a2t") Then
                 Dim fs As Stream = New FileStream("NearFarHedgingSettings.Strategy.a2t", FileMode.Open)
                 Dim bf As BinaryFormatter = New BinaryFormatter()
-                _NearFarHedgingUserInputs = CType(bf.Deserialize(fs), NearFarHedgingStrategyUserInputs)
+                _NearFarHedgingUserInputs = CType(bf.Deserialize(fs), NearFarHedgingUserInputs)
                 fs.Close()
                 _NearFarHedgingUserInputs.InstrumentsData = Nothing
                 _NearFarHedgingUserInputs.FillInstrumentDetails(_NearFarHedgingUserInputs.InstrumentDetailsFilePath, _cts)
@@ -1452,7 +1452,7 @@ Public Class frmMainTabbed
 #End Region
 
 #Region "Pet-D Gandhi Strategy"
-    Private _PetDGandhiUserInputs As PetDGandhiStrategyUserInputs = Nothing
+    Private _PetDGandhiUserInputs As PetDGandhiUserInputs = Nothing
     Private _PetDGandhiDashboadList As BindingList(Of ActivityDashboard) = Nothing
     Private _PetDGandhiTradableInstruments As IEnumerable(Of PetDGandhiStrategyInstrument) = Nothing
     Private _PetDGandhiStrategyToExecute As PetDGandhiStrategy = Nothing
@@ -1480,7 +1480,7 @@ Public Class frmMainTabbed
             If File.Exists("PetDGandhiSettings.Strategy.a2t") Then
                 Dim fs As Stream = New FileStream("PetDGandhiSettings.Strategy.a2t", FileMode.Open)
                 Dim bf As BinaryFormatter = New BinaryFormatter()
-                _PetDGandhiUserInputs = CType(bf.Deserialize(fs), PetDGandhiStrategyUserInputs)
+                _PetDGandhiUserInputs = CType(bf.Deserialize(fs), PetDGandhiUserInputs)
                 fs.Close()
                 _PetDGandhiUserInputs.InstrumentsData = Nothing
                 _PetDGandhiUserInputs.FillInstrumentDetails(_PetDGandhiUserInputs.InstrumentDetailsFilePath, _cts)

@@ -4,7 +4,7 @@ Imports Algo2TradeCore.Entities.UserSettings
 Imports Utilities.DAL
 
 <Serializable>
-Public Class NearFarHedgingStrategyUserInputs
+Public Class NearFarHedgingUserInputs
     Inherits StrategyUserInputs
     Public Property BollingerPeriod As Integer
     Public Property BollingerMultiplier As Integer

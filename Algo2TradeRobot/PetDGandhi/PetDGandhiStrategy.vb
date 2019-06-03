@@ -13,7 +13,7 @@ Public Class PetDGandhiStrategy
 
     Public Sub New(ByVal associatedParentController As APIStrategyController,
                    ByVal strategyIdentifier As String,
-                   ByVal userSettings As PetDGandhiStrategyUserInputs,
+                   ByVal userSettings As PetDGandhiUserInputs,
                    ByVal maxNumberOfDaysForHistoricalFetch As Integer,
                    ByVal canceller As CancellationTokenSource)
         MyBase.New(associatedParentController, strategyIdentifier, True, userSettings, maxNumberOfDaysForHistoricalFetch, canceller)
@@ -35,15 +35,15 @@ Public Class PetDGandhiStrategy
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
-            Dim petDGandhiUserInputs As PetDGandhiStrategyUserInputs = CType(Me.UserSettings, PetDGandhiStrategyUserInputs)
+            Dim petDGandhiUserInputs As PetDGandhiUserInputs = CType(Me.UserSettings, PetDGandhiUserInputs)
             If petDGandhiUserInputs.InstrumentsData IsNot Nothing AndAlso petDGandhiUserInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
-                Dim cashInstrumentList As IEnumerable(Of KeyValuePair(Of String, PetDGandhiStrategyUserInputs.InstrumentDetails)) =
+                Dim cashInstrumentList As IEnumerable(Of KeyValuePair(Of String, PetDGandhiUserInputs.InstrumentDetails)) =
                     petDGandhiUserInputs.InstrumentsData.Where(Function(x)
                                                                    Return x.Value.MarketType = IInstrument.TypeOfInstrument.Cash OrElse
                                                            x.Value.MarketType = IInstrument.TypeOfInstrument.None
                                                                End Function)
-                Dim futureInstrumentList As IEnumerable(Of KeyValuePair(Of String, PetDGandhiStrategyUserInputs.InstrumentDetails)) =
+                Dim futureInstrumentList As IEnumerable(Of KeyValuePair(Of String, PetDGandhiUserInputs.InstrumentDetails)) =
                     petDGandhiUserInputs.InstrumentsData.Where(Function(x)
                                                                    Return x.Value.MarketType = IInstrument.TypeOfInstrument.Futures OrElse
                                                            x.Value.MarketType = IInstrument.TypeOfInstrument.None
@@ -156,9 +156,9 @@ Public Class PetDGandhiStrategy
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf Me.GetTotalPL <= Math.Abs(CType(Me.UserSettings, PetDGandhiStrategyUserInputs).MaxLossPerDay) * -1 Then
+        ElseIf Me.GetTotalPL <= Math.Abs(CType(Me.UserSettings, PetDGandhiUserInputs).MaxLossPerDay) * -1 Then
             ret = New Tuple(Of Boolean, String)(True, "Max Loss % Per Day Reached")
-        ElseIf Me.GetTotalPL >= CType(Me.UserSettings, PetDGandhiStrategyUserInputs).MaxProfitPerDay Then
+        ElseIf Me.GetTotalPL >= CType(Me.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
             ret = New Tuple(Of Boolean, String)(True, "Max Profit % Per Day Reached")
         End If
         Return ret

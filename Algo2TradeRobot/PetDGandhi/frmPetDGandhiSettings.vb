@@ -3,10 +3,10 @@ Imports System.IO
 
 Public Class frmPetDGandhiSettings
     Private _cts As CancellationTokenSource = Nothing
-    Private _PetDGandhiSettings As PetDGandhiStrategyUserInputs = Nothing
+    Private _PetDGandhiSettings As PetDGandhiUserInputs = Nothing
     Private _PetDGandhiSettingsFilename As String = Path.Combine(My.Application.Info.DirectoryPath, "PetDGandhiSettings.Strategy.a2t")
 
-    Public Sub New(ByRef PetDGandhiUserInputs As PetDGandhiStrategyUserInputs)
+    Public Sub New(ByRef PetDGandhiUserInputs As PetDGandhiUserInputs)
         InitializeComponent()
         _PetDGandhiSettings = PetDGandhiUserInputs
     End Sub
@@ -18,7 +18,7 @@ Public Class frmPetDGandhiSettings
     Private Sub btnSavePetDGandhiSettings_Click(sender As Object, e As EventArgs) Handles btnSavePetDGandhiSettings.Click
         Try
             _cts = New CancellationTokenSource
-            If _PetDGandhiSettings Is Nothing Then _PetDGandhiSettings = New PetDGandhiStrategyUserInputs
+            If _PetDGandhiSettings Is Nothing Then _PetDGandhiSettings = New PetDGandhiUserInputs
             _PetDGandhiSettings.InstrumentsData = Nothing
             ValidateInputs()
             SaveSettings()
@@ -44,7 +44,7 @@ Public Class frmPetDGandhiSettings
 
     Private Sub LoadSettings()
         If File.Exists(_PetDGandhiSettingsFilename) Then
-            _PetDGandhiSettings = Utilities.Strings.DeserializeToCollection(Of PetDGandhiStrategyUserInputs)(_PetDGandhiSettingsFilename)
+            _PetDGandhiSettings = Utilities.Strings.DeserializeToCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename)
             txtSignalTimeFrame.Text = _PetDGandhiSettings.SignalTimeFrame
             dtpckrTradeStartTime.Value = _PetDGandhiSettings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _PetDGandhiSettings.LastTradeEntryTime
@@ -73,7 +73,7 @@ Public Class frmPetDGandhiSettings
         _PetDGandhiSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
         _PetDGandhiSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
-        Utilities.Strings.SerializeFromCollection(Of PetDGandhiStrategyUserInputs)(_PetDGandhiSettingsFilename, _PetDGandhiSettings)
+        Utilities.Strings.SerializeFromCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename, _PetDGandhiSettings)
     End Sub
     Private Function ValidateNumbers(ByVal startNumber As Decimal, ByVal endNumber As Decimal, ByVal inputTB As TextBox) As Boolean
         Dim ret As Boolean = False

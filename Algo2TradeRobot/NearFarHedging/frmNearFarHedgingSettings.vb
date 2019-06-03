@@ -4,10 +4,10 @@ Imports System.Threading
 Public Class frmNearFarHedgingSettings
 
     Private _cts As CancellationTokenSource = Nothing
-    Private _NearFarHedgingSettings As NearFarHedgingStrategyUserInputs = Nothing
+    Private _NearFarHedgingSettings As NearFarHedgingUserInputs = Nothing
     Private _NearFarHedgingSettingsFilename As String = Path.Combine(My.Application.Info.DirectoryPath, "NearFarHedgingSettings.Strategy.a2t")
 
-    Public Sub New(ByRef userInputs As NearFarHedgingStrategyUserInputs)
+    Public Sub New(ByRef userInputs As NearFarHedgingUserInputs)
         InitializeComponent()
         _NearFarHedgingSettings = userInputs
     End Sub
@@ -19,7 +19,7 @@ Public Class frmNearFarHedgingSettings
     Private Sub btnSaveNearFarHedgingSettings_Click(sender As Object, e As EventArgs) Handles btnSaveNearFarHedgingSettings.Click
         Try
             _cts = New CancellationTokenSource
-            If _NearFarHedgingSettings Is Nothing Then _NearFarHedgingSettings = New NearFarHedgingStrategyUserInputs
+            If _NearFarHedgingSettings Is Nothing Then _NearFarHedgingSettings = New NearFarHedgingUserInputs
             _NearFarHedgingSettings.InstrumentsData = Nothing
             ValidateInputs()
             SaveSettings()
@@ -31,7 +31,7 @@ Public Class frmNearFarHedgingSettings
 
     Private Sub LoadSettings()
         If File.Exists(_NearFarHedgingSettingsFilename) Then
-            _NearFarHedgingSettings = Utilities.Strings.DeserializeToCollection(Of NearFarHedgingStrategyUserInputs)(_NearFarHedgingSettingsFilename)
+            _NearFarHedgingSettings = Utilities.Strings.DeserializeToCollection(Of NearFarHedgingUserInputs)(_NearFarHedgingSettingsFilename)
             txtSignalTimeFrame.Text = _NearFarHedgingSettings.SignalTimeFrame
             dtpckrTradeStartTime.Value = _NearFarHedgingSettings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _NearFarHedgingSettings.LastTradeEntryTime
@@ -70,7 +70,7 @@ Public Class frmNearFarHedgingSettings
         _NearFarHedgingSettings.TelegramChatID = txtTelegramChatID.Text
         _NearFarHedgingSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
 
-        Utilities.Strings.SerializeFromCollection(Of NearFarHedgingStrategyUserInputs)(_NearFarHedgingSettingsFilename, _NearFarHedgingSettings)
+        Utilities.Strings.SerializeFromCollection(Of NearFarHedgingUserInputs)(_NearFarHedgingSettingsFilename, _NearFarHedgingSettings)
     End Sub
     Private Function ValidateNumbers(ByVal startNumber As Decimal, ByVal endNumber As Decimal, ByVal inputTB As TextBox) As Boolean
         Dim ret As Boolean = False

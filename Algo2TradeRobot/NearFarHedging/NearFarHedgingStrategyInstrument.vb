@@ -43,15 +43,15 @@ Public Class NearFarHedgingStrategyInstrument
                 pairConsumer.OnwardLevelConsumers = New List(Of IPayloadConsumer)
                 Dim spreadRatioData As SpreadRatioConsumer = New SpreadRatioConsumer(pairConsumer, TypeOfField.Close)
                 spreadRatioData.OnwardLevelConsumers = New List(Of IPayloadConsumer)
-                Dim spreadBollinger As BollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerMultiplier, TypeOfField.Spread)
-                Dim ratioBollinger As BollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerMultiplier, TypeOfField.Ratio)
+                Dim spreadBollinger As BollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingUserInputs).BollingerMultiplier, TypeOfField.Spread)
+                Dim ratioBollinger As BollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingUserInputs).BollingerMultiplier, TypeOfField.Ratio)
                 spreadRatioData.OnwardLevelConsumers.Add(spreadBollinger)
                 spreadRatioData.OnwardLevelConsumers.Add(ratioBollinger)
                 pairConsumer.OnwardLevelConsumers.Add(spreadRatioData)
                 RawPayloadDependentConsumers.Add(pairConsumer)
                 DummySpreadRatioConsumer = New SpreadRatioConsumer(pairConsumer, TypeOfField.Close)
-                DummySpreadBollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerMultiplier, TypeOfField.Spread)
-                DummyRatioBollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingStrategyUserInputs).BollingerMultiplier, TypeOfField.Ratio)
+                DummySpreadBollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingUserInputs).BollingerMultiplier, TypeOfField.Spread)
+                DummyRatioBollingerConsumer = New BollingerConsumer(spreadRatioData, CType(Me.ParentStrategy.UserSettings, NearFarHedgingUserInputs).BollingerPeriod, CType(Me.ParentStrategy.UserSettings, NearFarHedgingUserInputs).BollingerMultiplier, TypeOfField.Ratio)
             Else
                 Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
             End If
@@ -61,7 +61,7 @@ Public Class NearFarHedgingStrategyInstrument
         Try
             If Me.IsPairInstrument Then
                 Dim lastTriggerTime As Date = Date.MinValue
-                Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+                Dim hedgingUserInputs As NearFarHedgingUserInputs = Me.ParentStrategy.UserSettings
                 While True
                     If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
                         Throw Me.ParentStrategy.ParentController.OrphanException
@@ -200,7 +200,7 @@ Public Class NearFarHedgingStrategyInstrument
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean, ByVal data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
         Dim ret As List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)) = Nothing
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim hedgingUserInputs As NearFarHedgingUserInputs = Me.ParentStrategy.UserSettings
         Dim capitalAtDayStart As Decimal = Me.ParentStrategy.ParentController.GetUserMargin(TypeOfExchage.NSE)
         Dim potentialSignalData As Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload) = GetCurrentSignal(False)
         Dim runningCandlePayload As PairPayload = Nothing
@@ -336,7 +336,7 @@ Public Class NearFarHedgingStrategyInstrument
     Protected Overrides Async Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         Dim ret As List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)) = Nothing
-        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim hedgingUserInputs As NearFarHedgingUserInputs = Me.ParentStrategy.UserSettings
         Dim potentialSignalData As Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload) = GetCurrentSignal(False)
         Dim runningCandlePayload As PairPayload = Nothing
         Dim currentCandlePayload As OHLCPayload = Nothing
@@ -454,7 +454,7 @@ Public Class NearFarHedgingStrategyInstrument
             message = message.Replace("&", "_")
         End If
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim hedgingUserInputs As NearFarHedgingUserInputs = Me.ParentStrategy.UserSettings
         If hedgingUserInputs.TelegramAPIKey IsNot Nothing AndAlso Not hedgingUserInputs.TelegramAPIKey.Trim = "" AndAlso
             hedgingUserInputs.TelegramChatID IsNot Nothing AndAlso Not hedgingUserInputs.TelegramChatID.Trim = "" Then
             Using tSender As New Utilities.Notification.Telegram(hedgingUserInputs.TelegramAPIKey.Trim, hedgingUserInputs.TelegramChatID, _cts)
@@ -470,7 +470,7 @@ Public Class NearFarHedgingStrategyInstrument
                                  ByVal ratioBollingerData As BollingerConsumer.BollingerPayload,
                                  ByVal forcePrint As Boolean) As Tuple(Of Boolean, IOrder.TypeOfTransaction)
         Dim ret As Tuple(Of Boolean, IOrder.TypeOfTransaction) = Nothing
-        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim hedgingUserInputs As NearFarHedgingUserInputs = Me.ParentStrategy.UserSettings
         If spreadRatioData IsNot Nothing AndAlso spreadBollingerData IsNot Nothing AndAlso ratioBollingerData IsNot Nothing Then
             If forcePrint Then
                 logger.Debug("{0}, {1}, {2}", spreadRatioData.ToString, spreadBollingerData.ToString, ratioBollingerData.ToString)
@@ -524,7 +524,7 @@ Public Class NearFarHedgingStrategyInstrument
 
     Private Function GetCurrentSignal(ByVal forcePrint As Boolean) As Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload)
         Dim ret As Tuple(Of Boolean, IOrder.TypeOfTransaction, PairPayload, OHLCPayload) = Nothing
-        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim hedgingUserInputs As NearFarHedgingUserInputs = Me.ParentStrategy.UserSettings
 
         Dim runningCandlePayload As PairPayload = Nothing
         Dim spreadRatioConsumer As SpreadRatioConsumer = Nothing

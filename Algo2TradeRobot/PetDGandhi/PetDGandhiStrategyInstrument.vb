@@ -43,11 +43,11 @@ Public Class PetDGandhiStrategyInstrument
             If Me.ParentStrategy.UserSettings.SignalTimeFrame > 0 Then
                 Dim chartConsumer As PayloadToChartConsumer = New PayloadToChartConsumer(Me.ParentStrategy.UserSettings.SignalTimeFrame)
                 chartConsumer.OnwardLevelConsumers = New List(Of IPayloadConsumer) From
-                {New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiStrategyUserInputs).EMAPeriod, TypeOfField.Close),
-                New PivotHighLowConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiStrategyUserInputs).PivotHighLowStrict)}
+                {New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).EMAPeriod, TypeOfField.Close),
+                New PivotHighLowConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).PivotHighLowStrict)}
                 RawPayloadDependentConsumers.Add(chartConsumer)
-                _dummyEMAConsumer = New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiStrategyUserInputs).EMAPeriod, TypeOfField.Close)
-                _dummyPivotHighLowConsumer = New PivotHighLowConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiStrategyUserInputs).PivotHighLowStrict)
+                _dummyEMAConsumer = New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).EMAPeriod, TypeOfField.Close)
+                _dummyPivotHighLowConsumer = New PivotHighLowConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).PivotHighLowStrict)
             Else
                 Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
             End If
@@ -58,7 +58,7 @@ Public Class PetDGandhiStrategyInstrument
 
     Public Overrides Async Function MonitorAsync() As Task
         Try
-            Dim petDGandhiUserSettings As PetDGandhiStrategyUserInputs = Me.ParentStrategy.UserSettings
+            Dim petDGandhiUserSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
             While True
                 If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
                     Throw Me.ParentStrategy.ParentController.OrphanException
@@ -108,7 +108,7 @@ Public Class PetDGandhiStrategyInstrument
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
         Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim petDGandhiUserSettings As PetDGandhiStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim petDGandhiUserSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
         Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(petDGandhiUserSettings.SignalTimeFrame)
         Dim emaConsumer As EMAConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyEMAConsumer)
         Dim pivotHighLowConsumer As PivotHighLowConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyPivotHighLowConsumer)
@@ -352,7 +352,7 @@ Public Class PetDGandhiStrategyInstrument
                             Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
                             Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
                             Dim triggerPrice As Decimal = Decimal.MinValue
-                            Dim petDGandhiUserSettings As PetDGandhiStrategyUserInputs = Me.ParentStrategy.UserSettings
+                            Dim petDGandhiUserSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
                             Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(petDGandhiUserSettings.SignalTimeFrame)
                             Dim emaConsumer As EMAConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyEMAConsumer)
                             Dim pivotHighLowConsumer As PivotHighLowConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyPivotHighLowConsumer)
@@ -417,7 +417,7 @@ Public Class PetDGandhiStrategyInstrument
             If parentOrders IsNot Nothing AndAlso parentOrders.Count > 0 Then
                 For Each parentOrder In parentOrders
                     Dim parentBusinessOrder As IBusinessOrder = OrderDetails(parentOrder.OrderIdentifier)
-                    Dim petDGandhiUserSettings As PetDGandhiStrategyUserInputs = Me.ParentStrategy.UserSettings
+                    Dim petDGandhiUserSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
                     Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(petDGandhiUserSettings.SignalTimeFrame)
                     Dim emaConsumer As EMAConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyEMAConsumer)
                     Dim pivotHighLowConsumer As PivotHighLowConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyPivotHighLowConsumer)
@@ -555,7 +555,7 @@ Public Class PetDGandhiStrategyInstrument
             message = message.Replace("&", "_")
         End If
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-        Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim hedgingUserInputs As NearFarHedgingUserInputs = Me.ParentStrategy.UserSettings
         If hedgingUserInputs.TelegramAPIKey IsNot Nothing AndAlso Not hedgingUserInputs.TelegramAPIKey.Trim = "" AndAlso
             hedgingUserInputs.TelegramChatID IsNot Nothing AndAlso Not hedgingUserInputs.TelegramChatID.Trim = "" Then
             Using tSender As New Utilities.Notification.Telegram(hedgingUserInputs.TelegramAPIKey.Trim, hedgingUserInputs.TelegramChatID, _cts)

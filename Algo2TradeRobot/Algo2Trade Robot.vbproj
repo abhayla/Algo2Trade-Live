@@ -207,7 +207,7 @@
     </Compile>
     <Compile Include="NearFarHedging\NearFarHedgingStrategy.vb" />
     <Compile Include="NearFarHedging\NearFarHedgingStrategyInstrument.vb" />
-    <Compile Include="NearFarHedging\NearFarHedgingStrategyUserInputs.vb" />
+    <Compile Include="NearFarHedging\NearFarHedgingUserInputs.vb" />
     <Compile Include="OHL\frmOHLSettings.Designer.vb">
       <DependentUpon>frmOHLSettings.vb</DependentUpon>
     </Compile>
@@ -252,7 +252,7 @@
     </Compile>
     <Compile Include="PetDGandhi\PetDGandhiStrategy.vb" />
     <Compile Include="PetDGandhi\PetDGandhiStrategyInstrument.vb" />
-    <Compile Include="PetDGandhi\PetDGandhiStrategyUserInputs.vb" />
+    <Compile Include="PetDGandhi\PetDGandhiUserInputs.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AmiSignal\frmAmiSignalSettings.resx">

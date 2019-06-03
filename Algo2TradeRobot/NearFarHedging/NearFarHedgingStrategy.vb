@@ -13,7 +13,7 @@ Public Class NearFarHedgingStrategy
 
     Public Sub New(ByVal associatedParentController As APIStrategyController,
                    ByVal strategyIdentifier As String,
-                   ByVal userSettings As NearFarHedgingStrategyUserInputs,
+                   ByVal userSettings As NearFarHedgingUserInputs,
                    ByVal maxNumberOfDaysForHistoricalFetch As Integer,
                    ByVal canceller As CancellationTokenSource)
         MyBase.New(associatedParentController, strategyIdentifier, True, userSettings, maxNumberOfDaysForHistoricalFetch, canceller)
@@ -35,7 +35,7 @@ Public Class NearFarHedgingStrategy
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
 
-        Dim userInputs As NearFarHedgingStrategyUserInputs = CType(Me.UserSettings, NearFarHedgingStrategyUserInputs)
+        Dim userInputs As NearFarHedgingUserInputs = CType(Me.UserSettings, NearFarHedgingUserInputs)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             'Get Strategy Instruments
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
@@ -244,7 +244,7 @@ Public Class NearFarHedgingStrategy
                         message = message.Replace("&", "_")
                     End If
 
-                    Dim hedgingUserInputs As NearFarHedgingStrategyUserInputs = Me.UserSettings
+                    Dim hedgingUserInputs As NearFarHedgingUserInputs = Me.UserSettings
                     If hedgingUserInputs.TelegramAPIKey IsNot Nothing AndAlso Not hedgingUserInputs.TelegramAPIKey.Trim = "" AndAlso
                         hedgingUserInputs.TelegramChatID IsNot Nothing AndAlso Not hedgingUserInputs.TelegramPLChatID.Trim = "" Then
                         Using tSender As New Utilities.Notification.Telegram(hedgingUserInputs.TelegramAPIKey.Trim, hedgingUserInputs.TelegramPLChatID, _cts)
