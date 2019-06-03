@@ -25,6 +25,8 @@ Partial Class frmPetDGandhiSettings
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmPetDGandhiSettings))
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.chkboxPivotHighLowStrict = New System.Windows.Forms.CheckBox()
+        Me.lblPivotHighLowStrict = New System.Windows.Forms.Label()
         Me.txtEMAPeriod = New System.Windows.Forms.TextBox()
         Me.lblEMAPeriod = New System.Windows.Forms.Label()
         Me.txtMaxProfitPerDay = New System.Windows.Forms.TextBox()
@@ -53,8 +55,6 @@ Partial Class frmPetDGandhiSettings
         Me.lblTelegramChatID = New System.Windows.Forms.Label()
         Me.txtTelegramAPI = New System.Windows.Forms.TextBox()
         Me.lblTelegramAPI = New System.Windows.Forms.Label()
-        Me.lblPivotHighLowStrict = New System.Windows.Forms.Label()
-        Me.chkboxPivotHighLowStrict = New System.Windows.Forms.CheckBox()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.grpTelegram.SuspendLayout()
@@ -72,6 +72,25 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox2.TabIndex = 16
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Indicator Settings"
+        '
+        'chkboxPivotHighLowStrict
+        '
+        Me.chkboxPivotHighLowStrict.AutoSize = True
+        Me.chkboxPivotHighLowStrict.Location = New System.Drawing.Point(155, 65)
+        Me.chkboxPivotHighLowStrict.Name = "chkboxPivotHighLowStrict"
+        Me.chkboxPivotHighLowStrict.Size = New System.Drawing.Size(18, 17)
+        Me.chkboxPivotHighLowStrict.TabIndex = 34
+        Me.chkboxPivotHighLowStrict.UseVisualStyleBackColor = True
+        '
+        'lblPivotHighLowStrict
+        '
+        Me.lblPivotHighLowStrict.AutoSize = True
+        Me.lblPivotHighLowStrict.Location = New System.Drawing.Point(10, 64)
+        Me.lblPivotHighLowStrict.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblPivotHighLowStrict.Name = "lblPivotHighLowStrict"
+        Me.lblPivotHighLowStrict.Size = New System.Drawing.Size(137, 17)
+        Me.lblPivotHighLowStrict.TabIndex = 33
+        Me.lblPivotHighLowStrict.Text = "Pivot High Low Strict"
         '
         'txtEMAPeriod
         '
@@ -352,25 +371,6 @@ Partial Class frmPetDGandhiSettings
         Me.lblTelegramAPI.TabIndex = 31
         Me.lblTelegramAPI.Text = "API Key"
         '
-        'lblPivotHighLowStrict
-        '
-        Me.lblPivotHighLowStrict.AutoSize = True
-        Me.lblPivotHighLowStrict.Location = New System.Drawing.Point(10, 64)
-        Me.lblPivotHighLowStrict.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblPivotHighLowStrict.Name = "lblPivotHighLowStrict"
-        Me.lblPivotHighLowStrict.Size = New System.Drawing.Size(137, 17)
-        Me.lblPivotHighLowStrict.TabIndex = 33
-        Me.lblPivotHighLowStrict.Text = "Pivot High Low Strict"
-        '
-        'chkboxPivotHighLowStrict
-        '
-        Me.chkboxPivotHighLowStrict.AutoSize = True
-        Me.chkboxPivotHighLowStrict.Location = New System.Drawing.Point(155, 65)
-        Me.chkboxPivotHighLowStrict.Name = "chkboxPivotHighLowStrict"
-        Me.chkboxPivotHighLowStrict.Size = New System.Drawing.Size(18, 17)
-        Me.chkboxPivotHighLowStrict.TabIndex = 34
-        Me.chkboxPivotHighLowStrict.UseVisualStyleBackColor = True
-        '
         'frmPetDGandhiSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
@@ -381,6 +381,8 @@ Partial Class frmPetDGandhiSettings
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnSavePetDGandhiSettings)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.MaximizeBox = False
+        Me.MinimizeBox = False
         Me.Name = "frmPetDGandhiSettings"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Pet-D Gandhi Strategy - Settings"

@@ -13,7 +13,7 @@ Public Class EMA_SupertrendStrategy
 
     Public Sub New(ByVal associatedParentController As APIStrategyController,
                    ByVal strategyIdentifier As String,
-                   ByVal userSettings As EMA_SupertrendStrategyUserInputs,
+                   ByVal userSettings As EMA_SupertrendUserInputs,
                    ByVal maxNumberOfDaysForHistoricalFetch As Integer,
                    ByVal canceller As CancellationTokenSource)
         MyBase.New(associatedParentController, strategyIdentifier, True, userSettings, maxNumberOfDaysForHistoricalFetch, canceller)
@@ -37,7 +37,7 @@ Public Class EMA_SupertrendStrategy
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
 
             'Get Strategy Instruments
-            Dim emaSTUserInputs As EMA_SupertrendStrategyUserInputs = CType(Me.UserSettings, EMA_SupertrendStrategyUserInputs)
+            Dim emaSTUserInputs As EMA_SupertrendUserInputs = CType(Me.UserSettings, EMA_SupertrendUserInputs)
             If emaSTUserInputs.InstrumentsData IsNot Nothing AndAlso emaSTUserInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In emaSTUserInputs.InstrumentsData

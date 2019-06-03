@@ -4,10 +4,10 @@ Imports System.Threading
 Public Class frmEMA_SupertrendSettings
 
     Private _cts As CancellationTokenSource = Nothing
-    Private _EMA_SupertrendSettings As EMA_SupertrendStrategyUserInputs = Nothing
+    Private _EMA_SupertrendSettings As EMA_SupertrendUserInputs = Nothing
     Private _EMA_SupertrendSettingsFilename As String = Path.Combine(My.Application.Info.DirectoryPath, "EMA_SupertrendSettings.Strategy.a2t")
 
-    Public Sub New(ByRef EMA_SupertrendUserInputs As EMA_SupertrendStrategyUserInputs)
+    Public Sub New(ByRef EMA_SupertrendUserInputs As EMA_SupertrendUserInputs)
         InitializeComponent()
         _EMA_SupertrendSettings = EMA_SupertrendUserInputs
     End Sub
@@ -19,7 +19,7 @@ Public Class frmEMA_SupertrendSettings
     Private Sub btnSaveEMA_SupertrendSettings_Click(sender As Object, e As EventArgs) Handles btnSaveEMA_SupertrendSettings.Click
         Try
             _cts = New CancellationTokenSource
-            If _EMA_SupertrendSettings Is Nothing Then _EMA_SupertrendSettings = New EMA_SupertrendStrategyUserInputs
+            If _EMA_SupertrendSettings Is Nothing Then _EMA_SupertrendSettings = New EMA_SupertrendUserInputs
             _EMA_SupertrendSettings.InstrumentsData = Nothing
             ValidateInputs()
             SaveSettings()
@@ -31,7 +31,7 @@ Public Class frmEMA_SupertrendSettings
 
     Private Sub LoadSettings()
         If File.Exists(_EMA_SupertrendSettingsFilename) Then
-            _EMA_SupertrendSettings = Utilities.Strings.DeserializeToCollection(Of EMA_SupertrendStrategyUserInputs)(_EMA_SupertrendSettingsFilename)
+            _EMA_SupertrendSettings = Utilities.Strings.DeserializeToCollection(Of EMA_SupertrendUserInputs)(_EMA_SupertrendSettingsFilename)
             txtSignalTimeFrame.Text = _EMA_SupertrendSettings.SignalTimeFrame
             dtpckrTradeStartTime.Value = _EMA_SupertrendSettings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _EMA_SupertrendSettings.LastTradeEntryTime
@@ -58,7 +58,7 @@ Public Class frmEMA_SupertrendSettings
         _EMA_SupertrendSettings.SupertrendMultiplier = txtSupertrendMultiplier.Text
         _EMA_SupertrendSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
-        Utilities.Strings.SerializeFromCollection(Of EMA_SupertrendStrategyUserInputs)(_EMA_SupertrendSettingsFilename, _EMA_SupertrendSettings)
+        Utilities.Strings.SerializeFromCollection(Of EMA_SupertrendUserInputs)(_EMA_SupertrendSettingsFilename, _EMA_SupertrendSettings)
     End Sub
     Private Function ValidateNumbers(ByVal startNumber As Decimal, ByVal endNumber As Decimal, ByVal inputTB As TextBox) As Boolean
         Dim ret As Boolean = False

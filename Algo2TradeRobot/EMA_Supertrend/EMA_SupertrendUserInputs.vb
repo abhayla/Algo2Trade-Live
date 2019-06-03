@@ -4,7 +4,7 @@ Imports Algo2TradeCore.Entities.UserSettings
 Imports Utilities.DAL
 
 <Serializable>
-Public Class EMA_SupertrendStrategyUserInputs
+Public Class EMA_SupertrendUserInputs
     Inherits StrategyUserInputs
     Public Property FastEMAPeriod As Integer
     Public Property SlowEMAPeriod As Integer

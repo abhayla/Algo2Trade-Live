@@ -46,13 +46,13 @@ Public Class EMA_SupertrendStrategyInstrument
             If Me.ParentStrategy.UserSettings.SignalTimeFrame > 0 Then
                 Dim chartConsumer As PayloadToChartConsumer = New PayloadToChartConsumer(Me.ParentStrategy.UserSettings.SignalTimeFrame)
                 chartConsumer.OnwardLevelConsumers = New List(Of IPayloadConsumer) From
-                {New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).FastEMAPeriod, TypeOfField.Close)} ',
+                {New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendUserInputs).FastEMAPeriod, TypeOfField.Close)} ',
                 'New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).SlowEMAPeriod, TypeOfField.Close),
                 'New SupertrendConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).SupertrendPeriod, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).SupertrendMultiplier)}
                 RawPayloadDependentConsumers.Add(chartConsumer)
-                _dummyFastEMAConsumer = New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).FastEMAPeriod, TypeOfField.Close)
-                _dummySlowEMAConsumer = New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).SlowEMAPeriod, TypeOfField.Close)
-                _dummySupertrendConsumer = New SupertrendConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).SupertrendPeriod, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendStrategyUserInputs).SupertrendMultiplier)
+                _dummyFastEMAConsumer = New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendUserInputs).FastEMAPeriod, TypeOfField.Close)
+                _dummySlowEMAConsumer = New EMAConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendUserInputs).SlowEMAPeriod, TypeOfField.Close)
+                _dummySupertrendConsumer = New SupertrendConsumer(chartConsumer, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendUserInputs).SupertrendPeriod, CType(Me.ParentStrategy.UserSettings, EMA_SupertrendUserInputs).SupertrendMultiplier)
             Else
                 Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
             End If
@@ -123,7 +123,7 @@ Public Class EMA_SupertrendStrategyInstrument
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
         Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim emaStUserSettings As EMA_SupertrendStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim emaStUserSettings As EMA_SupertrendUserInputs = Me.ParentStrategy.UserSettings
         Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(emaStUserSettings.SignalTimeFrame)
         Dim capitalAtDayStart As Decimal = Me.ParentStrategy.ParentController.GetUserMargin(Me.TradableInstrument.ExchangeDetails.ExchangeType)
         Dim supertrendConsumer As SupertrendConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummySupertrendConsumer)
@@ -265,7 +265,7 @@ Public Class EMA_SupertrendStrategyInstrument
     Protected Overrides Async Function IsTriggerReceivedForModifyStoplossOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
         Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim emaStUserSettings As EMA_SupertrendStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim emaStUserSettings As EMA_SupertrendUserInputs = Me.ParentStrategy.UserSettings
 
         If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
             For Each parentOrderId In OrderDetails.Keys
@@ -466,7 +466,7 @@ Public Class EMA_SupertrendStrategyInstrument
     End Function
     Protected Overrides Async Function IsTriggerReceivedForExitOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
         Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Nothing
-        Dim emaStUserSettings As EMA_SupertrendStrategyUserInputs = Me.ParentStrategy.UserSettings
+        Dim emaStUserSettings As EMA_SupertrendUserInputs = Me.ParentStrategy.UserSettings
         Dim allActiveOrders As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.None)
         If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
             Dim parentOrders As List(Of IOrder) = allActiveOrders.FindAll(Function(x)

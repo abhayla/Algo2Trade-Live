@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
-Partial Class frmPetDGandhiTradableInstrumentList
+Partial Class frmEMACrossoverTradableInstrumentList
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -26,7 +26,7 @@ Partial Class frmPetDGandhiTradableInstrumentList
         Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmPetDGandhiTradableInstrumentList))
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmEMACrossoverTradableInstrumentList))
         Me.dgvTradableInstruments = New System.Windows.Forms.DataGridView()
         CType(Me.dgvTradableInstruments, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -73,7 +73,7 @@ Partial Class frmPetDGandhiTradableInstrumentList
         Me.dgvTradableInstruments.Size = New System.Drawing.Size(806, 312)
         Me.dgvTradableInstruments.TabIndex = 2
         '
-        'frmPetDGandhiTradableInstrumentList
+        'frmEMACrossoverTradableInstrumentList
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -82,9 +82,9 @@ Partial Class frmPetDGandhiTradableInstrumentList
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.Name = "frmPetDGandhiTradableInstrumentList"
+        Me.Name = "frmEMACrossoverTradableInstrumentList"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Pet-D Gandhi Strategy Tradable Instruments"
+        Me.Text = "EMA Crossover Strategy Tradable Instruments"
         CType(Me.dgvTradableInstruments, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 

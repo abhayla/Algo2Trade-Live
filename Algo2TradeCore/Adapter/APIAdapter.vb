@@ -57,6 +57,7 @@ Namespace Adapter
         Public MustOverride Async Function PlaceRegularMarketMISOrderAsync(ByVal tradeExchange As String, ByVal tradingSymbol As String, ByVal transaction As IOrder.TypeOfTransaction, ByVal quantity As Integer, ByVal tag As String) As Task(Of Dictionary(Of String, Object))
         Public MustOverride Async Function PlaceRegularLimitMISOrderAsync(ByVal tradeExchange As String, ByVal tradingSymbol As String, ByVal transaction As IOrder.TypeOfTransaction, ByVal quantity As Integer, ByVal price As Decimal, ByVal tag As String) As Task(Of Dictionary(Of String, Object))
         Public MustOverride Async Function PlaceRegularSLMMISOrderAsync(ByVal tradeExchange As String, ByVal tradingSymbol As String, ByVal transaction As IOrder.TypeOfTransaction, ByVal quantity As Integer, ByVal triggerPrice As Decimal, ByVal tag As String) As Task(Of Dictionary(Of String, Object))
+        Public MustOverride Async Function PlaceRegularMarketCNCOrderAsync(ByVal tradeExchange As String, ByVal tradingSymbol As String, ByVal transaction As IOrder.TypeOfTransaction, ByVal quantity As Integer, ByVal tag As String) As Task(Of Dictionary(Of String, Object))
         Public Enum ExecutionCommands
             GetPositions = 1
             GetQuotes

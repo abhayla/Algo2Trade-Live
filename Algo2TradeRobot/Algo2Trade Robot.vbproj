@@ -124,9 +124,24 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Common.vb" />
+    <Compile Include="EMACrossover\EMACrossoverStrategy.vb" />
+    <Compile Include="EMACrossover\EMACrossoverStrategyInstrument.vb" />
+    <Compile Include="EMACrossover\EMACrossoverUserInputs.vb" />
+    <Compile Include="EMACrossover\frmEMACrossoverSettings.Designer.vb">
+      <DependentUpon>frmEMACrossoverSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="EMACrossover\frmEMACrossoverSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EMACrossover\frmEMACrossoverTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmEMACrossoverTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="EMACrossover\frmEMACrossoverTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="EMA_Supertrend\EMA_SupertrendStrategy.vb" />
     <Compile Include="EMA_Supertrend\EMA_SupertrendStrategyInstrument.vb" />
-    <Compile Include="EMA_Supertrend\EMA_SupertrendStrategyUserInputs.vb" />
+    <Compile Include="EMA_Supertrend\EMA_SupertrendUserInputs.vb" />
     <Compile Include="EMA_Supertrend\frmEMA_SupertrendSettings.Designer.vb">
       <DependentUpon>frmEMA_SupertrendSettings.vb</DependentUpon>
     </Compile>
@@ -246,6 +261,12 @@
     <EmbeddedResource Include="AmiSignal\frmAmiSignalTradableInstrumentList.resx">
       <DependentUpon>frmAmiSignalTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="EMACrossover\frmEMACrossoverSettings.resx">
+      <DependentUpon>frmEMACrossoverSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EMACrossover\frmEMACrossoverTradableInstrumentList.resx">
+      <DependentUpon>frmEMACrossoverTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="EMA_Supertrend\frmEMA_SupertrendSettings.resx">
       <DependentUpon>frmEMA_SupertrendSettings.vb</DependentUpon>
     </EmbeddedResource>
@@ -321,5 +342,6 @@
   <ItemGroup>
     <Content Include="algo2tradericon 24x24.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

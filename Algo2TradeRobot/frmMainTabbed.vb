@@ -970,7 +970,7 @@ Public Class frmMainTabbed
 #End Region
 
 #Region "EMA & Supertrend Strategy"
-    Private _EMA_SupertrendUserInputs As EMA_SupertrendStrategyUserInputs = Nothing
+    Private _EMA_SupertrendUserInputs As EMA_SupertrendUserInputs = Nothing
     Private _EMA_SupertrendDashboadList As BindingList(Of ActivityDashboard) = Nothing
     Private _EMA_SupertrendTradableInstruments As IEnumerable(Of EMA_SupertrendStrategyInstrument) = Nothing
     Private _EMASupertrendStrategyToExecute As EMA_SupertrendStrategy = Nothing
@@ -998,7 +998,7 @@ Public Class frmMainTabbed
             If File.Exists("EMA_SupertrendSettings.Strategy.a2t") Then
                 Dim fs As Stream = New FileStream("EMA_SupertrendSettings.Strategy.a2t", FileMode.Open)
                 Dim bf As BinaryFormatter = New BinaryFormatter()
-                _EMA_SupertrendUserInputs = CType(bf.Deserialize(fs), EMA_SupertrendStrategyUserInputs)
+                _EMA_SupertrendUserInputs = CType(bf.Deserialize(fs), EMA_SupertrendUserInputs)
                 fs.Close()
                 _EMA_SupertrendUserInputs.InstrumentsData = Nothing
                 _EMA_SupertrendUserInputs.FillInstrumentDetails(_EMA_SupertrendUserInputs.InstrumentDetailsFilePath, _cts)
