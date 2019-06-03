@@ -20,7 +20,6 @@ Public Class PetDGandhiStrategyInstrument
     Private ReadOnly _dummyPivotHighLowConsumer As PivotHighLowConsumer
     Private _signalLevel As SignalLevels
     Private _usedSignalLevel As SignalLevels
-    Private _lastPlacedOrderID As String
 
     Public Sub New(ByVal associatedInstrument As IInstrument,
                    ByVal associatedParentStrategy As Strategy,
@@ -54,14 +53,21 @@ Public Class PetDGandhiStrategyInstrument
             End If
         End If
         _signalLevel = New SignalLevels
-        _lastPlacedOrderID = Nothing
+        _usedSignalLevel = New SignalLevels
     End Sub
 
     Public Overrides Async Function MonitorAsync() As Task
         Try
+            Dim petDGandhiUserSettings As PetDGandhiStrategyUserInputs = Me.ParentStrategy.UserSettings
             While True
                 If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
                     Throw Me.ParentStrategy.ParentController.OrphanException
+                End If
+
+                _cts.Token.ThrowIfCancellationRequested()
+                If Me.GetOverallPL() <= Math.Abs(petDGandhiUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).MaxLossPerStock) * -1 OrElse
+                    Me.GetOverallPL() >= Math.Abs(petDGandhiUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).MaxProfitPerStock) Then
+                    Await ForceExitAllTradesAsync("Force Cancel for stock PL").ConfigureAwait(False)
                 End If
 
                 _cts.Token.ThrowIfCancellationRequested()
@@ -73,12 +79,8 @@ Public Class PetDGandhiStrategyInstrument
                     ElseIf placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.Limit Then
                         placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOLimitMISOrder, Nothing).ConfigureAwait(False)
                     End If
-                    If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                       placeOrderResponse("data").ContainsKey("order_id") Then
-                        _lastPlacedOrderID = placeOrderResponse("data")("order_id")
-                    End If
                 End If
-                    _cts.Token.ThrowIfCancellationRequested()
+                _cts.Token.ThrowIfCancellationRequested()
                 Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
                 If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
                     Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
@@ -154,8 +156,8 @@ Public Class PetDGandhiStrategyInstrument
             If signal IsNot Nothing Then
                 Dim tradeDirection As IOrder.TypeOfTransaction = IOrder.TypeOfTransaction.None
                 If signal.BuyLevel <> Decimal.MinValue AndAlso signal.SellLevel <> Decimal.MinValue Then
-                    buyLine = signal.BuyLevel - Math.Abs(signal.BuyLevel - signal.SellLevel) * 40 / 100
-                    sellLine = signal.SellLevel + Math.Abs(signal.BuyLevel - signal.SellLevel) * 40 / 100
+                    buyLine = signal.BuyLevel - Math.Abs(signal.BuyLevel - signal.SellLevel) * 30 / 100
+                    sellLine = signal.SellLevel + Math.Abs(signal.BuyLevel - signal.SellLevel) * 30 / 100
                     If ltp > buyLine Then
                         tradeDirection = IOrder.TypeOfTransaction.Buy
                     ElseIf ltp < sellLine Then
@@ -180,24 +182,36 @@ Public Class PetDGandhiStrategyInstrument
                 Dim buyEntry As Boolean = True
                 Dim sellEntry As Boolean = True
 
-                If _lastPlacedOrderID IsNot Nothing AndAlso Me.OrderDetails IsNot Nothing AndAlso Me.OrderDetails.Count > 0 AndAlso
-                    Me.OrderDetails.ContainsKey(_lastPlacedOrderID) Then
-                    Dim businessOrder As IBusinessOrder = OrderDetails(_lastPlacedOrderID)
-                    If businessOrder.TargetOrder IsNot Nothing AndAlso businessOrder.TargetOrder.Count > 0 Then
-                        Dim targetReached As Boolean = False
-                        For Each runningTargetOrder In businessOrder.TargetOrder
-                            If runningTargetOrder.Status = IOrder.TypeOfStatus.Complete Then
-                                targetReached = True
-                                Exit For
-                            End If
-                        Next
-                        If targetReached Then
-                            If Not petDGandhiUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).SimilarDirectionTradeAfterTarget Then
-                                If businessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                    buyEntry = False
-                                ElseIf businessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                    sellEntry = False
-                                End If
+                Dim businessOrder As IBusinessOrder = GetLastExecutedOrder()
+                If businessOrder IsNot Nothing AndAlso businessOrder.AllOrder IsNot Nothing AndAlso businessOrder.AllOrder.Count > 0 Then
+                    Dim targetReached As Boolean = False
+                    For Each runningTargetOrder In businessOrder.AllOrder
+                        If runningTargetOrder.Status = IOrder.TypeOfStatus.Complete Then
+                            Select Case businessOrder.ParentOrder.TransactionType
+                                Case IOrder.TypeOfTransaction.Buy
+                                    If runningTargetOrder.AveragePrice >= businessOrder.ParentOrder.AveragePrice Then
+                                        targetReached = True
+                                        Exit For
+                                    End If
+                                Case IOrder.TypeOfTransaction.Sell
+                                    If runningTargetOrder.AveragePrice <= businessOrder.ParentOrder.AveragePrice Then
+                                        targetReached = True
+                                        Exit For
+                                    End If
+                            End Select
+                        End If
+                    Next
+
+                    If forcePrint Then
+                        logger.Debug("Place Order-> Order ID:{0}, Direction:{1}, Target Reached:{2}", businessOrder.ParentOrderIdentifier, businessOrder.ParentOrder.TransactionType.ToString, targetReached)
+                    End If
+
+                    If targetReached Then
+                        If Not petDGandhiUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).SimilarDirectionTradeAfterTarget Then
+                            If businessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                buyEntry = False
+                            ElseIf businessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                sellEntry = False
                             End If
                         End If
                     End If
@@ -219,12 +233,12 @@ Public Class PetDGandhiStrategyInstrument
                             .StoplossValue = stoploss,
                             .OrderType = IOrder.TypeOfOrder.SL
                         }
-                    Else
+                    ElseIf Me.GetTotalExecutedOrders() > 0 Then
+                        price = ltp + Math.Round(ConvertFloorCeling(ltp * 0.3 / 100, Convert.ToDouble(TradableInstrument.TickSize), RoundOfType.Celing), 2)
                         parameters = New PlaceOrderParameters(signal.BuySignalCandle) With
                         {
                             .EntryDirection = IOrder.TypeOfTransaction.Buy,
                             .Price = price,
-                            .TriggerPrice = triggerPrice,
                             .Quantity = quantity,
                             .SquareOffValue = target,
                             .StoplossValue = stoploss,
@@ -247,12 +261,12 @@ Public Class PetDGandhiStrategyInstrument
                             .StoplossValue = stoploss,
                             .OrderType = IOrder.TypeOfOrder.SL
                         }
-                    Else
+                    ElseIf Me.GetTotalExecutedOrders() > 0 Then
+                        price = ltp - Math.Round(ConvertFloorCeling(ltp * 0.3 / 100, Convert.ToDouble(TradableInstrument.TickSize), RoundOfType.Celing), 2)
                         parameters = New PlaceOrderParameters(signal.SellSignalCandle) With
                         {
                             .EntryDirection = IOrder.TypeOfTransaction.Sell,
                             .Price = price,
-                            .TriggerPrice = triggerPrice,
                             .Quantity = quantity,
                             .SquareOffValue = target,
                             .StoplossValue = stoploss,
@@ -267,7 +281,7 @@ Public Class PetDGandhiStrategyInstrument
         If parameters IsNot Nothing Then
             Try
                 If forcePrint Then
-                    logger.Debug("Place Order parametres: Entry Direcrion:{0}, Price:{1}, Quantity:{2}, Target:{3}, Stoploss:{4}, Signal Candle:{5}, Buy Level:{6}, Sell Level:{7}, Buy Line:{8}, Sell Line:{9}, LTP:{10}, Order Type:{11}",
+                    logger.Debug("Place Order parametres-> Entry Direcrion:{0}, Price:{1}, Quantity:{2}, Target:{3}, Stoploss:{4}, Signal Candle:{5}, Buy Level:{6}, Sell Level:{7}, Buy Line:{8}, Sell Line:{9}, LTP:{10}, Order Type:{11}",
                              parameters.EntryDirection.ToString, parameters.Price,
                              parameters.Quantity,
                              parameters.SquareOffValue,
@@ -303,6 +317,14 @@ Public Class PetDGandhiStrategyInstrument
                         ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "Condition Satisfied")
                     End If
                 Next
+                Dim handledActivity As IEnumerable(Of ActivityDashboard) =
+                    currentSignalActivities.Where(Function(x)
+                                                      Return x.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
+                                                      x.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated
+                                                  End Function)
+                If handledActivity IsNot Nothing AndAlso handledActivity.Count > 0 Then
+                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
+                End If
             Else
                 ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
             End If
@@ -369,9 +391,9 @@ Public Class PetDGandhiStrategyInstrument
                                 End If
 
                                 If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
-                                    ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, "Opposite direction trade entry price"))
-                                End If
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, "Opposite direction trade entry price"))
                             End If
+                        End If
                     Next
                 End If
             Next
@@ -408,8 +430,8 @@ Public Class PetDGandhiStrategyInstrument
                             Dim sellLine As Decimal = 0
                             Dim ltp As Decimal = Me.TradableInstrument.LastTick.LastPrice
                             If signal.BuyLevel <> Decimal.MinValue AndAlso signal.SellLevel <> Decimal.MinValue Then
-                                buyLine = signal.BuyLevel - Math.Abs(signal.BuyLevel - signal.SellLevel) * 40 / 100
-                                sellLine = signal.SellLevel + Math.Abs(signal.BuyLevel - signal.SellLevel) * 40 / 100
+                                buyLine = signal.BuyLevel - Math.Abs(signal.BuyLevel - signal.SellLevel) * 30 / 100
+                                sellLine = signal.SellLevel + Math.Abs(signal.BuyLevel - signal.SellLevel) * 30 / 100
                                 If ltp > buyLine Then
                                     tradeDirection = IOrder.TypeOfTransaction.Buy
                                 ElseIf ltp < sellLine Then
@@ -507,17 +529,20 @@ Public Class PetDGandhiStrategyInstrument
                 If orderData.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy AndAlso _signalLevel.BuySignalCandle IsNot Nothing AndAlso
                     _signalLevel.BuySignalCandle.SnapshotDateTime = signalCandleTime Then
                     logger.Debug("Removing Buy Signal as it is used. Buy Price:{0}, BuySignalCandle:{1}", _signalLevel.BuyLevel, _signalLevel.BuySignalCandle.SnapshotDateTime)
-                    _usedSignalLevel = _signalLevel
+                    _usedSignalLevel.BuyLevel = _signalLevel.BuyLevel
+                    _usedSignalLevel.BuySignalCandle = _signalLevel.BuySignalCandle
                     _signalLevel.BuyLevel = Decimal.MinValue
                     _signalLevel.BuySignalCandle = Nothing
                 ElseIf orderData.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell AndAlso _signalLevel.SellSignalCandle IsNot Nothing AndAlso
                     _signalLevel.SellSignalCandle.SnapshotDateTime = signalCandleTime Then
                     logger.Debug("Removing Sell Signal as it is used. Sell Price:{0}, SellSignalCandle:{1}", _signalLevel.SellLevel, _signalLevel.SellSignalCandle.SnapshotDateTime)
-                    _usedSignalLevel = _signalLevel
+                    _usedSignalLevel.SellLevel = _signalLevel.SellLevel
+                    _usedSignalLevel.SellSignalCandle = _signalLevel.SellSignalCandle
                     _signalLevel.SellLevel = Decimal.MinValue
                     _signalLevel.SellSignalCandle = Nothing
                 End If
             Catch ex As Exception
+                logger.Debug(ex.ToString)
                 Throw ex
             End Try
         End If
@@ -568,7 +593,7 @@ Public Class PetDGandhiStrategyInstrument
                                     _signalLevel.BuyLevel = lastPivotHighLow.PivotHigh.Value
                                     _signalLevel.BuySignalCandle = lastPivotHighLow.PivotHighSignalCandle
                                     logger.Debug("*** New Buy signal received. Buy Level:{0}, SignalCandleTime:{1}", _signalLevel.BuyLevel, _signalLevel.BuySignalCandle.SnapshotDateTime)
-                                Else
+                                ElseIf _usedSignalLevel Is Nothing OrElse _usedSignalLevel.BuyLevel = Decimal.MinValue Then
                                     _signalLevel.BuyLevel = lastPivotHighLow.PivotHigh.Value
                                     _signalLevel.BuySignalCandle = lastPivotHighLow.PivotHighSignalCandle
                                     logger.Debug("*** New Buy signal received. Buy Level:{0}, SignalCandleTime:{1}", _signalLevel.BuyLevel, _signalLevel.BuySignalCandle.SnapshotDateTime)
@@ -590,7 +615,7 @@ Public Class PetDGandhiStrategyInstrument
                                     _signalLevel.SellLevel = lastPivotHighLow.PivotLow.Value
                                     _signalLevel.SellSignalCandle = lastPivotHighLow.PivotLowSignalCandle
                                     logger.Debug("*** New Sell signal received. Sell Level:{0}, SignalCandleTime:{1}", _signalLevel.SellLevel, _signalLevel.SellSignalCandle.SnapshotDateTime)
-                                Else
+                                ElseIf _usedSignalLevel Is Nothing OrElse _usedSignalLevel.SellLevel = Decimal.MinValue Then
                                     _signalLevel.SellLevel = lastPivotHighLow.PivotLow.Value
                                     _signalLevel.SellSignalCandle = lastPivotHighLow.PivotLowSignalCandle
                                     logger.Debug("*** New Sell signal received. Sell Level:{0}, SignalCandleTime:{1}", _signalLevel.SellLevel, _signalLevel.SellSignalCandle.SnapshotDateTime)

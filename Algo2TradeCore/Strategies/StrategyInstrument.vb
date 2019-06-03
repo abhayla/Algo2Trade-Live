@@ -497,6 +497,21 @@ Namespace Strategies
             ret = allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0
             Return ret
         End Function
+        Public Function GetLastExecutedOrder() As IBusinessOrder
+            Dim ret As IBusinessOrder = Nothing
+            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+                Dim allExecutedOrders As IEnumerable(Of IBusinessOrder) = OrderDetails.Values.Where(Function(x)
+                                                                                                        Return x.ParentOrder IsNot Nothing AndAlso
+                                                                                                        x.ParentOrder.Status = IOrder.TypeOfStatus.Complete
+                                                                                                    End Function)
+                If allExecutedOrders IsNot Nothing AndAlso allExecutedOrders.Count > 0 Then
+                    ret = allExecutedOrders.OrderBy(Function(y)
+                                                        Return y.ParentOrder.TimeStamp
+                                                    End Function).LastOrDefault
+                End If
+            End If
+            Return ret
+        End Function
         Public Function GetTotalExecutedOrders() As Integer
             Dim tradeCount As Integer = 0
             If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
@@ -599,37 +614,39 @@ Namespace Strategies
         Public Overridable Async Function HandleTickTriggerToUIETCAsync() As Task
             Await Me.ParentStrategy.SignalManager.UIRefresh(Me, False).ConfigureAwait(False)
         End Function
-        Public Overridable Sub PopulateChartAndIndicators(ByVal candleCreator As Chart, ByVal currentCandle As OHLCPayload)
+        Public Overridable Async Function PopulateChartAndIndicatorsAsync(ByVal candleCreator As Chart, ByVal currentCandle As OHLCPayload) As Task
             'logger.Debug("PopulateChartAndIndicatorsAsync, parameters:{0},{1}", candleCreator.ToString, currentCandle.ToString)
+            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
             If RawPayloadDependentConsumers IsNot Nothing AndAlso RawPayloadDependentConsumers.Count > 0 Then
                 For Each runningRawPayloadConsumer In RawPayloadDependentConsumers
                     If runningRawPayloadConsumer.TypeOfConsumer = IPayloadConsumer.ConsumerType.Chart Then
                         Dim currentXMinute As Date = candleCreator.ConvertTimeframe(CType(runningRawPayloadConsumer, PayloadToChartConsumer).Timeframe,
                                                                     currentCandle,
                                                                     runningRawPayloadConsumer)
+                        Continue For
                         If candleCreator.IndicatorCreator Is Nothing Then candleCreator.IndicatorCreator = New ChartHandler.Indicator.IndicatorManeger(Me.ParentStrategy.ParentController, candleCreator, _cts)
                         If currentXMinute <> Date.MaxValue Then
                             Dim c As Integer = 1
                             If runningRawPayloadConsumer.OnwardLevelConsumers IsNot Nothing AndAlso runningRawPayloadConsumer.OnwardLevelConsumers.Count > 0 Then
-                                ''EMA Supertrend Strategy
-                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                '    If c < 3 Then
-                                '        candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
-                                '    Else
-                                '        candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer)
-                                '    End If
-                                '    c += 1
-                                'Next
-
-                                'PetDGandhi Strategy
+                                'EMA Supertrend Strategy
                                 For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                    If c = 1 Then
+                                    If c < 3 Then
                                         candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
                                     Else
-                                        candleCreator.IndicatorCreator.CalculatePivotHighLow(currentXMinute, consumer)
+                                        candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer)
                                     End If
                                     c += 1
                                 Next
+
+                                ''PetDGandhi Strategy
+                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
+                                '    If c = 1 Then
+                                '        candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
+                                '    Else
+                                '        candleCreator.IndicatorCreator.CalculatePivotHighLow(currentXMinute, consumer)
+                                '    End If
+                                '    c += 1
+                                'Next
                             End If
 
                             'Below block for pair strategy
@@ -667,7 +684,7 @@ Namespace Strategies
                                     Dim chartCreator As Chart = Me.ParentStrategy.ParentController.GetChartCreator(runningDependendStrategyInstrument.TradableInstrument.InstrumentIdentifier)
                                     If chartCreator IsNot Nothing Then
                                         Dim currentPayload As OHLCPayload = runningRawPayloadConsumer.ConsumerPayloads(currentXMinute)
-                                        runningDependendStrategyInstrument.PopulateChartAndIndicators(chartCreator, currentPayload)
+                                        runningDependendStrategyInstrument.PopulateChartAndIndicatorsAsync(chartCreator, currentPayload)
                                     End If
                                 Next
                             End If
@@ -717,7 +734,7 @@ Namespace Strategies
             '        End If
             '    Next
             'End If
-        End Sub
+        End Function
         Public Overridable Sub PopulateChartAndIndicatorsFromTick(ByVal candleCreator As Chart, ByVal currentTimestamp As Date)
             'logger.Debug("PopulateChartAndIndicatorsAsync, parameters:{0},{1}", candleCreator.ToString, currentCandle.ToString)
             If TickPayloadDependentConsumers IsNot Nothing AndAlso TickPayloadDependentConsumers.Count > 0 Then

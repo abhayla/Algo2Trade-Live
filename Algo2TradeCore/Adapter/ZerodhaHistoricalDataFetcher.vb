@@ -20,7 +20,7 @@ Namespace Adapter
         Public Event FetcherError(ByVal instrumentIdentifier As String, ByVal msg As String)
         'The below functions are needed to allow the derived classes to raise the above two events
         Protected Overridable Async Function OnFetcherCandlesAsync(ByVal instrumentIdentifier As String, ByVal historicalCandlesJSONDict As Dictionary(Of String, Object)) As Task
-            Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
             RaiseEvent FetcherCandles(instrumentIdentifier, historicalCandlesJSONDict)
         End Function
         Protected Overridable Sub OnFetcherError(ByVal instrumentIdentifier As String, ByVal msg As String)
@@ -110,7 +110,7 @@ Namespace Adapter
                                                                               If errorMessage IsNot Nothing Then
                                                                                   individualFetcher.OnFetcherError(x.InstrumentIdentifier, errorMessage)
                                                                               Else
-                                                                                  individualFetcher.OnFetcherCandlesAsync(x.InstrumentIdentifier, tempRet)
+                                                                                  Await individualFetcher.OnFetcherCandlesAsync(x.InstrumentIdentifier, tempRet).ConfigureAwait(False)
                                                                               End If
                                                                           Else
                                                                               'TO DO: Uncomment this

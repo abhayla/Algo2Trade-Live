@@ -996,7 +996,7 @@ Namespace Controller
 
         Public Async Sub OnFetcherCandlesAsync(ByVal instrumentIdentifier As String, ByVal historicalCandlesJSONDict As Dictionary(Of String, Object))
             'logger.Debug("OnFetcherCandlesAsync, parameteres:{0},{1}",instrumentIdentifier, Utils.JsonSerialize(historicalCandlesJSONDict))
-            Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
             If _rawPayloadCreators IsNot Nothing AndAlso _rawPayloadCreators.ContainsKey(instrumentIdentifier) Then
                 _rawPayloadCreators(instrumentIdentifier).GetChartFromHistoricalAsync(historicalCandlesJSONDict)
             End If
