@@ -33,7 +33,7 @@
             Above = 1
             Below
         End Enum
-        Public Enum Position
+        Public Enum Positions
             Above = 1
             Below
         End Enum

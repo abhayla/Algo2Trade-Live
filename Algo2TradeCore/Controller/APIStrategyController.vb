@@ -148,6 +148,8 @@ Namespace Controller
             If _APIHistoricalDataFetcher IsNot Nothing Then _APIHistoricalDataFetcher.RefreshCancellationToken(canceller)
             If _APIInformationCollector IsNot Nothing Then _APIInformationCollector.RefreshCancellationToken(canceller)
         End Sub
+
+#Region "Execute Command"
         Protected Async Function ExecuteCommandAsync(ByVal command As APIAdapter.ExecutionCommands, ByVal data As Object) As Task(Of Object)
             'logger.Debug("ExecuteCommandAsync, parameters:{0},{1}", command, Utilities.Strings.JsonSerialize(data))
 
@@ -167,7 +169,7 @@ Namespace Controller
                        Not Me.APIConnection.Equals(apiConnectionBeingUsed))
                         apiConnectionBeingUsed = Me.APIConnection
                         _cts.Token.ThrowIfCancellationRequested()
-                        If command <> ExecutionCommands.GetOrders Then
+                        If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetHoldings Then
                             logger.Debug("Waiting for fresh token before running command:{0}", command.ToString)
                         End If
                         Await Task.Delay(500, _cts.Token).ConfigureAwait(False)
@@ -176,7 +178,7 @@ Namespace Controller
 
                     _APIAdapter.SetAPIAccessToken(APIConnection.AccessToken)
 
-                    If command <> ExecutionCommands.GetOrders Then
+                    If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetHoldings Then
                         logger.Debug("Firing command:{0}", command.ToString)
                     End If
                     OnDocumentRetryStatus(retryCtr, _MaxReTries)
@@ -227,6 +229,20 @@ Namespace Controller
                                 allOKWithoutException = True
                                 _cts.Token.ThrowIfCancellationRequested()
                                 ret = allOrderResponse
+                                _cts.Token.ThrowIfCancellationRequested()
+                                Exit For
+                            Case ExecutionCommands.GetHoldings
+                                Dim allHoldingResponse As IEnumerable(Of IHolding) = Nothing
+                                allHoldingResponse = Await _APIAdapter.GetAllHoldingsAsync().ConfigureAwait(False)
+                                If allHoldingResponse IsNot Nothing Then
+                                    'logger.Debug("Getting all holdings is complete, allHoldingResponse.count:{0}", allHoldingResponse.Count)
+                                Else
+                                    'logger.Debug("Getting all holdings is complete, allHoldingResponse.count:{0}", 0)
+                                End If
+                                lastException = Nothing
+                                allOKWithoutException = True
+                                _cts.Token.ThrowIfCancellationRequested()
+                                ret = allHoldingResponse
                                 _cts.Token.ThrowIfCancellationRequested()
                                 Exit For
                             Case ExecutionCommands.GetUserMargins
@@ -371,7 +387,7 @@ Namespace Controller
             If Not allOKWithoutException Then Throw lastException
             Return ret
         End Function
-
+#End Region
 
         Protected MustOverride Function GetLoginURL() As String
         Public MustOverride Async Function LoginAsync() As Task(Of IConnection)
@@ -379,6 +395,7 @@ Namespace Controller
         Protected MustOverride Async Function FillQuantityMultiplierMapAsync() As Task
         Public MustOverride Async Function SubscribeStrategyAsync(ByVal strategyToRun As Strategy) As Task
         Public MustOverride Overloads Async Function GetOrderDetailsAsync() As Task(Of Concurrent.ConcurrentBag(Of IBusinessOrder))
+        Public MustOverride Overloads Async Function GetHoldingDetailsAsync() As Task(Of Concurrent.ConcurrentBag(Of IHolding))
         Public Sub FillCandlestickCreator()
             If _AllStrategyUniqueInstruments IsNot Nothing AndAlso _AllStrategyUniqueInstruments.Count > 0 Then
                 For Each runningStrategyUniqueInstruments In _AllStrategyUniqueInstruments
@@ -390,14 +407,6 @@ Namespace Controller
                         _subscribedStrategyInstruments(runningStrategyUniqueInstruments.InstrumentIdentifier).Where(Function(x)
                                                                                                                         Return x.ParentStrategy.IsStrategyCandleStickBased
                                                                                                                     End Function)
-
-                    ''indibar
-                    'Dim candleStickBasedStrategyInstruments As IEnumerable(Of StrategyInstrument) =
-                    '    _subscribedStrategyInstruments(runningStrategyUniqueInstruments.InstrumentIdentifier).Where(Function(x)
-                    '                                                                                                    Return x.ParentStrategy.IsStrategyCandleStickBased OrElse
-                    '                                                                                                    x.ParentStrategy.IsTickPopulationNeeded
-                    '                                                                                                End Function)
-                    ''end indibar
 
                     If candleStickBasedStrategyInstruments IsNot Nothing AndAlso candleStickBasedStrategyInstruments.Count > 0 Then
                         If _rawPayloadCreators Is Nothing Then _rawPayloadCreators = New Dictionary(Of String, CandleStickChart)

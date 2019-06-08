@@ -196,7 +196,7 @@ Namespace Adapter
         End Function
 #End Region
 
-#Region "Trades & Orders"
+#Region "Trades"
         Public Overrides Async Function GetAllTradesAsync() As Task(Of IEnumerable(Of ITrade))
             'logger.Debug("GetAllTradesAsync, parameters:Nothing")
             Dim ret As List(Of ZerodhaTrade) = Nothing
@@ -257,6 +257,9 @@ Namespace Adapter
             End If
             Return ret
         End Function
+#End Region
+
+#Region "Orders"
         Public Overrides Async Function GetAllOrdersAsync() As Task(Of IEnumerable(Of IOrder))
             'logger.Debug("GetAllOrdersAsync, parameters:Nothing")
             Dim ret As List(Of ZerodhaOrder) = Nothing
@@ -315,6 +318,146 @@ Namespace Adapter
                 End If
             Else
                 Throw New ApplicationException(String.Format("Zerodha command execution did not return any list of order, command:{0}", execCommand.ToString))
+            End If
+            Return ret
+        End Function
+#End Region
+
+#Region "Holdings"
+        Public Overrides Async Function GetAllHoldingsAsync() As Task(Of IEnumerable(Of IHolding))
+            'logger.Debug("GetAllOrdersAsync, parameters:Nothing")
+            Dim ret As List(Of ZerodhaHolding) = Nothing
+            Dim execCommand As ExecutionCommands = ExecutionCommands.GetHoldings
+            _cts.Token.ThrowIfCancellationRequested()
+            Dim tempAllRet As Dictionary(Of String, Object) = Nothing
+            Try
+                tempAllRet = Await ExecuteCommandAsync(execCommand, Nothing).ConfigureAwait(False)
+            Catch tex As TokenException
+                Throw New ZerodhaBusinessException(tex.Message, tex, AdapterBusinessException.TypeOfException.TokenException)
+            Catch gex As GeneralException
+                Throw New ZerodhaBusinessException(gex.Message, gex, AdapterBusinessException.TypeOfException.GeneralException)
+            Catch pex As PermissionException
+                Throw New ZerodhaBusinessException(pex.Message, pex, AdapterBusinessException.TypeOfException.PermissionException)
+            Catch oex As OrderException
+                Throw New ZerodhaBusinessException(oex.Message, oex, AdapterBusinessException.TypeOfException.OrderException)
+            Catch iex As InputException
+                Throw New ZerodhaBusinessException(iex.Message, iex, AdapterBusinessException.TypeOfException.InputException)
+            Catch dex As DataException
+                Throw New ZerodhaBusinessException(dex.Message, dex, AdapterBusinessException.TypeOfException.DataException)
+            Catch nex As NetworkException
+                Throw New ZerodhaBusinessException(nex.Message, nex, AdapterBusinessException.TypeOfException.NetworkException)
+            Catch ex As Exception
+                Throw ex
+            End Try
+            _cts.Token.ThrowIfCancellationRequested()
+
+            Dim tempRet As Object = Nothing
+            If tempAllRet IsNot Nothing AndAlso tempAllRet.ContainsKey(execCommand.ToString) Then
+                tempRet = tempAllRet(execCommand.ToString)
+                If tempRet IsNot Nothing Then
+                    Dim errorMessage As String = ParentController.GetErrorResponse(tempRet)
+                    If errorMessage IsNot Nothing Then
+                        Throw New ApplicationException(errorMessage)
+                    End If
+                Else
+                    Throw New ApplicationException(String.Format("Zerodha command execution did not return anything, command:{0}", execCommand.ToString))
+                End If
+            Else
+                Throw New ApplicationException(String.Format("Relevant command was fired but not detected in the response, command:{0}", execCommand.ToString))
+            End If
+
+            If tempRet.GetType = GetType(List(Of Holding)) Then
+                If tempRet.count > 0 Then
+                    'OnHeartbeat(String.Format("Creating Zerodha order collection from API orders, count:{0}", tempRet.count))
+                    'logger.Debug(String.Format("Creating Zerodha order collection from API orders, count:{0}", tempRet.count))
+                    Dim zerodhaReturedHoldings As List(Of Holding) = CType(tempRet, List(Of Holding))
+                    For Each runningOrder As Holding In zerodhaReturedHoldings
+                        _cts.Token.ThrowIfCancellationRequested()
+                        If ret Is Nothing Then ret = New List(Of ZerodhaHolding)
+                        ret.Add(New ZerodhaHolding With {.WrappedHolding = runningOrder})
+                    Next
+                    'Else
+                    'OnHeartbeat(String.Format("Zerodha command execution did not return any list of order, command:{0}", execCommand.ToString))
+                    'logger.Debug(String.Format("Zerodha command execution did not return any list of order, command:{0}", execCommand.ToString))
+                End If
+            Else
+                Throw New ApplicationException(String.Format("Zerodha command execution did not return any list of holding, command:{0}", execCommand.ToString))
+            End If
+            Return ret
+        End Function
+#End Region
+
+#Region "Positions"
+        Public Overrides Async Function GetAllPositionsAsync() As Task(Of IPositionResponse)
+            'logger.Debug("GetAllPositionsAsync, parameters:Nothing")
+            Dim ret As ZerodhaPositionResponse = Nothing
+            Dim execCommand As ExecutionCommands = ExecutionCommands.GetPositions
+            _cts.Token.ThrowIfCancellationRequested()
+            Dim tempAllRet As Dictionary(Of String, Object) = Nothing
+            Try
+                tempAllRet = Await ExecuteCommandAsync(execCommand, Nothing).ConfigureAwait(False)
+            Catch tex As TokenException
+                Throw New ZerodhaBusinessException(tex.Message, tex, AdapterBusinessException.TypeOfException.TokenException)
+            Catch gex As GeneralException
+                Throw New ZerodhaBusinessException(gex.Message, gex, AdapterBusinessException.TypeOfException.GeneralException)
+            Catch pex As PermissionException
+                Throw New ZerodhaBusinessException(pex.Message, pex, AdapterBusinessException.TypeOfException.PermissionException)
+            Catch oex As OrderException
+                Throw New ZerodhaBusinessException(oex.Message, oex, AdapterBusinessException.TypeOfException.OrderException)
+            Catch iex As InputException
+                Throw New ZerodhaBusinessException(iex.Message, iex, AdapterBusinessException.TypeOfException.InputException)
+            Catch dex As DataException
+                Throw New ZerodhaBusinessException(dex.Message, dex, AdapterBusinessException.TypeOfException.DataException)
+            Catch nex As NetworkException
+                Throw New ZerodhaBusinessException(nex.Message, nex, AdapterBusinessException.TypeOfException.NetworkException)
+            Catch ex As Exception
+                Throw ex
+            End Try
+            _cts.Token.ThrowIfCancellationRequested()
+
+            Dim tempRet As Object = Nothing
+            If tempAllRet IsNot Nothing AndAlso tempAllRet.ContainsKey(execCommand.ToString) Then
+                tempRet = tempAllRet(execCommand.ToString)
+                If tempRet IsNot Nothing Then
+                    Dim errorMessage As String = ParentController.GetErrorResponse(tempRet)
+                    If errorMessage IsNot Nothing Then
+                        Throw New ApplicationException(errorMessage)
+                    End If
+                Else
+                    Throw New ApplicationException(String.Format("Zerodha command execution did not return anything, command:{0}", execCommand.ToString))
+                End If
+            Else
+                Throw New ApplicationException(String.Format("Relevant command was fired but not detected in the response, command:{0}", execCommand.ToString))
+            End If
+
+            If tempRet.GetType = GetType(PositionResponse) Then
+                'OnHeartbeat(String.Format("Creating Zerodha position collection from API position, count:{0}", tempRet.count))
+                'logger.Debug(String.Format("Creating Zerodha position collection from API position, count:{0}", tempRet.count))
+                Dim zerodhaReturedPositions As PositionResponse = CType(tempRet, PositionResponse)
+
+                If ret Is Nothing Then ret = New ZerodhaPositionResponse
+                ret.WrappedPositionResponse = zerodhaReturedPositions
+
+                If zerodhaReturedPositions.Day IsNot Nothing AndAlso zerodhaReturedPositions.Day.Count > 0 Then
+                    For Each runningPosition As Position In zerodhaReturedPositions.Day
+                        _cts.Token.ThrowIfCancellationRequested()
+                        If ret.Day Is Nothing Then ret.Day = New List(Of IPosition)
+                        ret.Day.Add(New ZerodhaPosition With {.WrappedPosition = runningPosition})
+                    Next
+                End If
+
+                If zerodhaReturedPositions.Net IsNot Nothing AndAlso zerodhaReturedPositions.Net.Count > 0 Then
+                    For Each runningPosition As Position In zerodhaReturedPositions.Net
+                        _cts.Token.ThrowIfCancellationRequested()
+                        If ret.Net Is Nothing Then ret.Net = New List(Of IPosition)
+                        ret.Net.Add(New ZerodhaPosition With {.WrappedPosition = runningPosition})
+                    Next
+                End If
+                'Else
+                'OnHeartbeat(String.Format("Zerodha command execution did not return any list of order, command:{0}", execCommand.ToString))
+                'logger.Debug(String.Format("Zerodha command execution did not return any list of order, command:{0}", execCommand.ToString))
+            Else
+                Throw New ApplicationException(String.Format("Zerodha command execution did not return any position response, command:{0}", execCommand.ToString))
             End If
             Return ret
         End Function
@@ -1209,14 +1352,14 @@ Namespace Adapter
 
 #Region "Zerodha Commands"
         Private Async Function ExecuteCommandAsync(ByVal command As ExecutionCommands, ByVal stockData As Dictionary(Of String, Object)) As Task(Of Dictionary(Of String, Object))
-            If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetQuotes Then
+            If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetQuotes AndAlso command <> ExecutionCommands.GetHoldings Then
                 logger.Debug("ExecuteCommandAsync, command:{0}, stockData:{1}", command.ToString, Utils.JsonSerialize(stockData))
             End If
             _cts.Token.ThrowIfCancellationRequested()
             Dim ret As Dictionary(Of String, Object) = Nothing
 
             Dim lastException As Exception = Nothing
-            If command <> ExecutionCommands.GetOrders Then
+            If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetHoldings Then
                 logger.Debug(String.Format("Firing Zerodha command to complete desired action, command:{0}", command.ToString))
             End If
             Select Case command
@@ -1263,6 +1406,19 @@ Namespace Adapter
                                                             End Function).ConfigureAwait(False)
                     _cts.Token.ThrowIfCancellationRequested()
                     ret = New Dictionary(Of String, Object) From {{command.ToString, positions}}
+                Case ExecutionCommands.GetHoldings
+                    Dim holdings As List(Of Holding) = Nothing
+                    holdings = Await Task.Factory.StartNew(Function()
+                                                               Try
+                                                                   Return _Kite.GetHoldings()
+                                                               Catch ex As Exception
+                                                                   logger.Error(ex)
+                                                                   lastException = ex
+                                                                   Return Nothing
+                                                               End Try
+                                                           End Function).ConfigureAwait(False)
+                    _cts.Token.ThrowIfCancellationRequested()
+                    ret = New Dictionary(Of String, Object) From {{command.ToString, holdings}}
                 Case ExecutionCommands.PlaceOrder
                     Dim placedOrders As Dictionary(Of String, Object) = Nothing
                     If stockData IsNot Nothing AndAlso stockData.Count > 0 Then

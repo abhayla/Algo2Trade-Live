@@ -86,6 +86,7 @@
     <Compile Include="ChartHandler\Indicator\Indicator.vb" />
     <Compile Include="Entities\Exchange.vb" />
     <Compile Include="Entities\Field.vb" />
+    <Compile Include="Entities\IHolding.vb" />
     <Compile Include="Entities\Indicators\ATRConsumer.vb" />
     <Compile Include="Entities\Indicators\BollingerConsumer.vb" />
     <Compile Include="Entities\Indicators\EMAConsumer.vb" />
@@ -94,6 +95,8 @@
     <Compile Include="Entities\Indicators\SpreadRatioConsumer.vb" />
     <Compile Include="Entities\Indicators\SupertrendConsumer.vb" />
     <Compile Include="Entities\Indicators\TickSMAConsumer.vb" />
+    <Compile Include="Entities\IPosition.vb" />
+    <Compile Include="Entities\IPositionResponse.vb" />
     <Compile Include="Entities\IUserMargin.vb" />
     <Compile Include="Entities\PaperOrder.vb" />
     <Compile Include="Entities\PayloadToPairConsumer.vb" />
@@ -123,7 +126,10 @@
     <Compile Include="Entities\IPayload.vb" />
     <Compile Include="Entities\BusinessOrder.vb" />
     <Compile Include="Entities\ZerodhaConnection.vb" />
+    <Compile Include="Entities\ZerodhaHolding.vb" />
     <Compile Include="Entities\ZerodhaInstrument.vb" />
+    <Compile Include="Entities\ZerodhaPosition.vb" />
+    <Compile Include="Entities\ZerodhaPositionResponse.vb" />
     <Compile Include="Entities\ZerodhaUserMargin.vb" />
     <Compile Include="Entities\ZerodhaOrder.vb" />
     <Compile Include="Entities\ZerodhaQuote.vb" />

@@ -42,6 +42,8 @@ Namespace Adapter
         Public MustOverride Async Function GetAllInstrumentsAsync() As Task(Of IEnumerable(Of IInstrument))
         Public MustOverride Async Function GetAllTradesAsync() As Task(Of IEnumerable(Of ITrade))
         Public MustOverride Async Function GetAllOrdersAsync() As Task(Of IEnumerable(Of IOrder))
+        Public MustOverride Async Function GetAllHoldingsAsync() As Task(Of IEnumerable(Of IHolding))
+        Public MustOverride Async Function GetAllPositionsAsync() As Task(Of IPositionResponse)
         Public MustOverride Async Function GetUserMarginsAsync() As Task(Of Dictionary(Of Enums.TypeOfExchage, IUserMargin))
         Public MustOverride Async Function GetAllQuotesAsync(ByVal instruments As IEnumerable(Of IInstrument)) As Task(Of IEnumerable(Of IQuote))
         Public MustOverride Sub SetAPIAccessToken(ByVal apiAccessToken As String)
@@ -61,6 +63,7 @@ Namespace Adapter
         Public Enum ExecutionCommands
             GetPositions = 1
             GetQuotes
+            GetHoldings
             PlaceOrder
             ModifyOrderQuantity
             ModifyOrderPrice

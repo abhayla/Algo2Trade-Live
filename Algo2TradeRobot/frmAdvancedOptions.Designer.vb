@@ -48,11 +48,17 @@ Partial Class frmAdvancedOptions
         Me.lblNSEExcahngeEndTime = New System.Windows.Forms.Label()
         Me.dtpckrNSEExchangeStartTime = New System.Windows.Forms.DateTimePicker()
         Me.lblNSEExchangeStartTime = New System.Windows.Forms.Label()
-        Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
-        Me.btnSaveDelaySettings = New System.Windows.Forms.Button()
         Me.tabRemarks = New System.Windows.Forms.TabPage()
         Me.txtRemarks = New System.Windows.Forms.TextBox()
         Me.lblRemarks = New System.Windows.Forms.Label()
+        Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
+        Me.btnSaveDelaySettings = New System.Windows.Forms.Button()
+        Me.dtpckrNSEContractRolloverTime = New System.Windows.Forms.DateTimePicker()
+        Me.lblNSEContractRolloverTime = New System.Windows.Forms.Label()
+        Me.dtpckrMCXContractRolloverTime = New System.Windows.Forms.DateTimePicker()
+        Me.lblMCXContractRolloverTime = New System.Windows.Forms.Label()
+        Me.dtpckrCDSContractRolloverTime = New System.Windows.Forms.DateTimePicker()
+        Me.lblCDSContractRolloverTime = New System.Windows.Forms.Label()
         Me.tabMain.SuspendLayout()
         Me.tabDelaySettings.SuspendLayout()
         Me.tabExchangeDetailsSettings.SuspendLayout()
@@ -64,13 +70,13 @@ Partial Class frmAdvancedOptions
         '
         'tabMain
         '
-        Me.tabMain.Controls.Add(Me.tabDelaySettings)
         Me.tabMain.Controls.Add(Me.tabExchangeDetailsSettings)
+        Me.tabMain.Controls.Add(Me.tabDelaySettings)
         Me.tabMain.Controls.Add(Me.tabRemarks)
         Me.tabMain.Location = New System.Drawing.Point(0, 0)
         Me.tabMain.Name = "tabMain"
         Me.tabMain.SelectedIndex = 0
-        Me.tabMain.Size = New System.Drawing.Size(424, 311)
+        Me.tabMain.Size = New System.Drawing.Size(424, 371)
         Me.tabMain.TabIndex = 0
         '
         'tabDelaySettings
@@ -84,7 +90,7 @@ Partial Class frmAdvancedOptions
         Me.tabDelaySettings.Location = New System.Drawing.Point(4, 25)
         Me.tabDelaySettings.Name = "tabDelaySettings"
         Me.tabDelaySettings.Padding = New System.Windows.Forms.Padding(3)
-        Me.tabDelaySettings.Size = New System.Drawing.Size(416, 282)
+        Me.tabDelaySettings.Size = New System.Drawing.Size(416, 342)
         Me.tabDelaySettings.TabIndex = 0
         Me.tabDelaySettings.Text = "Delay"
         Me.tabDelaySettings.UseVisualStyleBackColor = True
@@ -152,20 +158,22 @@ Partial Class frmAdvancedOptions
         Me.tabExchangeDetailsSettings.Controls.Add(Me.GroupBox1)
         Me.tabExchangeDetailsSettings.Location = New System.Drawing.Point(4, 25)
         Me.tabExchangeDetailsSettings.Name = "tabExchangeDetailsSettings"
-        Me.tabExchangeDetailsSettings.Size = New System.Drawing.Size(416, 282)
+        Me.tabExchangeDetailsSettings.Size = New System.Drawing.Size(416, 342)
         Me.tabExchangeDetailsSettings.TabIndex = 1
         Me.tabExchangeDetailsSettings.Text = "Exchange Details"
         Me.tabExchangeDetailsSettings.UseVisualStyleBackColor = True
         '
         'GroupBox3
         '
+        Me.GroupBox3.Controls.Add(Me.dtpckrCDSContractRolloverTime)
+        Me.GroupBox3.Controls.Add(Me.lblCDSContractRolloverTime)
         Me.GroupBox3.Controls.Add(Me.dtpckrCDSExchangeEndTime)
         Me.GroupBox3.Controls.Add(Me.lblCDSExchangeEndTime)
         Me.GroupBox3.Controls.Add(Me.dtpckrCDSExchangeStartTime)
         Me.GroupBox3.Controls.Add(Me.lblCDSExchangeStartTime)
-        Me.GroupBox3.Location = New System.Drawing.Point(9, 185)
+        Me.GroupBox3.Location = New System.Drawing.Point(9, 225)
         Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(404, 85)
+        Me.GroupBox3.Size = New System.Drawing.Size(399, 110)
         Me.GroupBox3.TabIndex = 31
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "CDS"
@@ -173,7 +181,7 @@ Partial Class frmAdvancedOptions
         'dtpckrCDSExchangeEndTime
         '
         Me.dtpckrCDSExchangeEndTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrCDSExchangeEndTime.Location = New System.Drawing.Point(265, 49)
+        Me.dtpckrCDSExchangeEndTime.Location = New System.Drawing.Point(250, 49)
         Me.dtpckrCDSExchangeEndTime.Name = "dtpckrCDSExchangeEndTime"
         Me.dtpckrCDSExchangeEndTime.ShowUpDown = True
         Me.dtpckrCDSExchangeEndTime.Size = New System.Drawing.Size(134, 22)
@@ -193,7 +201,7 @@ Partial Class frmAdvancedOptions
         'dtpckrCDSExchangeStartTime
         '
         Me.dtpckrCDSExchangeStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrCDSExchangeStartTime.Location = New System.Drawing.Point(265, 20)
+        Me.dtpckrCDSExchangeStartTime.Location = New System.Drawing.Point(250, 20)
         Me.dtpckrCDSExchangeStartTime.Name = "dtpckrCDSExchangeStartTime"
         Me.dtpckrCDSExchangeStartTime.ShowUpDown = True
         Me.dtpckrCDSExchangeStartTime.Size = New System.Drawing.Size(134, 22)
@@ -212,13 +220,15 @@ Partial Class frmAdvancedOptions
         '
         'GroupBox2
         '
+        Me.GroupBox2.Controls.Add(Me.dtpckrMCXContractRolloverTime)
+        Me.GroupBox2.Controls.Add(Me.lblMCXContractRolloverTime)
         Me.GroupBox2.Controls.Add(Me.dtpckrMCXExchangeEndTime)
         Me.GroupBox2.Controls.Add(Me.lblMCXExchangeEndTime)
         Me.GroupBox2.Controls.Add(Me.dtpckrMCXExchangeStartTime)
         Me.GroupBox2.Controls.Add(Me.lblMCXExchangeStartTime)
-        Me.GroupBox2.Location = New System.Drawing.Point(9, 94)
+        Me.GroupBox2.Location = New System.Drawing.Point(9, 114)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(404, 85)
+        Me.GroupBox2.Size = New System.Drawing.Size(399, 109)
         Me.GroupBox2.TabIndex = 30
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "MCX"
@@ -226,7 +236,7 @@ Partial Class frmAdvancedOptions
         'dtpckrMCXExchangeEndTime
         '
         Me.dtpckrMCXExchangeEndTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrMCXExchangeEndTime.Location = New System.Drawing.Point(265, 49)
+        Me.dtpckrMCXExchangeEndTime.Location = New System.Drawing.Point(250, 49)
         Me.dtpckrMCXExchangeEndTime.Name = "dtpckrMCXExchangeEndTime"
         Me.dtpckrMCXExchangeEndTime.ShowUpDown = True
         Me.dtpckrMCXExchangeEndTime.Size = New System.Drawing.Size(134, 22)
@@ -246,7 +256,7 @@ Partial Class frmAdvancedOptions
         'dtpckrMCXExchangeStartTime
         '
         Me.dtpckrMCXExchangeStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrMCXExchangeStartTime.Location = New System.Drawing.Point(265, 20)
+        Me.dtpckrMCXExchangeStartTime.Location = New System.Drawing.Point(250, 20)
         Me.dtpckrMCXExchangeStartTime.Name = "dtpckrMCXExchangeStartTime"
         Me.dtpckrMCXExchangeStartTime.ShowUpDown = True
         Me.dtpckrMCXExchangeStartTime.Size = New System.Drawing.Size(134, 22)
@@ -265,21 +275,23 @@ Partial Class frmAdvancedOptions
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.dtpckrNSEContractRolloverTime)
+        Me.GroupBox1.Controls.Add(Me.lblNSEContractRolloverTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrNSEExchangeEndTime)
         Me.GroupBox1.Controls.Add(Me.lblNSEExcahngeEndTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrNSEExchangeStartTime)
         Me.GroupBox1.Controls.Add(Me.lblNSEExchangeStartTime)
         Me.GroupBox1.Location = New System.Drawing.Point(9, 3)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(404, 85)
+        Me.GroupBox1.Size = New System.Drawing.Size(399, 109)
         Me.GroupBox1.TabIndex = 29
         Me.GroupBox1.TabStop = False
-        Me.GroupBox1.Text = "NSE"
+        Me.GroupBox1.Text = "NSE / NFO"
         '
         'dtpckrNSEExchangeEndTime
         '
         Me.dtpckrNSEExchangeEndTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrNSEExchangeEndTime.Location = New System.Drawing.Point(265, 49)
+        Me.dtpckrNSEExchangeEndTime.Location = New System.Drawing.Point(250, 49)
         Me.dtpckrNSEExchangeEndTime.Name = "dtpckrNSEExchangeEndTime"
         Me.dtpckrNSEExchangeEndTime.ShowUpDown = True
         Me.dtpckrNSEExchangeEndTime.Size = New System.Drawing.Size(134, 22)
@@ -299,7 +311,7 @@ Partial Class frmAdvancedOptions
         'dtpckrNSEExchangeStartTime
         '
         Me.dtpckrNSEExchangeStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrNSEExchangeStartTime.Location = New System.Drawing.Point(265, 20)
+        Me.dtpckrNSEExchangeStartTime.Location = New System.Drawing.Point(250, 20)
         Me.dtpckrNSEExchangeStartTime.Name = "dtpckrNSEExchangeStartTime"
         Me.dtpckrNSEExchangeStartTime.ShowUpDown = True
         Me.dtpckrNSEExchangeStartTime.Size = New System.Drawing.Size(134, 22)
@@ -316,33 +328,13 @@ Partial Class frmAdvancedOptions
         Me.lblNSEExchangeStartTime.TabIndex = 30
         Me.lblNSEExchangeStartTime.Text = "Exchange Start Time"
         '
-        'ImageList1
-        '
-        Me.ImageList1.ImageStream = CType(resources.GetObject("ImageList1.ImageStream"), System.Windows.Forms.ImageListStreamer)
-        Me.ImageList1.TransparentColor = System.Drawing.Color.Transparent
-        Me.ImageList1.Images.SetKeyName(0, "save-icon-36533.png")
-        '
-        'btnSaveDelaySettings
-        '
-        Me.btnSaveDelaySettings.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.btnSaveDelaySettings.ImageKey = "save-icon-36533.png"
-        Me.btnSaveDelaySettings.ImageList = Me.ImageList1
-        Me.btnSaveDelaySettings.Location = New System.Drawing.Point(424, 25)
-        Me.btnSaveDelaySettings.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnSaveDelaySettings.Name = "btnSaveDelaySettings"
-        Me.btnSaveDelaySettings.Size = New System.Drawing.Size(112, 58)
-        Me.btnSaveDelaySettings.TabIndex = 0
-        Me.btnSaveDelaySettings.Text = "&Save"
-        Me.btnSaveDelaySettings.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.btnSaveDelaySettings.UseVisualStyleBackColor = True
-        '
         'tabRemarks
         '
         Me.tabRemarks.Controls.Add(Me.txtRemarks)
         Me.tabRemarks.Controls.Add(Me.lblRemarks)
         Me.tabRemarks.Location = New System.Drawing.Point(4, 25)
         Me.tabRemarks.Name = "tabRemarks"
-        Me.tabRemarks.Size = New System.Drawing.Size(416, 282)
+        Me.tabRemarks.Size = New System.Drawing.Size(416, 342)
         Me.tabRemarks.TabIndex = 2
         Me.tabRemarks.Text = "Remarks"
         Me.tabRemarks.UseVisualStyleBackColor = True
@@ -365,11 +357,91 @@ Partial Class frmAdvancedOptions
         Me.lblRemarks.TabIndex = 12
         Me.lblRemarks.Text = "Form Remarks"
         '
+        'ImageList1
+        '
+        Me.ImageList1.ImageStream = CType(resources.GetObject("ImageList1.ImageStream"), System.Windows.Forms.ImageListStreamer)
+        Me.ImageList1.TransparentColor = System.Drawing.Color.Transparent
+        Me.ImageList1.Images.SetKeyName(0, "save-icon-36533.png")
+        '
+        'btnSaveDelaySettings
+        '
+        Me.btnSaveDelaySettings.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.btnSaveDelaySettings.ImageKey = "save-icon-36533.png"
+        Me.btnSaveDelaySettings.ImageList = Me.ImageList1
+        Me.btnSaveDelaySettings.Location = New System.Drawing.Point(424, 25)
+        Me.btnSaveDelaySettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnSaveDelaySettings.Name = "btnSaveDelaySettings"
+        Me.btnSaveDelaySettings.Size = New System.Drawing.Size(112, 58)
+        Me.btnSaveDelaySettings.TabIndex = 0
+        Me.btnSaveDelaySettings.Text = "&Save"
+        Me.btnSaveDelaySettings.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        Me.btnSaveDelaySettings.UseVisualStyleBackColor = True
+        '
+        'dtpckrNSEContractRolloverTime
+        '
+        Me.dtpckrNSEContractRolloverTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
+        Me.dtpckrNSEContractRolloverTime.Location = New System.Drawing.Point(250, 77)
+        Me.dtpckrNSEContractRolloverTime.Name = "dtpckrNSEContractRolloverTime"
+        Me.dtpckrNSEContractRolloverTime.ShowUpDown = True
+        Me.dtpckrNSEContractRolloverTime.Size = New System.Drawing.Size(134, 22)
+        Me.dtpckrNSEContractRolloverTime.TabIndex = 33
+        Me.dtpckrNSEContractRolloverTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
+        '
+        'lblNSEContractRolloverTime
+        '
+        Me.lblNSEContractRolloverTime.AutoSize = True
+        Me.lblNSEContractRolloverTime.Location = New System.Drawing.Point(3, 79)
+        Me.lblNSEContractRolloverTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblNSEContractRolloverTime.Name = "lblNSEContractRolloverTime"
+        Me.lblNSEContractRolloverTime.Size = New System.Drawing.Size(152, 17)
+        Me.lblNSEContractRolloverTime.TabIndex = 34
+        Me.lblNSEContractRolloverTime.Text = "Contract Rollover Time"
+        '
+        'dtpckrMCXContractRolloverTime
+        '
+        Me.dtpckrMCXContractRolloverTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
+        Me.dtpckrMCXContractRolloverTime.Location = New System.Drawing.Point(250, 77)
+        Me.dtpckrMCXContractRolloverTime.Name = "dtpckrMCXContractRolloverTime"
+        Me.dtpckrMCXContractRolloverTime.ShowUpDown = True
+        Me.dtpckrMCXContractRolloverTime.Size = New System.Drawing.Size(134, 22)
+        Me.dtpckrMCXContractRolloverTime.TabIndex = 35
+        Me.dtpckrMCXContractRolloverTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
+        '
+        'lblMCXContractRolloverTime
+        '
+        Me.lblMCXContractRolloverTime.AutoSize = True
+        Me.lblMCXContractRolloverTime.Location = New System.Drawing.Point(3, 79)
+        Me.lblMCXContractRolloverTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMCXContractRolloverTime.Name = "lblMCXContractRolloverTime"
+        Me.lblMCXContractRolloverTime.Size = New System.Drawing.Size(152, 17)
+        Me.lblMCXContractRolloverTime.TabIndex = 36
+        Me.lblMCXContractRolloverTime.Text = "Contract Rollover Time"
+        '
+        'dtpckrCDSContractRolloverTime
+        '
+        Me.dtpckrCDSContractRolloverTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
+        Me.dtpckrCDSContractRolloverTime.Location = New System.Drawing.Point(250, 78)
+        Me.dtpckrCDSContractRolloverTime.Name = "dtpckrCDSContractRolloverTime"
+        Me.dtpckrCDSContractRolloverTime.ShowUpDown = True
+        Me.dtpckrCDSContractRolloverTime.Size = New System.Drawing.Size(134, 22)
+        Me.dtpckrCDSContractRolloverTime.TabIndex = 37
+        Me.dtpckrCDSContractRolloverTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
+        '
+        'lblCDSContractRolloverTime
+        '
+        Me.lblCDSContractRolloverTime.AutoSize = True
+        Me.lblCDSContractRolloverTime.Location = New System.Drawing.Point(3, 80)
+        Me.lblCDSContractRolloverTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblCDSContractRolloverTime.Name = "lblCDSContractRolloverTime"
+        Me.lblCDSContractRolloverTime.Size = New System.Drawing.Size(152, 17)
+        Me.lblCDSContractRolloverTime.TabIndex = 38
+        Me.lblCDSContractRolloverTime.Text = "Contract Rollover Time"
+        '
         'frmAdvancedOptions
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(541, 311)
+        Me.ClientSize = New System.Drawing.Size(541, 373)
         Me.Controls.Add(Me.btnSaveDelaySettings)
         Me.Controls.Add(Me.tabMain)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -423,4 +495,10 @@ Partial Class frmAdvancedOptions
     Friend WithEvents tabRemarks As TabPage
     Friend WithEvents txtRemarks As TextBox
     Friend WithEvents lblRemarks As Label
+    Friend WithEvents dtpckrCDSContractRolloverTime As DateTimePicker
+    Friend WithEvents lblCDSContractRolloverTime As Label
+    Friend WithEvents dtpckrMCXContractRolloverTime As DateTimePicker
+    Friend WithEvents lblMCXContractRolloverTime As Label
+    Friend WithEvents dtpckrNSEContractRolloverTime As DateTimePicker
+    Friend WithEvents lblNSEContractRolloverTime As Label
 End Class

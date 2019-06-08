@@ -32,10 +32,15 @@ Public Class frmAdvancedOptions
             If _UserInputs.ExchangeDetails IsNot Nothing Then
                 dtpckrNSEExchangeStartTime.Value = _UserInputs.ExchangeDetails("NSE").ExchangeStartTime
                 dtpckrNSEExchangeEndTime.Value = _UserInputs.ExchangeDetails("NSE").ExchangeEndTime
+                dtpckrNSEContractRolloverTime.Value = _UserInputs.ExchangeDetails("NSE").ContractRolloverTime
+
                 dtpckrMCXExchangeStartTime.Value = _UserInputs.ExchangeDetails("MCX").ExchangeStartTime
                 dtpckrMCXExchangeEndTime.Value = _UserInputs.ExchangeDetails("MCX").ExchangeEndTime
+                dtpckrMCXContractRolloverTime.Value = _UserInputs.ExchangeDetails("MCX").ContractRolloverTime
+
                 dtpckrCDSExchangeStartTime.Value = _UserInputs.ExchangeDetails("CDS").ExchangeStartTime
                 dtpckrCDSExchangeEndTime.Value = _UserInputs.ExchangeDetails("CDS").ExchangeEndTime
+                dtpckrCDSContractRolloverTime.Value = _UserInputs.ExchangeDetails("CDS").ContractRolloverTime
             End If
             txtRemarks.Text = _UserInputs.FormRemarks
         End If
@@ -48,13 +53,13 @@ Public Class frmAdvancedOptions
         _UserInputs.ForceRestartTime = dtpckrForceRestartTime.Value
         _UserInputs.ExchangeDetails = New Dictionary(Of String, Exchange) From {
             {"NSE", New Exchange(Enums.TypeOfExchage.NSE) With
-            {.ExchangeStartTime = dtpckrNSEExchangeStartTime.Value, .ExchangeEndTime = dtpckrNSEExchangeEndTime.Value}},
+            {.ExchangeStartTime = dtpckrNSEExchangeStartTime.Value, .ExchangeEndTime = dtpckrNSEExchangeEndTime.Value, .ContractRolloverTime = dtpckrNSEContractRolloverTime.Value}},
             {"NFO", New Exchange(Enums.TypeOfExchage.NSE) With
-            {.ExchangeStartTime = dtpckrNSEExchangeStartTime.Value, .ExchangeEndTime = dtpckrNSEExchangeEndTime.Value}},
+            {.ExchangeStartTime = dtpckrNSEExchangeStartTime.Value, .ExchangeEndTime = dtpckrNSEExchangeEndTime.Value, .ContractRolloverTime = dtpckrNSEContractRolloverTime.Value}},
             {"MCX", New Exchange(Enums.TypeOfExchage.MCX) With
-            {.ExchangeStartTime = dtpckrMCXExchangeStartTime.Value, .ExchangeEndTime = dtpckrMCXExchangeEndTime.Value}},
+            {.ExchangeStartTime = dtpckrMCXExchangeStartTime.Value, .ExchangeEndTime = dtpckrMCXExchangeEndTime.Value, .ContractRolloverTime = dtpckrMCXContractRolloverTime.Value}},
             {"CDS", New Exchange(Enums.TypeOfExchage.CDS) With
-            {.ExchangeStartTime = dtpckrCDSExchangeStartTime.Value, .ExchangeEndTime = dtpckrCDSExchangeEndTime.Value}}
+            {.ExchangeStartTime = dtpckrCDSExchangeStartTime.Value, .ExchangeEndTime = dtpckrCDSExchangeEndTime.Value, .ContractRolloverTime = dtpckrCDSContractRolloverTime.Value}}
         }
         _UserInputs.FormRemarks = txtRemarks.Text
         Utilities.Strings.SerializeFromCollection(Of ControllerUserInputs)(ControllerUserInputs.Filename, _UserInputs)

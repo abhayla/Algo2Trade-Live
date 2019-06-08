@@ -14,6 +14,7 @@ Imports Algo2TradeCore.Strategies
 Imports Algo2TradeCore.Adapter.APIAdapter
 Imports Algo2TradeCore.Entities.UserSettings
 Imports System.IO
+Imports System.Collections.Concurrent
 
 Namespace Controller
     Public Class ZerodhaStrategyController
@@ -987,6 +988,22 @@ Namespace Controller
             End If
             Return ret
         End Function
+        Public Overrides Async Function GetHoldingDetailsAsync() As Task(Of ConcurrentBag(Of IHolding))
+            Dim ret As Concurrent.ConcurrentBag(Of IHolding) = Nothing
+            _cts.Token.ThrowIfCancellationRequested()
+            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+            Dim execCommand As ExecutionCommands = ExecutionCommands.GetHoldings
+            _cts.Token.ThrowIfCancellationRequested()
+            Dim allHoldings As IEnumerable(Of IHolding) = Await ExecuteCommandAsync(execCommand, Nothing).ConfigureAwait(False)
+            _cts.Token.ThrowIfCancellationRequested()
+            If allHoldings IsNot Nothing AndAlso allHoldings.Count > 0 Then
+                For Each runningHolding In allHoldings
+                    If ret Is Nothing Then ret = New ConcurrentBag(Of IHolding)
+                    ret.Add(runningHolding)
+                Next
+            End If
+            Return ret
+        End Function
 #End Region
 
 #Region "Fetcher Events"
@@ -1120,6 +1137,20 @@ Namespace Controller
                                     For Each strategyToRun In _AllStrategies
                                         _cts.Token.ThrowIfCancellationRequested()
                                         Await strategyToRun.ProcessOrderAsync(orderData).ConfigureAwait(False)
+                                        strategyToRun.IsFirstTimeInformationCollected = True
+                                    Next
+                                End If
+                            Next
+                        End If
+                    Case APIInformationCollector.InformationType.GetHoldingDetails
+                        Dim holdingDetails As Concurrent.ConcurrentBag(Of IHolding) = CType(information, Concurrent.ConcurrentBag(Of IHolding))
+                        If holdingDetails IsNot Nothing AndAlso holdingDetails.Count > 0 Then
+                            For Each holdingData In holdingDetails
+                                _cts.Token.ThrowIfCancellationRequested()
+                                If _AllStrategies IsNot Nothing AndAlso _AllStrategies.Count > 0 Then
+                                    For Each strategyToRun In _AllStrategies
+                                        _cts.Token.ThrowIfCancellationRequested()
+                                        Await strategyToRun.ProcessHoldingAsync(holdingData).ConfigureAwait(False)
                                         strategyToRun.IsFirstTimeInformationCollected = True
                                     Next
                                 End If

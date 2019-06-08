@@ -26,5 +26,15 @@ Namespace Entities
                 _ExchangeEndTime = value
             End Set
         End Property
+
+        Private _ContractRolloverTime As Date
+        Public Property ContractRolloverTime As Date
+            Get
+                Return New Date(Now.Year, Now.Month, Now.Day, _ContractRolloverTime.Hour, _ContractRolloverTime.Minute, _ContractRolloverTime.Second)
+            End Get
+            Set(value As Date)
+                _ContractRolloverTime = value
+            End Set
+        End Property
     End Class
 End Namespace

@@ -250,6 +250,17 @@ Namespace Strategies
                 Next
             End If
         End Function
+        Public Overridable Async Function ProcessHoldingAsync(ByVal holdingData As IHolding) As Task
+            'logger.Debug("ProcessOrderAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
+            If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
+                For Each runningTradableStrategyInstrument In TradableStrategyInstruments
+                    _cts.Token.ThrowIfCancellationRequested()
+                    If runningTradableStrategyInstrument.TradableInstrument.InstrumentIdentifier = holdingData.InstrumentIdentifier Then
+                        Await runningTradableStrategyInstrument.ProcessHoldingAsync(holdingData).ConfigureAwait(False)
+                    End If
+                Next
+            End If
+        End Function
 #End Region
 
 #Region "Public MustOverride Functions"

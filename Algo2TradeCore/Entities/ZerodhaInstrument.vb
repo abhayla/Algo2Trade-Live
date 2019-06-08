@@ -73,9 +73,7 @@ Namespace Entities
                 Return APISource.Zerodha
             End Get
         End Property
-        Public Overrides Function ToString() As String
-            Return InstrumentIdentifier
-        End Function
+
         Private _LastTick As ITick
         Public Property LastTick As ITick Implements IInstrument.LastTick
             Get
@@ -116,5 +114,8 @@ Namespace Entities
 
         Public Property ExchangeDetails As Exchange Implements IInstrument.ExchangeDetails
 
+        Public Overrides Function ToString() As String
+            Return String.Format("{0}_{1}", Me.TradingSymbol, Me.InstrumentIdentifier)
+        End Function
     End Class
 End Namespace

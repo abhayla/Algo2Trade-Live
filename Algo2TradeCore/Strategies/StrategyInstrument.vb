@@ -96,6 +96,7 @@ Namespace Strategies
             PlaceRegularMarketMISOrder
             PlaceRegularLimitMISOrder
             PlaceRegularSLMMISOrder
+            PlaceRegularMarketCNCOrder
             ModifyStoplossOrder
             ModifyTargetOrder
             CancelBOOrder
@@ -122,6 +123,7 @@ Namespace Strategies
         Public Property ParentStrategy As Strategy
         Public Property TradableInstrument As IInstrument
         Public Property OrderDetails As Concurrent.ConcurrentDictionary(Of String, IBusinessOrder)
+        Public Property HoldingDetails As IHolding
         Public Property RawPayloadDependentConsumers As List(Of IPayloadConsumer)
         Public Property TickPayloadDependentConsumers As List(Of IPayloadConsumer)
         Public Property IsPairInstrument As Boolean
@@ -267,7 +269,7 @@ Namespace Strategies
                                         ByVal firstDummyConsumerField As TypeOfField,
                                         ByVal secondDummyConsumerField As TypeOfField,
                                         ByVal currentCandle As OHLCPayload,
-                                        ByVal position As Enums.Position,
+                                        ByVal position As Enums.Positions,
                                         ByVal printDetails As Boolean) As Boolean
             Dim ret As Boolean = False
             If currentCandle IsNot Nothing AndAlso currentCandle.PreviousPayload IsNot Nothing AndAlso currentCandle.PreviousPayload.PreviousPayload IsNot Nothing Then
@@ -291,9 +293,9 @@ Namespace Strategies
                         Dim firstConsumerCurrentValueField As Field = GetFieldFromType(firstConsumerCurrentValue, firstDummyConsumerField)
                         Dim secondConsumerCurrentValueField As Field = GetFieldFromType(secondConsumerCurrentValue, secondDummyConsumerField)
                         Select Case position
-                            Case Position.Above
+                            Case Positions.Above
                                 ret = firstConsumerCurrentValueField.Value > secondConsumerCurrentValueField.Value
-                            Case Position.Below
+                            Case Positions.Below
                                 ret = firstConsumerCurrentValueField.Value < secondConsumerCurrentValueField.Value
                         End Select
                         If printDetails Then
@@ -303,7 +305,7 @@ Namespace Strategies
                                           firstDummyConsumerField.ToString,
                                           secondDummyConsumerField.ToString,
                                           currentCandle.ToString,
-                                          If(position = Position.Above, "[x>y]", "[x<y]"),
+                                          If(position = Positions.Above, "[x>y]", "[x<y]"),
                                           firstConsumerCurrentValueField.Value,
                                           secondConsumerCurrentValueField.Value,
                                           position.ToString,
@@ -909,6 +911,12 @@ Namespace Strategies
                 'Debug.WriteLine("Error from UI refresh")
             End Try
         End Function
+        Public Overridable Async Function ProcessHoldingAsync(ByVal holdingData As IHolding) As Task
+            'logger.Debug("ProcessOrderAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
+            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+            _cts.Token.ThrowIfCancellationRequested()
+            HoldingDetails = holdingData
+        End Function
         Public Overridable Function GetAllActiveOrders(ByVal signalDirection As IOrder.TypeOfTransaction) As List(Of IOrder)
             Dim ret As List(Of IOrder) = Nothing
             'Dim direction As String = Nothing
@@ -1368,6 +1376,41 @@ Namespace Strategies
                                                                                                     quantity:=placeOrderTrigger.Item2.Quantity,
                                                                                                     triggerPrice:=placeOrderTrigger.Item2.TriggerPrice,
                                                                                                     tag:=activityTag).ConfigureAwait(False)
+                                    If placeOrderResponse IsNot Nothing Then
+                                        logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
+                                        Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
+                                        lastException = Nothing
+                                        allOKWithoutException = True
+                                        _cts.Token.ThrowIfCancellationRequested()
+                                        ret = placeOrderResponse
+                                        _cts.Token.ThrowIfCancellationRequested()
+                                        Exit For
+                                    Else
+                                        Throw New ApplicationException(String.Format("Place order did not succeed"))
+                                    End If
+                                Else
+                                    lastException = Nothing
+                                    allOKWithoutException = True
+                                    _cts.Token.ThrowIfCancellationRequested()
+                                    Exit For
+                                End If
+                            Case ExecuteCommands.PlaceRegularMarketCNCOrder
+                                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
+                                If placeOrderTrigger IsNot Nothing AndAlso (placeOrderTrigger.Item1 = ExecuteCommandAction.Take OrElse
+                                    placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake) Then
+
+                                    activityTag = GenerateFreshTagForNewSignal(activityTag, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime)
+
+                                    If placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+
+                                    Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime, placeOrderTrigger.Item2.EntryDirection, Now, placeOrderTrigger.Item3).ConfigureAwait(False)
+
+                                    Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
+                                    placeOrderResponse = Await _APIAdapter.PlaceRegularMarketCNCOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
+                                                                                                            tradingSymbol:=Me.TradableInstrument.TradingSymbol,
+                                                                                                            transaction:=placeOrderTrigger.Item2.EntryDirection,
+                                                                                                            quantity:=placeOrderTrigger.Item2.Quantity,
+                                                                                                            tag:=activityTag).ConfigureAwait(False)
                                     If placeOrderResponse IsNot Nothing Then
                                         logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
                                         Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
