@@ -65,16 +65,16 @@ Public Class EMACrossoverStrategyInstrument
                     Throw Me.ParentStrategy.ParentController.OrphanException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-                If counter = 0 Then
-                    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                    If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
-                        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketCNCOrder, Nothing).ConfigureAwait(False)
-                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                            placeOrderResponse("data").ContainsKey("order_id") Then
-                            counter += 1
-                        End If
-                    End If
-                End If
+                ''If counter = 0 Then
+                ''    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                ''    If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                ''        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketCNCOrder, Nothing).ConfigureAwait(False)
+                ''        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                ''            placeOrderResponse("data").ContainsKey("order_id") Then
+                ''            counter += 1
+                ''        End If
+                ''    End If
+                ''End If
 
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While

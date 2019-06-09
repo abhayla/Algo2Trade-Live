@@ -28,6 +28,7 @@ Partial Class frmEMACrossoverTradableInstrumentList
         Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmEMACrossoverTradableInstrumentList))
         Me.dgvTradableInstruments = New System.Windows.Forms.DataGridView()
+        Me.btnExitEMACrossoverTradableInstrument = New System.Windows.Forms.Button()
         CType(Me.dgvTradableInstruments, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -53,10 +54,9 @@ Partial Class frmEMACrossoverTradableInstrumentList
         DataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText
         DataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
         Me.dgvTradableInstruments.DefaultCellStyle = DataGridViewCellStyle2
-        Me.dgvTradableInstruments.Dock = System.Windows.Forms.DockStyle.Fill
         Me.dgvTradableInstruments.Location = New System.Drawing.Point(0, 0)
+        Me.dgvTradableInstruments.Margin = New System.Windows.Forms.Padding(2)
         Me.dgvTradableInstruments.Name = "dgvTradableInstruments"
-        Me.dgvTradableInstruments.ReadOnly = True
         DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
         DataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control
         DataGridViewCellStyle3.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -70,16 +70,27 @@ Partial Class frmEMACrossoverTradableInstrumentList
         Me.dgvTradableInstruments.RowsDefaultCellStyle = DataGridViewCellStyle4
         Me.dgvTradableInstruments.RowTemplate.Height = 24
         Me.dgvTradableInstruments.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect
-        Me.dgvTradableInstruments.Size = New System.Drawing.Size(806, 312)
+        Me.dgvTradableInstruments.Size = New System.Drawing.Size(586, 254)
         Me.dgvTradableInstruments.TabIndex = 2
+        '
+        'btnExitEMACrossoverTradableInstrument
+        '
+        Me.btnExitEMACrossoverTradableInstrument.Location = New System.Drawing.Point(608, 12)
+        Me.btnExitEMACrossoverTradableInstrument.Name = "btnExitEMACrossoverTradableInstrument"
+        Me.btnExitEMACrossoverTradableInstrument.Size = New System.Drawing.Size(75, 31)
+        Me.btnExitEMACrossoverTradableInstrument.TabIndex = 3
+        Me.btnExitEMACrossoverTradableInstrument.Text = "E&xit"
+        Me.btnExitEMACrossoverTradableInstrument.UseVisualStyleBackColor = True
         '
         'frmEMACrossoverTradableInstrumentList
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(806, 312)
+        Me.ClientSize = New System.Drawing.Size(695, 254)
+        Me.Controls.Add(Me.btnExitEMACrossoverTradableInstrument)
         Me.Controls.Add(Me.dgvTradableInstruments)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.Margin = New System.Windows.Forms.Padding(2)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "frmEMACrossoverTradableInstrumentList"
@@ -91,4 +102,5 @@ Partial Class frmEMACrossoverTradableInstrumentList
     End Sub
 
     Friend WithEvents dgvTradableInstruments As DataGridView
+    Friend WithEvents btnExitEMACrossoverTradableInstrument As Button
 End Class
