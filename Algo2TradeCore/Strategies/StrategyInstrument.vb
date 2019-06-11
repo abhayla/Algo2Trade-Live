@@ -618,27 +618,25 @@ Namespace Strategies
         End Function
         Public Overridable Async Function PopulateChartAndIndicatorsAsync(ByVal candleCreator As Chart, ByVal currentCandle As OHLCPayload) As Task
             'logger.Debug("PopulateChartAndIndicatorsAsync, parameters:{0},{1}", candleCreator.ToString, currentCandle.ToString)
-            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
             If RawPayloadDependentConsumers IsNot Nothing AndAlso RawPayloadDependentConsumers.Count > 0 Then
                 For Each runningRawPayloadConsumer In RawPayloadDependentConsumers
                     If runningRawPayloadConsumer.TypeOfConsumer = IPayloadConsumer.ConsumerType.Chart Then
                         Dim currentXMinute As Date = candleCreator.ConvertTimeframe(CType(runningRawPayloadConsumer, PayloadToChartConsumer).Timeframe,
                                                                     currentCandle,
                                                                     runningRawPayloadConsumer)
-                        Continue For
                         If candleCreator.IndicatorCreator Is Nothing Then candleCreator.IndicatorCreator = New ChartHandler.Indicator.IndicatorManeger(Me.ParentStrategy.ParentController, candleCreator, _cts)
                         If currentXMinute <> Date.MaxValue Then
                             Dim c As Integer = 1
                             If runningRawPayloadConsumer.OnwardLevelConsumers IsNot Nothing AndAlso runningRawPayloadConsumer.OnwardLevelConsumers.Count > 0 Then
-                                'EMA Supertrend Strategy
-                                For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                    If c < 3 Then
-                                        candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
-                                    Else
-                                        candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer)
-                                    End If
-                                    c += 1
-                                Next
+                                ''EMA Supertrend Strategy
+                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
+                                '    If c < 3 Then
+                                '        candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
+                                '    Else
+                                '        candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer)
+                                '    End If
+                                '    c += 1
+                                'Next
 
                                 ''PetDGandhi Strategy
                                 'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
@@ -649,6 +647,11 @@ Namespace Strategies
                                 '    End If
                                 '    c += 1
                                 'Next
+
+                                'EMA Crossover Strategy
+                                For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
+                                    candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
+                                Next
                             End If
 
                             'Below block for pair strategy
@@ -686,7 +689,7 @@ Namespace Strategies
                                     Dim chartCreator As Chart = Me.ParentStrategy.ParentController.GetChartCreator(runningDependendStrategyInstrument.TradableInstrument.InstrumentIdentifier)
                                     If chartCreator IsNot Nothing Then
                                         Dim currentPayload As OHLCPayload = runningRawPayloadConsumer.ConsumerPayloads(currentXMinute)
-                                        runningDependendStrategyInstrument.PopulateChartAndIndicatorsAsync(chartCreator, currentPayload)
+                                        Await runningDependendStrategyInstrument.PopulateChartAndIndicatorsAsync(chartCreator, currentPayload).ConfigureAwait(False)
                                     End If
                                 Next
                             End If
@@ -752,9 +755,16 @@ Namespace Strategies
         End Sub
         Public Overridable Async Function ProcessOrderAsync(ByVal orderData As IBusinessOrder) As Task
             'logger.Debug("ProcessOrderAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
-            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+            Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
-            OrderDetails.AddOrUpdate(orderData.ParentOrderIdentifier, orderData, Function(key, value) orderData)
+            If orderData.ParentOrder.Tag IsNot Nothing AndAlso orderData.ParentOrder.Tag <> "" Then
+                OrderDetails.AddOrUpdate(orderData.ParentOrderIdentifier, orderData, Function(key, value) orderData)
+            Else
+                Dim activityTag As String = GenerateTag(orderData.ParentOrder.TimeStamp)
+                Dim parentOrderWithTag As IOrder = _APIAdapter.CreateSimilarOrderWithTag(activityTag, orderData.ParentOrder)
+                orderData.ParentOrder = parentOrderWithTag
+                OrderDetails.AddOrUpdate(orderData.ParentOrderIdentifier, orderData, Function(key, value) orderData)
+            End If
 
             'Modify Activity Details
             'Actvity Signal Status flow diagram
@@ -762,6 +772,7 @@ Namespace Strategies
             'Modify/Cancel Activity: Handled->Activated->Complete/Rejected
 
             '-------Entry Activity-------'
+            _cts.Token.ThrowIfCancellationRequested()
             If orderData.ParentOrder.Status = IOrder.TypeOfStatus.Rejected Then
                 Await Me.ParentStrategy.SignalManager.RejectEntryActivity(orderData.ParentOrder.Tag, Me, orderData.ParentOrderIdentifier).ConfigureAwait(False)
             ElseIf orderData.ParentOrder.Status = IOrder.TypeOfStatus.Cancelled Then
@@ -770,6 +781,7 @@ Namespace Strategies
                 Dim runningOrder As Boolean = False
                 If orderData.SLOrder IsNot Nothing AndAlso orderData.SLOrder.Count > 0 Then
                     For Each slOrder In orderData.SLOrder
+                        _cts.Token.ThrowIfCancellationRequested()
                         If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not slOrder.Status = IOrder.TypeOfStatus.Cancelled Then
                             runningOrder = True
                             Exit For
@@ -777,6 +789,7 @@ Namespace Strategies
                     Next
                 ElseIf orderData.AllOrder IsNot Nothing AndAlso orderData.AllOrder.Count > 0 Then
                     For Each allOrder In orderData.AllOrder
+                        _cts.Token.ThrowIfCancellationRequested()
                         If Not allOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not allOrder.Status = IOrder.TypeOfStatus.Cancelled Then
                             runningOrder = True
                             Exit For
@@ -790,6 +803,7 @@ Namespace Strategies
                 End If
             End If
 
+            _cts.Token.ThrowIfCancellationRequested()
             If Me.ParentStrategy.SignalManager.ActivityDetails IsNot Nothing AndAlso
                 Me.ParentStrategy.SignalManager.ActivityDetails.Count > 0 AndAlso
                 Me.ParentStrategy.SignalManager.ActivityDetails.ContainsKey(orderData.ParentOrder.Tag) Then
@@ -801,6 +815,7 @@ Namespace Strategies
                     Dim currentCancelActivity As ActivityDashboard.Activity = Me.ParentStrategy.SignalManager.ActivityDetails(orderData.ParentOrder.Tag).CancelActivity
                     If orderData.SLOrder IsNot Nothing AndAlso orderData.SLOrder.Count > 0 Then
                         For Each slOrder In orderData.SLOrder
+                            _cts.Token.ThrowIfCancellationRequested()
                             If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not slOrder.Status = IOrder.TypeOfStatus.Cancelled Then
                                 orderCancelled = False
                                 statusMessage = slOrder.StatusMessage
@@ -811,6 +826,7 @@ Namespace Strategies
                         Next
                     ElseIf orderData.AllOrder IsNot Nothing AndAlso orderData.AllOrder.Count > 0 Then
                         For Each allOrder In orderData.AllOrder
+                            _cts.Token.ThrowIfCancellationRequested()
                             If Not allOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not allOrder.Status = IOrder.TypeOfStatus.Cancelled Then
                                 orderCancelled = False
                                 statusMessage = allOrder.StatusMessage
@@ -837,6 +853,7 @@ Namespace Strategies
                 End If
 
                 '-------Modify Stoploss Activity-------'
+                _cts.Token.ThrowIfCancellationRequested()
                 If Me.ParentStrategy.SignalManager.ActivityDetails(orderData.ParentOrder.Tag).StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
                     Me.ParentStrategy.SignalManager.ActivityDetails(orderData.ParentOrder.Tag).StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated Then
                     Dim orderModified As Boolean = True
@@ -844,6 +861,7 @@ Namespace Strategies
                     Dim currentModifyActivity As ActivityDashboard.Activity = Me.ParentStrategy.SignalManager.ActivityDetails(orderData.ParentOrder.Tag).StoplossModifyActivity
                     If orderData.SLOrder IsNot Nothing AndAlso orderData.SLOrder.Count > 0 Then
                         For Each slOrder In orderData.SLOrder
+                            _cts.Token.ThrowIfCancellationRequested()
                             If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not slOrder.Status = IOrder.TypeOfStatus.Cancelled Then
                                 If slOrder.TriggerPrice <> Val(currentModifyActivity.Supporting) Then
                                     orderModified = False
@@ -853,6 +871,7 @@ Namespace Strategies
                         Next
                     ElseIf orderData.AllOrder IsNot Nothing AndAlso orderData.AllOrder.Count > 0 Then
                         For Each allOrder In orderData.AllOrder
+                            _cts.Token.ThrowIfCancellationRequested()
                             If Not allOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not allOrder.Status = IOrder.TypeOfStatus.Cancelled Then
                                 If allOrder.TriggerPrice <> 0 AndAlso allOrder.TriggerPrice <> Val(currentModifyActivity.Supporting) Then
                                     orderModified = False
@@ -878,6 +897,7 @@ Namespace Strategies
                     Dim currentModifyActivity As ActivityDashboard.Activity = Me.ParentStrategy.SignalManager.ActivityDetails(orderData.ParentOrder.Tag).TargetModifyActivity
                     If orderData.SLOrder IsNot Nothing AndAlso orderData.SLOrder.Count > 0 Then
                         For Each targetOrder In orderData.TargetOrder
+                            _cts.Token.ThrowIfCancellationRequested()
                             If Not targetOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not targetOrder.Status = IOrder.TypeOfStatus.Cancelled Then
                                 If targetOrder.Price <> Val(currentModifyActivity.Supporting) Then
                                     orderModified = False
@@ -887,6 +907,7 @@ Namespace Strategies
                         Next
                     ElseIf orderData.AllOrder IsNot Nothing AndAlso orderData.AllOrder.Count > 0 Then
                         For Each allOrder In orderData.AllOrder
+                            _cts.Token.ThrowIfCancellationRequested()
                             If Not allOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not allOrder.Status = IOrder.TypeOfStatus.Cancelled Then
                                 If allOrder.Price <> 0 AndAlso allOrder.Price <> Val(currentModifyActivity.Supporting) Then
                                     orderModified = False

@@ -67,8 +67,6 @@ Namespace Adapter
                         End If
 
                         Await GetOrderUpdatesAsync().ConfigureAwait(False)
-                        Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
-                        Await GetHoldingUpdatesAsync().ConfigureAwait(False)
                     Catch fex As ForceExitException
                         logger.Error(fex)
                         OnCollectorError(fex.Message)
@@ -109,11 +107,6 @@ Namespace Adapter
         Protected Overrides Async Function GetOrderUpdatesAsync() As Task
             Dim orderDetails As Concurrent.ConcurrentBag(Of IBusinessOrder) = Await Me.ParentController.GetOrderDetailsAsync().ConfigureAwait(False)
             Await OnCollectorInformationAsync(orderDetails, InformationType.GetOrderDetails).ConfigureAwait(False)
-        End Function
-
-        Protected Overrides Async Function GetHoldingUpdatesAsync() As Task
-            Dim holdingDetails As Concurrent.ConcurrentBag(Of IHolding) = Await Me.ParentController.GetHoldingDetailsAsync().ConfigureAwait(False)
-            Await OnCollectorInformationAsync(holdingDetails, InformationType.GetHoldingDetails).ConfigureAwait(False)
         End Function
 
         Public Overrides Function ToString() As String

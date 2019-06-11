@@ -47,6 +47,7 @@ Public Class frmEMACrossoverSettings
         If File.Exists(_EMACrossoverSettingsFilename) Then
             _EMACrossoverSettings = Utilities.Strings.DeserializeToCollection(Of EMACrossoverUserInputs)(_EMACrossoverSettingsFilename)
             txtSignalTimeFrame.Text = _EMACrossoverSettings.SignalTimeFrame
+            txtTradeEntryDelay.Text = _EMACrossoverSettings.TradeEntryDelay
             txtFastEMAPeriod.Text = _EMACrossoverSettings.FastEMAPeriod
             txtSlowEMAPeriod.Text = _EMACrossoverSettings.SlowEMAPeriod
             txtInstrumentDetalis.Text = _EMACrossoverSettings.InstrumentDetailsFilePath
@@ -54,6 +55,7 @@ Public Class frmEMACrossoverSettings
     End Sub
     Private Sub SaveSettings()
         _EMACrossoverSettings.SignalTimeFrame = txtSignalTimeFrame.Text
+        _EMACrossoverSettings.TradeEntryDelay = txtTradeEntryDelay.Text
         _EMACrossoverSettings.FastEMAPeriod = txtFastEMAPeriod.Text
         _EMACrossoverSettings.SlowEMAPeriod = txtSlowEMAPeriod.Text
         _EMACrossoverSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
@@ -78,6 +80,7 @@ Public Class frmEMACrossoverSettings
 
     Private Sub ValidateInputs()
         ValidateNumbers(1, 60, txtSignalTimeFrame)
+        ValidateNumbers(1, Val(txtSignalTimeFrame.Text), txtTradeEntryDelay)
         ValidateNumbers(1, Integer.MaxValue, txtSlowEMAPeriod)
         ValidateNumbers(1, Integer.MaxValue, txtFastEMAPeriod)
         ValidateFile()

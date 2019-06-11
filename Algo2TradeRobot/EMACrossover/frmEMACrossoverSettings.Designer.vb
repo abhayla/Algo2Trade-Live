@@ -38,6 +38,8 @@ Partial Class frmEMACrossoverSettings
         Me.txtInstrumentDetalis = New System.Windows.Forms.TextBox()
         Me.btnBrowse = New System.Windows.Forms.Button()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.txtTradeEntryDelay = New System.Windows.Forms.TextBox()
+        Me.lblTradeEntryDelay = New System.Windows.Forms.Label()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
@@ -71,7 +73,7 @@ Partial Class frmEMACrossoverSettings
         Me.GroupBox2.Controls.Add(Me.lblSlowEMAPeriod)
         Me.GroupBox2.Controls.Add(Me.txtFastEMAPeriod)
         Me.GroupBox2.Controls.Add(Me.lblFastEMAPeriod)
-        Me.GroupBox2.Location = New System.Drawing.Point(5, 107)
+        Me.GroupBox2.Location = New System.Drawing.Point(5, 137)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(451, 93)
         Me.GroupBox2.TabIndex = 22
@@ -85,6 +87,7 @@ Partial Class frmEMACrossoverSettings
         Me.txtSlowEMAPeriod.Name = "txtSlowEMAPeriod"
         Me.txtSlowEMAPeriod.Size = New System.Drawing.Size(255, 22)
         Me.txtSlowEMAPeriod.TabIndex = 32
+        Me.txtSlowEMAPeriod.Tag = "Slow EMA Period"
         '
         'lblSlowEMAPeriod
         '
@@ -103,6 +106,7 @@ Partial Class frmEMACrossoverSettings
         Me.txtFastEMAPeriod.Name = "txtFastEMAPeriod"
         Me.txtFastEMAPeriod.Size = New System.Drawing.Size(256, 22)
         Me.txtFastEMAPeriod.TabIndex = 30
+        Me.txtFastEMAPeriod.Tag = "Fast EMA Period"
         '
         'lblFastEMAPeriod
         '
@@ -131,11 +135,12 @@ Partial Class frmEMACrossoverSettings
         Me.txtSignalTimeFrame.Name = "txtSignalTimeFrame"
         Me.txtSignalTimeFrame.Size = New System.Drawing.Size(255, 22)
         Me.txtSignalTimeFrame.TabIndex = 0
+        Me.txtSignalTimeFrame.Tag = "Signal Time Frame"
         '
         'lblInstrumentDetails
         '
         Me.lblInstrumentDetails.AutoSize = True
-        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 59)
+        Me.lblInstrumentDetails.Location = New System.Drawing.Point(9, 97)
         Me.lblInstrumentDetails.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblInstrumentDetails.Name = "lblInstrumentDetails"
         Me.lblInstrumentDetails.Size = New System.Drawing.Size(121, 17)
@@ -144,7 +149,7 @@ Partial Class frmEMACrossoverSettings
         '
         'txtInstrumentDetalis
         '
-        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(174, 56)
+        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(174, 94)
         Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
         Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
         Me.txtInstrumentDetalis.ReadOnly = True
@@ -154,7 +159,7 @@ Partial Class frmEMACrossoverSettings
         'btnBrowse
         '
         Me.btnBrowse.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnBrowse.Location = New System.Drawing.Point(404, 55)
+        Me.btnBrowse.Location = New System.Drawing.Point(404, 93)
         Me.btnBrowse.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(40, 23)
@@ -164,6 +169,8 @@ Partial Class frmEMACrossoverSettings
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.txtTradeEntryDelay)
+        Me.GroupBox1.Controls.Add(Me.lblTradeEntryDelay)
         Me.GroupBox1.Controls.Add(Me.btnBrowse)
         Me.GroupBox1.Controls.Add(Me.txtInstrumentDetalis)
         Me.GroupBox1.Controls.Add(Me.lblInstrumentDetails)
@@ -173,15 +180,34 @@ Partial Class frmEMACrossoverSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(451, 94)
+        Me.GroupBox1.Size = New System.Drawing.Size(451, 124)
         Me.GroupBox1.TabIndex = 21
         Me.GroupBox1.TabStop = False
+        '
+        'txtTradeEntryDelay
+        '
+        Me.txtTradeEntryDelay.Location = New System.Drawing.Point(175, 57)
+        Me.txtTradeEntryDelay.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtTradeEntryDelay.Name = "txtTradeEntryDelay"
+        Me.txtTradeEntryDelay.Size = New System.Drawing.Size(255, 22)
+        Me.txtTradeEntryDelay.TabIndex = 16
+        Me.txtTradeEntryDelay.Tag = "Trade Entry Delay"
+        '
+        'lblTradeEntryDelay
+        '
+        Me.lblTradeEntryDelay.AutoSize = True
+        Me.lblTradeEntryDelay.Location = New System.Drawing.Point(9, 60)
+        Me.lblTradeEntryDelay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblTradeEntryDelay.Name = "lblTradeEntryDelay"
+        Me.lblTradeEntryDelay.Size = New System.Drawing.Size(155, 17)
+        Me.lblTradeEntryDelay.TabIndex = 17
+        Me.lblTradeEntryDelay.Text = "Trade Entry Delay(min)"
         '
         'frmEMACrossoverSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(583, 207)
+        Me.ClientSize = New System.Drawing.Size(583, 237)
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.btnSaveEMACrossoverSettings)
         Me.Controls.Add(Me.GroupBox1)
@@ -213,4 +239,6 @@ Partial Class frmEMACrossoverSettings
     Friend WithEvents txtInstrumentDetalis As TextBox
     Friend WithEvents btnBrowse As Button
     Friend WithEvents GroupBox1 As GroupBox
+    Friend WithEvents txtTradeEntryDelay As TextBox
+    Friend WithEvents lblTradeEntryDelay As Label
 End Class

@@ -51,10 +51,8 @@ Namespace Adapter
         End Sub
         Protected MustOverride Async Function StartPollingAsync() As Task
         Protected MustOverride Async Function GetOrderUpdatesAsync() As Task
-        Protected MustOverride Async Function GetHoldingUpdatesAsync() As Task
         Public Enum InformationType
             GetOrderDetails = 1
-            GetHoldingDetails
             None
         End Enum
     End Class

@@ -43,26 +43,23 @@ Public Class EMACrossoverStrategy
                 For Each instrument In emaCrossoverUserInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = Nothing
-                    'Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
-                    '                                                                                     Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
-                    '                                                                                         x.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
-                    '                                                                                         (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX" OrElse x.RawExchange = "CDS")
-                    '                                                                                 End Function)
+                    Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
+                                                                                                         Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
+                                                                                                             x.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
+                                                                                                             (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX" OrElse x.RawExchange = "CDS")
+                                                                                                     End Function)
 
-                    'Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                    '                                                       If Not x.Expiry.Value.Date = Now.Date Then
-                    '                                                           Return x.Expiry.Value
-                    '                                                       Else
-                    '                                                           Return Date.MaxValue
-                    '                                                       End If
-                    '                                                   End Function)
-                    'runningTradableInstrument = allTradableInstruments.Find(Function(x)
-                    '                                                            Return x.Expiry = minExpiry
-                    '                                                        End Function)
+                    Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
+                                                                           If Not x.Expiry.Value.Date = Now.Date Then
+                                                                               Return x.Expiry.Value
+                                                                           Else
+                                                                               Return Date.MaxValue
+                                                                           End If
+                                                                       End Function)
 
-                    runningTradableInstrument = dummyAllInstruments.Find(Function(x)
-                                                                             Return x.TradingSymbol = instrument.Key
-                                                                         End Function)
+                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
+                                                                                Return x.Expiry = minExpiry
+                                                                            End Function)
 
                     _cts.Token.ThrowIfCancellationRequested()
 
@@ -120,6 +117,7 @@ Public Class EMACrossoverStrategy
         Dim lastException As Exception = Nothing
         Try
             _cts.Token.ThrowIfCancellationRequested()
+            Await GetHoldingsDataAsync().ConfigureAwait(False)
             Dim tasks As New List(Of Task)()
             For Each tradableStrategyInstrument As EMACrossoverStrategyInstrument In TradableStrategyInstruments
                 _cts.Token.ThrowIfCancellationRequested()

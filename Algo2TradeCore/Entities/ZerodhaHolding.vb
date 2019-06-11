@@ -1,10 +1,9 @@
 ﻿Imports KiteConnect
 
 Namespace Entities
+    <Serializable>
     Public Class ZerodhaHolding
         Implements IHolding
-
-        Public Property WrappedHolding As Holding
 
         Public ReadOnly Property Product As String Implements IHolding.Product
             Get
@@ -59,5 +58,17 @@ Namespace Entities
                 Return WrappedHolding.Quantity
             End Get
         End Property
+
+        <NonSerialized>
+        Private _WrappedHolding As Holding
+        Public Property WrappedHolding As Holding
+            Get
+                Return _WrappedHolding
+            End Get
+            Set(value As Holding)
+                _WrappedHolding = value
+            End Set
+        End Property
+
     End Class
 End Namespace

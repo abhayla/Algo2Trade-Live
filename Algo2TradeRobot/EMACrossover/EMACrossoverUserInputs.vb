@@ -9,13 +9,14 @@ Public Class EMACrossoverUserInputs
     Inherits StrategyUserInputs
     Public Property FastEMAPeriod As Integer
     Public Property SlowEMAPeriod As Integer
+    Public Property TradeEntryDelay As Integer
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 
     <Serializable>
     Public Class InstrumentDetails
         Public Property InstrumentName As String
-        Public Property Quantity As Integer
+        Public Property InitialQuantity As Integer
         Public Property ModifiedQuantity As Integer
     End Class
 
@@ -73,7 +74,8 @@ Public Class EMACrossoverUserInputs
                             If instrumentName IsNot Nothing AndAlso quantity > 0 Then
                                 Dim instrumentData As New InstrumentDetails With {
                                     .InstrumentName = instrumentName.ToUpper,
-                                    .Quantity = quantity
+                                    .InitialQuantity = quantity,
+                                    .ModifiedQuantity = quantity
                                 }
 
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)

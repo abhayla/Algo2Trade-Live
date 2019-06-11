@@ -2,9 +2,9 @@
 Imports Algo2TradeCore.Adapter
 Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Strategies
-Imports Utilities.Numbers
 Imports NLog
 Imports Algo2TradeCore.Entities.Indicators
+Imports System.IO
 
 Public Class EMACrossoverStrategyInstrument
     Inherits StrategyInstrument
@@ -14,8 +14,9 @@ Public Class EMACrossoverStrategyInstrument
     Public Shared Shadows logger As Logger = LogManager.GetCurrentClassLogger
 #End Region
 
+    Public Property ForceExitByUser As Boolean
+
     Private lastPrevPayloadPlaceOrder As String = ""
-    Private lastPrevPayloadExitOrder As String = ""
     Private ReadOnly _dummyFastEMAConsumer As EMAConsumer
     Private ReadOnly _dummySlowEMAConsumer As EMAConsumer
     Public Sub New(ByVal associatedInstrument As IInstrument,
@@ -49,32 +50,51 @@ Public Class EMACrossoverStrategyInstrument
                 Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
             End If
         End If
+        Me.ForceExitByUser = False
     End Sub
 
-    Public Overrides Function ProcessOrderAsync(orderData As IBusinessOrder) As Task
-        Return MyBase.ProcessOrderAsync(orderData)
-        'Convert Order to holding
-
+    Public Overrides Function ProcessHoldingAsync(holdingData As IHolding) As Task
+        Dim todayDate As String = Now.ToString("yy_MM_dd")
+        For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "*.Holdings.a2t")
+            If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+        Next
+        Dim holdingFileName As String = Path.Combine(My.Application.Info.DirectoryPath, String.Format("{0}_{1}.Holdings.a2t", Me.ToString, todayDate))
+        If File.Exists(holdingFileName) Then
+            Dim dayStartHoldingData As IHolding = Utilities.Strings.DeserializeToCollection(Of IHolding)(holdingFileName)
+            Return MyBase.ProcessHoldingAsync(dayStartHoldingData)
+        Else
+            Return MyBase.ProcessHoldingAsync(holdingData)
+        End If
+        If HoldingDetails IsNot Nothing Then
+            Utilities.Strings.SerializeFromCollection(Of IHolding)(holdingFileName, Me.HoldingDetails)
+        End If
     End Function
 
     Public Overrides Async Function MonitorAsync() As Task
         Try
-            Dim counter As Integer = 0
             While True
                 If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
                     Throw Me.ParentStrategy.ParentController.OrphanException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-                ''If counter = 0 Then
-                ''    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                ''    If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
-                ''        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketCNCOrder, Nothing).ConfigureAwait(False)
-                ''        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                ''            placeOrderResponse("data").ContainsKey("order_id") Then
-                ''            counter += 1
-                ''        End If
-                ''    End If
-                ''End If
+                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                    If placeOrderTrigger.Item2.Quantity <> 0 Then
+                        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketCNCOrder, Nothing).ConfigureAwait(False)
+                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                            placeOrderResponse("data").ContainsKey("order_id") Then
+                            If ForceExitByUser Then
+                                ForceExitByUser = False
+                                OnHeartbeat(String.Format("Force exit successful: {0}", Me.TradableInstrument.TradingSymbol))
+                            End If
+                        End If
+                    Else
+                        If ForceExitByUser Then
+                            ForceExitByUser = False
+                            OnHeartbeat(String.Format("No position available for force exit: {0}", Me.TradableInstrument.TradingSymbol))
+                        End If
+                    End If
+                End If
 
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While
@@ -93,15 +113,145 @@ Public Class EMACrossoverStrategyInstrument
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
         Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim dummySignalCandle As OHLCPayload = New OHLCPayload(OHLCPayload.PayloadSource.None)
-        dummySignalCandle.SnapshotDateTime = Utilities.Time.GetDateTimeTillMinutes(Me.TradableInstrument.LastTick.Timestamp)
-        Dim parameters As PlaceOrderParameters = New PlaceOrderParameters(dummySignalCandle)
-        With parameters
-            .EntryDirection = IOrder.TypeOfTransaction.Sell
-            .OrderType = IOrder.TypeOfOrder.Market
-            .Quantity = 2
-        End With
-        ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Test CNC Order")
+        Dim emaCrossoverUserSettings As EMACrossoverUserInputs = Me.ParentStrategy.UserSettings
+        Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(emaCrossoverUserSettings.SignalTimeFrame)
+        Dim fastEMAConsumer As EMAConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyFastEMAConsumer)
+        Dim slowEMAConsumer As EMAConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummySlowEMAConsumer)
+        Dim currentTime As Date = Now()
+
+        Try
+            If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
+                If Not runningCandlePayload.PreviousPayload.ToString = lastPrevPayloadPlaceOrder Then
+                    lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
+                    logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
+                    logger.Debug("PlaceOrder-> Rest all parameters: RunningCandlePayloadSnapshotDateTime:{0}, PayloadGeneratedBy:{1}, IsHistoricalCompleted:{2}, IsFirstTimeInformationCollected:{3}, IsCrossover(above):{4}, IsCrossover(below):{5}, EMA({6}):{7}, EMA({8}):{9}, Force Exit by user:{10}, Quantity:{11}, Exchange Start Time:{12}, Exchange End Time:{13}, Current Time:{14}, Trade entry delay:{15}, TradingSymbol:{16}",
+                    runningCandlePayload.SnapshotDateTime.ToString,
+                    runningCandlePayload.PayloadGeneratedBy.ToString,
+                    Me.TradableInstrument.IsHistoricalCompleted,
+                    Me.ParentStrategy.IsFirstTimeInformationCollected,
+                    IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, True),
+                    IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, True),
+                    emaCrossoverUserSettings.FastEMAPeriod,
+                    fastEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                    emaCrossoverUserSettings.SlowEMAPeriod,
+                    slowEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                    Me.ForceExitByUser,
+                    GetQuantityToTrade(),
+                   Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.ToString,
+                   Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
+                   currentTime.ToString,
+                   emaCrossoverUserSettings.TradeEntryDelay,
+                   Me.TradableInstrument.TradingSymbol)
+                End If
+            End If
+        Catch ex As Exception
+            logger.Error(ex)
+        End Try
+
+        Dim parameters As PlaceOrderParameters = Nothing
+        If ForceExitByUser AndAlso currentTime >= Me.TradableInstrument.ExchangeDetails.ExchangeStartTime AndAlso currentTime <= Me.TradableInstrument.ExchangeDetails.ExchangeEndTime Then
+            Dim quantity As Integer = GetQuantityToTrade() / 2
+            If quantity > 0 Then
+                parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                   {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                                    .Quantity = Math.Abs(quantity)}
+            Else
+                parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                  {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                   .Quantity = Math.Abs(quantity)}
+            End If
+        ElseIf currentTime >= Me.TradableInstrument.ExchangeDetails.ExchangeStartTime AndAlso currentTime <= Me.TradableInstrument.ExchangeDetails.ExchangeEndTime AndAlso
+            runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
+            currentTime <= runningCandlePayload.SnapshotDateTime.AddMinutes(emaCrossoverUserSettings.TradeEntryDelay) AndAlso
+            runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
+
+            If IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, False) Then
+                Dim quantity As Integer = GetQuantityToTrade()
+                parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                   {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                    .Quantity = Math.Abs(quantity)}
+            ElseIf IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, False) Then
+                Dim quantity As Integer = GetQuantityToTrade()
+                parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                   {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                                    .Quantity = Math.Abs(quantity)}
+            End If
+
+        End If
+
+        'Below portion have to be done in every place order trigger
+        If parameters IsNot Nothing Then
+            Try
+                If forcePrint Then
+                    logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+                    If Me.TradableInstrument.IsHistoricalCompleted Then
+                        logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
+                        logger.Debug("PlaceOrder-> Rest all parameters: 
+                                    RunningCandlePayloadSnapshotDateTime:{0}, PayloadGeneratedBy:{1}, 
+                                    IsHistoricalCompleted:{2}, IsFirstTimeInformationCollected:{3}, 
+                                    IsCrossover(above):{4}, IsCrossover(below):{5}, 
+                                    EMA({6}):{7}, EMA({8}):{9}, 
+                                    Force Exit by user:{10}, Quantity:{11},
+                                    Exchange Start Time:{12}, Exchange End Time:{13},
+                                    Current Time:{14}, Trade entry delay:{15},
+                                    TradingSymbol:{16}",
+                                    runningCandlePayload.SnapshotDateTime.ToString,
+                                    runningCandlePayload.PayloadGeneratedBy.ToString,
+                                    Me.TradableInstrument.IsHistoricalCompleted,
+                                    Me.ParentStrategy.IsFirstTimeInformationCollected,
+                                    IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, True),
+                                    IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, True),
+                                    emaCrossoverUserSettings.FastEMAPeriod,
+                                    fastEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                                    emaCrossoverUserSettings.SlowEMAPeriod,
+                                    slowEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                                    Me.ForceExitByUser,
+                                    GetQuantityToTrade(),
+                                    Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.ToString,
+                                    Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
+                                    currentTime.ToString,
+                                    emaCrossoverUserSettings.TradeEntryDelay,
+                                    Me.TradableInstrument.TradingSymbol)
+                    ElseIf ForceExitByUser Then
+                        logger.Debug("PlaceOrder-> Rest all parameters:
+                                    Force exit done by user before historical completed. 
+                                    IsHistoricalCompleted:{0}, IsFirstTimeInformationCollected:{1}, 
+                                    Force Exit by user:{2}, Quantity:{3},
+                                    Exchange Start Time:{4}, Exchange End Time:{5},
+                                    Current Time:{6}, Trading Symbol:{7}",
+                                    Me.TradableInstrument.IsHistoricalCompleted,
+                                    Me.ParentStrategy.IsFirstTimeInformationCollected,
+                                    ForceExitByUser,
+                                    GetQuantityToTrade(),
+                                    Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.ToString,
+                                    Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
+                                    currentTime.ToString,
+                                    Me.TradableInstrument.TradingSymbol)
+                    End If
+                End If
+            Catch ex As Exception
+                logger.Error(ex)
+            End Try
+
+            Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
+            If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
+                If currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
+                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException IsNot Nothing AndAlso
+                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
+                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "Condition Satisfied")
+                ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded Then
+                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
+                    'ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
+                    '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters)(ExecuteCommandAction.Take, parameters)
+                Else
+                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "Condition Satisfied")
+                End If
+            Else
+                ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
+            End If
+        Else
+            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
+        End If
         Return ret
     End Function
 
@@ -127,6 +277,43 @@ Public Class EMACrossoverStrategyInstrument
 
     Protected Overrides Function ForceExitSpecificTradeAsync(order As IOrder, reason As String) As Task
         Throw New NotImplementedException()
+    End Function
+
+    Private Function GetQuantityToTrade() As Integer
+        Dim ret As Integer = 0
+        Dim emaCrossoverUserSettings As EMACrossoverUserInputs = Me.ParentStrategy.UserSettings
+        If HoldingDetails IsNot Nothing Then
+            ret = Me.HoldingDetails.T1Quantity
+            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+                For Each runningOrder In OrderDetails.Values
+                    If runningOrder.ParentOrder IsNot Nothing AndAlso runningOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                        If runningOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                            ret += runningOrder.ParentOrder.Quantity
+                        ElseIf runningOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                            ret -= runningOrder.ParentOrder.Quantity
+                        End If
+                    End If
+                Next
+            End If
+            ret = ret * 2
+        Else
+            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+                For Each runningOrder In OrderDetails.Values
+                    If runningOrder.ParentOrder IsNot Nothing AndAlso runningOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                        If runningOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                            ret += runningOrder.ParentOrder.Quantity
+                        ElseIf runningOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                            ret -= runningOrder.ParentOrder.Quantity
+                        End If
+                    End If
+                Next
+                ret = ret * 2
+            End If
+        End If
+        If ret = 0 Then
+            If Not ForceExitByUser Then ret = Me.TradableInstrument.LotSize * emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).InitialQuantity
+        End If
+        Return ret
     End Function
 
 #Region "IDisposable Support"

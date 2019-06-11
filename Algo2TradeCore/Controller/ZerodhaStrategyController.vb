@@ -1142,20 +1142,6 @@ Namespace Controller
                                 End If
                             Next
                         End If
-                    Case APIInformationCollector.InformationType.GetHoldingDetails
-                        Dim holdingDetails As Concurrent.ConcurrentBag(Of IHolding) = CType(information, Concurrent.ConcurrentBag(Of IHolding))
-                        If holdingDetails IsNot Nothing AndAlso holdingDetails.Count > 0 Then
-                            For Each holdingData In holdingDetails
-                                _cts.Token.ThrowIfCancellationRequested()
-                                If _AllStrategies IsNot Nothing AndAlso _AllStrategies.Count > 0 Then
-                                    For Each strategyToRun In _AllStrategies
-                                        _cts.Token.ThrowIfCancellationRequested()
-                                        Await strategyToRun.ProcessHoldingAsync(holdingData).ConfigureAwait(False)
-                                        strategyToRun.IsFirstTimeInformationCollected = True
-                                    Next
-                                End If
-                            Next
-                        End If
                     Case Else
                         Throw New NotImplementedException
                 End Select

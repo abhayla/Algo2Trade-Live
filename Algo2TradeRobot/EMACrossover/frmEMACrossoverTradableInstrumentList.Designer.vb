@@ -54,8 +54,8 @@ Partial Class frmEMACrossoverTradableInstrumentList
         DataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText
         DataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
         Me.dgvTradableInstruments.DefaultCellStyle = DataGridViewCellStyle2
-        Me.dgvTradableInstruments.Location = New System.Drawing.Point(0, 0)
-        Me.dgvTradableInstruments.Margin = New System.Windows.Forms.Padding(2)
+        Me.dgvTradableInstruments.Location = New System.Drawing.Point(2, -1)
+        Me.dgvTradableInstruments.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.dgvTradableInstruments.Name = "dgvTradableInstruments"
         DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
         DataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control
@@ -70,27 +70,29 @@ Partial Class frmEMACrossoverTradableInstrumentList
         Me.dgvTradableInstruments.RowsDefaultCellStyle = DataGridViewCellStyle4
         Me.dgvTradableInstruments.RowTemplate.Height = 24
         Me.dgvTradableInstruments.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect
-        Me.dgvTradableInstruments.Size = New System.Drawing.Size(586, 254)
+        Me.dgvTradableInstruments.Size = New System.Drawing.Size(781, 313)
         Me.dgvTradableInstruments.TabIndex = 2
         '
         'btnExitEMACrossoverTradableInstrument
         '
-        Me.btnExitEMACrossoverTradableInstrument.Location = New System.Drawing.Point(608, 12)
+        Me.btnExitEMACrossoverTradableInstrument.AutoSize = True
+        Me.btnExitEMACrossoverTradableInstrument.Location = New System.Drawing.Point(803, 13)
+        Me.btnExitEMACrossoverTradableInstrument.Margin = New System.Windows.Forms.Padding(4)
         Me.btnExitEMACrossoverTradableInstrument.Name = "btnExitEMACrossoverTradableInstrument"
-        Me.btnExitEMACrossoverTradableInstrument.Size = New System.Drawing.Size(75, 31)
+        Me.btnExitEMACrossoverTradableInstrument.Size = New System.Drawing.Size(100, 38)
         Me.btnExitEMACrossoverTradableInstrument.TabIndex = 3
         Me.btnExitEMACrossoverTradableInstrument.Text = "E&xit"
         Me.btnExitEMACrossoverTradableInstrument.UseVisualStyleBackColor = True
         '
         'frmEMACrossoverTradableInstrumentList
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(695, 254)
+        Me.ClientSize = New System.Drawing.Size(927, 313)
         Me.Controls.Add(Me.btnExitEMACrossoverTradableInstrument)
         Me.Controls.Add(Me.dgvTradableInstruments)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Margin = New System.Windows.Forms.Padding(2)
+        Me.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "frmEMACrossoverTradableInstrumentList"
@@ -98,6 +100,7 @@ Partial Class frmEMACrossoverTradableInstrumentList
         Me.Text = "EMA Crossover Strategy Tradable Instruments"
         CType(Me.dgvTradableInstruments, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
+        Me.PerformLayout()
 
     End Sub
 

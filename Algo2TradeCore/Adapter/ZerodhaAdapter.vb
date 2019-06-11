@@ -321,6 +321,15 @@ Namespace Adapter
             End If
             Return ret
         End Function
+        Public Overrides Function CreateSimilarOrderWithTag(tag As String, orderData As IOrder) As IOrder
+            Dim ret As ZerodhaOrder = Nothing
+            If orderData IsNot Nothing Then
+                Dim similarOrder As Order = CType(orderData, ZerodhaOrder).WrappedOrder
+                similarOrder.Tag = tag
+                ret = New ZerodhaOrder With {.WrappedOrder = similarOrder}
+            End If
+            Return ret
+        End Function
 #End Region
 
 #Region "Holdings"
@@ -383,6 +392,25 @@ Namespace Adapter
             Else
                 Throw New ApplicationException(String.Format("Zerodha command execution did not return any list of holding, command:{0}", execCommand.ToString))
             End If
+            Return ret
+        End Function
+        Public Overrides Function CreateSingleHolding(quantity As Integer, instrument As IInstrument) As IHolding
+            Dim ret As ZerodhaHolding = Nothing
+            Dim dummyHolding As Holding = New Holding
+            With dummyHolding
+                .InstrumentToken = instrument.InstrumentIdentifier
+                .Exchange = instrument.RawExchange
+                .T1Quantity = quantity
+                .TradingSymbol = instrument.TradingSymbol
+            End With
+            ret = New ZerodhaHolding With {.WrappedHolding = dummyHolding}
+            Return ret
+        End Function
+        Public Overrides Function CreateSingleHolding(quantity As Integer, sampleHolding As IHolding) As IHolding
+            Dim ret As ZerodhaHolding = Nothing
+            Dim dummyHolding As Holding = CType(sampleHolding, ZerodhaHolding).WrappedHolding
+            dummyHolding.T1Quantity = quantity
+            ret = New ZerodhaHolding With {.WrappedHolding = dummyHolding}
             Return ret
         End Function
 #End Region
@@ -1294,7 +1322,7 @@ Namespace Adapter
                 {"TransactionType", transactionDirection},
                 {"Quantity", quantity},
                 {"Price", Nothing},
-                {"Product", Constants.PRODUCT_CNC},
+                {"Product", If(tradingSymbol.ToUpper.Contains("FUT"), Constants.PRODUCT_NRML, Constants.PRODUCT_CNC)},
                 {"OrderType", Constants.ORDER_TYPE_MARKET},
                 {"Validity", Constants.VALIDITY_DAY},
                 {"TriggerPrice", Nothing},

@@ -1822,7 +1822,7 @@ Public Class frmMainTabbed
             End If 'Common controller
             EnableDisableUIEx(UIMode.ReleaseOther, GetType(EMACrossoverStrategy))
 
-            _EMACrossoverStrategyToExecute = New EMACrossoverStrategy(_commonController, 5, _EMACrossoverUserInputs, 5, _cts)
+            _EMACrossoverStrategyToExecute = New EMACrossoverStrategy(_commonController, 5, _EMACrossoverUserInputs, 8, _cts)
             OnHeartbeatEx(String.Format("Running strategy:{0}", _EMACrossoverStrategyToExecute.ToString), New List(Of Object) From {_EMACrossoverStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()

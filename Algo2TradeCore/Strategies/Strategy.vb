@@ -270,5 +270,17 @@ Namespace Strategies
         Protected MustOverride Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)
 #End Region
 
+#Region "Private Functions"
+        Protected Async Function GetHoldingsDataAsync() As Task
+            Dim holdingDetails As Concurrent.ConcurrentBag(Of IHolding) = Await Me.ParentController.GetHoldingDetailsAsync().ConfigureAwait(False)
+            If holdingDetails IsNot Nothing AndAlso holdingDetails.Count > 0 Then
+                For Each holdingData In holdingDetails
+                    _cts.Token.ThrowIfCancellationRequested()
+                    Await Me.ProcessHoldingAsync(holdingData).ConfigureAwait(False)
+                Next
+            End If
+        End Function
+#End Region
+
     End Class
 End Namespace
