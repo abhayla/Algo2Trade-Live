@@ -169,7 +169,7 @@ Namespace Controller
                        Not Me.APIConnection.Equals(apiConnectionBeingUsed))
                         apiConnectionBeingUsed = Me.APIConnection
                         _cts.Token.ThrowIfCancellationRequested()
-                        If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetHoldings Then
+                        If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetPositions Then
                             logger.Debug("Waiting for fresh token before running command:{0}", command.ToString)
                         End If
                         Await Task.Delay(500, _cts.Token).ConfigureAwait(False)
@@ -178,7 +178,7 @@ Namespace Controller
 
                     _APIAdapter.SetAPIAccessToken(APIConnection.AccessToken)
 
-                    If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetHoldings Then
+                    If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetPositions Then
                         logger.Debug("Firing command:{0}", command.ToString)
                     End If
                     OnDocumentRetryStatus(retryCtr, _MaxReTries)
@@ -243,6 +243,15 @@ Namespace Controller
                                 allOKWithoutException = True
                                 _cts.Token.ThrowIfCancellationRequested()
                                 ret = allHoldingResponse
+                                _cts.Token.ThrowIfCancellationRequested()
+                                Exit For
+                            Case ExecutionCommands.GetPositions
+                                Dim allPositionResponse As IPositionResponse = Nothing
+                                allPositionResponse = Await _APIAdapter.GetAllPositionsAsync().ConfigureAwait(False)
+                                lastException = Nothing
+                                allOKWithoutException = True
+                                _cts.Token.ThrowIfCancellationRequested()
+                                ret = allPositionResponse
                                 _cts.Token.ThrowIfCancellationRequested()
                                 Exit For
                             Case ExecutionCommands.GetUserMargins
@@ -396,6 +405,7 @@ Namespace Controller
         Public MustOverride Async Function SubscribeStrategyAsync(ByVal strategyToRun As Strategy) As Task
         Public MustOverride Overloads Async Function GetOrderDetailsAsync() As Task(Of Concurrent.ConcurrentBag(Of IBusinessOrder))
         Public MustOverride Overloads Async Function GetHoldingDetailsAsync() As Task(Of Concurrent.ConcurrentBag(Of IHolding))
+        Public MustOverride Overloads Async Function GetPositionDetailsAsync() As Task(Of Concurrent.ConcurrentBag(Of IPosition))
         Public Sub FillCandlestickCreator()
             If _AllStrategyUniqueInstruments IsNot Nothing AndAlso _AllStrategyUniqueInstruments.Count > 0 Then
                 For Each runningStrategyUniqueInstruments In _AllStrategyUniqueInstruments
@@ -423,6 +433,7 @@ Namespace Controller
         End Sub
         Protected Overridable Async Function FillOrderDetailsAsync() As Task
             Try
+                Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
                 _cts.Token.ThrowIfCancellationRequested()
                 Dim orderDetails As Concurrent.ConcurrentBag(Of IBusinessOrder) = Await GetOrderDetailsAsync().ConfigureAwait(False)
                 If orderDetails IsNot Nothing AndAlso orderDetails.Count > 0 Then
@@ -432,6 +443,31 @@ Namespace Controller
                             For Each strategyToRun In _AllStrategies
                                 _cts.Token.ThrowIfCancellationRequested()
                                 Await strategyToRun.ProcessOrderAsync(orderData).ConfigureAwait(False)
+                            Next
+                        End If
+                    Next
+                End If
+            Catch cex As OperationCanceledException
+                logger.Warn(cex)
+                Me.OrphanException = cex
+            Catch ex As Exception
+                'Neglect error as in the next minute, it will be run again,
+                'till that time tick based candles will be used
+                logger.Warn(ex)
+            End Try
+        End Function
+        Protected Overridable Async Function FillPositionDetailsAsync() As Task
+            Try
+                Await Task.Delay(1001, _cts.Token).ConfigureAwait(False)
+                _cts.Token.ThrowIfCancellationRequested()
+                Dim positionDetails As Concurrent.ConcurrentBag(Of IPosition) = Await GetPositionDetailsAsync().ConfigureAwait(False)
+                If positionDetails IsNot Nothing AndAlso positionDetails.Count > 0 Then
+                    For Each positionData In positionDetails
+                        _cts.Token.ThrowIfCancellationRequested()
+                        If _AllStrategies IsNot Nothing AndAlso _AllStrategies.Count > 0 Then
+                            For Each strategyToRun In _AllStrategies
+                                _cts.Token.ThrowIfCancellationRequested()
+                                Await strategyToRun.ProcessPositionAsync(positionData).ConfigureAwait(False)
                             Next
                         End If
                     Next

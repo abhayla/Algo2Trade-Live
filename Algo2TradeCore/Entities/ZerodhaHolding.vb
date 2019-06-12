@@ -70,5 +70,10 @@ Namespace Entities
             End Set
         End Property
 
+        Public ReadOnly Property Broker As APISource Implements IHolding.Broker
+            Get
+                Return APISource.Zerodha
+            End Get
+        End Property
     End Class
 End Namespace

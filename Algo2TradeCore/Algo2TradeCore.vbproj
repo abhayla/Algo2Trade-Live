@@ -129,7 +129,7 @@
     <Compile Include="Entities\ZerodhaHolding.vb" />
     <Compile Include="Entities\ZerodhaInstrument.vb" />
     <Compile Include="Entities\ZerodhaPosition.vb" />
-    <Compile Include="Entities\ZerodhaPositionResponse.vb" />
+    <Compile Include="Entities\BusinessPositionResponse.vb" />
     <Compile Include="Entities\ZerodhaUserMargin.vb" />
     <Compile Include="Entities\ZerodhaOrder.vb" />
     <Compile Include="Entities\ZerodhaQuote.vb" />

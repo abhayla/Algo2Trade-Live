@@ -394,31 +394,12 @@ Namespace Adapter
             End If
             Return ret
         End Function
-        Public Overrides Function CreateSingleHolding(quantity As Integer, instrument As IInstrument) As IHolding
-            Dim ret As ZerodhaHolding = Nothing
-            Dim dummyHolding As Holding = New Holding
-            With dummyHolding
-                .InstrumentToken = instrument.InstrumentIdentifier
-                .Exchange = instrument.RawExchange
-                .T1Quantity = quantity
-                .TradingSymbol = instrument.TradingSymbol
-            End With
-            ret = New ZerodhaHolding With {.WrappedHolding = dummyHolding}
-            Return ret
-        End Function
-        Public Overrides Function CreateSingleHolding(quantity As Integer, sampleHolding As IHolding) As IHolding
-            Dim ret As ZerodhaHolding = Nothing
-            Dim dummyHolding As Holding = CType(sampleHolding, ZerodhaHolding).WrappedHolding
-            dummyHolding.T1Quantity = quantity
-            ret = New ZerodhaHolding With {.WrappedHolding = dummyHolding}
-            Return ret
-        End Function
 #End Region
 
 #Region "Positions"
         Public Overrides Async Function GetAllPositionsAsync() As Task(Of IPositionResponse)
             'logger.Debug("GetAllPositionsAsync, parameters:Nothing")
-            Dim ret As ZerodhaPositionResponse = Nothing
+            Dim ret As BusinessPositionResponse = Nothing
             Dim execCommand As ExecutionCommands = ExecutionCommands.GetPositions
             _cts.Token.ThrowIfCancellationRequested()
             Dim tempAllRet As Dictionary(Of String, Object) = Nothing
@@ -463,8 +444,7 @@ Namespace Adapter
                 'logger.Debug(String.Format("Creating Zerodha position collection from API position, count:{0}", tempRet.count))
                 Dim zerodhaReturedPositions As PositionResponse = CType(tempRet, PositionResponse)
 
-                If ret Is Nothing Then ret = New ZerodhaPositionResponse
-                ret.WrappedPositionResponse = zerodhaReturedPositions
+                If ret Is Nothing Then ret = New BusinessPositionResponse
 
                 If zerodhaReturedPositions.Day IsNot Nothing AndAlso zerodhaReturedPositions.Day.Count > 0 Then
                     For Each runningPosition As Position In zerodhaReturedPositions.Day
@@ -1380,14 +1360,14 @@ Namespace Adapter
 
 #Region "Zerodha Commands"
         Private Async Function ExecuteCommandAsync(ByVal command As ExecutionCommands, ByVal stockData As Dictionary(Of String, Object)) As Task(Of Dictionary(Of String, Object))
-            If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetQuotes AndAlso command <> ExecutionCommands.GetHoldings Then
+            If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetQuotes AndAlso command <> ExecutionCommands.GetPositions Then
                 logger.Debug("ExecuteCommandAsync, command:{0}, stockData:{1}", command.ToString, Utils.JsonSerialize(stockData))
             End If
             _cts.Token.ThrowIfCancellationRequested()
             Dim ret As Dictionary(Of String, Object) = Nothing
 
             Dim lastException As Exception = Nothing
-            If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetHoldings Then
+            If command <> ExecutionCommands.GetOrders AndAlso command <> ExecutionCommands.GetPositions Then
                 logger.Debug(String.Format("Firing Zerodha command to complete desired action, command:{0}", command.ToString))
             End If
             Select Case command

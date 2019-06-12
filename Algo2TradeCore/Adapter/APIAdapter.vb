@@ -48,8 +48,6 @@ Namespace Adapter
         Public MustOverride Async Function GetAllQuotesAsync(ByVal instruments As IEnumerable(Of IInstrument)) As Task(Of IEnumerable(Of IQuote))
         Public MustOverride Sub SetAPIAccessToken(ByVal apiAccessToken As String)
         Public MustOverride Function CreateSingleInstrument(ByVal supportedTradingSymbol As String, ByVal instrumentToken As UInteger, ByVal sampleInstrument As IInstrument) As IInstrument
-        Public MustOverride Function CreateSingleHolding(ByVal quantity As Integer, ByVal instrument As IInstrument) As IHolding
-        Public MustOverride Function CreateSingleHolding(ByVal quantity As Integer, ByVal sampleHolding As IHolding) As IHolding
         Public MustOverride Function CreateSimilarOrderWithTag(ByVal tag As String, ByVal orderData As IOrder) As IOrder
         Public MustOverride Async Function ModifyStoplossOrderAsync(ByVal orderId As String, ByVal triggerPrice As Decimal) As Task(Of Dictionary(Of String, Object))
         Public MustOverride Async Function ModifyTargetOrderAsync(ByVal orderId As String, ByVal price As Decimal) As Task(Of Dictionary(Of String, Object))

@@ -124,6 +124,7 @@ Namespace Strategies
         Public Property TradableInstrument As IInstrument
         Public Property OrderDetails As Concurrent.ConcurrentDictionary(Of String, IBusinessOrder)
         Public Property HoldingDetails As IHolding
+        Public Property PositionDetails As IPosition
         Public Property RawPayloadDependentConsumers As List(Of IPayloadConsumer)
         Public Property TickPayloadDependentConsumers As List(Of IPayloadConsumer)
         Public Property IsPairInstrument As Boolean
@@ -933,10 +934,16 @@ Namespace Strategies
             End Try
         End Function
         Public Overridable Async Function ProcessHoldingAsync(ByVal holdingData As IHolding) As Task
-            'logger.Debug("ProcessOrderAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
+            'logger.Debug("ProcessHoldingAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
             Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
-            HoldingDetails = holdingData
+            Me.HoldingDetails = holdingData
+        End Function
+        Public Overridable Async Function ProcessPositionAsync(ByVal positionData As IPosition) As Task
+            'logger.Debug("ProcessPositionAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
+            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+            _cts.Token.ThrowIfCancellationRequested()
+            Me.PositionDetails = positionData
         End Function
         Public Overridable Function GetAllActiveOrders(ByVal signalDirection As IOrder.TypeOfTransaction) As List(Of IOrder)
             Dim ret As List(Of IOrder) = Nothing

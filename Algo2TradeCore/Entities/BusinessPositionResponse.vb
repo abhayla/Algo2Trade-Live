@@ -1,10 +1,8 @@
 ﻿Imports KiteConnect
 
 Namespace Entities
-    Public Class ZerodhaPositionResponse
+    Public Class BusinessPositionResponse
         Implements IPositionResponse
-
-        Public Property WrappedPositionResponse As PositionResponse
 
         Public Property Day As List(Of IPosition) Implements IPositionResponse.Day
 

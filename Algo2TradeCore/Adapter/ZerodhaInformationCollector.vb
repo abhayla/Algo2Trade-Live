@@ -66,6 +66,8 @@ Namespace Adapter
                             Throw New ForceExitException()
                         End If
 
+                        Await GetPositionUpdatesAsync().ConfigureAwait(False)
+                        Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
                         Await GetOrderUpdatesAsync().ConfigureAwait(False)
                     Catch fex As ForceExitException
                         logger.Error(fex)
@@ -107,6 +109,11 @@ Namespace Adapter
         Protected Overrides Async Function GetOrderUpdatesAsync() As Task
             Dim orderDetails As Concurrent.ConcurrentBag(Of IBusinessOrder) = Await Me.ParentController.GetOrderDetailsAsync().ConfigureAwait(False)
             Await OnCollectorInformationAsync(orderDetails, InformationType.GetOrderDetails).ConfigureAwait(False)
+        End Function
+
+        Protected Overrides Async Function GetPositionUpdatesAsync() As Task
+            Dim postionDetails As Concurrent.ConcurrentBag(Of IPosition) = Await Me.ParentController.GetPositionDetailsAsync().ConfigureAwait(False)
+            Await OnCollectorInformationAsync(postionDetails, InformationType.GetPositionDetails).ConfigureAwait(False)
         End Function
 
         Public Overrides Function ToString() As String

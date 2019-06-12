@@ -1004,6 +1004,22 @@ Namespace Controller
             End If
             Return ret
         End Function
+        Public Overrides Async Function GetPositionDetailsAsync() As Task(Of ConcurrentBag(Of IPosition))
+            Dim ret As Concurrent.ConcurrentBag(Of IPosition) = Nothing
+            _cts.Token.ThrowIfCancellationRequested()
+            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+            Dim execCommand As ExecutionCommands = ExecutionCommands.GetPositions
+            _cts.Token.ThrowIfCancellationRequested()
+            Dim allPositions As IPositionResponse = Await ExecuteCommandAsync(execCommand, Nothing).ConfigureAwait(False)
+            _cts.Token.ThrowIfCancellationRequested()
+            If allPositions IsNot Nothing AndAlso allPositions.Net.Count > 0 Then
+                For Each runningPosition In allPositions.Net
+                    If ret Is Nothing Then ret = New ConcurrentBag(Of IPosition)
+                    ret.Add(runningPosition)
+                Next
+            End If
+            Return ret
+        End Function
 #End Region
 
 #Region "Fetcher Events"
@@ -1114,6 +1130,7 @@ Namespace Controller
                 orderData.Status = "OPEN" OrElse
                 orderData.Status = "TRIGGER PENDING" Then
                 FillOrderDetailsAsync()
+                FillPositionDetailsAsync()
             End If
         End Sub
 #End Region
@@ -1137,6 +1154,20 @@ Namespace Controller
                                     For Each strategyToRun In _AllStrategies
                                         _cts.Token.ThrowIfCancellationRequested()
                                         Await strategyToRun.ProcessOrderAsync(orderData).ConfigureAwait(False)
+                                        strategyToRun.IsFirstTimeInformationCollected = True
+                                    Next
+                                End If
+                            Next
+                        End If
+                    Case APIInformationCollector.InformationType.GetPositionDetails
+                        Dim postionDetails As Concurrent.ConcurrentBag(Of IPosition) = CType(information, Concurrent.ConcurrentBag(Of IPosition))
+                        If postionDetails IsNot Nothing AndAlso postionDetails.Count > 0 Then
+                            For Each positionData In postionDetails
+                                _cts.Token.ThrowIfCancellationRequested()
+                                If _AllStrategies IsNot Nothing AndAlso _AllStrategies.Count > 0 Then
+                                    For Each strategyToRun In _AllStrategies
+                                        _cts.Token.ThrowIfCancellationRequested()
+                                        Await strategyToRun.ProcessPositionAsync(positionData).ConfigureAwait(False)
                                         strategyToRun.IsFirstTimeInformationCollected = True
                                     Next
                                 End If

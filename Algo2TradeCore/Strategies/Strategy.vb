@@ -251,12 +251,23 @@ Namespace Strategies
             End If
         End Function
         Public Overridable Async Function ProcessHoldingAsync(ByVal holdingData As IHolding) As Task
-            'logger.Debug("ProcessOrderAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
+            'logger.Debug("ProcessHoldingAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
             If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
                 For Each runningTradableStrategyInstrument In TradableStrategyInstruments
                     _cts.Token.ThrowIfCancellationRequested()
                     If runningTradableStrategyInstrument.TradableInstrument.InstrumentIdentifier = holdingData.InstrumentIdentifier Then
                         Await runningTradableStrategyInstrument.ProcessHoldingAsync(holdingData).ConfigureAwait(False)
+                    End If
+                Next
+            End If
+        End Function
+        Public Overridable Async Function ProcessPositionAsync(ByVal positionData As IPosition) As Task
+            'logger.Debug("ProcessPositionAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
+            If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
+                For Each runningTradableStrategyInstrument In TradableStrategyInstruments
+                    _cts.Token.ThrowIfCancellationRequested()
+                    If runningTradableStrategyInstrument.TradableInstrument.InstrumentIdentifier = positionData.InstrumentIdentifier Then
+                        Await runningTradableStrategyInstrument.ProcessPositionAsync(positionData).ConfigureAwait(False)
                     End If
                 Next
             End If

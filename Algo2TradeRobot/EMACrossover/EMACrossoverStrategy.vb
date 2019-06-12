@@ -117,7 +117,7 @@ Public Class EMACrossoverStrategy
         Dim lastException As Exception = Nothing
         Try
             _cts.Token.ThrowIfCancellationRequested()
-            Await GetHoldingsDataAsync().ConfigureAwait(False)
+            'Await GetHoldingsDataAsync().ConfigureAwait(False)
             Dim tasks As New List(Of Task)()
             For Each tradableStrategyInstrument As EMACrossoverStrategyInstrument In TradableStrategyInstruments
                 _cts.Token.ThrowIfCancellationRequested()
@@ -137,21 +137,21 @@ Public Class EMACrossoverStrategy
         End If
     End Function
 
-    Public Overrides Async Function ProcessOrderAsync(orderData As IBusinessOrder) As Task
-        If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
-            For Each runningTradableStrategyInstrument In TradableStrategyInstruments
-                _cts.Token.ThrowIfCancellationRequested()
-                If runningTradableStrategyInstrument.TradableInstrument.InstrumentIdentifier = orderData.ParentOrder.InstrumentIdentifier Then
-                    'If orderData.ParentOrder.Tag IsNot Nothing Then
-                    '    Dim decodedTag As String = Convert.ToInt64(orderData.ParentOrder.Tag, 16)
-                    '    If decodedTag.Substring(0, 1).Equals(Me.StrategyIdentifier) Then
-                    Await runningTradableStrategyInstrument.ProcessOrderAsync(orderData).ConfigureAwait(False)
-                    '    End If
-                    'End If
-                End If
-            Next
-        End If
-    End Function
+    'Public Overrides Async Function ProcessOrderAsync(orderData As IBusinessOrder) As Task
+    '    If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
+    '        For Each runningTradableStrategyInstrument In TradableStrategyInstruments
+    '            _cts.Token.ThrowIfCancellationRequested()
+    '            If runningTradableStrategyInstrument.TradableInstrument.InstrumentIdentifier = orderData.ParentOrder.InstrumentIdentifier Then
+    '                'If orderData.ParentOrder.Tag IsNot Nothing Then
+    '                '    Dim decodedTag As String = Convert.ToInt64(orderData.ParentOrder.Tag, 16)
+    '                '    If decodedTag.Substring(0, 1).Equals(Me.StrategyIdentifier) Then
+    '                Await runningTradableStrategyInstrument.ProcessOrderAsync(orderData).ConfigureAwait(False)
+    '                '    End If
+    '                'End If
+    '            End If
+    '        Next
+    '    End If
+    'End Function
 
     Protected Overrides Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)
         Dim ret As Tuple(Of Boolean, String) = Nothing

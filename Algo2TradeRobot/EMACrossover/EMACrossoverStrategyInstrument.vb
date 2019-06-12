@@ -53,22 +53,22 @@ Public Class EMACrossoverStrategyInstrument
         Me.ForceExitByUser = False
     End Sub
 
-    Public Overrides Function ProcessHoldingAsync(holdingData As IHolding) As Task
-        Dim todayDate As String = Now.ToString("yy_MM_dd")
-        For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "*.Holdings.a2t")
-            If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
-        Next
-        Dim holdingFileName As String = Path.Combine(My.Application.Info.DirectoryPath, String.Format("{0}_{1}.Holdings.a2t", Me.ToString, todayDate))
-        If File.Exists(holdingFileName) Then
-            Dim dayStartHoldingData As IHolding = Utilities.Strings.DeserializeToCollection(Of IHolding)(holdingFileName)
-            Return MyBase.ProcessHoldingAsync(dayStartHoldingData)
-        Else
-            Return MyBase.ProcessHoldingAsync(holdingData)
-        End If
-        If HoldingDetails IsNot Nothing Then
-            Utilities.Strings.SerializeFromCollection(Of IHolding)(holdingFileName, Me.HoldingDetails)
-        End If
-    End Function
+    'Public Overrides Function ProcessHoldingAsync(holdingData As IHolding) As Task
+    '    Dim todayDate As String = Now.ToString("yy_MM_dd")
+    '    For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "*.Holdings.a2t")
+    '        If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+    '    Next
+    '    Dim holdingFileName As String = Path.Combine(My.Application.Info.DirectoryPath, String.Format("{0}_{1}.Holdings.a2t", Me.ToString, todayDate))
+    '    If File.Exists(holdingFileName) Then
+    '        Dim dayStartHoldingData As IHolding = Utilities.Strings.DeserializeToCollection(Of IHolding)(holdingFileName)
+    '        Return MyBase.ProcessHoldingAsync(dayStartHoldingData)
+    '    Else
+    '        Return MyBase.ProcessHoldingAsync(holdingData)
+    '    End If
+    '    If HoldingDetails IsNot Nothing Then
+    '        Utilities.Strings.SerializeFromCollection(Of IHolding)(holdingFileName, Me.HoldingDetails)
+    '    End If
+    'End Function
 
     Public Overrides Async Function MonitorAsync() As Task
         Try
@@ -282,33 +282,8 @@ Public Class EMACrossoverStrategyInstrument
     Private Function GetQuantityToTrade() As Integer
         Dim ret As Integer = 0
         Dim emaCrossoverUserSettings As EMACrossoverUserInputs = Me.ParentStrategy.UserSettings
-        If HoldingDetails IsNot Nothing Then
-            ret = Me.HoldingDetails.T1Quantity
-            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
-                For Each runningOrder In OrderDetails.Values
-                    If runningOrder.ParentOrder IsNot Nothing AndAlso runningOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
-                        If runningOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                            ret += runningOrder.ParentOrder.Quantity
-                        ElseIf runningOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                            ret -= runningOrder.ParentOrder.Quantity
-                        End If
-                    End If
-                Next
-            End If
-            ret = ret * 2
-        Else
-            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
-                For Each runningOrder In OrderDetails.Values
-                    If runningOrder.ParentOrder IsNot Nothing AndAlso runningOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
-                        If runningOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                            ret += runningOrder.ParentOrder.Quantity
-                        ElseIf runningOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                            ret -= runningOrder.ParentOrder.Quantity
-                        End If
-                    End If
-                Next
-                ret = ret * 2
-            End If
+        If PositionDetails IsNot Nothing Then
+            ret = Me.PositionDetails.Quantity * 2
         End If
         If ret = 0 Then
             If Not ForceExitByUser Then ret = Me.TradableInstrument.LotSize * emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).InitialQuantity

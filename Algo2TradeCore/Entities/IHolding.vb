@@ -9,5 +9,6 @@
         ReadOnly Property ISIN As String
         ReadOnly Property RealisedQuantity As Integer
         ReadOnly Property Quantity As Integer
+        ReadOnly Property Broker As APISource
     End Interface
 End Namespace
