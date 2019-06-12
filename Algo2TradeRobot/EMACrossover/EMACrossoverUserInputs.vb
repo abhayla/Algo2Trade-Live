@@ -1,6 +1,5 @@
 ﻿Imports System.IO
 Imports System.Threading
-Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Entities.UserSettings
 Imports Utilities.DAL
 
@@ -43,8 +42,6 @@ Public Class EMACrossoverUserInputs
                         Next
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim instrumentName As String = Nothing
-                            Dim marketCash As Boolean = False
-                            Dim marketFuture As Boolean = False
                             Dim quantity As Integer = Integer.MinValue
 
                             For columnCtr = 0 To instrumentDetails.GetLength(1)

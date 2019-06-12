@@ -138,6 +138,21 @@ Partial Class frmMainTabbed
         Me.tmrNearFarHedgingTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrPetDGandhiTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrEMACrossoverTickerStatus = New System.Windows.Forms.Timer(Me.components)
+        Me.tabCandleRangeBreakout = New System.Windows.Forms.TabPage()
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.btnCandleRangeBreakoutStop = New System.Windows.Forms.Button()
+        Me.btnCandleRangeBreakoutStart = New System.Windows.Forms.Button()
+        Me.Panel8 = New System.Windows.Forms.Panel()
+        Me.blbCandleRangeBreakoutTickerStatus = New Bulb.LedBulb()
+        Me.lblCandleRangeBreakoutTickerStatus = New System.Windows.Forms.Label()
+        Me.btnCandleRangeBreakoutSettings = New System.Windows.Forms.Button()
+        Me.linklblCandleRangeBreakoutTradableInstrument = New System.Windows.Forms.LinkLabel()
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.TableLayoutPanel6 = New System.Windows.Forms.TableLayoutPanel()
+        Me.lstCandleRangeBreakoutLog = New System.Windows.Forms.ListBox()
+        Me.sfdgvCandleRangeBreakoutMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
+        Me.tmrCandleRangeBreakoutTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.msMainMenuStrip.SuspendLayout()
         Me.tabMain.SuspendLayout()
         Me.tabEMACrossover.SuspendLayout()
@@ -191,6 +206,13 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalBodyHorizontalSplitter.SuspendLayout()
         CType(Me.sfdgvAmiSignalMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabCandleRangeBreakout.SuspendLayout()
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.SuspendLayout()
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.SuspendLayout()
+        Me.Panel8.SuspendLayout()
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.SuspendLayout()
+        Me.TableLayoutPanel6.SuspendLayout()
+        CType(Me.sfdgvCandleRangeBreakoutMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'msMainMenuStrip
@@ -233,6 +255,7 @@ Partial Class frmMainTabbed
         '
         'tabMain
         '
+        Me.tabMain.Controls.Add(Me.tabCandleRangeBreakout)
         Me.tabMain.Controls.Add(Me.tabEMACrossover)
         Me.tabMain.Controls.Add(Me.tabPetDGandhi)
         Me.tabMain.Controls.Add(Me.tabNearFarHedging)
@@ -242,7 +265,7 @@ Partial Class frmMainTabbed
         Me.tabMain.Controls.Add(Me.tabAmiSignal)
         Me.tabMain.Dock = System.Windows.Forms.DockStyle.Fill
         Me.tabMain.Location = New System.Drawing.Point(0, 28)
-        Me.tabMain.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tabMain.Margin = New System.Windows.Forms.Padding(4)
         Me.tabMain.Name = "tabMain"
         Me.tabMain.SelectedIndex = 0
         Me.tabMain.Size = New System.Drawing.Size(1371, 722)
@@ -252,7 +275,7 @@ Partial Class frmMainTabbed
         '
         Me.tabEMACrossover.Controls.Add(Me.pnlEMACrossoverMainPanelHorizontalSplitter)
         Me.tabEMACrossover.Location = New System.Drawing.Point(4, 25)
-        Me.tabEMACrossover.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tabEMACrossover.Margin = New System.Windows.Forms.Padding(4)
         Me.tabEMACrossover.Name = "tabEMACrossover"
         Me.tabEMACrossover.Size = New System.Drawing.Size(1363, 693)
         Me.tabEMACrossover.TabIndex = 6
@@ -267,7 +290,7 @@ Partial Class frmMainTabbed
         Me.pnlEMACrossoverMainPanelHorizontalSplitter.Controls.Add(Me.pnlEMACrossoverBodyVerticalSplitter, 0, 1)
         Me.pnlEMACrossoverMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlEMACrossoverMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlEMACrossoverMainPanelHorizontalSplitter.Name = "pnlEMACrossoverMainPanelHorizontalSplitter"
         Me.pnlEMACrossoverMainPanelHorizontalSplitter.RowCount = 2
         Me.pnlEMACrossoverMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
@@ -300,7 +323,7 @@ Partial Class frmMainTabbed
         Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.linklblEMACrossoverTradableInstrument, 10, 0)
         Me.pnlEMACrossoverTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlEMACrossoverTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlEMACrossoverTopHeaderVerticalSplitter.Name = "pnlEMACrossoverTopHeaderVerticalSplitter"
         Me.pnlEMACrossoverTopHeaderVerticalSplitter.RowCount = 1
         Me.pnlEMACrossoverTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
@@ -311,7 +334,7 @@ Partial Class frmMainTabbed
         '
         Me.btnEMACrossoverStop.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnEMACrossoverStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnEMACrossoverStop.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnEMACrossoverStop.Margin = New System.Windows.Forms.Padding(4)
         Me.btnEMACrossoverStop.Name = "btnEMACrossoverStop"
         Me.btnEMACrossoverStop.Size = New System.Drawing.Size(82, 32)
         Me.btnEMACrossoverStop.TabIndex = 10
@@ -322,7 +345,7 @@ Partial Class frmMainTabbed
         '
         Me.btnEMACrossoverStart.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnEMACrossoverStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnEMACrossoverStart.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnEMACrossoverStart.Margin = New System.Windows.Forms.Padding(4)
         Me.btnEMACrossoverStart.Name = "btnEMACrossoverStart"
         Me.btnEMACrossoverStart.Size = New System.Drawing.Size(82, 32)
         Me.btnEMACrossoverStart.TabIndex = 2
@@ -334,7 +357,7 @@ Partial Class frmMainTabbed
         Me.Panel7.Controls.Add(Me.blbEMACrossoverTickerStatus)
         Me.Panel7.Controls.Add(Me.lblEMACrossoverTickerStatus)
         Me.Panel7.Location = New System.Drawing.Point(1201, 4)
-        Me.Panel7.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Panel7.Margin = New System.Windows.Forms.Padding(4)
         Me.Panel7.Name = "Panel7"
         Me.Panel7.Size = New System.Drawing.Size(147, 31)
         Me.Panel7.TabIndex = 9
@@ -344,7 +367,7 @@ Partial Class frmMainTabbed
         Me.blbEMACrossoverTickerStatus.Color = System.Drawing.Color.Pink
         Me.blbEMACrossoverTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
         Me.blbEMACrossoverTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbEMACrossoverTickerStatus.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.blbEMACrossoverTickerStatus.Margin = New System.Windows.Forms.Padding(4)
         Me.blbEMACrossoverTickerStatus.Name = "blbEMACrossoverTickerStatus"
         Me.blbEMACrossoverTickerStatus.On = True
         Me.blbEMACrossoverTickerStatus.Size = New System.Drawing.Size(47, 31)
@@ -365,7 +388,7 @@ Partial Class frmMainTabbed
         '
         Me.btnEMACrossoverSettings.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnEMACrossoverSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnEMACrossoverSettings.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnEMACrossoverSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnEMACrossoverSettings.Name = "btnEMACrossoverSettings"
         Me.btnEMACrossoverSettings.Size = New System.Drawing.Size(82, 32)
         Me.btnEMACrossoverSettings.TabIndex = 11
@@ -393,11 +416,11 @@ Partial Class frmMainTabbed
         Me.pnlEMACrossoverBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel5, 0, 0)
         Me.pnlEMACrossoverBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlEMACrossoverBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
-        Me.pnlEMACrossoverBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlEMACrossoverBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlEMACrossoverBodyVerticalSplitter.Name = "pnlEMACrossoverBodyVerticalSplitter"
         Me.pnlEMACrossoverBodyVerticalSplitter.RowCount = 1
         Me.pnlEMACrossoverBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlEMACrossoverBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 633.0!))
+        Me.pnlEMACrossoverBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
         Me.pnlEMACrossoverBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
         Me.pnlEMACrossoverBodyVerticalSplitter.TabIndex = 1
         '
@@ -409,7 +432,7 @@ Partial Class frmMainTabbed
         Me.TableLayoutPanel5.Controls.Add(Me.sfdgvEMACrossoverMainDashboard, 0, 0)
         Me.TableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TableLayoutPanel5.Location = New System.Drawing.Point(4, 4)
-        Me.TableLayoutPanel5.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.TableLayoutPanel5.Margin = New System.Windows.Forms.Padding(4)
         Me.TableLayoutPanel5.Name = "TableLayoutPanel5"
         Me.TableLayoutPanel5.RowCount = 2
         Me.TableLayoutPanel5.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
@@ -424,7 +447,7 @@ Partial Class frmMainTabbed
         Me.lstEMACrossoverLog.FormattingEnabled = True
         Me.lstEMACrossoverLog.ItemHeight = 16
         Me.lstEMACrossoverLog.Location = New System.Drawing.Point(4, 444)
-        Me.lstEMACrossoverLog.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.lstEMACrossoverLog.Margin = New System.Windows.Forms.Padding(4)
         Me.lstEMACrossoverLog.Name = "lstEMACrossoverLog"
         Me.lstEMACrossoverLog.Size = New System.Drawing.Size(932, 181)
         Me.lstEMACrossoverLog.TabIndex = 9
@@ -440,7 +463,7 @@ Partial Class frmMainTabbed
         Me.sfdgvEMACrossoverMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
         Me.sfdgvEMACrossoverMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
         Me.sfdgvEMACrossoverMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvEMACrossoverMainDashboard.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.sfdgvEMACrossoverMainDashboard.Margin = New System.Windows.Forms.Padding(4)
         Me.sfdgvEMACrossoverMainDashboard.Name = "sfdgvEMACrossoverMainDashboard"
         Me.sfdgvEMACrossoverMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
         Me.sfdgvEMACrossoverMainDashboard.Size = New System.Drawing.Size(932, 432)
@@ -453,7 +476,7 @@ Partial Class frmMainTabbed
         Me.tabPetDGandhi.Location = New System.Drawing.Point(4, 25)
         Me.tabPetDGandhi.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.tabPetDGandhi.Name = "tabPetDGandhi"
-        Me.tabPetDGandhi.Size = New System.Drawing.Size(1363, 691)
+        Me.tabPetDGandhi.Size = New System.Drawing.Size(1363, 693)
         Me.tabPetDGandhi.TabIndex = 5
         Me.tabPetDGandhi.Text = "Pet-D Gandhi"
         Me.tabPetDGandhi.UseVisualStyleBackColor = True
@@ -466,12 +489,12 @@ Partial Class frmMainTabbed
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.Controls.Add(Me.pnlPetDGandhiBodyVerticalSplitter, 0, 1)
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.Name = "pnlPetDGandhiMainPanelHorizontalSplitter"
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.RowCount = 2
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 691)
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.TabIndex = 3
         '
         'pnlPetDGandhiTopHeaderVerticalSplitter
@@ -499,7 +522,7 @@ Partial Class frmMainTabbed
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.linklblPetDGandhiTradableInstrument, 10, 0)
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.Name = "pnlPetDGandhiTopHeaderVerticalSplitter"
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.RowCount = 1
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
@@ -510,7 +533,7 @@ Partial Class frmMainTabbed
         '
         Me.btnPetDGandhiStop.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnPetDGandhiStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnPetDGandhiStop.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnPetDGandhiStop.Margin = New System.Windows.Forms.Padding(4)
         Me.btnPetDGandhiStop.Name = "btnPetDGandhiStop"
         Me.btnPetDGandhiStop.Size = New System.Drawing.Size(82, 32)
         Me.btnPetDGandhiStop.TabIndex = 10
@@ -521,7 +544,7 @@ Partial Class frmMainTabbed
         '
         Me.btnPetDGandhiStart.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnPetDGandhiStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnPetDGandhiStart.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnPetDGandhiStart.Margin = New System.Windows.Forms.Padding(4)
         Me.btnPetDGandhiStart.Name = "btnPetDGandhiStart"
         Me.btnPetDGandhiStart.Size = New System.Drawing.Size(82, 32)
         Me.btnPetDGandhiStart.TabIndex = 2
@@ -533,7 +556,7 @@ Partial Class frmMainTabbed
         Me.Panel6.Controls.Add(Me.blbPetDGandhiTickerStatus)
         Me.Panel6.Controls.Add(Me.lblPetDGandhiTickerStatus)
         Me.Panel6.Location = New System.Drawing.Point(1201, 4)
-        Me.Panel6.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Panel6.Margin = New System.Windows.Forms.Padding(4)
         Me.Panel6.Name = "Panel6"
         Me.Panel6.Size = New System.Drawing.Size(147, 31)
         Me.Panel6.TabIndex = 9
@@ -543,7 +566,7 @@ Partial Class frmMainTabbed
         Me.blbPetDGandhiTickerStatus.Color = System.Drawing.Color.Pink
         Me.blbPetDGandhiTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
         Me.blbPetDGandhiTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbPetDGandhiTickerStatus.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.blbPetDGandhiTickerStatus.Margin = New System.Windows.Forms.Padding(4)
         Me.blbPetDGandhiTickerStatus.Name = "blbPetDGandhiTickerStatus"
         Me.blbPetDGandhiTickerStatus.On = True
         Me.blbPetDGandhiTickerStatus.Size = New System.Drawing.Size(47, 31)
@@ -564,7 +587,7 @@ Partial Class frmMainTabbed
         '
         Me.btnPetDGandhiSettings.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnPetDGandhiSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnPetDGandhiSettings.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnPetDGandhiSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnPetDGandhiSettings.Name = "btnPetDGandhiSettings"
         Me.btnPetDGandhiSettings.Size = New System.Drawing.Size(82, 32)
         Me.btnPetDGandhiSettings.TabIndex = 11
@@ -592,12 +615,12 @@ Partial Class frmMainTabbed
         Me.pnlPetDGandhiBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel4, 0, 0)
         Me.pnlPetDGandhiBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlPetDGandhiBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
-        Me.pnlPetDGandhiBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlPetDGandhiBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlPetDGandhiBodyVerticalSplitter.Name = "pnlPetDGandhiBodyVerticalSplitter"
         Me.pnlPetDGandhiBodyVerticalSplitter.RowCount = 1
         Me.pnlPetDGandhiBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlPetDGandhiBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 633.0!))
-        Me.pnlPetDGandhiBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 635)
+        Me.pnlPetDGandhiBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 635.0!))
+        Me.pnlPetDGandhiBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
         Me.pnlPetDGandhiBodyVerticalSplitter.TabIndex = 1
         '
         'TableLayoutPanel4
@@ -608,12 +631,12 @@ Partial Class frmMainTabbed
         Me.TableLayoutPanel4.Controls.Add(Me.sfdgvPetDGandhiMainDashboard, 0, 0)
         Me.TableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TableLayoutPanel4.Location = New System.Drawing.Point(4, 4)
-        Me.TableLayoutPanel4.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.TableLayoutPanel4.Margin = New System.Windows.Forms.Padding(4)
         Me.TableLayoutPanel4.Name = "TableLayoutPanel4"
         Me.TableLayoutPanel4.RowCount = 2
         Me.TableLayoutPanel4.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.TableLayoutPanel4.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.TableLayoutPanel4.Size = New System.Drawing.Size(940, 627)
+        Me.TableLayoutPanel4.Size = New System.Drawing.Size(940, 629)
         Me.TableLayoutPanel4.TabIndex = 0
         '
         'lstPetDGandhiLog
@@ -622,8 +645,8 @@ Partial Class frmMainTabbed
         Me.lstPetDGandhiLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
         Me.lstPetDGandhiLog.FormattingEnabled = True
         Me.lstPetDGandhiLog.ItemHeight = 16
-        Me.lstPetDGandhiLog.Location = New System.Drawing.Point(4, 442)
-        Me.lstPetDGandhiLog.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.lstPetDGandhiLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstPetDGandhiLog.Margin = New System.Windows.Forms.Padding(4)
         Me.lstPetDGandhiLog.Name = "lstPetDGandhiLog"
         Me.lstPetDGandhiLog.Size = New System.Drawing.Size(932, 181)
         Me.lstPetDGandhiLog.TabIndex = 9
@@ -639,10 +662,10 @@ Partial Class frmMainTabbed
         Me.sfdgvPetDGandhiMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
         Me.sfdgvPetDGandhiMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
         Me.sfdgvPetDGandhiMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvPetDGandhiMainDashboard.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.sfdgvPetDGandhiMainDashboard.Margin = New System.Windows.Forms.Padding(4)
         Me.sfdgvPetDGandhiMainDashboard.Name = "sfdgvPetDGandhiMainDashboard"
         Me.sfdgvPetDGandhiMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvPetDGandhiMainDashboard.Size = New System.Drawing.Size(932, 430)
+        Me.sfdgvPetDGandhiMainDashboard.Size = New System.Drawing.Size(932, 432)
         Me.sfdgvPetDGandhiMainDashboard.TabIndex = 6
         Me.sfdgvPetDGandhiMainDashboard.Text = "SfDataGrid1"
         '
@@ -652,7 +675,7 @@ Partial Class frmMainTabbed
         Me.tabNearFarHedging.Location = New System.Drawing.Point(4, 25)
         Me.tabNearFarHedging.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.tabNearFarHedging.Name = "tabNearFarHedging"
-        Me.tabNearFarHedging.Size = New System.Drawing.Size(1363, 691)
+        Me.tabNearFarHedging.Size = New System.Drawing.Size(1363, 693)
         Me.tabNearFarHedging.TabIndex = 4
         Me.tabNearFarHedging.Text = "Near Far Hedging"
         Me.tabNearFarHedging.UseVisualStyleBackColor = True
@@ -665,12 +688,12 @@ Partial Class frmMainTabbed
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.Controls.Add(Me.pnlNearFarHedgingBodyVerticalSplitter, 0, 1)
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlNearFarHedgingMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlNearFarHedgingMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.Name = "pnlNearFarHedgingMainPanelHorizontalSplitter"
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.RowCount = 2
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlNearFarHedgingMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 691)
+        Me.pnlNearFarHedgingMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.TabIndex = 2
         '
         'pnlNearFarHedgingTopHeaderVerticalSplitter
@@ -698,7 +721,7 @@ Partial Class frmMainTabbed
         Me.pnlNearFarHedgingTopHeaderVerticalSplitter.Controls.Add(Me.linklblNearFarHedgingTradableInstrument, 10, 0)
         Me.pnlNearFarHedgingTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlNearFarHedgingTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlNearFarHedgingTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlNearFarHedgingTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlNearFarHedgingTopHeaderVerticalSplitter.Name = "pnlNearFarHedgingTopHeaderVerticalSplitter"
         Me.pnlNearFarHedgingTopHeaderVerticalSplitter.RowCount = 1
         Me.pnlNearFarHedgingTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
@@ -709,7 +732,7 @@ Partial Class frmMainTabbed
         '
         Me.btnNearFarHedgingStop.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnNearFarHedgingStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnNearFarHedgingStop.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnNearFarHedgingStop.Margin = New System.Windows.Forms.Padding(4)
         Me.btnNearFarHedgingStop.Name = "btnNearFarHedgingStop"
         Me.btnNearFarHedgingStop.Size = New System.Drawing.Size(82, 32)
         Me.btnNearFarHedgingStop.TabIndex = 10
@@ -720,7 +743,7 @@ Partial Class frmMainTabbed
         '
         Me.btnNearFarHedgingStart.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnNearFarHedgingStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnNearFarHedgingStart.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnNearFarHedgingStart.Margin = New System.Windows.Forms.Padding(4)
         Me.btnNearFarHedgingStart.Name = "btnNearFarHedgingStart"
         Me.btnNearFarHedgingStart.Size = New System.Drawing.Size(82, 32)
         Me.btnNearFarHedgingStart.TabIndex = 2
@@ -732,7 +755,7 @@ Partial Class frmMainTabbed
         Me.Panel5.Controls.Add(Me.blbNearFarHedgingTickerStatus)
         Me.Panel5.Controls.Add(Me.lblNearFarHedgingTickerStatus)
         Me.Panel5.Location = New System.Drawing.Point(1201, 4)
-        Me.Panel5.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Panel5.Margin = New System.Windows.Forms.Padding(4)
         Me.Panel5.Name = "Panel5"
         Me.Panel5.Size = New System.Drawing.Size(147, 31)
         Me.Panel5.TabIndex = 9
@@ -742,7 +765,7 @@ Partial Class frmMainTabbed
         Me.blbNearFarHedgingTickerStatus.Color = System.Drawing.Color.Pink
         Me.blbNearFarHedgingTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
         Me.blbNearFarHedgingTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbNearFarHedgingTickerStatus.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.blbNearFarHedgingTickerStatus.Margin = New System.Windows.Forms.Padding(4)
         Me.blbNearFarHedgingTickerStatus.Name = "blbNearFarHedgingTickerStatus"
         Me.blbNearFarHedgingTickerStatus.On = True
         Me.blbNearFarHedgingTickerStatus.Size = New System.Drawing.Size(47, 31)
@@ -763,7 +786,7 @@ Partial Class frmMainTabbed
         '
         Me.btnNearFarHedgingSettings.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnNearFarHedgingSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnNearFarHedgingSettings.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnNearFarHedgingSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnNearFarHedgingSettings.Name = "btnNearFarHedgingSettings"
         Me.btnNearFarHedgingSettings.Size = New System.Drawing.Size(82, 32)
         Me.btnNearFarHedgingSettings.TabIndex = 11
@@ -791,12 +814,12 @@ Partial Class frmMainTabbed
         Me.pnlNearFarHedgingBodyVerticalSplitter.Controls.Add(Me.pnlNearFarHedgingBodyHorizontalSplitter, 0, 0)
         Me.pnlNearFarHedgingBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlNearFarHedgingBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
-        Me.pnlNearFarHedgingBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlNearFarHedgingBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlNearFarHedgingBodyVerticalSplitter.Name = "pnlNearFarHedgingBodyVerticalSplitter"
         Me.pnlNearFarHedgingBodyVerticalSplitter.RowCount = 1
         Me.pnlNearFarHedgingBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlNearFarHedgingBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 633.0!))
-        Me.pnlNearFarHedgingBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 635)
+        Me.pnlNearFarHedgingBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 635.0!))
+        Me.pnlNearFarHedgingBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
         Me.pnlNearFarHedgingBodyVerticalSplitter.TabIndex = 1
         '
         'pnlNearFarHedgingBodyHorizontalSplitter
@@ -807,12 +830,12 @@ Partial Class frmMainTabbed
         Me.pnlNearFarHedgingBodyHorizontalSplitter.Controls.Add(Me.sfdgvNearFarHedgingMainDashboard, 0, 0)
         Me.pnlNearFarHedgingBodyHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlNearFarHedgingBodyHorizontalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlNearFarHedgingBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlNearFarHedgingBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlNearFarHedgingBodyHorizontalSplitter.Name = "pnlNearFarHedgingBodyHorizontalSplitter"
         Me.pnlNearFarHedgingBodyHorizontalSplitter.RowCount = 2
         Me.pnlNearFarHedgingBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlNearFarHedgingBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.pnlNearFarHedgingBodyHorizontalSplitter.Size = New System.Drawing.Size(940, 627)
+        Me.pnlNearFarHedgingBodyHorizontalSplitter.Size = New System.Drawing.Size(940, 629)
         Me.pnlNearFarHedgingBodyHorizontalSplitter.TabIndex = 0
         '
         'lstNearFarHedgingLog
@@ -821,8 +844,8 @@ Partial Class frmMainTabbed
         Me.lstNearFarHedgingLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
         Me.lstNearFarHedgingLog.FormattingEnabled = True
         Me.lstNearFarHedgingLog.ItemHeight = 16
-        Me.lstNearFarHedgingLog.Location = New System.Drawing.Point(4, 442)
-        Me.lstNearFarHedgingLog.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.lstNearFarHedgingLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstNearFarHedgingLog.Margin = New System.Windows.Forms.Padding(4)
         Me.lstNearFarHedgingLog.Name = "lstNearFarHedgingLog"
         Me.lstNearFarHedgingLog.Size = New System.Drawing.Size(932, 181)
         Me.lstNearFarHedgingLog.TabIndex = 9
@@ -838,10 +861,10 @@ Partial Class frmMainTabbed
         Me.sfdgvNearFarHedgingMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
         Me.sfdgvNearFarHedgingMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
         Me.sfdgvNearFarHedgingMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvNearFarHedgingMainDashboard.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.sfdgvNearFarHedgingMainDashboard.Margin = New System.Windows.Forms.Padding(4)
         Me.sfdgvNearFarHedgingMainDashboard.Name = "sfdgvNearFarHedgingMainDashboard"
         Me.sfdgvNearFarHedgingMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvNearFarHedgingMainDashboard.Size = New System.Drawing.Size(932, 430)
+        Me.sfdgvNearFarHedgingMainDashboard.Size = New System.Drawing.Size(932, 432)
         Me.sfdgvNearFarHedgingMainDashboard.TabIndex = 6
         Me.sfdgvNearFarHedgingMainDashboard.Text = "SfDataGrid1"
         '
@@ -851,7 +874,7 @@ Partial Class frmMainTabbed
         Me.tabEMA_Supertrend.Location = New System.Drawing.Point(4, 25)
         Me.tabEMA_Supertrend.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.tabEMA_Supertrend.Name = "tabEMA_Supertrend"
-        Me.tabEMA_Supertrend.Size = New System.Drawing.Size(1363, 691)
+        Me.tabEMA_Supertrend.Size = New System.Drawing.Size(1363, 693)
         Me.tabEMA_Supertrend.TabIndex = 3
         Me.tabEMA_Supertrend.Text = "EMA & Supertrend Strategy"
         Me.tabEMA_Supertrend.UseVisualStyleBackColor = True
@@ -864,12 +887,12 @@ Partial Class frmMainTabbed
         Me.pnlEMA5_20STMainPanelHorizontalSplitter.Controls.Add(Me.pnlEMA5_20STBodyVerticalSplitter, 0, 1)
         Me.pnlEMA5_20STMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlEMA5_20STMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlEMA5_20STMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlEMA5_20STMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlEMA5_20STMainPanelHorizontalSplitter.Name = "pnlEMA5_20STMainPanelHorizontalSplitter"
         Me.pnlEMA5_20STMainPanelHorizontalSplitter.RowCount = 2
         Me.pnlEMA5_20STMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
         Me.pnlEMA5_20STMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlEMA5_20STMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 691)
+        Me.pnlEMA5_20STMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
         Me.pnlEMA5_20STMainPanelHorizontalSplitter.TabIndex = 1
         '
         'pnlEMA5_20STTopHeaderVerticalSplitter
@@ -898,7 +921,7 @@ Partial Class frmMainTabbed
         Me.pnlEMA5_20STTopHeaderVerticalSplitter.Controls.Add(Me.linklblEMA_SupertrendTradableInstrument, 10, 0)
         Me.pnlEMA5_20STTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlEMA5_20STTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlEMA5_20STTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlEMA5_20STTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlEMA5_20STTopHeaderVerticalSplitter.Name = "pnlEMA5_20STTopHeaderVerticalSplitter"
         Me.pnlEMA5_20STTopHeaderVerticalSplitter.RowCount = 1
         Me.pnlEMA5_20STTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
@@ -910,7 +933,7 @@ Partial Class frmMainTabbed
         Me.btnEMA_SupertrendExitAll.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnEMA_SupertrendExitAll.Enabled = False
         Me.btnEMA_SupertrendExitAll.Location = New System.Drawing.Point(184, 4)
-        Me.btnEMA_SupertrendExitAll.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnEMA_SupertrendExitAll.Margin = New System.Windows.Forms.Padding(4)
         Me.btnEMA_SupertrendExitAll.Name = "btnEMA_SupertrendExitAll"
         Me.btnEMA_SupertrendExitAll.Size = New System.Drawing.Size(82, 32)
         Me.btnEMA_SupertrendExitAll.TabIndex = 13
@@ -921,7 +944,7 @@ Partial Class frmMainTabbed
         '
         Me.btnEMA_SupertrendStop.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnEMA_SupertrendStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnEMA_SupertrendStop.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnEMA_SupertrendStop.Margin = New System.Windows.Forms.Padding(4)
         Me.btnEMA_SupertrendStop.Name = "btnEMA_SupertrendStop"
         Me.btnEMA_SupertrendStop.Size = New System.Drawing.Size(82, 32)
         Me.btnEMA_SupertrendStop.TabIndex = 10
@@ -932,7 +955,7 @@ Partial Class frmMainTabbed
         '
         Me.btnEMA_SupertrendStart.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnEMA_SupertrendStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnEMA_SupertrendStart.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnEMA_SupertrendStart.Margin = New System.Windows.Forms.Padding(4)
         Me.btnEMA_SupertrendStart.Name = "btnEMA_SupertrendStart"
         Me.btnEMA_SupertrendStart.Size = New System.Drawing.Size(82, 32)
         Me.btnEMA_SupertrendStart.TabIndex = 2
@@ -944,7 +967,7 @@ Partial Class frmMainTabbed
         Me.Panel4.Controls.Add(Me.blbEMA_SupertrendTickerStatus)
         Me.Panel4.Controls.Add(Me.lblEMA_SupertrendTickerStatus)
         Me.Panel4.Location = New System.Drawing.Point(1201, 4)
-        Me.Panel4.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Panel4.Margin = New System.Windows.Forms.Padding(4)
         Me.Panel4.Name = "Panel4"
         Me.Panel4.Size = New System.Drawing.Size(147, 31)
         Me.Panel4.TabIndex = 9
@@ -954,7 +977,7 @@ Partial Class frmMainTabbed
         Me.blbEMA_SupertrendTickerStatus.Color = System.Drawing.Color.Pink
         Me.blbEMA_SupertrendTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
         Me.blbEMA_SupertrendTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbEMA_SupertrendTickerStatus.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.blbEMA_SupertrendTickerStatus.Margin = New System.Windows.Forms.Padding(4)
         Me.blbEMA_SupertrendTickerStatus.Name = "blbEMA_SupertrendTickerStatus"
         Me.blbEMA_SupertrendTickerStatus.On = True
         Me.blbEMA_SupertrendTickerStatus.Size = New System.Drawing.Size(47, 31)
@@ -975,7 +998,7 @@ Partial Class frmMainTabbed
         '
         Me.btnEMA_SupertrendSettings.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnEMA_SupertrendSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnEMA_SupertrendSettings.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnEMA_SupertrendSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnEMA_SupertrendSettings.Name = "btnEMA_SupertrendSettings"
         Me.btnEMA_SupertrendSettings.Size = New System.Drawing.Size(82, 32)
         Me.btnEMA_SupertrendSettings.TabIndex = 11
@@ -1003,12 +1026,12 @@ Partial Class frmMainTabbed
         Me.pnlEMA5_20STBodyVerticalSplitter.Controls.Add(Me.pnlEMA5_20STBodyHorizontalSplitter, 0, 0)
         Me.pnlEMA5_20STBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlEMA5_20STBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
-        Me.pnlEMA5_20STBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlEMA5_20STBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlEMA5_20STBodyVerticalSplitter.Name = "pnlEMA5_20STBodyVerticalSplitter"
         Me.pnlEMA5_20STBodyVerticalSplitter.RowCount = 1
         Me.pnlEMA5_20STBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlEMA5_20STBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 633.0!))
-        Me.pnlEMA5_20STBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 635)
+        Me.pnlEMA5_20STBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 635.0!))
+        Me.pnlEMA5_20STBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
         Me.pnlEMA5_20STBodyVerticalSplitter.TabIndex = 1
         '
         'pnlEMA5_20STBodyHorizontalSplitter
@@ -1019,12 +1042,12 @@ Partial Class frmMainTabbed
         Me.pnlEMA5_20STBodyHorizontalSplitter.Controls.Add(Me.sfdgvEMA_SupertrendMainDashboard, 0, 0)
         Me.pnlEMA5_20STBodyHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlEMA5_20STBodyHorizontalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlEMA5_20STBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlEMA5_20STBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlEMA5_20STBodyHorizontalSplitter.Name = "pnlEMA5_20STBodyHorizontalSplitter"
         Me.pnlEMA5_20STBodyHorizontalSplitter.RowCount = 2
         Me.pnlEMA5_20STBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlEMA5_20STBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.pnlEMA5_20STBodyHorizontalSplitter.Size = New System.Drawing.Size(940, 627)
+        Me.pnlEMA5_20STBodyHorizontalSplitter.Size = New System.Drawing.Size(940, 629)
         Me.pnlEMA5_20STBodyHorizontalSplitter.TabIndex = 0
         '
         'lstEMA_SupertrendLog
@@ -1033,8 +1056,8 @@ Partial Class frmMainTabbed
         Me.lstEMA_SupertrendLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
         Me.lstEMA_SupertrendLog.FormattingEnabled = True
         Me.lstEMA_SupertrendLog.ItemHeight = 16
-        Me.lstEMA_SupertrendLog.Location = New System.Drawing.Point(4, 442)
-        Me.lstEMA_SupertrendLog.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.lstEMA_SupertrendLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstEMA_SupertrendLog.Margin = New System.Windows.Forms.Padding(4)
         Me.lstEMA_SupertrendLog.Name = "lstEMA_SupertrendLog"
         Me.lstEMA_SupertrendLog.Size = New System.Drawing.Size(932, 181)
         Me.lstEMA_SupertrendLog.TabIndex = 9
@@ -1050,10 +1073,10 @@ Partial Class frmMainTabbed
         Me.sfdgvEMA_SupertrendMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
         Me.sfdgvEMA_SupertrendMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
         Me.sfdgvEMA_SupertrendMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvEMA_SupertrendMainDashboard.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.sfdgvEMA_SupertrendMainDashboard.Margin = New System.Windows.Forms.Padding(4)
         Me.sfdgvEMA_SupertrendMainDashboard.Name = "sfdgvEMA_SupertrendMainDashboard"
         Me.sfdgvEMA_SupertrendMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvEMA_SupertrendMainDashboard.Size = New System.Drawing.Size(932, 430)
+        Me.sfdgvEMA_SupertrendMainDashboard.Size = New System.Drawing.Size(932, 432)
         Me.sfdgvEMA_SupertrendMainDashboard.TabIndex = 6
         Me.sfdgvEMA_SupertrendMainDashboard.Text = "SfDataGrid1"
         '
@@ -1061,10 +1084,10 @@ Partial Class frmMainTabbed
         '
         Me.tabMomentumReversal.Controls.Add(Me.pnlMomentumReversalMainPanelHorizontalSplitter)
         Me.tabMomentumReversal.Location = New System.Drawing.Point(4, 25)
-        Me.tabMomentumReversal.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tabMomentumReversal.Margin = New System.Windows.Forms.Padding(4)
         Me.tabMomentumReversal.Name = "tabMomentumReversal"
-        Me.tabMomentumReversal.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
-        Me.tabMomentumReversal.Size = New System.Drawing.Size(1363, 691)
+        Me.tabMomentumReversal.Padding = New System.Windows.Forms.Padding(4)
+        Me.tabMomentumReversal.Size = New System.Drawing.Size(1363, 693)
         Me.tabMomentumReversal.TabIndex = 0
         Me.tabMomentumReversal.Text = "Momentum Reversal"
         Me.tabMomentumReversal.UseVisualStyleBackColor = True
@@ -1077,12 +1100,12 @@ Partial Class frmMainTabbed
         Me.pnlMomentumReversalMainPanelHorizontalSplitter.Controls.Add(Me.pnlMomentumReversalBodyVerticalSplitter, 0, 1)
         Me.pnlMomentumReversalMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlMomentumReversalMainPanelHorizontalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlMomentumReversalMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlMomentumReversalMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlMomentumReversalMainPanelHorizontalSplitter.Name = "pnlMomentumReversalMainPanelHorizontalSplitter"
         Me.pnlMomentumReversalMainPanelHorizontalSplitter.RowCount = 2
         Me.pnlMomentumReversalMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
         Me.pnlMomentumReversalMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlMomentumReversalMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1355, 683)
+        Me.pnlMomentumReversalMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1355, 685)
         Me.pnlMomentumReversalMainPanelHorizontalSplitter.TabIndex = 0
         '
         'pnlMomentumReversalTopHeaderVerticalSplitter
@@ -1110,7 +1133,7 @@ Partial Class frmMainTabbed
         Me.pnlMomentumReversalTopHeaderVerticalSplitter.Controls.Add(Me.linklblMomentumReversalTradableInstrument, 10, 0)
         Me.pnlMomentumReversalTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlMomentumReversalTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlMomentumReversalTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlMomentumReversalTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlMomentumReversalTopHeaderVerticalSplitter.Name = "pnlMomentumReversalTopHeaderVerticalSplitter"
         Me.pnlMomentumReversalTopHeaderVerticalSplitter.RowCount = 1
         Me.pnlMomentumReversalTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
@@ -1121,7 +1144,7 @@ Partial Class frmMainTabbed
         '
         Me.btnMomentumReversalStop.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnMomentumReversalStop.Location = New System.Drawing.Point(93, 4)
-        Me.btnMomentumReversalStop.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnMomentumReversalStop.Margin = New System.Windows.Forms.Padding(4)
         Me.btnMomentumReversalStop.Name = "btnMomentumReversalStop"
         Me.btnMomentumReversalStop.Size = New System.Drawing.Size(81, 31)
         Me.btnMomentumReversalStop.TabIndex = 10
@@ -1132,7 +1155,7 @@ Partial Class frmMainTabbed
         '
         Me.btnMomentumReversalStart.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnMomentumReversalStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnMomentumReversalStart.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnMomentumReversalStart.Margin = New System.Windows.Forms.Padding(4)
         Me.btnMomentumReversalStart.Name = "btnMomentumReversalStart"
         Me.btnMomentumReversalStart.Size = New System.Drawing.Size(81, 31)
         Me.btnMomentumReversalStart.TabIndex = 2
@@ -1144,7 +1167,7 @@ Partial Class frmMainTabbed
         Me.Panel1.Controls.Add(Me.blbMomentumReversalTickerStatus)
         Me.Panel1.Controls.Add(Me.lblMomentumReversalTickerStatus)
         Me.Panel1.Location = New System.Drawing.Point(1189, 4)
-        Me.Panel1.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Panel1.Margin = New System.Windows.Forms.Padding(4)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(147, 31)
         Me.Panel1.TabIndex = 9
@@ -1154,7 +1177,7 @@ Partial Class frmMainTabbed
         Me.blbMomentumReversalTickerStatus.Color = System.Drawing.Color.Pink
         Me.blbMomentumReversalTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
         Me.blbMomentumReversalTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbMomentumReversalTickerStatus.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.blbMomentumReversalTickerStatus.Margin = New System.Windows.Forms.Padding(4)
         Me.blbMomentumReversalTickerStatus.Name = "blbMomentumReversalTickerStatus"
         Me.blbMomentumReversalTickerStatus.On = True
         Me.blbMomentumReversalTickerStatus.Size = New System.Drawing.Size(47, 31)
@@ -1175,7 +1198,7 @@ Partial Class frmMainTabbed
         '
         Me.btnMomentumReversalSettings.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnMomentumReversalSettings.Location = New System.Drawing.Point(805, 4)
-        Me.btnMomentumReversalSettings.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnMomentumReversalSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnMomentumReversalSettings.Name = "btnMomentumReversalSettings"
         Me.btnMomentumReversalSettings.Size = New System.Drawing.Size(81, 31)
         Me.btnMomentumReversalSettings.TabIndex = 11
@@ -1203,12 +1226,12 @@ Partial Class frmMainTabbed
         Me.pnlMomentumReversalBodyVerticalSplitter.Controls.Add(Me.pnlMomentumReversalBodyHorizontalSplitter, 0, 0)
         Me.pnlMomentumReversalBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlMomentumReversalBodyVerticalSplitter.Location = New System.Drawing.Point(4, 51)
-        Me.pnlMomentumReversalBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlMomentumReversalBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlMomentumReversalBodyVerticalSplitter.Name = "pnlMomentumReversalBodyVerticalSplitter"
         Me.pnlMomentumReversalBodyVerticalSplitter.RowCount = 1
         Me.pnlMomentumReversalBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlMomentumReversalBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 626.0!))
-        Me.pnlMomentumReversalBodyVerticalSplitter.Size = New System.Drawing.Size(1347, 628)
+        Me.pnlMomentumReversalBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 628.0!))
+        Me.pnlMomentumReversalBodyVerticalSplitter.Size = New System.Drawing.Size(1347, 630)
         Me.pnlMomentumReversalBodyVerticalSplitter.TabIndex = 1
         '
         'pnlMomentumReversalBodyHorizontalSplitter
@@ -1219,12 +1242,12 @@ Partial Class frmMainTabbed
         Me.pnlMomentumReversalBodyHorizontalSplitter.Controls.Add(Me.sfdgvMomentumReversalMainDashboard, 0, 0)
         Me.pnlMomentumReversalBodyHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlMomentumReversalBodyHorizontalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlMomentumReversalBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlMomentumReversalBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlMomentumReversalBodyHorizontalSplitter.Name = "pnlMomentumReversalBodyHorizontalSplitter"
         Me.pnlMomentumReversalBodyHorizontalSplitter.RowCount = 2
         Me.pnlMomentumReversalBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlMomentumReversalBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.pnlMomentumReversalBodyHorizontalSplitter.Size = New System.Drawing.Size(934, 620)
+        Me.pnlMomentumReversalBodyHorizontalSplitter.Size = New System.Drawing.Size(934, 622)
         Me.pnlMomentumReversalBodyHorizontalSplitter.TabIndex = 0
         '
         'lstMomentumReversalLog
@@ -1233,10 +1256,10 @@ Partial Class frmMainTabbed
         Me.lstMomentumReversalLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
         Me.lstMomentumReversalLog.FormattingEnabled = True
         Me.lstMomentumReversalLog.ItemHeight = 16
-        Me.lstMomentumReversalLog.Location = New System.Drawing.Point(4, 438)
-        Me.lstMomentumReversalLog.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.lstMomentumReversalLog.Location = New System.Drawing.Point(4, 439)
+        Me.lstMomentumReversalLog.Margin = New System.Windows.Forms.Padding(4)
         Me.lstMomentumReversalLog.Name = "lstMomentumReversalLog"
-        Me.lstMomentumReversalLog.Size = New System.Drawing.Size(926, 178)
+        Me.lstMomentumReversalLog.Size = New System.Drawing.Size(926, 179)
         Me.lstMomentumReversalLog.TabIndex = 9
         '
         'sfdgvMomentumReversalMainDashboard
@@ -1250,10 +1273,10 @@ Partial Class frmMainTabbed
         Me.sfdgvMomentumReversalMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
         Me.sfdgvMomentumReversalMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
         Me.sfdgvMomentumReversalMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvMomentumReversalMainDashboard.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.sfdgvMomentumReversalMainDashboard.Margin = New System.Windows.Forms.Padding(4)
         Me.sfdgvMomentumReversalMainDashboard.Name = "sfdgvMomentumReversalMainDashboard"
         Me.sfdgvMomentumReversalMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvMomentumReversalMainDashboard.Size = New System.Drawing.Size(926, 426)
+        Me.sfdgvMomentumReversalMainDashboard.Size = New System.Drawing.Size(926, 427)
         Me.sfdgvMomentumReversalMainDashboard.TabIndex = 6
         Me.sfdgvMomentumReversalMainDashboard.Text = "SfDataGrid1"
         '
@@ -1261,10 +1284,10 @@ Partial Class frmMainTabbed
         '
         Me.tabOHL.Controls.Add(Me.pnlOHLMainPanelHorizontalSplitter)
         Me.tabOHL.Location = New System.Drawing.Point(4, 25)
-        Me.tabOHL.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tabOHL.Margin = New System.Windows.Forms.Padding(4)
         Me.tabOHL.Name = "tabOHL"
-        Me.tabOHL.Padding = New System.Windows.Forms.Padding(4, 4, 4, 4)
-        Me.tabOHL.Size = New System.Drawing.Size(1363, 691)
+        Me.tabOHL.Padding = New System.Windows.Forms.Padding(4)
+        Me.tabOHL.Size = New System.Drawing.Size(1363, 693)
         Me.tabOHL.TabIndex = 1
         Me.tabOHL.Text = "OHL"
         Me.tabOHL.UseVisualStyleBackColor = True
@@ -1277,12 +1300,12 @@ Partial Class frmMainTabbed
         Me.pnlOHLMainPanelHorizontalSplitter.Controls.Add(Me.pnlOHLBodyVerticalSplitter, 0, 1)
         Me.pnlOHLMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlOHLMainPanelHorizontalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlOHLMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlOHLMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlOHLMainPanelHorizontalSplitter.Name = "pnlOHLMainPanelHorizontalSplitter"
         Me.pnlOHLMainPanelHorizontalSplitter.RowCount = 2
         Me.pnlOHLMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
         Me.pnlOHLMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlOHLMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1355, 683)
+        Me.pnlOHLMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1355, 685)
         Me.pnlOHLMainPanelHorizontalSplitter.TabIndex = 1
         '
         'pnlOHLTopHeaderVerticalSplitter
@@ -1310,7 +1333,7 @@ Partial Class frmMainTabbed
         Me.pnlOHLTopHeaderVerticalSplitter.Controls.Add(Me.linklblOHLTradableInstruments, 10, 0)
         Me.pnlOHLTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlOHLTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlOHLTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlOHLTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlOHLTopHeaderVerticalSplitter.Name = "pnlOHLTopHeaderVerticalSplitter"
         Me.pnlOHLTopHeaderVerticalSplitter.RowCount = 1
         Me.pnlOHLTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
@@ -1321,7 +1344,7 @@ Partial Class frmMainTabbed
         '
         Me.btnOHLStop.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnOHLStop.Location = New System.Drawing.Point(93, 4)
-        Me.btnOHLStop.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnOHLStop.Margin = New System.Windows.Forms.Padding(4)
         Me.btnOHLStop.Name = "btnOHLStop"
         Me.btnOHLStop.Size = New System.Drawing.Size(81, 31)
         Me.btnOHLStop.TabIndex = 11
@@ -1332,7 +1355,7 @@ Partial Class frmMainTabbed
         '
         Me.btnOHLStart.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnOHLStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnOHLStart.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnOHLStart.Margin = New System.Windows.Forms.Padding(4)
         Me.btnOHLStart.Name = "btnOHLStart"
         Me.btnOHLStart.Size = New System.Drawing.Size(81, 31)
         Me.btnOHLStart.TabIndex = 2
@@ -1344,7 +1367,7 @@ Partial Class frmMainTabbed
         Me.Panel2.Controls.Add(Me.blbOHLTickerStatus)
         Me.Panel2.Controls.Add(Me.lblOHLTickerStatus)
         Me.Panel2.Location = New System.Drawing.Point(1189, 4)
-        Me.Panel2.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Panel2.Margin = New System.Windows.Forms.Padding(4)
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(147, 31)
         Me.Panel2.TabIndex = 9
@@ -1354,7 +1377,7 @@ Partial Class frmMainTabbed
         Me.blbOHLTickerStatus.Color = System.Drawing.Color.Pink
         Me.blbOHLTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
         Me.blbOHLTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbOHLTickerStatus.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.blbOHLTickerStatus.Margin = New System.Windows.Forms.Padding(4)
         Me.blbOHLTickerStatus.Name = "blbOHLTickerStatus"
         Me.blbOHLTickerStatus.On = True
         Me.blbOHLTickerStatus.Size = New System.Drawing.Size(47, 31)
@@ -1375,7 +1398,7 @@ Partial Class frmMainTabbed
         '
         Me.btnOHLSettings.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnOHLSettings.Location = New System.Drawing.Point(805, 4)
-        Me.btnOHLSettings.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnOHLSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnOHLSettings.Name = "btnOHLSettings"
         Me.btnOHLSettings.Size = New System.Drawing.Size(81, 31)
         Me.btnOHLSettings.TabIndex = 12
@@ -1404,11 +1427,11 @@ Partial Class frmMainTabbed
         Me.pnlOHLBodyVerticalSplitter.Controls.Add(Me.pnlOHLBodyHorizontalSplitter, 0, 0)
         Me.pnlOHLBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlOHLBodyVerticalSplitter.Location = New System.Drawing.Point(4, 51)
-        Me.pnlOHLBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlOHLBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlOHLBodyVerticalSplitter.Name = "pnlOHLBodyVerticalSplitter"
         Me.pnlOHLBodyVerticalSplitter.RowCount = 1
         Me.pnlOHLBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlOHLBodyVerticalSplitter.Size = New System.Drawing.Size(1347, 628)
+        Me.pnlOHLBodyVerticalSplitter.Size = New System.Drawing.Size(1347, 630)
         Me.pnlOHLBodyVerticalSplitter.TabIndex = 1
         '
         'PictureBox3
@@ -1418,7 +1441,7 @@ Partial Class frmMainTabbed
         Me.PictureBox3.Location = New System.Drawing.Point(945, 2)
         Me.PictureBox3.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.PictureBox3.Name = "PictureBox3"
-        Me.PictureBox3.Size = New System.Drawing.Size(399, 624)
+        Me.PictureBox3.Size = New System.Drawing.Size(399, 626)
         Me.PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.PictureBox3.TabIndex = 2
         Me.PictureBox3.TabStop = False
@@ -1431,12 +1454,12 @@ Partial Class frmMainTabbed
         Me.pnlOHLBodyHorizontalSplitter.Controls.Add(Me.sfdgvOHLMainDashboard, 0, 0)
         Me.pnlOHLBodyHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlOHLBodyHorizontalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlOHLBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlOHLBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlOHLBodyHorizontalSplitter.Name = "pnlOHLBodyHorizontalSplitter"
         Me.pnlOHLBodyHorizontalSplitter.RowCount = 2
         Me.pnlOHLBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlOHLBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.pnlOHLBodyHorizontalSplitter.Size = New System.Drawing.Size(934, 620)
+        Me.pnlOHLBodyHorizontalSplitter.Size = New System.Drawing.Size(934, 622)
         Me.pnlOHLBodyHorizontalSplitter.TabIndex = 0
         '
         'lstOHLLog
@@ -1445,10 +1468,10 @@ Partial Class frmMainTabbed
         Me.lstOHLLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
         Me.lstOHLLog.FormattingEnabled = True
         Me.lstOHLLog.ItemHeight = 16
-        Me.lstOHLLog.Location = New System.Drawing.Point(4, 438)
-        Me.lstOHLLog.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.lstOHLLog.Location = New System.Drawing.Point(4, 439)
+        Me.lstOHLLog.Margin = New System.Windows.Forms.Padding(4)
         Me.lstOHLLog.Name = "lstOHLLog"
-        Me.lstOHLLog.Size = New System.Drawing.Size(926, 178)
+        Me.lstOHLLog.Size = New System.Drawing.Size(926, 179)
         Me.lstOHLLog.TabIndex = 9
         '
         'sfdgvOHLMainDashboard
@@ -1462,10 +1485,10 @@ Partial Class frmMainTabbed
         Me.sfdgvOHLMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
         Me.sfdgvOHLMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
         Me.sfdgvOHLMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvOHLMainDashboard.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.sfdgvOHLMainDashboard.Margin = New System.Windows.Forms.Padding(4)
         Me.sfdgvOHLMainDashboard.Name = "sfdgvOHLMainDashboard"
         Me.sfdgvOHLMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvOHLMainDashboard.Size = New System.Drawing.Size(926, 426)
+        Me.sfdgvOHLMainDashboard.Size = New System.Drawing.Size(926, 427)
         Me.sfdgvOHLMainDashboard.TabIndex = 6
         Me.sfdgvOHLMainDashboard.Text = "SfDataGrid1"
         '
@@ -1473,9 +1496,9 @@ Partial Class frmMainTabbed
         '
         Me.tabAmiSignal.Controls.Add(Me.pnlAmiSignalMainPanelHorizontalSplitter)
         Me.tabAmiSignal.Location = New System.Drawing.Point(4, 25)
-        Me.tabAmiSignal.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tabAmiSignal.Margin = New System.Windows.Forms.Padding(4)
         Me.tabAmiSignal.Name = "tabAmiSignal"
-        Me.tabAmiSignal.Size = New System.Drawing.Size(1363, 691)
+        Me.tabAmiSignal.Size = New System.Drawing.Size(1363, 693)
         Me.tabAmiSignal.TabIndex = 2
         Me.tabAmiSignal.Text = "AmiBroker Signal"
         Me.tabAmiSignal.UseVisualStyleBackColor = True
@@ -1488,12 +1511,12 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalMainPanelHorizontalSplitter.Controls.Add(Me.pnlAmiSignalBodyVerticalSplitter, 0, 1)
         Me.pnlAmiSignalMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlAmiSignalMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlAmiSignalMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlAmiSignalMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlAmiSignalMainPanelHorizontalSplitter.Name = "pnlAmiSignalMainPanelHorizontalSplitter"
         Me.pnlAmiSignalMainPanelHorizontalSplitter.RowCount = 2
         Me.pnlAmiSignalMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
         Me.pnlAmiSignalMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlAmiSignalMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 691)
+        Me.pnlAmiSignalMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
         Me.pnlAmiSignalMainPanelHorizontalSplitter.TabIndex = 1
         '
         'pnlAmiSignalTopHeaderVerticalSplitter
@@ -1521,7 +1544,7 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalTopHeaderVerticalSplitter.Controls.Add(Me.linklblAmiSignalTradableInstrument, 10, 0)
         Me.pnlAmiSignalTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlAmiSignalTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlAmiSignalTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlAmiSignalTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlAmiSignalTopHeaderVerticalSplitter.Name = "pnlAmiSignalTopHeaderVerticalSplitter"
         Me.pnlAmiSignalTopHeaderVerticalSplitter.RowCount = 1
         Me.pnlAmiSignalTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
@@ -1532,7 +1555,7 @@ Partial Class frmMainTabbed
         '
         Me.btnAmiSignalStop.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnAmiSignalStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnAmiSignalStop.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnAmiSignalStop.Margin = New System.Windows.Forms.Padding(4)
         Me.btnAmiSignalStop.Name = "btnAmiSignalStop"
         Me.btnAmiSignalStop.Size = New System.Drawing.Size(82, 32)
         Me.btnAmiSignalStop.TabIndex = 10
@@ -1543,7 +1566,7 @@ Partial Class frmMainTabbed
         '
         Me.btnAmiSignalStart.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnAmiSignalStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnAmiSignalStart.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnAmiSignalStart.Margin = New System.Windows.Forms.Padding(4)
         Me.btnAmiSignalStart.Name = "btnAmiSignalStart"
         Me.btnAmiSignalStart.Size = New System.Drawing.Size(82, 32)
         Me.btnAmiSignalStart.TabIndex = 2
@@ -1555,7 +1578,7 @@ Partial Class frmMainTabbed
         Me.Panel3.Controls.Add(Me.blbAmiSignalTickerStatus)
         Me.Panel3.Controls.Add(Me.lblAmiSignalTickerStatus)
         Me.Panel3.Location = New System.Drawing.Point(1201, 4)
-        Me.Panel3.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Panel3.Margin = New System.Windows.Forms.Padding(4)
         Me.Panel3.Name = "Panel3"
         Me.Panel3.Size = New System.Drawing.Size(147, 32)
         Me.Panel3.TabIndex = 9
@@ -1565,7 +1588,7 @@ Partial Class frmMainTabbed
         Me.blbAmiSignalTickerStatus.Color = System.Drawing.Color.Pink
         Me.blbAmiSignalTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
         Me.blbAmiSignalTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbAmiSignalTickerStatus.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.blbAmiSignalTickerStatus.Margin = New System.Windows.Forms.Padding(4)
         Me.blbAmiSignalTickerStatus.Name = "blbAmiSignalTickerStatus"
         Me.blbAmiSignalTickerStatus.On = True
         Me.blbAmiSignalTickerStatus.Size = New System.Drawing.Size(47, 32)
@@ -1586,7 +1609,7 @@ Partial Class frmMainTabbed
         '
         Me.btnAmiSignalSettings.Dock = System.Windows.Forms.DockStyle.Fill
         Me.btnAmiSignalSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnAmiSignalSettings.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnAmiSignalSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnAmiSignalSettings.Name = "btnAmiSignalSettings"
         Me.btnAmiSignalSettings.Size = New System.Drawing.Size(82, 32)
         Me.btnAmiSignalSettings.TabIndex = 12
@@ -1615,11 +1638,11 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalBodyVerticalSplitter.Controls.Add(Me.PictureBox1, 1, 0)
         Me.pnlAmiSignalBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlAmiSignalBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
-        Me.pnlAmiSignalBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlAmiSignalBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlAmiSignalBodyVerticalSplitter.Name = "pnlAmiSignalBodyVerticalSplitter"
         Me.pnlAmiSignalBodyVerticalSplitter.RowCount = 1
         Me.pnlAmiSignalBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlAmiSignalBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 635)
+        Me.pnlAmiSignalBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
         Me.pnlAmiSignalBodyVerticalSplitter.TabIndex = 1
         '
         'pnlAmiSignalBodyHorizontalSplitter
@@ -1630,12 +1653,12 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalBodyHorizontalSplitter.Controls.Add(Me.sfdgvAmiSignalMainDashboard, 0, 0)
         Me.pnlAmiSignalBodyHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlAmiSignalBodyHorizontalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlAmiSignalBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pnlAmiSignalBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
         Me.pnlAmiSignalBodyHorizontalSplitter.Name = "pnlAmiSignalBodyHorizontalSplitter"
         Me.pnlAmiSignalBodyHorizontalSplitter.RowCount = 2
         Me.pnlAmiSignalBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlAmiSignalBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.pnlAmiSignalBodyHorizontalSplitter.Size = New System.Drawing.Size(940, 627)
+        Me.pnlAmiSignalBodyHorizontalSplitter.Size = New System.Drawing.Size(940, 629)
         Me.pnlAmiSignalBodyHorizontalSplitter.TabIndex = 0
         '
         'lstAmiSignalLog
@@ -1644,8 +1667,8 @@ Partial Class frmMainTabbed
         Me.lstAmiSignalLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
         Me.lstAmiSignalLog.FormattingEnabled = True
         Me.lstAmiSignalLog.ItemHeight = 16
-        Me.lstAmiSignalLog.Location = New System.Drawing.Point(4, 442)
-        Me.lstAmiSignalLog.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.lstAmiSignalLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstAmiSignalLog.Margin = New System.Windows.Forms.Padding(4)
         Me.lstAmiSignalLog.Name = "lstAmiSignalLog"
         Me.lstAmiSignalLog.Size = New System.Drawing.Size(932, 181)
         Me.lstAmiSignalLog.TabIndex = 9
@@ -1661,10 +1684,10 @@ Partial Class frmMainTabbed
         Me.sfdgvAmiSignalMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
         Me.sfdgvAmiSignalMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
         Me.sfdgvAmiSignalMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvAmiSignalMainDashboard.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.sfdgvAmiSignalMainDashboard.Margin = New System.Windows.Forms.Padding(4)
         Me.sfdgvAmiSignalMainDashboard.Name = "sfdgvAmiSignalMainDashboard"
         Me.sfdgvAmiSignalMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvAmiSignalMainDashboard.Size = New System.Drawing.Size(932, 430)
+        Me.sfdgvAmiSignalMainDashboard.Size = New System.Drawing.Size(932, 432)
         Me.sfdgvAmiSignalMainDashboard.TabIndex = 6
         Me.sfdgvAmiSignalMainDashboard.Text = "SfDataGrid1"
         '
@@ -1675,7 +1698,7 @@ Partial Class frmMainTabbed
         Me.PictureBox1.Location = New System.Drawing.Point(951, 2)
         Me.PictureBox1.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(401, 631)
+        Me.PictureBox1.Size = New System.Drawing.Size(401, 633)
         Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.PictureBox1.TabIndex = 1
         Me.PictureBox1.TabStop = False
@@ -1708,6 +1731,208 @@ Partial Class frmMainTabbed
         '
         Me.tmrEMACrossoverTickerStatus.Enabled = True
         '
+        'tabCandleRangeBreakout
+        '
+        Me.tabCandleRangeBreakout.Controls.Add(Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter)
+        Me.tabCandleRangeBreakout.Location = New System.Drawing.Point(4, 25)
+        Me.tabCandleRangeBreakout.Name = "tabCandleRangeBreakout"
+        Me.tabCandleRangeBreakout.Size = New System.Drawing.Size(1363, 693)
+        Me.tabCandleRangeBreakout.TabIndex = 7
+        Me.tabCandleRangeBreakout.Text = "Candle Range Breakout"
+        Me.tabCandleRangeBreakout.UseVisualStyleBackColor = True
+        '
+        'pnlCandleRangeBreakoutMainPanelHorizontalSplitter
+        '
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ColumnCount = 1
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Controls.Add(Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter, 0, 0)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Controls.Add(Me.pnlCandleRangeBreakoutBodyVerticalSplitter, 0, 1)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Name = "pnlCandleRangeBreakoutMainPanelHorizontalSplitter"
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.RowCount = 2
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.TabIndex = 5
+        '
+        'pnlCandleRangeBreakoutTopHeaderVerticalSplitter
+        '
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnCount = 15
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnCandleRangeBreakoutStop, 0, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnCandleRangeBreakoutStart, 0, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.Panel8, 14, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnCandleRangeBreakoutSettings, 9, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.linklblCandleRangeBreakoutTradableInstrument, 10, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Name = "pnlCandleRangeBreakoutTopHeaderVerticalSplitter"
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.RowCount = 1
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.TabIndex = 0
+        '
+        'btnCandleRangeBreakoutStop
+        '
+        Me.btnCandleRangeBreakoutStop.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnCandleRangeBreakoutStop.Location = New System.Drawing.Point(94, 4)
+        Me.btnCandleRangeBreakoutStop.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnCandleRangeBreakoutStop.Name = "btnCandleRangeBreakoutStop"
+        Me.btnCandleRangeBreakoutStop.Size = New System.Drawing.Size(82, 32)
+        Me.btnCandleRangeBreakoutStop.TabIndex = 10
+        Me.btnCandleRangeBreakoutStop.Text = "Stop"
+        Me.btnCandleRangeBreakoutStop.UseVisualStyleBackColor = True
+        '
+        'btnCandleRangeBreakoutStart
+        '
+        Me.btnCandleRangeBreakoutStart.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnCandleRangeBreakoutStart.Location = New System.Drawing.Point(4, 4)
+        Me.btnCandleRangeBreakoutStart.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnCandleRangeBreakoutStart.Name = "btnCandleRangeBreakoutStart"
+        Me.btnCandleRangeBreakoutStart.Size = New System.Drawing.Size(82, 32)
+        Me.btnCandleRangeBreakoutStart.TabIndex = 2
+        Me.btnCandleRangeBreakoutStart.Text = "Start"
+        Me.btnCandleRangeBreakoutStart.UseVisualStyleBackColor = True
+        '
+        'Panel8
+        '
+        Me.Panel8.Controls.Add(Me.blbCandleRangeBreakoutTickerStatus)
+        Me.Panel8.Controls.Add(Me.lblCandleRangeBreakoutTickerStatus)
+        Me.Panel8.Location = New System.Drawing.Point(1201, 4)
+        Me.Panel8.Margin = New System.Windows.Forms.Padding(4)
+        Me.Panel8.Name = "Panel8"
+        Me.Panel8.Size = New System.Drawing.Size(147, 31)
+        Me.Panel8.TabIndex = 9
+        '
+        'blbCandleRangeBreakoutTickerStatus
+        '
+        Me.blbCandleRangeBreakoutTickerStatus.Color = System.Drawing.Color.Pink
+        Me.blbCandleRangeBreakoutTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
+        Me.blbCandleRangeBreakoutTickerStatus.Location = New System.Drawing.Point(100, 0)
+        Me.blbCandleRangeBreakoutTickerStatus.Margin = New System.Windows.Forms.Padding(4)
+        Me.blbCandleRangeBreakoutTickerStatus.Name = "blbCandleRangeBreakoutTickerStatus"
+        Me.blbCandleRangeBreakoutTickerStatus.On = True
+        Me.blbCandleRangeBreakoutTickerStatus.Size = New System.Drawing.Size(47, 31)
+        Me.blbCandleRangeBreakoutTickerStatus.TabIndex = 7
+        Me.blbCandleRangeBreakoutTickerStatus.Text = "LedBulb1"
+        '
+        'lblCandleRangeBreakoutTickerStatus
+        '
+        Me.lblCandleRangeBreakoutTickerStatus.AutoSize = True
+        Me.lblCandleRangeBreakoutTickerStatus.Location = New System.Drawing.Point(9, 9)
+        Me.lblCandleRangeBreakoutTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblCandleRangeBreakoutTickerStatus.Name = "lblCandleRangeBreakoutTickerStatus"
+        Me.lblCandleRangeBreakoutTickerStatus.Size = New System.Drawing.Size(91, 17)
+        Me.lblCandleRangeBreakoutTickerStatus.TabIndex = 9
+        Me.lblCandleRangeBreakoutTickerStatus.Text = "Ticker Status"
+        '
+        'btnCandleRangeBreakoutSettings
+        '
+        Me.btnCandleRangeBreakoutSettings.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnCandleRangeBreakoutSettings.Location = New System.Drawing.Point(814, 4)
+        Me.btnCandleRangeBreakoutSettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnCandleRangeBreakoutSettings.Name = "btnCandleRangeBreakoutSettings"
+        Me.btnCandleRangeBreakoutSettings.Size = New System.Drawing.Size(82, 32)
+        Me.btnCandleRangeBreakoutSettings.TabIndex = 11
+        Me.btnCandleRangeBreakoutSettings.Text = "Settings"
+        Me.btnCandleRangeBreakoutSettings.UseVisualStyleBackColor = True
+        '
+        'linklblCandleRangeBreakoutTradableInstrument
+        '
+        Me.linklblCandleRangeBreakoutTradableInstrument.AutoSize = True
+        Me.linklblCandleRangeBreakoutTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.linklblCandleRangeBreakoutTradableInstrument.Enabled = False
+        Me.linklblCandleRangeBreakoutTradableInstrument.Location = New System.Drawing.Point(903, 0)
+        Me.linklblCandleRangeBreakoutTradableInstrument.Name = "linklblCandleRangeBreakoutTradableInstrument"
+        Me.linklblCandleRangeBreakoutTradableInstrument.Size = New System.Drawing.Size(220, 40)
+        Me.linklblCandleRangeBreakoutTradableInstrument.TabIndex = 12
+        Me.linklblCandleRangeBreakoutTradableInstrument.TabStop = True
+        Me.linklblCandleRangeBreakoutTradableInstrument.Text = "Tradable Instruments: 0"
+        Me.linklblCandleRangeBreakoutTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'pnlCandleRangeBreakoutBodyVerticalSplitter
+        '
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnCount = 2
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel6, 0, 0)
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Name = "pnlCandleRangeBreakoutBodyVerticalSplitter"
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.RowCount = 1
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.TabIndex = 1
+        '
+        'TableLayoutPanel6
+        '
+        Me.TableLayoutPanel6.ColumnCount = 1
+        Me.TableLayoutPanel6.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.TableLayoutPanel6.Controls.Add(Me.lstCandleRangeBreakoutLog, 0, 1)
+        Me.TableLayoutPanel6.Controls.Add(Me.sfdgvCandleRangeBreakoutMainDashboard, 0, 0)
+        Me.TableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.TableLayoutPanel6.Location = New System.Drawing.Point(4, 4)
+        Me.TableLayoutPanel6.Margin = New System.Windows.Forms.Padding(4)
+        Me.TableLayoutPanel6.Name = "TableLayoutPanel6"
+        Me.TableLayoutPanel6.RowCount = 2
+        Me.TableLayoutPanel6.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.TableLayoutPanel6.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.TableLayoutPanel6.Size = New System.Drawing.Size(940, 629)
+        Me.TableLayoutPanel6.TabIndex = 0
+        '
+        'lstCandleRangeBreakoutLog
+        '
+        Me.lstCandleRangeBreakoutLog.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstCandleRangeBreakoutLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
+        Me.lstCandleRangeBreakoutLog.FormattingEnabled = True
+        Me.lstCandleRangeBreakoutLog.ItemHeight = 16
+        Me.lstCandleRangeBreakoutLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstCandleRangeBreakoutLog.Margin = New System.Windows.Forms.Padding(4)
+        Me.lstCandleRangeBreakoutLog.Name = "lstCandleRangeBreakoutLog"
+        Me.lstCandleRangeBreakoutLog.Size = New System.Drawing.Size(932, 181)
+        Me.lstCandleRangeBreakoutLog.TabIndex = 9
+        '
+        'sfdgvCandleRangeBreakoutMainDashboard
+        '
+        Me.sfdgvCandleRangeBreakoutMainDashboard.AccessibleName = "Table"
+        Me.sfdgvCandleRangeBreakoutMainDashboard.AllowDraggingColumns = True
+        Me.sfdgvCandleRangeBreakoutMainDashboard.AllowEditing = False
+        Me.sfdgvCandleRangeBreakoutMainDashboard.AllowFiltering = True
+        Me.sfdgvCandleRangeBreakoutMainDashboard.AllowResizingColumns = True
+        Me.sfdgvCandleRangeBreakoutMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
+        Me.sfdgvCandleRangeBreakoutMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
+        Me.sfdgvCandleRangeBreakoutMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.sfdgvCandleRangeBreakoutMainDashboard.Location = New System.Drawing.Point(4, 4)
+        Me.sfdgvCandleRangeBreakoutMainDashboard.Margin = New System.Windows.Forms.Padding(4)
+        Me.sfdgvCandleRangeBreakoutMainDashboard.Name = "sfdgvCandleRangeBreakoutMainDashboard"
+        Me.sfdgvCandleRangeBreakoutMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
+        Me.sfdgvCandleRangeBreakoutMainDashboard.Size = New System.Drawing.Size(932, 432)
+        Me.sfdgvCandleRangeBreakoutMainDashboard.TabIndex = 6
+        Me.sfdgvCandleRangeBreakoutMainDashboard.Text = "SfDataGrid1"
+        '
+        'tmrCandleRangeBreakoutTickerStatus
+        '
+        Me.tmrCandleRangeBreakoutTickerStatus.Enabled = True
+        '
         'frmMainTabbed
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
@@ -1717,7 +1942,7 @@ Partial Class frmMainTabbed
         Me.Controls.Add(Me.msMainMenuStrip)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MainMenuStrip = Me.msMainMenuStrip
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "frmMainTabbed"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Algo2Trade Robot"
@@ -1789,6 +2014,15 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalBodyHorizontalSplitter.ResumeLayout(False)
         CType(Me.sfdgvAmiSignalMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabCandleRangeBreakout.ResumeLayout(False)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ResumeLayout(False)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ResumeLayout(False)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.PerformLayout()
+        Me.Panel8.ResumeLayout(False)
+        Me.Panel8.PerformLayout()
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ResumeLayout(False)
+        Me.TableLayoutPanel6.ResumeLayout(False)
+        CType(Me.sfdgvCandleRangeBreakoutMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -1908,4 +2142,19 @@ Partial Class frmMainTabbed
     Friend WithEvents TableLayoutPanel5 As TableLayoutPanel
     Friend WithEvents lstEMACrossoverLog As ListBox
     Friend WithEvents sfdgvEMACrossoverMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
+    Friend WithEvents tabCandleRangeBreakout As TabPage
+    Friend WithEvents pnlCandleRangeBreakoutMainPanelHorizontalSplitter As TableLayoutPanel
+    Friend WithEvents pnlCandleRangeBreakoutTopHeaderVerticalSplitter As TableLayoutPanel
+    Friend WithEvents btnCandleRangeBreakoutStop As Button
+    Friend WithEvents btnCandleRangeBreakoutStart As Button
+    Friend WithEvents Panel8 As Panel
+    Friend WithEvents blbCandleRangeBreakoutTickerStatus As Bulb.LedBulb
+    Friend WithEvents lblCandleRangeBreakoutTickerStatus As Label
+    Friend WithEvents btnCandleRangeBreakoutSettings As Button
+    Friend WithEvents linklblCandleRangeBreakoutTradableInstrument As LinkLabel
+    Friend WithEvents pnlCandleRangeBreakoutBodyVerticalSplitter As TableLayoutPanel
+    Friend WithEvents TableLayoutPanel6 As TableLayoutPanel
+    Friend WithEvents lstCandleRangeBreakoutLog As ListBox
+    Friend WithEvents sfdgvCandleRangeBreakoutMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
+    Friend WithEvents tmrCandleRangeBreakoutTickerStatus As Timer
 End Class

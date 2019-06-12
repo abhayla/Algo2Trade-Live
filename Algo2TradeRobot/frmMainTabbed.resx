@@ -570,28 +570,31 @@
 </value>
   </data>
   <metadata name="tmrMomentumReversalTickerStatus.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>147, 6</value>
+    <value>206, 6</value>
   </metadata>
   <metadata name="tmrOHLTickerStatus.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>379, 6</value>
+    <value>527, 6</value>
   </metadata>
   <metadata name="tmrAmiSignalTickerStatus.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>526, 6</value>
+    <value>728, 6</value>
   </metadata>
   <metadata name="tmrEMA_SupertrendTickerStatus.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>703, 6</value>
+    <value>967, 7</value>
   </metadata>
   <metadata name="tmrNearFarHedgingTickerStatus.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>917, 6</value>
+    <value>10, 46</value>
   </metadata>
   <metadata name="tmrPetDGandhiTickerStatus.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>1131, 6</value>
+    <value>288, 46</value>
   </metadata>
   <metadata name="tmrEMACrossoverTickerStatus.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>1309, 6</value>
+    <value>532, 46</value>
+  </metadata>
+  <metadata name="tmrCandleRangeBreakoutTickerStatus.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>799, 47</value>
   </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>74</value>
+    <value>96</value>
   </metadata>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

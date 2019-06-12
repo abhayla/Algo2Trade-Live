@@ -1,0 +1,2 @@
+Instrument Name,Quantity,Higher Tail %,Lower Tail %,Target,Reverse Trade,Max Stock Profit,Max Stock Loss
+CRUDEOIL,1,50,25,0.05,TRUE,1000,500

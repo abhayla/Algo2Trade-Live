@@ -123,6 +123,21 @@
     <Compile Include="AmiSignal\frmAmiSignalTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="CandleRangeBreakout\CandleRangeBreakoutStrategy.vb" />
+    <Compile Include="CandleRangeBreakout\CandleRangeBreakoutStrategyInstrument.vb" />
+    <Compile Include="CandleRangeBreakout\CandleRangeBreakoutUserInputs.vb" />
+    <Compile Include="CandleRangeBreakout\frmCandleRangeBreakoutSettings.Designer.vb">
+      <DependentUpon>frmCandleRangeBreakoutSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="CandleRangeBreakout\frmCandleRangeBreakoutSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CandleRangeBreakout\frmCandleRangeBreakoutTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmCandleRangeBreakoutTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="CandleRangeBreakout\frmCandleRangeBreakoutTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Common.vb" />
     <Compile Include="EMACrossover\EMACrossoverStrategy.vb" />
     <Compile Include="EMACrossover\EMACrossoverStrategyInstrument.vb" />
@@ -260,6 +275,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AmiSignal\frmAmiSignalTradableInstrumentList.resx">
       <DependentUpon>frmAmiSignalTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CandleRangeBreakout\frmCandleRangeBreakoutSettings.resx">
+      <DependentUpon>frmCandleRangeBreakoutSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CandleRangeBreakout\frmCandleRangeBreakoutTradableInstrumentList.resx">
+      <DependentUpon>frmCandleRangeBreakoutTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EMACrossover\frmEMACrossoverSettings.resx">
       <DependentUpon>frmEMACrossoverSettings.vb</DependentUpon>

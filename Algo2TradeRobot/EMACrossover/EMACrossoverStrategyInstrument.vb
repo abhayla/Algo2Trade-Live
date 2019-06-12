@@ -4,7 +4,6 @@ Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Strategies
 Imports NLog
 Imports Algo2TradeCore.Entities.Indicators
-Imports System.IO
 
 Public Class EMACrossoverStrategyInstrument
     Inherits StrategyInstrument
