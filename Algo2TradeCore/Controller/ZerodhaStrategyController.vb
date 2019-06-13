@@ -1012,7 +1012,7 @@ Namespace Controller
             _cts.Token.ThrowIfCancellationRequested()
             Dim allPositions As IPositionResponse = Await ExecuteCommandAsync(execCommand, Nothing).ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
-            If allPositions IsNot Nothing AndAlso allPositions.Net.Count > 0 Then
+            If allPositions IsNot Nothing AndAlso allPositions.Net IsNot Nothing AndAlso allPositions.Net.Count > 0 Then
                 For Each runningPosition In allPositions.Net
                     If ret Is Nothing Then ret = New ConcurrentBag(Of IPosition)
                     ret.Add(runningPosition)

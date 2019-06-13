@@ -1603,6 +1603,9 @@ Namespace Strategies
                     Dim activityTag As String = GenerateTag(Now)
                     Dim parentPlaceOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = data
                     If parentPlaceOrderTrigger IsNot Nothing AndAlso parentPlaceOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                        logger.Debug("Place Order Details-> Direction:{0}, Qunatity:{1}, Trigger Price:{2}",
+                                     parentPlaceOrderTrigger.Item3.EntryDirection.ToString, parentPlaceOrderTrigger.Item3.Quantity, parentPlaceOrderTrigger.Item3.TriggerPrice)
+
                         While Me.IsActiveInstrument
                             Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
                         End While
@@ -1718,16 +1721,25 @@ Namespace Strategies
                         Dim potentialExitOrders As List(Of IOrder) = Nothing
                         For Each runningExitOrder In exitOrdersTrigger
                             If runningExitOrder.Item1 = ExecuteCommandAction.Take Then
-
-                                Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
-                                While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
-                                    Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
-                                End While
-
                                 Dim parentBusinessOrder As IBusinessOrder = GetParentFromChildOrder(runningExitOrder.Item2)
+
+                                logger.Debug("Cancel Order Details-> Parent Order ID:{0}, Direction:{1}, Reason:{2}",
+                                             parentBusinessOrder.ParentOrderIdentifier, parentBusinessOrder.ParentOrder.TransactionType.ToString, runningExitOrder.Item3)
+
+                                If runningExitOrder.Item3.ToUpper <> "STOPLOSS REACHED" Then
+                                    Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
+                                    While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
+                                        Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                                    End While
+                                End If
+
                                 Await Me.ParentStrategy.SignalManager.HandleCancelActivity(runningExitOrder.Item2.Tag, Me, Nothing, Now, runningExitOrder.Item3).ConfigureAwait(False)
                                 CType(runningExitOrder.Item2, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
-                                CType(runningExitOrder.Item2, PaperOrder).AveragePrice = Me.TradableInstrument.LastTick.LastPrice
+                                If runningExitOrder.Item3.ToUpper = "STOPLOSS REACHED" Then
+                                    CType(runningExitOrder.Item2, PaperOrder).AveragePrice = runningExitOrder.Item2.TriggerPrice
+                                Else
+                                    CType(runningExitOrder.Item2, PaperOrder).AveragePrice = Me.TradableInstrument.LastTick.LastPrice
+                                End If
                                 Await Me.ParentStrategy.SignalManager.ActivateCancelActivity(runningExitOrder.Item2.Tag, Me, Nothing, Now).ConfigureAwait(False)
                                 Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
                                 logger.Debug("Order Exited {0}", Me.TradableInstrument.TradingSymbol)
