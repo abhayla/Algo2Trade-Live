@@ -21,6 +21,7 @@ Public Class CandleRangeBreakoutUserInputs
         Public Property HigherTailPercentage As Decimal
         Public Property LowerTailPercentage As Decimal
         Public Property MinTargetPoint As Decimal
+        Public Property MinStoplossPoint As Decimal
         Public Property MaxStoplossPoint As Decimal
         Public Property ReverseTrade As Boolean
         Public Property MaxStockProfit As Decimal
@@ -37,9 +38,9 @@ Public Class CandleRangeBreakoutUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"INSTRUMENT NAME", "QUANTITY", "HIGHER TAIL %", "LOWER TAIL %", "MINIMUM TARGET POINT", "MAXIMUM STOPLOSS POINT", "REVERSE TRADE", "MAX STOCK PROFIT", "MAX STOCK LOSS"}
+                        Dim excelColumnList As New List(Of String) From {"INSTRUMENT NAME", "QUANTITY", "HIGHER TAIL %", "LOWER TAIL %", "MINIMUM TARGET POINT", "MINIMUM STOPLOSS POINT", "MAXIMUM STOPLOSS POINT", "REVERSE TRADE", "MAX STOCK PROFIT", "MAX STOCK LOSS"}
 
-                        For colCtr = 0 To 8
+                        For colCtr = 0 To 9
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -54,7 +55,8 @@ Public Class CandleRangeBreakoutUserInputs
                             Dim higherTail As Decimal = Decimal.MinValue
                             Dim lowerTail As Decimal = Decimal.MinValue
                             Dim target As Decimal = Decimal.MinValue
-                            Dim stoploss As Decimal = Decimal.MinValue
+                            Dim minStoploss As Decimal = Decimal.MinValue
+                            Dim maxStoploss As Decimal = Decimal.MinValue
                             Dim reverseTrade As Boolean = False
                             Dim maxStockProfit As Decimal = Decimal.MinValue
                             Dim maxStockLoss As Decimal = Decimal.MinValue
@@ -119,14 +121,25 @@ Public Class CandleRangeBreakoutUserInputs
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            stoploss = instrumentDetails(rowCtr, columnCtr)
+                                            minStoploss = instrumentDetails(rowCtr, columnCtr)
+                                        Else
+                                            Throw New ApplicationException(String.Format("Minimum Stoploss Point cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                        End If
+                                    Else
+                                        Throw New ApplicationException(String.Format("Minimum Stoploss Point cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                    End If
+                                ElseIf columnCtr = 6 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
+                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
+                                            maxStoploss = instrumentDetails(rowCtr, columnCtr)
                                         Else
                                             Throw New ApplicationException(String.Format("Maximum Stoploss Point cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                         End If
                                     Else
                                         Throw New ApplicationException(String.Format("Maximum Stoploss Point cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
-                                ElseIf columnCtr = 6 Then
+                                ElseIf columnCtr = 7 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If instrumentDetails(rowCtr, columnCtr).ToString.ToUpper = "TRUE" Then
@@ -139,7 +152,7 @@ Public Class CandleRangeBreakoutUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("Reverse Trade cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
-                                ElseIf columnCtr = 7 Then
+                                ElseIf columnCtr = 8 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
@@ -150,7 +163,7 @@ Public Class CandleRangeBreakoutUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("Max Stock Profit cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
-                                ElseIf columnCtr = 8 Then
+                                ElseIf columnCtr = 9 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
@@ -171,7 +184,8 @@ Public Class CandleRangeBreakoutUserInputs
                                     .HigherTailPercentage = higherTail
                                     .LowerTailPercentage = lowerTail
                                     .MinTargetPoint = target
-                                    .MaxStoplossPoint = stoploss
+                                    .MinStoplossPoint = minStoploss
+                                    .MaxStoplossPoint = maxStoploss
                                     .ReverseTrade = reverseTrade
                                     .MaxStockProfit = maxStockProfit
                                     .MaxStockLoss = maxStockLoss

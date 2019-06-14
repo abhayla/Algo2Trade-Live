@@ -14,6 +14,8 @@ Public Class EMACrossoverStrategyInstrument
 #End Region
 
     Public Property ForceExitByUser As Boolean
+    Public Property ForceExitForContractRollover As Boolean
+    Public Property ForceEntryForContractRollover As Boolean
 
     Private lastPrevPayloadPlaceOrder As String = ""
     Private ReadOnly _dummyFastEMAConsumer As EMAConsumer
@@ -50,6 +52,7 @@ Public Class EMACrossoverStrategyInstrument
             End If
         End If
         Me.ForceExitByUser = False
+        Me.ForceExitForContractRollover = False
     End Sub
 
     'Public Overrides Function ProcessHoldingAsync(holdingData As IHolding) As Task
@@ -86,11 +89,27 @@ Public Class EMACrossoverStrategyInstrument
                                 ForceExitByUser = False
                                 OnHeartbeat(String.Format("Force exit successful: {0}", Me.TradableInstrument.TradingSymbol))
                             End If
+                            If ForceExitForContractRollover Then
+                                ForceExitForContractRollover = False
+                                OnHeartbeat(String.Format("Force exit for contract rollover successful: {0}", Me.TradableInstrument.TradingSymbol))
+                            End If
+                            If ForceEntryForContractRollover Then
+                                ForceEntryForContractRollover = False
+                                OnHeartbeat(String.Format("Force entry for contract rollover successful: {0}", Me.TradableInstrument.TradingSymbol))
+                            End If
                         End If
                     Else
                         If ForceExitByUser Then
                             ForceExitByUser = False
                             OnHeartbeat(String.Format("No position available for force exit: {0}", Me.TradableInstrument.TradingSymbol))
+                        End If
+                        If ForceExitForContractRollover Then
+                            ForceExitForContractRollover = False
+                            OnHeartbeat(String.Format("No position available for contract rollover force exit: {0}", Me.TradableInstrument.TradingSymbol))
+                        End If
+                        If ForceEntryForContractRollover Then
+                            ForceEntryForContractRollover = False
+                            OnHeartbeat(String.Format("No position available for contract rollover force entry: {0}", Me.TradableInstrument.TradingSymbol))
                         End If
                     End If
                 End If
@@ -123,24 +142,28 @@ Public Class EMACrossoverStrategyInstrument
                 If Not runningCandlePayload.PreviousPayload.ToString = lastPrevPayloadPlaceOrder Then
                     lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
                     logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
-                    logger.Debug("PlaceOrder-> Rest all parameters: RunningCandlePayloadSnapshotDateTime:{0}, PayloadGeneratedBy:{1}, IsHistoricalCompleted:{2}, IsFirstTimeInformationCollected:{3}, IsCrossover(above):{4}, IsCrossover(below):{5}, EMA({6}):{7}, EMA({8}):{9}, Force Exit by user:{10}, Quantity:{11}, Exchange Start Time:{12}, Exchange End Time:{13}, Current Time:{14}, Trade entry delay:{15}, TradingSymbol:{16}",
-                    runningCandlePayload.SnapshotDateTime.ToString,
-                    runningCandlePayload.PayloadGeneratedBy.ToString,
-                    Me.TradableInstrument.IsHistoricalCompleted,
-                    Me.ParentStrategy.IsFirstTimeInformationCollected,
-                    IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, True),
-                    IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, True),
-                    emaCrossoverUserSettings.FastEMAPeriod,
-                    fastEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
-                    emaCrossoverUserSettings.SlowEMAPeriod,
-                    slowEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
-                    Me.ForceExitByUser,
-                    GetQuantityToTrade(),
-                   Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.ToString,
-                   Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
-                   currentTime.ToString,
-                   emaCrossoverUserSettings.TradeEntryDelay,
-                   Me.TradableInstrument.TradingSymbol)
+                    logger.Debug("PlaceOrder-> Rest all parameters: RunningCandlePayloadSnapshotDateTime:{0}, PayloadGeneratedBy:{1}, IsHistoricalCompleted:{2}, IsFirstTimeInformationCollected:{3}, IsCrossover(above):{4}, IsCrossover(below):{5}, EMA({6}):{7}, EMA({8}):{9}, Force Exit by user:{10}, Quantity:{11}, Exchange Start Time:{12}, Exchange End Time:{13}, Current Time:{14}, Trade entry delay:{15}, Is My Another Contract Available:{16}, Contract Rollover Time:{17}, Contract Rollover Force Exit:{18}, Contract Rollover Force Entry:{19}, TradingSymbol:{20}",
+                                runningCandlePayload.SnapshotDateTime.ToString,
+                                runningCandlePayload.PayloadGeneratedBy.ToString,
+                                Me.TradableInstrument.IsHistoricalCompleted,
+                                Me.ParentStrategy.IsFirstTimeInformationCollected,
+                                IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, True),
+                                IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, True),
+                                emaCrossoverUserSettings.FastEMAPeriod,
+                                fastEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                                emaCrossoverUserSettings.SlowEMAPeriod,
+                                slowEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                                Me.ForceExitByUser,
+                                GetQuantityToTrade(),
+                                Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.ToString,
+                                Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
+                                currentTime.ToString,
+                                emaCrossoverUserSettings.TradeEntryDelay,
+                                IsMyAnotherContractAvailable(),
+                                Me.TradableInstrument.ExchangeDetails.ContractRolloverTime.ToString,
+                                Me.ForceExitForContractRollover,
+                                Me.ForceEntryForContractRollover,
+                                Me.TradableInstrument.TradingSymbol)
                 End If
             End If
         Catch ex As Exception
@@ -148,8 +171,21 @@ Public Class EMACrossoverStrategyInstrument
         End Try
 
         Dim parameters As PlaceOrderParameters = Nothing
-        If ForceExitByUser AndAlso currentTime >= Me.TradableInstrument.ExchangeDetails.ExchangeStartTime AndAlso currentTime <= Me.TradableInstrument.ExchangeDetails.ExchangeEndTime Then
+        If (ForceExitByUser OrElse ForceExitForContractRollover OrElse ForceEntryForContractRollover) AndAlso
+            currentTime >= Me.TradableInstrument.ExchangeDetails.ExchangeStartTime AndAlso currentTime <= Me.TradableInstrument.ExchangeDetails.ExchangeEndTime Then
             Dim quantity As Integer = GetQuantityToTrade() / 2
+            If Me.ForceEntryForContractRollover Then
+                quantity = emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).ModifiedQuantity
+                If quantity > 0 Then
+                    parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                       {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                        .Quantity = Math.Abs(quantity)}
+                Else
+                    parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                      {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                                       .Quantity = Math.Abs(quantity)}
+                End If
+            End If
             If quantity > 0 Then
                 parameters = New PlaceOrderParameters(runningCandlePayload) With
                                    {.EntryDirection = IOrder.TypeOfTransaction.Sell,
@@ -159,23 +195,26 @@ Public Class EMACrossoverStrategyInstrument
                                   {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                    .Quantity = Math.Abs(quantity)}
             End If
+            If ForceExitForContractRollover Then emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).ModifiedQuantity = quantity
         ElseIf currentTime >= Me.TradableInstrument.ExchangeDetails.ExchangeStartTime AndAlso currentTime <= Me.TradableInstrument.ExchangeDetails.ExchangeEndTime AndAlso
             runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
             currentTime <= runningCandlePayload.SnapshotDateTime.AddMinutes(emaCrossoverUserSettings.TradeEntryDelay) AndAlso
             runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
-
-            If IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, False) Then
-                Dim quantity As Integer = GetQuantityToTrade()
-                parameters = New PlaceOrderParameters(runningCandlePayload) With
-                                   {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                    .Quantity = Math.Abs(quantity)}
-            ElseIf IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, False) Then
-                Dim quantity As Integer = GetQuantityToTrade()
-                parameters = New PlaceOrderParameters(runningCandlePayload) With
-                                   {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                    .Quantity = Math.Abs(quantity)}
+            If (Me.TradableInstrument.Expiry.Value.Date <> Now.Date AndAlso Not IsMyAnotherContractAvailable.Item1) OrElse
+                (Me.TradableInstrument.Expiry.Value.Date <> Now.Date AndAlso IsMyAnotherContractAvailable.Item1 AndAlso currentTime >= Me.TradableInstrument.ExchangeDetails.ContractRolloverTime) OrElse
+                (Me.TradableInstrument.Expiry.Value.Date = Now.Date AndAlso IsMyAnotherContractAvailable.Item1 AndAlso currentTime < Me.TradableInstrument.ExchangeDetails.ContractRolloverTime) Then
+                If IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, False) Then
+                    Dim quantity As Integer = GetQuantityToTrade()
+                    parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                       {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                        .Quantity = Math.Abs(quantity)}
+                ElseIf IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, False) Then
+                    Dim quantity As Integer = GetQuantityToTrade()
+                    parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                       {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                                        .Quantity = Math.Abs(quantity)}
+                End If
             End If
-
         End If
 
         'Below portion have to be done in every place order trigger
@@ -193,7 +232,9 @@ Public Class EMACrossoverStrategyInstrument
                                     Force Exit by user:{10}, Quantity:{11},
                                     Exchange Start Time:{12}, Exchange End Time:{13},
                                     Current Time:{14}, Trade entry delay:{15},
-                                    TradingSymbol:{16}",
+                                    Is My Another Contract Available:{16}, Contract Rollover Time:{17},
+                                    Contract Rollover Force Exit:{18}, Contract Rollover Force Entry:{19},
+                                    TradingSymbol:{20}",
                                     runningCandlePayload.SnapshotDateTime.ToString,
                                     runningCandlePayload.PayloadGeneratedBy.ToString,
                                     Me.TradableInstrument.IsHistoricalCompleted,
@@ -210,6 +251,10 @@ Public Class EMACrossoverStrategyInstrument
                                     Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
                                     currentTime.ToString,
                                     emaCrossoverUserSettings.TradeEntryDelay,
+                                    IsMyAnotherContractAvailable(),
+                                    Me.TradableInstrument.ExchangeDetails.ContractRolloverTime.ToString,
+                                    Me.ForceExitForContractRollover,
+                                    Me.ForceEntryForContractRollover,
                                     Me.TradableInstrument.TradingSymbol)
                     ElseIf ForceExitByUser Then
                         logger.Debug("PlaceOrder-> Rest all parameters:
@@ -288,6 +333,46 @@ Public Class EMACrossoverStrategyInstrument
             If Not ForceExitByUser Then ret = Me.TradableInstrument.LotSize * emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).InitialQuantity
         End If
         Return ret
+    End Function
+
+    Private Function IsMyAnotherContractAvailable() As Tuple(Of Boolean, EMACrossoverStrategyInstrument)
+        Dim ret As Tuple(Of Boolean, EMACrossoverStrategyInstrument) = New Tuple(Of Boolean, EMACrossoverStrategyInstrument)(False, Nothing)
+        For Each runningStrategyInstrument As EMACrossoverStrategyInstrument In Me.ParentStrategy.TradableStrategyInstruments
+            If runningStrategyInstrument.TradableInstrument.InstrumentIdentifier <> Me.TradableInstrument.InstrumentIdentifier AndAlso
+                runningStrategyInstrument.TradableInstrument.RawInstrumentName = Me.TradableInstrument.RawInstrumentName Then
+                ret = New Tuple(Of Boolean, EMACrossoverStrategyInstrument)(True, runningStrategyInstrument)
+                Exit For
+            End If
+        Next
+        Return ret
+    End Function
+
+    Public Async Function ContractRolloverAsync() As Task
+        If Me.TradableInstrument.Expiry.Value.Date = Now.Date Then
+            Try
+                While True
+                    If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
+                        Throw Me.ParentStrategy.ParentController.OrphanException
+                    End If
+                    _cts.Token.ThrowIfCancellationRequested()
+
+                    If Now >= Me.TradableInstrument.ExchangeDetails.ContractRolloverTime AndAlso
+                        IsMyAnotherContractAvailable.Item1 Then
+                        Me.ForceExitForContractRollover = True
+                        While Me.ForceExitForContractRollover
+                            Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
+                        End While
+                        IsMyAnotherContractAvailable.Item2.ForceEntryForContractRollover = True
+                        Exit While
+                    End If
+
+                    Await Task.Delay(60000, _cts.Token).ConfigureAwait(False)
+                End While
+            Catch ex As Exception
+                logger.Error("Strategy Instrument:{0}, error:{1}", Me.ToString, ex.ToString)
+                Throw ex
+            End Try
+        End If
     End Function
 
 #Region "IDisposable Support"

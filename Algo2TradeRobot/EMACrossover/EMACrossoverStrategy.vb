@@ -50,11 +50,7 @@ Public Class EMACrossoverStrategy
                                                                                                      End Function)
 
                     Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date = Now.Date Then
-                                                                               Return x.Expiry.Value
-                                                                           Else
-                                                                               Return Date.MaxValue
-                                                                           End If
+                                                                           Return x.Expiry.Value
                                                                        End Function)
 
                     runningTradableInstrument = allTradableInstruments.Find(Function(x)
@@ -65,6 +61,26 @@ Public Class EMACrossoverStrategy
 
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
                     If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
+
+                    If runningTradableInstrument.Expiry.Value.Date = Now.Date Then
+                        Dim nextMinExpiry As Date = allTradableInstruments.Min(Function(x)
+                                                                                   If Not x.Expiry.Value.Date = Now.Date Then
+                                                                                       Return x.Expiry.Value
+                                                                                   Else
+                                                                                       Return Date.MaxValue
+                                                                                   End If
+                                                                               End Function)
+
+                        runningTradableInstrument = allTradableInstruments.Find(Function(x)
+                                                                                    Return x.Expiry = nextMinExpiry
+                                                                                End Function)
+
+                        _cts.Token.ThrowIfCancellationRequested()
+
+                        If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
+                        If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
+                    End If
+
                     ret = True
                 Next
                 TradableInstrumentsAsPerStrategy = retTradableInstrumentsAsPerStrategy
@@ -122,6 +138,7 @@ Public Class EMACrossoverStrategy
             For Each tradableStrategyInstrument As EMACrossoverStrategyInstrument In TradableStrategyInstruments
                 _cts.Token.ThrowIfCancellationRequested()
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
+                tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.ContractRolloverAsync, _cts.Token))
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
