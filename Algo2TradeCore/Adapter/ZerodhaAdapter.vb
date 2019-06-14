@@ -105,13 +105,6 @@ Namespace Adapter
                 Dim zerodhaReturedInstruments As List(Of Instrument) = CType(tempRet, List(Of Instrument))
                 For Each runningInstrument As Instrument In zerodhaReturedInstruments
                     _cts.Token.ThrowIfCancellationRequested()
-
-                    'For checking start
-                    If runningInstrument.InstrumentToken = "429571" Then
-                        runningInstrument.Expiry = Now.Date
-                    End If
-                    'End
-
                     If ret Is Nothing Then ret = New List(Of ZerodhaInstrument)
                     ret.Add(New ZerodhaInstrument(Me.ParentController, runningInstrument.InstrumentToken) With {.WrappedInstrument = runningInstrument})
                 Next

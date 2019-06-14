@@ -81,7 +81,7 @@ Public Class CandleRangeBreakoutStrategyInstrument
                             Dim targetPoint As Decimal = (activeOrder.ParentOrder.AveragePrice - activeOrder.SLOrder.FirstOrDefault.TriggerPrice) * 2
                             If targetPoint > minTargetPoint AndAlso targetPoint < maxStoplossPoint * 2 Then
                                 target += targetPoint
-                            ElseIf targetPoint > maxStoplossPoint * 2 Then
+                            ElseIf targetPoint >= maxStoplossPoint * 2 Then
                                 target += maxStoplossPoint * 2
                             Else
                                 target += minTargetPoint
@@ -97,7 +97,7 @@ Public Class CandleRangeBreakoutStrategyInstrument
                             Dim targetPoint As Decimal = (activeOrder.SLOrder.FirstOrDefault.TriggerPrice - activeOrder.ParentOrder.AveragePrice) * 2
                             If targetPoint > minTargetPoint AndAlso targetPoint < maxStoplossPoint * 2 Then
                                 target -= targetPoint
-                            ElseIf targetPoint > maxStoplossPoint * 2 Then
+                            ElseIf targetPoint >= maxStoplossPoint * 2 Then
                                 target -= maxStoplossPoint * 2
                             Else
                                 target -= minTargetPoint

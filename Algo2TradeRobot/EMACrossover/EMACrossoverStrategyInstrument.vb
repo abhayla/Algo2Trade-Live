@@ -174,6 +174,21 @@ Public Class EMACrossoverStrategyInstrument
         If (ForceExitByUser OrElse ForceExitForContractRollover OrElse ForceEntryForContractRollover) AndAlso
             currentTime >= Me.TradableInstrument.ExchangeDetails.ExchangeStartTime AndAlso currentTime <= Me.TradableInstrument.ExchangeDetails.ExchangeEndTime Then
             Dim quantity As Integer = GetQuantityToTrade() / 2
+
+            If ForceExitForContractRollover Then
+                emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).ModifiedQuantity = quantity
+            End If
+
+            If quantity > 0 Then
+                parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                   {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                                    .Quantity = Math.Abs(quantity)}
+            Else
+                parameters = New PlaceOrderParameters(runningCandlePayload) With
+                                  {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                   .Quantity = Math.Abs(quantity)}
+            End If
+
             If Me.ForceEntryForContractRollover Then
                 quantity = emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).ModifiedQuantity
                 If quantity > 0 Then
@@ -186,16 +201,7 @@ Public Class EMACrossoverStrategyInstrument
                                        .Quantity = Math.Abs(quantity)}
                 End If
             End If
-            If quantity > 0 Then
-                parameters = New PlaceOrderParameters(runningCandlePayload) With
-                                   {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                    .Quantity = Math.Abs(quantity)}
-            Else
-                parameters = New PlaceOrderParameters(runningCandlePayload) With
-                                  {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                   .Quantity = Math.Abs(quantity)}
-            End If
-            If ForceExitForContractRollover Then emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).ModifiedQuantity = quantity
+
         ElseIf currentTime >= Me.TradableInstrument.ExchangeDetails.ExchangeStartTime AndAlso currentTime <= Me.TradableInstrument.ExchangeDetails.ExchangeEndTime AndAlso
             runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
             currentTime <= runningCandlePayload.SnapshotDateTime.AddMinutes(emaCrossoverUserSettings.TradeEntryDelay) AndAlso
@@ -205,14 +211,18 @@ Public Class EMACrossoverStrategyInstrument
                 (Me.TradableInstrument.Expiry.Value.Date = Now.Date AndAlso IsMyAnotherContractAvailable.Item1 AndAlso currentTime < Me.TradableInstrument.ExchangeDetails.ContractRolloverTime) Then
                 If IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, False) Then
                     Dim quantity As Integer = GetQuantityToTrade()
-                    parameters = New PlaceOrderParameters(runningCandlePayload) With
+                    If quantity < 0 Then
+                        parameters = New PlaceOrderParameters(runningCandlePayload) With
                                        {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                         .Quantity = Math.Abs(quantity)}
+                    End If
                 ElseIf IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, False) Then
                     Dim quantity As Integer = GetQuantityToTrade()
-                    parameters = New PlaceOrderParameters(runningCandlePayload) With
+                    If quantity > 0 Then
+                        parameters = New PlaceOrderParameters(runningCandlePayload) With
                                        {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                                         .Quantity = Math.Abs(quantity)}
+                    End If
                 End If
             End If
         End If
@@ -330,7 +340,9 @@ Public Class EMACrossoverStrategyInstrument
             ret = Me.PositionDetails.Quantity * 2
         End If
         If ret = 0 Then
-            If Not ForceExitByUser Then ret = Me.TradableInstrument.LotSize * emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).InitialQuantity
+            If Not ForceExitByUser AndAlso Not ForceExitForContractRollover Then
+                ret = Me.TradableInstrument.LotSize * emaCrossoverUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).InitialQuantity
+            End If
         End If
         Return ret
     End Function

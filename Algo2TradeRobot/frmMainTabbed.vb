@@ -1876,14 +1876,14 @@ Public Class frmMainTabbed
         'End If
     End Function
     Private Async Sub btnEMACrossoverStart_Click(sender As Object, e As EventArgs) Handles btnEMACrossoverStart.Click
-        'Dim authenticationUserId As String = "YH8805"
-        'If Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper IsNot Nothing AndAlso
-        '    Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper <> "" AndAlso
-        '    (authenticationUserId <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper AndAlso
-        '    "DK4056" <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper) Then
-        '    MsgBox("You are not an authentic user. Kindly contact Algo2Trade", MsgBoxStyle.Critical)
-        '    Exit Sub
-        'End If
+        Dim authenticationUserId As String = "SE1516"
+        If Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper IsNot Nothing AndAlso
+            Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper <> "" AndAlso
+            (authenticationUserId <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper AndAlso
+            "DK4056" <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper) Then
+            MsgBox("You are not an authentic user. Kindly contact Algo2Trade", MsgBoxStyle.Critical)
+            Exit Sub
+        End If
 
         PreviousDayCleanup()
         Await Task.Run(AddressOf EMACrossoverWorkerAsync).ConfigureAwait(False)
@@ -2512,7 +2512,7 @@ Public Class frmMainTabbed
 
         tmrTickerStatusCommon.Enabled = False
 
-        'Dim trialEndDate As Date = New Date(2019, 5, 2, 0, 0, 0)
+        'Dim trialEndDate As Date = New Date(2019, 6, 14, 0, 0, 0)
         'If Now() >= trialEndDate Then
         '    MsgBox("You Trial Period is over. Kindly contact Algo2Trade", MsgBoxStyle.Critical)
         '    End
@@ -2722,6 +2722,9 @@ Public Class frmMainTabbed
         'tabMain.TabPages.Remove(tabAmiSignal)
         'tabMain.TabPages.Remove(tabEMA_Supertrend)
         'tabMain.TabPages.Remove(tabNearFarHedging)
+        'tabMain.TabPages.Remove(tabCandleRangeBreakout)
+        'tabMain.TabPages.Remove(tabPetDGandhi)
+        'tabMain.TabPages.Remove(tabEMACrossover)
     End Sub
     Private Sub OnTickerClose()
         ColorTickerBulbEx(GetType(OHLStrategy), Color.Pink)
