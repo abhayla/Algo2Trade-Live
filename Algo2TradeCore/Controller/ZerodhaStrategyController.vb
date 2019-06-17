@@ -898,7 +898,9 @@ Namespace Controller
                         _cts.Token.ThrowIfCancellationRequested()
                         slOrder = allOrders.ToList.FindAll(Function(x)
                                                                Dim y As ZerodhaOrder = CType(x, ZerodhaOrder)
-                                                               If y.Status = IOrder.TypeOfStatus.Cancelled OrElse y.Status = IOrder.TypeOfStatus.Complete Then
+                                                               If y.Status = IOrder.TypeOfStatus.Cancelled OrElse
+                                                                   y.Status = IOrder.TypeOfStatus.Complete OrElse
+                                                                   y.Status = IOrder.TypeOfStatus.Rejected Then
                                                                    Return Nothing
                                                                Else
                                                                    Return y.WrappedOrder.ParentOrderId = parentOrder.OrderIdentifier AndAlso
@@ -909,7 +911,9 @@ Namespace Controller
                         _cts.Token.ThrowIfCancellationRequested()
                         targetOrder = allOrders.ToList.FindAll(Function(x)
                                                                    Dim y As ZerodhaOrder = CType(x, ZerodhaOrder)
-                                                                   If y.Status = IOrder.TypeOfStatus.Cancelled OrElse y.Status = IOrder.TypeOfStatus.Complete Then
+                                                                   If y.Status = IOrder.TypeOfStatus.Cancelled OrElse
+                                                                       y.Status = IOrder.TypeOfStatus.Complete OrElse
+                                                                       y.Status = IOrder.TypeOfStatus.Rejected Then
                                                                        Return Nothing
                                                                    Else
                                                                        Return y.WrappedOrder.ParentOrderId = parentOrder.OrderIdentifier AndAlso
@@ -920,7 +924,9 @@ Namespace Controller
                         _cts.Token.ThrowIfCancellationRequested()
                         allOrder = allOrders.ToList.FindAll(Function(x)
                                                                 Dim y As ZerodhaOrder = CType(x, ZerodhaOrder)
-                                                                If y.Status = IOrder.TypeOfStatus.Cancelled OrElse y.Status = IOrder.TypeOfStatus.Complete Then
+                                                                If y.Status = IOrder.TypeOfStatus.Cancelled OrElse
+                                                                    y.Status = IOrder.TypeOfStatus.Complete OrElse
+                                                                    y.Status = IOrder.TypeOfStatus.Rejected Then
                                                                     Return y.WrappedOrder.ParentOrderId = parentOrder.OrderIdentifier
                                                                 Else
                                                                     Return Nothing
@@ -930,7 +936,9 @@ Namespace Controller
                         _cts.Token.ThrowIfCancellationRequested()
                         slOrder = allOrders.ToList.FindAll(Function(x)
                                                                Dim y As ZerodhaOrder = CType(x, ZerodhaOrder)
-                                                               If y.Status = IOrder.TypeOfStatus.Cancelled OrElse y.Status = IOrder.TypeOfStatus.Complete Then
+                                                               If y.Status = IOrder.TypeOfStatus.Cancelled OrElse
+                                                                   y.Status = IOrder.TypeOfStatus.Complete OrElse
+                                                                   y.Status = IOrder.TypeOfStatus.Rejected Then
                                                                    Return Nothing
                                                                Else
                                                                    Return y.WrappedOrder.ParentOrderId = parentOrder.OrderIdentifier AndAlso
@@ -941,7 +949,9 @@ Namespace Controller
                         _cts.Token.ThrowIfCancellationRequested()
                         targetOrder = allOrders.ToList.FindAll(Function(x)
                                                                    Dim y As ZerodhaOrder = CType(x, ZerodhaOrder)
-                                                                   If y.Status = IOrder.TypeOfStatus.Cancelled OrElse y.Status = IOrder.TypeOfStatus.Complete Then
+                                                                   If y.Status = IOrder.TypeOfStatus.Cancelled OrElse
+                                                                       y.Status = IOrder.TypeOfStatus.Complete OrElse
+                                                                       y.Status = IOrder.TypeOfStatus.Rejected Then
                                                                        Return Nothing
                                                                    Else
                                                                        Return y.WrappedOrder.ParentOrderId = parentOrder.OrderIdentifier AndAlso
@@ -952,7 +962,9 @@ Namespace Controller
                         _cts.Token.ThrowIfCancellationRequested()
                         allOrder = allOrders.ToList.FindAll(Function(x)
                                                                 Dim y As ZerodhaOrder = CType(x, ZerodhaOrder)
-                                                                If y.Status = IOrder.TypeOfStatus.Cancelled OrElse y.Status = IOrder.TypeOfStatus.Complete Then
+                                                                If y.Status = IOrder.TypeOfStatus.Cancelled OrElse
+                                                                    y.Status = IOrder.TypeOfStatus.Complete OrElse
+                                                                    y.Status = IOrder.TypeOfStatus.Rejected Then
                                                                     Return y.WrappedOrder.ParentOrderId = parentOrder.OrderIdentifier
                                                                 Else
                                                                     Return Nothing
