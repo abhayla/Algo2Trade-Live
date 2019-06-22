@@ -172,7 +172,10 @@ Public Class EMACrossoverStrategyInstrument
 
         Dim parameters As PlaceOrderParameters = Nothing
         If (ForceExitByUser OrElse ForceExitForContractRollover OrElse ForceEntryForContractRollover) AndAlso
-            currentTime >= Me.TradableInstrument.ExchangeDetails.ExchangeStartTime AndAlso currentTime <= Me.TradableInstrument.ExchangeDetails.ExchangeEndTime Then
+            currentTime >= Me.TradableInstrument.ExchangeDetails.ExchangeStartTime AndAlso
+            currentTime <= Me.TradableInstrument.ExchangeDetails.ExchangeEndTime AndAlso
+            Me.TradableInstrument.IsHistoricalCompleted AndAlso runningCandlePayload IsNot Nothing Then
+
             Dim quantity As Integer = GetQuantityToTrade() / 2
 
             If ForceExitForContractRollover Then
