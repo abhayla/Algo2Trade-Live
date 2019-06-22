@@ -61,7 +61,7 @@
             dgvTradableInstruments.Refresh()
         End If
         For Each runningColumn In dgvTradableInstruments.Columns
-            runningColumn.ReadOnly = IIf(runningColumn.Index = 1, True, False)
+            runningColumn.ReadOnly = IIf(runningColumn.Index = 0, False, True)
         Next
     End Sub
 
@@ -111,4 +111,5 @@
             e.Cancel = True
         End If
     End Sub
+
 End Class

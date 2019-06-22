@@ -29,7 +29,9 @@ Partial Class frmEMACrossoverTradableInstrumentList
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmEMACrossoverTradableInstrumentList))
         Me.dgvTradableInstruments = New System.Windows.Forms.DataGridView()
         Me.btnExitEMACrossoverTradableInstrument = New System.Windows.Forms.Button()
+        Me.pnlMainEMACrossoverTradableInstrumentList = New System.Windows.Forms.TableLayoutPanel()
         CType(Me.dgvTradableInstruments, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.pnlMainEMACrossoverTradableInstrumentList.SuspendLayout()
         Me.SuspendLayout()
         '
         'dgvTradableInstruments
@@ -54,8 +56,9 @@ Partial Class frmEMACrossoverTradableInstrumentList
         DataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText
         DataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.[False]
         Me.dgvTradableInstruments.DefaultCellStyle = DataGridViewCellStyle2
-        Me.dgvTradableInstruments.Location = New System.Drawing.Point(2, -1)
-        Me.dgvTradableInstruments.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.dgvTradableInstruments.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.dgvTradableInstruments.Location = New System.Drawing.Point(2, 2)
+        Me.dgvTradableInstruments.Margin = New System.Windows.Forms.Padding(2)
         Me.dgvTradableInstruments.Name = "dgvTradableInstruments"
         DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
         DataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control
@@ -70,40 +73,56 @@ Partial Class frmEMACrossoverTradableInstrumentList
         Me.dgvTradableInstruments.RowsDefaultCellStyle = DataGridViewCellStyle4
         Me.dgvTradableInstruments.RowTemplate.Height = 24
         Me.dgvTradableInstruments.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect
-        Me.dgvTradableInstruments.Size = New System.Drawing.Size(781, 313)
+        Me.dgvTradableInstruments.Size = New System.Drawing.Size(584, 378)
         Me.dgvTradableInstruments.TabIndex = 2
         '
         'btnExitEMACrossoverTradableInstrument
         '
         Me.btnExitEMACrossoverTradableInstrument.AutoSize = True
-        Me.btnExitEMACrossoverTradableInstrument.Location = New System.Drawing.Point(803, 13)
-        Me.btnExitEMACrossoverTradableInstrument.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnExitEMACrossoverTradableInstrument.Dock = System.Windows.Forms.DockStyle.Top
+        Me.btnExitEMACrossoverTradableInstrument.Location = New System.Drawing.Point(591, 3)
         Me.btnExitEMACrossoverTradableInstrument.Name = "btnExitEMACrossoverTradableInstrument"
-        Me.btnExitEMACrossoverTradableInstrument.Size = New System.Drawing.Size(100, 38)
+        Me.btnExitEMACrossoverTradableInstrument.Size = New System.Drawing.Size(101, 31)
         Me.btnExitEMACrossoverTradableInstrument.TabIndex = 3
         Me.btnExitEMACrossoverTradableInstrument.Text = "E&xit"
         Me.btnExitEMACrossoverTradableInstrument.UseVisualStyleBackColor = True
         '
+        'pnlMainEMACrossoverTradableInstrumentList
+        '
+        Me.pnlMainEMACrossoverTradableInstrumentList.ColumnCount = 2
+        Me.pnlMainEMACrossoverTradableInstrumentList.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 84.7482!))
+        Me.pnlMainEMACrossoverTradableInstrumentList.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15.2518!))
+        Me.pnlMainEMACrossoverTradableInstrumentList.Controls.Add(Me.dgvTradableInstruments, 0, 0)
+        Me.pnlMainEMACrossoverTradableInstrumentList.Controls.Add(Me.btnExitEMACrossoverTradableInstrument, 1, 0)
+        Me.pnlMainEMACrossoverTradableInstrumentList.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlMainEMACrossoverTradableInstrumentList.Location = New System.Drawing.Point(0, 0)
+        Me.pnlMainEMACrossoverTradableInstrumentList.Name = "pnlMainEMACrossoverTradableInstrumentList"
+        Me.pnlMainEMACrossoverTradableInstrumentList.RowCount = 1
+        Me.pnlMainEMACrossoverTradableInstrumentList.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.pnlMainEMACrossoverTradableInstrumentList.Size = New System.Drawing.Size(695, 382)
+        Me.pnlMainEMACrossoverTradableInstrumentList.TabIndex = 4
+        '
         'frmEMACrossoverTradableInstrumentList
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(927, 313)
-        Me.Controls.Add(Me.btnExitEMACrossoverTradableInstrument)
-        Me.Controls.Add(Me.dgvTradableInstruments)
+        Me.ClientSize = New System.Drawing.Size(695, 382)
+        Me.Controls.Add(Me.pnlMainEMACrossoverTradableInstrumentList)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.Margin = New System.Windows.Forms.Padding(2)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "frmEMACrossoverTradableInstrumentList"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "EMA Crossover Strategy Tradable Instruments"
         CType(Me.dgvTradableInstruments, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.pnlMainEMACrossoverTradableInstrumentList.ResumeLayout(False)
+        Me.pnlMainEMACrossoverTradableInstrumentList.PerformLayout()
         Me.ResumeLayout(False)
-        Me.PerformLayout()
 
     End Sub
 
     Friend WithEvents dgvTradableInstruments As DataGridView
     Friend WithEvents btnExitEMACrossoverTradableInstrument As Button
+    Friend WithEvents pnlMainEMACrossoverTradableInstrumentList As TableLayoutPanel
 End Class
