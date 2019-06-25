@@ -28,6 +28,7 @@
             LastPrice
             PivotHigh
             PivotLow
+            Fractal
         End Enum
         Enum CrossDirection
             Above = 1

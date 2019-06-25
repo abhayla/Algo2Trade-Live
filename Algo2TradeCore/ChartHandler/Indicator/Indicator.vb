@@ -531,6 +531,69 @@ Namespace ChartHandler.Indicator
                 Next
             End If
         End Sub
+        Public Sub CalculateFractal(ByVal timeToCalculateFrom As Date, ByVal outputConsumer As FractalConsumer)
+            If outputConsumer IsNot Nothing AndAlso outputConsumer.ParentConsumer IsNot Nothing AndAlso
+            outputConsumer.ParentConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ParentConsumer.ConsumerPayloads.Count > 0 Then
+
+                Dim requiredDataSet As List(Of Date) =
+                    outputConsumer.ParentConsumer.ConsumerPayloads.Keys.Where(Function(x)
+                                                                                  Return x >= timeToCalculateFrom
+                                                                              End Function).OrderBy(Function(x)
+                                                                                                        Return x
+                                                                                                    End Function).ToList
+
+                Dim highFractal As Decimal = 0
+                Dim lowFractal As Decimal = 0
+                For Each runningInputDate In requiredDataSet
+                    If outputConsumer.ConsumerPayloads Is Nothing Then outputConsumer.ConsumerPayloads = New Concurrent.ConcurrentDictionary(Of Date, IPayload)
+
+                    Dim previousFractalValues As IEnumerable(Of KeyValuePair(Of Date, IPayload)) = Nothing
+                    Dim previousFractalValue As FractalConsumer.FractalPayload = Nothing
+                    If outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
+                        previousFractalValues = outputConsumer.ConsumerPayloads.Where(Function(x)
+                                                                                          Return x.Key < runningInputDate
+                                                                                      End Function)
+                        If previousFractalValues IsNot Nothing AndAlso previousFractalValues.Count > 0 Then
+                            previousFractalValue = previousFractalValues.OrderBy(Function(y)
+                                                                                     Return y.Key
+                                                                                 End Function).LastOrDefault.Value
+                        End If
+                    End If
+                    If previousFractalValue IsNot Nothing Then
+                        highFractal = previousFractalValue.FractalHigh.Value
+                        lowFractal = previousFractalValue.FractalLow.Value
+                    End If
+
+                    Dim fractalValue As FractalConsumer.FractalPayload = Nothing
+                    If Not outputConsumer.ConsumerPayloads.TryGetValue(runningInputDate, fractalValue) Then
+                        fractalValue = New FractalConsumer.FractalPayload
+                    End If
+
+                    Dim runningPayload As OHLCPayload = outputConsumer.ParentConsumer.ConsumerPayloads(runningInputDate)
+
+                    If runningPayload.PreviousPayload IsNot Nothing AndAlso
+                        runningPayload.PreviousPayload.PreviousPayload IsNot Nothing Then
+                        If runningPayload.PreviousPayload.HighPrice.Value < runningPayload.PreviousPayload.PreviousPayload.HighPrice.Value AndAlso
+                            runningPayload.HighPrice.Value < runningPayload.PreviousPayload.PreviousPayload.HighPrice.Value Then
+                            If IsFractalHighSatisfied(runningPayload.PreviousPayload.PreviousPayload, False) Then
+                                highFractal = runningPayload.PreviousPayload.PreviousPayload.HighPrice.Value
+                            End If
+                        End If
+                        If runningPayload.PreviousPayload.LowPrice.Value > runningPayload.PreviousPayload.PreviousPayload.LowPrice.Value AndAlso
+                            runningPayload.LowPrice.Value > runningPayload.PreviousPayload.PreviousPayload.LowPrice.Value Then
+                            If IsFractalLowSatisfied(runningPayload.PreviousPayload.PreviousPayload, False) Then
+                                lowFractal = runningPayload.PreviousPayload.PreviousPayload.LowPrice.Value
+                            End If
+                        End If
+                    End If
+
+                    fractalValue.FractalHigh.Value = highFractal
+                    fractalValue.FractalLow.Value = lowFractal
+
+                    outputConsumer.ConsumerPayloads.AddOrUpdate(runningInputDate, fractalValue, Function(key, value) fractalValue)
+                Next
+            End If
+        End Sub
         Public Sub CalculateTickSMA(ByVal outputConsumer As TickSMAConsumer)
             Dim inputPayload As Concurrent.ConcurrentBag(Of ITick) = _parentChart.GetTickPayloads()
             If outputConsumer IsNot Nothing AndAlso inputPayload IsNot Nothing AndAlso inputPayload.Count > 0 Then
@@ -633,6 +696,50 @@ Namespace ChartHandler.Indicator
                 Dim sampleVariance As Double = sumVariance / (inputPayload.Count)
                 Dim standardDeviation As Double = Math.Sqrt(sampleVariance)
                 ret = standardDeviation
+            End If
+            Return ret
+        End Function
+        Private Function IsFractalHighSatisfied(ByVal candidateCandle As OHLCPayload, ByVal checkOnlyPrevious As Boolean) As Boolean
+            Dim ret As Boolean = False
+            If candidateCandle IsNot Nothing AndAlso
+                candidateCandle.PreviousPayload IsNot Nothing AndAlso
+                candidateCandle.PreviousPayload.PreviousPayload IsNot Nothing Then
+                If checkOnlyPrevious AndAlso candidateCandle.PreviousPayload.HighPrice.Value < candidateCandle.HighPrice.Value Then
+                    ret = True
+                ElseIf candidateCandle.PreviousPayload.HighPrice.Value < candidateCandle.HighPrice.Value AndAlso
+                        candidateCandle.PreviousPayload.PreviousPayload.HighPrice.Value < candidateCandle.HighPrice.Value Then
+                    ret = True
+                ElseIf candidateCandle.PreviousPayload.HighPrice.Value = candidateCandle.HighPrice.Value Then
+                    ret = IsFractalHighSatisfied(candidateCandle.PreviousPayload, checkOnlyPrevious)
+                ElseIf candidateCandle.PreviousPayload.HighPrice.Value > candidateCandle.HighPrice.Value Then
+                    ret = False
+                ElseIf candidateCandle.PreviousPayload.PreviousPayload.HighPrice.Value = candidateCandle.HighPrice.Value Then
+                    ret = IsFractalHighSatisfied(candidateCandle.PreviousPayload.PreviousPayload, True)
+                ElseIf candidateCandle.PreviousPayload.PreviousPayload.HighPrice.Value > candidateCandle.HighPrice.Value Then
+                    ret = False
+                End If
+            End If
+            Return ret
+        End Function
+        Private Function IsFractalLowSatisfied(ByVal candidateCandle As OHLCPayload, ByVal checkOnlyPrevious As Boolean) As Boolean
+            Dim ret As Boolean = False
+            If candidateCandle IsNot Nothing AndAlso
+                candidateCandle.PreviousPayload IsNot Nothing AndAlso
+                candidateCandle.PreviousPayload.PreviousPayload IsNot Nothing Then
+                If checkOnlyPrevious AndAlso candidateCandle.PreviousPayload.LowPrice.Value > candidateCandle.LowPrice.Value Then
+                    ret = True
+                ElseIf candidateCandle.PreviousPayload.LowPrice.Value > candidateCandle.LowPrice.Value AndAlso
+                        candidateCandle.PreviousPayload.PreviousPayload.LowPrice.Value > candidateCandle.LowPrice.Value Then
+                    ret = True
+                ElseIf candidateCandle.PreviousPayload.LowPrice.Value = candidateCandle.LowPrice.Value Then
+                    ret = IsFractalLowSatisfied(candidateCandle.PreviousPayload, checkOnlyPrevious)
+                ElseIf candidateCandle.PreviousPayload.LowPrice.Value < candidateCandle.LowPrice.Value Then
+                    ret = False
+                ElseIf candidateCandle.PreviousPayload.PreviousPayload.LowPrice.Value = candidateCandle.LowPrice.Value Then
+                    ret = IsFractalLowSatisfied(candidateCandle.PreviousPayload.PreviousPayload, True)
+                ElseIf candidateCandle.PreviousPayload.PreviousPayload.LowPrice.Value < candidateCandle.LowPrice.Value Then
+                    ret = False
+                End If
             End If
             Return ret
         End Function
