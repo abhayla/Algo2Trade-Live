@@ -2220,6 +2220,7 @@ Public Class frmMainTabbed
                 RemoveHandler _commonController.CollectorError, AddressOf OnCollectorError
                 RemoveHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
                 RemoveHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                RemoveHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
 
                 AddHandler _commonController.Heartbeat, AddressOf OnHeartbeat
                 AddHandler _commonController.WaitingFor, AddressOf OnWaitingFor
@@ -2239,6 +2240,7 @@ Public Class frmMainTabbed
                 AddHandler _commonController.CollectorError, AddressOf OnCollectorError
                 AddHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
                 AddHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                AddHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
 
 #Region "Login"
                 Dim loginMessage As String = Nothing
@@ -2375,6 +2377,7 @@ Public Class frmMainTabbed
         FlashTickerBulbEx(GetType(JoyMaaATMStrategy))
     End Sub
     Private Async Sub btnJoyMaaATMStop_Click(sender As Object, e As EventArgs) Handles btnJoyMaaATMStop.Click
+        OnEndOfTheDay(_JoyMaaATMStrategyToExecute)
         SetObjectEnableDisable_ThreadSafe(linklblJoyMaaATMTradableInstrument, False)
         If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
         If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
@@ -3547,6 +3550,94 @@ Public Class frmMainTabbed
             Case Else
                 Throw New NotImplementedException
         End Select
+    End Sub
+    Protected Sub OnEndOfTheDay(ByVal runningStrategy As Strategy)
+        If runningStrategy IsNot Nothing AndAlso runningStrategy.ExportCSV Then
+            Select Case runningStrategy.GetType
+                Case GetType(MomentumReversalStrategy)
+                    ExportGridToCSV(sfdgvMomentumReversalMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Momentum Reversal Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                Case GetType(OHLStrategy)
+                    ExportGridToCSV(sfdgvOHLMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("OHL Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                Case GetType(AmiSignalStrategy)
+                    ExportGridToCSV(sfdgvAmiSignalMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Ami Signal Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                Case GetType(EMA_SupertrendStrategy)
+                    ExportGridToCSV(sfdgvEMA_SupertrendMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Supertrend Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                Case GetType(NearFarHedgingStrategy)
+                    ExportGridToCSV(sfdgvNearFarHedgingMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Near Far Hedging Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                Case GetType(PetDGandhiStrategy)
+                    ExportGridToCSV(sfdgvPetDGandhiMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("PetD Gandhi Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                Case GetType(EMACrossoverStrategy)
+                    ExportGridToCSV(sfdgvEMACrossoverMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Crossover Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                Case GetType(CandleRangeBreakoutStrategy)
+                    ExportGridToCSV(sfdgvCandleRangeBreakoutMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Candle Range Breakout Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                Case GetType(JoyMaaATMStrategy)
+                    ExportGridToCSV(sfdgvJoyMaaATMMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Joy Maa ATM Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                Case Else
+                    Throw New NotImplementedException
+            End Select
+            runningStrategy.ExportCSV = False
+        End If
+    End Sub
+#End Region
+
+#Region "Export Grid"
+    Private Sub ExportGridToCSV(ByVal sfdgv As SfDataGrid, ByVal fileName As String)
+        If sfdgv IsNot Nothing AndAlso sfdgv.RowCount > 0 Then
+            OnHeartbeat("Exoprting datagrid to csv")
+            Dim dt As DataTable = Nothing
+            Dim totalRows As Integer = sfdgv.RowCount
+            For i As Integer = 1 To totalRows - 1
+                Dim rowData As Syncfusion.Data.NodeEntry = sfdgv.GetRecordEntryAtRowIndex(i)
+                If rowData IsNot Nothing Then
+                    If dt Is Nothing Then
+                        dt = New DataTable
+                        dt.Columns.Add("Trading Date")
+                        dt.Columns.Add("Trading Symbol")
+                        dt.Columns.Add("Entry Direction")
+                        dt.Columns.Add("Entry Time")
+                        dt.Columns.Add("Exit Condition")
+                        dt.Columns.Add("Exit Time")
+                        dt.Columns.Add("Signal PL")
+                        dt.Columns.Add("Strategy Overall PL after brokerage")
+                        dt.Columns.Add("Strategy Max Drawup")
+                        dt.Columns.Add("Strategy Max Drawdown")
+                    End If
+                    Dim rowDatas As String() = rowData.ToString.Split(" ")
+                    If rowDatas IsNot Nothing AndAlso rowDatas.Count > 0 Then
+                        Dim row As System.Data.DataRow = dt.NewRow
+                        For j As Integer = 0 To rowDatas.Count - 1
+                            row("Trading Date") = Now.Date
+                            Select Case j
+                                Case 2
+                                    row("Trading Symbol") = rowDatas(2)
+                                Case 8
+                                    row("Strategy Overall PL after brokerage") = rowDatas(8)
+                                Case 11
+                                    row("Strategy Max Drawup") = rowDatas(11)
+                                Case 14
+                                    row("Strategy Max Drawdown") = rowDatas(14)
+                                Case 20
+                                    row("Signal PL") = rowDatas(20)
+                                Case 30
+                                    row("Entry Direction") = rowDatas(30)
+                                Case 37
+                                    row("Entry Time") = rowDatas(37)
+                                Case 70
+                                    row("Exit Time") = rowDatas(70)
+                                Case 76
+                                    row("Exit Condition") = rowDatas(76)
+                            End Select
+                        Next
+                        dt.Rows.Add(row)
+                    End If
+                End If
+            Next
+            If dt IsNot Nothing Then
+                Using csvCreator As New Utilities.DAL.CSVHelper(fileName, ",", _cts)
+                    csvCreator.GetCSVFromDataTable(dt)
+                End Using
+            End If
+        End If
     End Sub
 #End Region
 

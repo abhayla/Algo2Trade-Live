@@ -156,7 +156,7 @@ Public Class CandleRangeBreakoutStrategyInstrument
                         End If
                     Else
                         Dim modifiedPlaceOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = New Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)(placeOrderTrigger.Item1, Me, placeOrderTrigger.Item2, placeOrderTrigger.Item3)
-                        Dim placeOrderResponse As IBusinessOrder = Await TakePaperTradeAsync(modifiedPlaceOrderTrigger).ConfigureAwait(False)
+                        Dim placeOrderResponse As IBusinessOrder = Await TakeCOPaperTradeAsync(modifiedPlaceOrderTrigger).ConfigureAwait(False)
                         _lastPlacedOrder = placeOrderResponse
                         If placeOrderResponse IsNot Nothing Then
                             Dim target As Decimal = placeOrderResponse.ParentOrder.AveragePrice

@@ -131,7 +131,7 @@ Public Class NearFarHedgingStrategyInstrument
                         Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = data
                         If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take AndAlso
                             (Not Me.IsActiveInstrument OrElse (Me.IsActiveInstrument AndAlso Me.PairStrategyCancellationRequest)) Then
-                            Dim placeOrderData As IBusinessOrder = Await TakePaperTradeAsync(placeOrderTrigger).ConfigureAwait(False)
+                            Dim placeOrderData As IBusinessOrder = Await TakeCOPaperTradeAsync(placeOrderTrigger).ConfigureAwait(False)
                             If placeOrderData IsNot Nothing AndAlso placeOrderData.ParentOrder IsNot Nothing Then
                                 _cts.Token.ThrowIfCancellationRequested()
                                 GenerateTelegramMessageAsync(String.Format("Order placed. {0}{1},{2}Trading Symbol:{3}, Direction:{4}, Entry Price:{5}, Quantity:{6},{7}Timestamp:{8}",

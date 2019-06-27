@@ -143,14 +143,14 @@ Public Class JoyMaaATMStrategyInstrument
                         Dim modifiedPlaceOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = New Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)(placeOrderTrigger.Item1, Me, placeOrderTrigger.Item2, placeOrderTrigger.Item3)
                         Dim placeOrderResponse As IBusinessOrder = Nothing
                         If reverseExit Then
-                            placeOrderResponse = Await TakePaperTradeAsync(modifiedPlaceOrderTrigger).ConfigureAwait(False)
+                            placeOrderResponse = Await TakeBOPaperTradeAsync(modifiedPlaceOrderTrigger).ConfigureAwait(False)
                         Else
-                            placeOrderResponse = Await TakePaperTradeAsync(modifiedPlaceOrderTrigger, True, _lastTick).ConfigureAwait(False)
+                            placeOrderResponse = Await TakeBOPaperTradeAsync(modifiedPlaceOrderTrigger, True, _lastTick).ConfigureAwait(False)
                         End If
                         _lastPlacedOrder = placeOrderResponse
                         _eligibleToTakeTrade = False
                         If placeOrderResponse IsNot Nothing Then
-                            Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Direction:{1}, Signal Candle Time:{2}, Fractal:{3}, ATR:{4}, Entry Price:{5}, Quantity:{6}, Stoploss Price:{7}, Target Price:{8}, Timestamp:{9}",
+                            Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Direction:{1}, Signal Candle Time:{2}, Fractal:{3}, ATR:{4}, Entry Price:{5}, Quantity:{6}, Stoploss Price:{7}, Target Price:{8}, LTP:{9}, Timestamp:{10}",
                                                                   Me.TradableInstrument.TradingSymbol,
                                                                   placeOrderResponse.ParentOrder.TransactionType.ToString,
                                                                   placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime.ToShortTimeString,
@@ -160,6 +160,7 @@ Public Class JoyMaaATMStrategyInstrument
                                                                   placeOrderResponse.ParentOrder.Quantity,
                                                                   placeOrderResponse.SLOrder.FirstOrDefault.TriggerPrice,
                                                                   placeOrderResponse.TargetOrder.FirstOrDefault.AveragePrice,
+                                                                  _lastTick.LastPrice,
                                                                   Now)
                             GenerateTelegramMessageAsync(message)
                         End If
@@ -259,20 +260,24 @@ Public Class JoyMaaATMStrategyInstrument
             'Dim shortEntryBuffer As Decimal = CalculateBuffer(potentialShortEntryPrice, Me.TradableInstrument.TickSize, Utilities.Numbers.NumberManipulation.RoundOfType.Floor)
             Dim shortEntryBuffer As Decimal = ConvertFloorCeling(atr * 10 / 100, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
 
-            If Not _eligibleToTakeTrade AndAlso currentTick.LastPrice >= potentialShortEntryPrice AndAlso currentTick.LastPrice <= potentialLongEntryPrice Then
+            If Not _eligibleToTakeTrade AndAlso
+                (runningCandlePayload.PreviousPayload.HighPrice.Value >= potentialShortEntryPrice AndAlso
+                runningCandlePayload.PreviousPayload.HighPrice.Value <= potentialLongEntryPrice) OrElse
+                (runningCandlePayload.PreviousPayload.LowPrice.Value >= potentialShortEntryPrice AndAlso
+                runningCandlePayload.PreviousPayload.LowPrice.Value <= potentialLongEntryPrice) Then
                 _eligibleToTakeTrade = True
             End If
 
             If _eligibleToTakeTrade AndAlso _lastDayFractalHighChange AndAlso currentTick.LastPrice >= potentialLongEntryPrice + longEntryBuffer Then
                 Dim potentialEntryPrice As Decimal = potentialLongEntryPrice + longEntryBuffer
-                Dim stoploss As Decimal = potentialEntryPrice - ConvertFloorCeling(atr, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                Dim target As Decimal = potentialEntryPrice + (potentialEntryPrice - stoploss) * userSettings.TargetMultiplier
+                Dim stoploss As Decimal = ConvertFloorCeling(atr, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                Dim target As Decimal = stoploss * userSettings.TargetMultiplier
                 parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                         {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                          .Price = potentialEntryPrice,
-                         .TriggerPrice = stoploss - 2,
+                         .StoplossValue = stoploss,
                          .SquareOffValue = target,
-                         .Quantity = CalculateQuantityFromTarget(potentialEntryPrice, target, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).TargetINR),
+                         .Quantity = CalculateQuantityFromTarget(potentialEntryPrice, potentialEntryPrice + target, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).TargetINR),
                          .Supporting = New List(Of Object)}
 
                 parameters.Supporting.Add(potentialLongEntryPrice)
@@ -280,14 +285,14 @@ Public Class JoyMaaATMStrategyInstrument
                 _lastTick = currentTick
             ElseIf _eligibleToTakeTrade AndAlso _lastDayFractalLowChange AndAlso currentTick.LastPrice <= potentialShortEntryPrice - shortEntryBuffer Then
                 Dim potentialEntryPrice As Decimal = potentialShortEntryPrice - shortEntryBuffer
-                Dim stoploss As Decimal = potentialEntryPrice + ConvertFloorCeling(atr, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                Dim target As Decimal = potentialEntryPrice - (stoploss - potentialEntryPrice) * userSettings.TargetMultiplier
+                Dim stoploss As Decimal = ConvertFloorCeling(atr, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                Dim target As Decimal = stoploss * userSettings.TargetMultiplier
                 parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                         {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                          .Price = potentialEntryPrice,
-                         .TriggerPrice = stoploss + 2,
+                         .StoplossValue = stoploss,
                          .SquareOffValue = target,
-                         .Quantity = CalculateQuantityFromTarget(target, potentialEntryPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).TargetINR),
+                         .Quantity = CalculateQuantityFromTarget(potentialEntryPrice - target, potentialEntryPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).TargetINR),
                          .Supporting = New List(Of Object)}
 
                 parameters.Supporting.Add(potentialShortEntryPrice)

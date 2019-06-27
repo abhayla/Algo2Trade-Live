@@ -729,12 +729,14 @@ Namespace Controller
                 RemoveHandler strategyToRun.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
                 RemoveHandler strategyToRun.DocumentDownloadCompleteEx, AddressOf OnDocumentDownloadCompleteEx
                 RemoveHandler strategyToRun.NewItemAdded, AddressOf OnNewItemAdded
+                RemoveHandler strategyToRun.EndOfTheDay, AddressOf OnEndOfTheDay
 
                 AddHandler strategyToRun.HeartbeatEx, AddressOf OnHeartbeatEx
                 AddHandler strategyToRun.WaitingForEx, AddressOf OnWaitingForEx
                 AddHandler strategyToRun.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
                 AddHandler strategyToRun.DocumentDownloadCompleteEx, AddressOf OnDocumentDownloadCompleteEx
                 AddHandler strategyToRun.NewItemAdded, AddressOf OnNewItemAdded
+                AddHandler strategyToRun.EndOfTheDay, AddressOf OnEndOfTheDay
                 OnHeartbeatEx(String.Format("As per the strategy logic, tradable instruments being fetched, strategy:{0}", strategyToRun.ToString), New List(Of Object) From {strategyToRun})
                 _cts.Token.ThrowIfCancellationRequested()
                 Dim ret As Boolean = Await strategyToRun.CreateTradableStrategyInstrumentsAsync(_AllInstruments).ConfigureAwait(False)

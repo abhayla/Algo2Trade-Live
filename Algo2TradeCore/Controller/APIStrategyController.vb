@@ -35,6 +35,7 @@ Namespace Controller
         Public Event FetcherError(ByVal instrumentIdentifier As String, ByVal errorMessage As String)
         Public Event CollectorError(ByVal errorMessage As String)
         Public Event NewItemAdded(ByVal item As ActivityDashboard)
+        Public Event EndOfTheDay(ByVal runningStrategy As Strategy)
         Public Event SessionExpiry(ByVal runningStrategy As Strategy)
 
         Protected Overridable Sub OnDocumentDownloadComplete()
@@ -90,6 +91,9 @@ Namespace Controller
             If item IsNot Nothing Then
                 RaiseEvent NewItemAdded(item)
             End If
+        End Sub
+        Protected Overridable Sub OnEndOfTheDay(ByVal runningStrategy As Strategy)
+            RaiseEvent EndOfTheDay(runningStrategy)
         End Sub
         Protected Sub OnSessionExpiry(ByVal runningStrategy As Strategy)
             RaiseEvent SessionExpiry(runningStrategy)

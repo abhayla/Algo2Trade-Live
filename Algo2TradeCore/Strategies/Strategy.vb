@@ -15,6 +15,7 @@ Namespace Strategies
         Public Event HeartbeatEx(ByVal msg As String, ByVal source As List(Of Object))
         Public Event WaitingForEx(ByVal elapsedSecs As Integer, ByVal totalSecs As Integer, ByVal msg As String, ByVal source As List(Of Object))
         Public Event NewItemAdded(ByVal item As ActivityDashboard)
+        Public Event EndOfTheDay(ByVal runningStrategy As Strategy)
         'The below functions are needed to allow the derived classes to raise the above two events
         Protected Overridable Sub OnDocumentDownloadCompleteEx(ByVal source As List(Of Object))
             If source Is Nothing Then source = New List(Of Object)
@@ -69,6 +70,9 @@ Namespace Strategies
                 RaiseEvent NewItemAdded(item)
             End If
         End Sub
+        Protected Overridable Sub OnEndOfTheDay(ByVal runningStrategy As Strategy)
+            RaiseEvent EndOfTheDay(runningStrategy)
+        End Sub
 #End Region
 
 #Region "Logging and Status Progress"
@@ -87,6 +91,7 @@ Namespace Strategies
         Public Property IsFirstTimeInformationCollected As Boolean
         Public Property MaxDrawUp As Decimal = Decimal.MinValue
         Public Property MaxDrawDown As Decimal = Decimal.MaxValue
+        Public Property ExportCSV As Boolean
 
         Protected _cts As CancellationTokenSource
         Public Sub New(ByVal associatedParentController As APIStrategyController,
@@ -103,6 +108,7 @@ Namespace Strategies
             Me.MaxNumberOfDaysForHistoricalFetch = maxNumberOfDaysForHistoricalFetch
             Me.IsFirstTimeInformationCollected = False
             Me.IsTickPopulationNeeded = isTickPopulationNeeded
+            Me.ExportCSV = True
             Me.SignalManager = New SignalStateManager(associatedParentController, Me, canceller)
             AddHandler Me.SignalManager.NewItemAdded, AddressOf OnNewItemAdded
             _cts = canceller
@@ -220,6 +226,9 @@ Namespace Strategies
                                 OnHeartbeatEx(String.Format("No active trades to exit"), New List(Of Object) From {Me})
                             End If
                             Me.ExitAllTrades = False
+                            If triggerResponse.Item2.ToUpper.Contains("EOD") Then
+                                OnEndOfTheDay(Me)
+                            End If
                         End If
                         delayCtr += 1
                     Else
