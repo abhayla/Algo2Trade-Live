@@ -593,6 +593,23 @@ Namespace Strategies
                 Return 0
             End If
         End Function
+        Public Function CalculateQuantityFromTarget(ByVal buyPrice As Double, ByVal sellPrice As Double, ByVal NetProfitLossOfTrade As Double) As Integer
+            Dim lotSize As Integer = Me.TradableInstrument.LotSize
+            Dim quantityMultiplier As Integer = 1
+            Dim previousQuantity As Integer = lotSize
+            For quantityMultiplier = 1 To Integer.MaxValue
+                Dim plAfterBrokerage As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, sellPrice, lotSize * quantityMultiplier)
+                If NetProfitLossOfTrade > 0 Then
+                    If plAfterBrokerage >= NetProfitLossOfTrade Then
+                        previousQuantity = lotSize * quantityMultiplier
+                        Exit For
+                    Else
+                        previousQuantity = lotSize * quantityMultiplier
+                    End If
+                End If
+            Next
+            Return previousQuantity
+        End Function
 #End Region
 
 #Region "Public Overridable Functions"
@@ -649,9 +666,19 @@ Namespace Strategies
                                 '    c += 1
                                 'Next
 
-                                'EMA Crossover Strategy
+                                ''EMA Crossover Strategy
+                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
+                                '    candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
+                                'Next
+
+                                'Joy Maa Strategy
                                 For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                    candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
+                                    If c = 1 Then
+                                        candleCreator.IndicatorCreator.CalculateFractal(currentXMinute, consumer)
+                                    ElseIf c = 2 Then
+                                        candleCreator.IndicatorCreator.CalculateATR(currentXMinute, consumer)
+                                    End If
+                                    c += 1
                                 Next
                             End If
 
@@ -1594,7 +1621,7 @@ Namespace Strategies
 
 #Region "Paper Trade"
         Private _placeOrderLock As Integer = 0
-        Protected Async Function TakePaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
+        Protected Async Function TakePaperTradeAsync(ByVal data As Object, Optional ByVal entryImmediately As Boolean = False, Optional ByVal currentTick As ITick = Nothing) As Task(Of IBusinessOrder)
             Dim ret As IBusinessOrder = Nothing
             'logger.Debug(String.Format("Before Place Lock:{0}, {1}", Interlocked.Read(_placeOrderLock), Me.TradableInstrument.TradingSymbol))
             If 0 = Interlocked.Exchange(_placeOrderLock, 1) Then
@@ -1606,14 +1633,12 @@ Namespace Strategies
                         logger.Debug("Place Order Details-> Direction:{0}, Qunatity:{1}, Trigger Price:{2}",
                                      parentPlaceOrderTrigger.Item3.EntryDirection.ToString, parentPlaceOrderTrigger.Item3.Quantity, parentPlaceOrderTrigger.Item3.TriggerPrice)
 
-                        While Me.IsActiveInstrument
-                            Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
-                        End While
-
-                        Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
-                        While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
-                            Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
-                        End While
+                        If Not entryImmediately Then
+                            Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
+                            While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
+                                Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                            End While
+                        End If
 
                         activityTag = GenerateFreshTagForNewSignal(activityTag, parentPlaceOrderTrigger.Item3.SignalCandle.SnapshotDateTime)
 
@@ -1621,8 +1646,15 @@ Namespace Strategies
 
                         Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, parentPlaceOrderTrigger.Item3.SignalCandle.SnapshotDateTime, parentPlaceOrderTrigger.Item3.EntryDirection, Now, parentPlaceOrderTrigger.Item4).ConfigureAwait(False)
 
+                        Dim entryPrice As Decimal = Decimal.MinValue
+                        If currentTick IsNot Nothing Then
+                            entryPrice = currentTick.LastPrice
+                        Else
+                            entryPrice = Me.TradableInstrument.LastTick.LastPrice
+                        End If
+
                         Dim parentOrder As PaperOrder = New PaperOrder
-                        parentOrder.AveragePrice = Me.TradableInstrument.LastTick.LastPrice
+                        parentOrder.AveragePrice = entryPrice
                         parentOrder.Quantity = parentPlaceOrderTrigger.Item3.Quantity
                         parentOrder.Status = IOrder.TypeOfStatus.Complete
                         parentOrder.InstrumentIdentifier = Me.TradableInstrument.InstrumentIdentifier
@@ -1651,6 +1683,24 @@ Namespace Strategies
                         parentBOrder.ParentOrder = parentOrder
                         parentBOrder.SLOrder = slOrderList
                         parentBOrder.ParentOrderIdentifier = parentOrder.OrderIdentifier
+
+                        If parentPlaceOrderTrigger.Item3.SquareOffValue <> Decimal.MinValue Then
+                            Dim targetOrder As PaperOrder = New PaperOrder
+                            targetOrder.AveragePrice = parentPlaceOrderTrigger.Item3.SquareOffValue
+                            targetOrder.Quantity = parentPlaceOrderTrigger.Item3.Quantity
+                            targetOrder.Status = IOrder.TypeOfStatus.Open
+                            targetOrder.InstrumentIdentifier = Me.TradableInstrument.InstrumentIdentifier
+                            targetOrder.OrderIdentifier = Utilities.Numbers.GetUniqueNumber()
+                            targetOrder.ParentOrderIdentifier = parentOrder.OrderIdentifier
+                            targetOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
+                            targetOrder.TransactionType = If(parentPlaceOrderTrigger.Item3.EntryDirection = IOrder.TypeOfTransaction.Buy, IOrder.TypeOfTransaction.Sell, IOrder.TypeOfTransaction.Buy)
+                            targetOrder.TimeStamp = Now
+                            targetOrder.Tag = activityTag
+
+                            Dim targetOrderList As List(Of IOrder) = New List(Of IOrder)
+                            targetOrderList.Add(targetOrder)
+                            parentBOrder.TargetOrder = targetOrderList
+                        End If
 
                         Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, parentBOrder.ParentOrderIdentifier, Now).ConfigureAwait(False)
                         logger.Debug("Order Placed {0}, Time:{1}", Me.TradableInstrument.TradingSymbol, Now.ToString)
@@ -1712,7 +1762,7 @@ Namespace Strategies
         End Function
 
         Private _forceCancelOrderLock As Integer = 0
-        Protected Async Function ForceCancelPaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
+        Protected Async Function ForceCancelPaperTradeAsync(ByVal data As Object, Optional ByVal exitImmediately As Boolean = False, Optional ByVal currentTick As ITick = Nothing) As Task(Of IBusinessOrder)
             Dim ret As IBusinessOrder = Nothing
             If 0 = Interlocked.Exchange(_forceCancelOrderLock, 1) Then
                 Try
@@ -1726,7 +1776,7 @@ Namespace Strategies
                                 logger.Debug("Cancel Order Details-> Parent Order ID:{0}, Direction:{1}, Reason:{2}",
                                              parentBusinessOrder.ParentOrderIdentifier, parentBusinessOrder.ParentOrder.TransactionType.ToString, runningExitOrder.Item3)
 
-                                If runningExitOrder.Item3.ToUpper <> "STOPLOSS REACHED" Then
+                                If Not exitImmediately Then
                                     Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
                                     While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
                                         Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
@@ -1734,12 +1784,46 @@ Namespace Strategies
                                 End If
 
                                 Await Me.ParentStrategy.SignalManager.HandleCancelActivity(runningExitOrder.Item2.Tag, Me, Nothing, Now, runningExitOrder.Item3).ConfigureAwait(False)
-                                CType(runningExitOrder.Item2, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
-                                If runningExitOrder.Item3.ToUpper = "STOPLOSS REACHED" Then
-                                    CType(runningExitOrder.Item2, PaperOrder).AveragePrice = runningExitOrder.Item2.TriggerPrice
-                                Else
-                                    CType(runningExitOrder.Item2, PaperOrder).AveragePrice = Me.TradableInstrument.LastTick.LastPrice
+
+                                Dim slOrder As IOrder = runningExitOrder.Item2
+                                Dim targetOrder As IOrder = Nothing
+                                If parentBusinessOrder.TargetOrder IsNot Nothing AndAlso parentBusinessOrder.TargetOrder.Count = 1 Then
+                                    targetOrder = parentBusinessOrder.TargetOrder.FirstOrDefault
                                 End If
+
+                                Dim exitPrice As Decimal = Decimal.MinValue
+                                If currentTick IsNot Nothing Then
+                                    exitPrice = currentTick.LastPrice
+                                Else
+                                    exitPrice = Me.TradableInstrument.LastTick.LastPrice
+                                End If
+
+                                If runningExitOrder.Item3.ToUpper = "STOPLOSS REACHED" Then
+                                    CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Complete
+                                    CType(slOrder, PaperOrder).AveragePrice = exitPrice
+                                    If targetOrder IsNot Nothing Then
+                                        CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                        CType(targetOrder, PaperOrder).Quantity = 0
+                                    End If
+                                ElseIf runningExitOrder.Item3.ToUpper = "TARGET REACHED" Then
+                                    If targetOrder IsNot Nothing Then
+                                        CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                        CType(slOrder, PaperOrder).Quantity = 0
+                                        CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Complete
+                                        CType(targetOrder, PaperOrder).AveragePrice = exitPrice
+                                    Else
+                                        CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                        CType(slOrder, PaperOrder).AveragePrice = exitPrice
+                                    End If
+                                Else
+                                    CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                    CType(slOrder, PaperOrder).AveragePrice = exitPrice
+                                    If targetOrder IsNot Nothing Then
+                                        CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                        CType(targetOrder, PaperOrder).Quantity = 0
+                                    End If
+                                End If
+
                                 Await Me.ParentStrategy.SignalManager.ActivateCancelActivity(runningExitOrder.Item2.Tag, Me, Nothing, Now).ConfigureAwait(False)
                                 Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
                                 logger.Debug("Order Exited {0}", Me.TradableInstrument.TradingSymbol)
@@ -1749,9 +1833,15 @@ Namespace Strategies
                                 Else
                                     Throw New ApplicationException("Check why there is more than one sl order")
                                 End If
+                                If parentBusinessOrder.TargetOrder.Count = 1 Then
+                                    parentBusinessOrder.TargetOrder = Nothing
+                                Else
+                                    Throw New ApplicationException("Check why there is more than one target order")
+                                End If
 
                                 If potentialExitOrders Is Nothing Then potentialExitOrders = New List(Of IOrder)
                                 potentialExitOrders.Add(runningExitOrder.Item2)
+                                If targetOrder IsNot Nothing Then potentialExitOrders.Add(targetOrder)
                                 parentBusinessOrder.AllOrder = potentialExitOrders
                                 ret = parentBusinessOrder
                             End If

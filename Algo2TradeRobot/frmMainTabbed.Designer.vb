@@ -30,20 +30,20 @@ Partial Class frmMainTabbed
         Me.miAdvancedOptions = New System.Windows.Forms.ToolStripMenuItem()
         Me.miAbout = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabMain = New System.Windows.Forms.TabControl()
-        Me.tabEMACrossover = New System.Windows.Forms.TabPage()
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.btnEMACrossoverStop = New System.Windows.Forms.Button()
-        Me.btnEMACrossoverStart = New System.Windows.Forms.Button()
-        Me.Panel7 = New System.Windows.Forms.Panel()
-        Me.blbEMACrossoverTickerStatus = New Bulb.LedBulb()
-        Me.lblEMACrossoverTickerStatus = New System.Windows.Forms.Label()
-        Me.btnEMACrossoverSettings = New System.Windows.Forms.Button()
-        Me.linklblEMACrossoverTradableInstrument = New System.Windows.Forms.LinkLabel()
-        Me.pnlEMACrossoverBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.TableLayoutPanel5 = New System.Windows.Forms.TableLayoutPanel()
-        Me.lstEMACrossoverLog = New System.Windows.Forms.ListBox()
-        Me.sfdgvEMACrossoverMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
+        Me.tabJoyMaaATM = New System.Windows.Forms.TabPage()
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.btnJoyMaaATMStop = New System.Windows.Forms.Button()
+        Me.btnJoyMaaATMStart = New System.Windows.Forms.Button()
+        Me.Panel9 = New System.Windows.Forms.Panel()
+        Me.blbJoyMaaATMTickerStatus = New Bulb.LedBulb()
+        Me.lblJoyMaaATMTickerStatus = New System.Windows.Forms.Label()
+        Me.btnJoyMaaATMSettings = New System.Windows.Forms.Button()
+        Me.linklblJoyMaaATMTradableInstrument = New System.Windows.Forms.LinkLabel()
+        Me.pnlJoyMaaATMBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.TableLayoutPanel7 = New System.Windows.Forms.TableLayoutPanel()
+        Me.lstJoyMaaATMLog = New System.Windows.Forms.ListBox()
+        Me.sfdgvJoyMaaATMMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
         Me.tabCandleRangeBreakout = New System.Windows.Forms.TabPage()
         Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
@@ -72,6 +72,20 @@ Partial Class frmMainTabbed
         Me.TableLayoutPanel4 = New System.Windows.Forms.TableLayoutPanel()
         Me.lstPetDGandhiLog = New System.Windows.Forms.ListBox()
         Me.sfdgvPetDGandhiMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
+        Me.tabEMACrossover = New System.Windows.Forms.TabPage()
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.btnEMACrossoverStop = New System.Windows.Forms.Button()
+        Me.btnEMACrossoverStart = New System.Windows.Forms.Button()
+        Me.Panel7 = New System.Windows.Forms.Panel()
+        Me.blbEMACrossoverTickerStatus = New Bulb.LedBulb()
+        Me.lblEMACrossoverTickerStatus = New System.Windows.Forms.Label()
+        Me.btnEMACrossoverSettings = New System.Windows.Forms.Button()
+        Me.linklblEMACrossoverTradableInstrument = New System.Windows.Forms.LinkLabel()
+        Me.pnlEMACrossoverBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.TableLayoutPanel5 = New System.Windows.Forms.TableLayoutPanel()
+        Me.lstEMACrossoverLog = New System.Windows.Forms.ListBox()
+        Me.sfdgvEMACrossoverMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
         Me.tabNearFarHedging = New System.Windows.Forms.TabPage()
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlNearFarHedgingTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
@@ -153,15 +167,22 @@ Partial Class frmMainTabbed
         Me.tmrPetDGandhiTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrEMACrossoverTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrCandleRangeBreakoutTickerStatus = New System.Windows.Forms.Timer(Me.components)
+        Me.tmrJoyMaaATMTickerStatus = New System.Windows.Forms.Timer(Me.components)
+        Me.PictureBox2 = New System.Windows.Forms.PictureBox()
+        Me.PictureBox4 = New System.Windows.Forms.PictureBox()
+        Me.PictureBox5 = New System.Windows.Forms.PictureBox()
+        Me.PictureBox6 = New System.Windows.Forms.PictureBox()
+        Me.PictureBox7 = New System.Windows.Forms.PictureBox()
+        Me.PictureBox8 = New System.Windows.Forms.PictureBox()
         Me.msMainMenuStrip.SuspendLayout()
         Me.tabMain.SuspendLayout()
-        Me.tabEMACrossover.SuspendLayout()
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.SuspendLayout()
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.SuspendLayout()
-        Me.Panel7.SuspendLayout()
-        Me.pnlEMACrossoverBodyVerticalSplitter.SuspendLayout()
-        Me.TableLayoutPanel5.SuspendLayout()
-        CType(Me.sfdgvEMACrossoverMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabJoyMaaATM.SuspendLayout()
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.SuspendLayout()
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.SuspendLayout()
+        Me.Panel9.SuspendLayout()
+        Me.pnlJoyMaaATMBodyVerticalSplitter.SuspendLayout()
+        Me.TableLayoutPanel7.SuspendLayout()
+        CType(Me.sfdgvJoyMaaATMMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabCandleRangeBreakout.SuspendLayout()
         Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.SuspendLayout()
@@ -176,6 +197,13 @@ Partial Class frmMainTabbed
         Me.pnlPetDGandhiBodyVerticalSplitter.SuspendLayout()
         Me.TableLayoutPanel4.SuspendLayout()
         CType(Me.sfdgvPetDGandhiMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.tabEMACrossover.SuspendLayout()
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.SuspendLayout()
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.SuspendLayout()
+        Me.Panel7.SuspendLayout()
+        Me.pnlEMACrossoverBodyVerticalSplitter.SuspendLayout()
+        Me.TableLayoutPanel5.SuspendLayout()
+        CType(Me.sfdgvEMACrossoverMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabNearFarHedging.SuspendLayout()
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlNearFarHedgingTopHeaderVerticalSplitter.SuspendLayout()
@@ -213,6 +241,12 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalBodyHorizontalSplitter.SuspendLayout()
         CType(Me.sfdgvAmiSignalMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox4, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox5, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox6, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox7, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'msMainMenuStrip
@@ -255,6 +289,7 @@ Partial Class frmMainTabbed
         '
         'tabMain
         '
+        Me.tabMain.Controls.Add(Me.tabJoyMaaATM)
         Me.tabMain.Controls.Add(Me.tabCandleRangeBreakout)
         Me.tabMain.Controls.Add(Me.tabPetDGandhi)
         Me.tabMain.Controls.Add(Me.tabEMACrossover)
@@ -271,204 +306,204 @@ Partial Class frmMainTabbed
         Me.tabMain.Size = New System.Drawing.Size(1371, 722)
         Me.tabMain.TabIndex = 1
         '
-        'tabEMACrossover
+        'tabJoyMaaATM
         '
-        Me.tabEMACrossover.Controls.Add(Me.pnlEMACrossoverMainPanelHorizontalSplitter)
-        Me.tabEMACrossover.Location = New System.Drawing.Point(4, 25)
-        Me.tabEMACrossover.Margin = New System.Windows.Forms.Padding(4)
-        Me.tabEMACrossover.Name = "tabEMACrossover"
-        Me.tabEMACrossover.Size = New System.Drawing.Size(1363, 693)
-        Me.tabEMACrossover.TabIndex = 6
-        Me.tabEMACrossover.Text = "EMA Crossover"
-        Me.tabEMACrossover.UseVisualStyleBackColor = True
+        Me.tabJoyMaaATM.Controls.Add(Me.pnlJoyMaaATMMainPanelHorizontalSplitter)
+        Me.tabJoyMaaATM.Location = New System.Drawing.Point(4, 25)
+        Me.tabJoyMaaATM.Name = "tabJoyMaaATM"
+        Me.tabJoyMaaATM.Size = New System.Drawing.Size(1363, 693)
+        Me.tabJoyMaaATM.TabIndex = 8
+        Me.tabJoyMaaATM.Text = "Joy Maa ATM"
+        Me.tabJoyMaaATM.UseVisualStyleBackColor = True
         '
-        'pnlEMACrossoverMainPanelHorizontalSplitter
+        'pnlJoyMaaATMMainPanelHorizontalSplitter
         '
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.ColumnCount = 1
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Controls.Add(Me.pnlEMACrossoverTopHeaderVerticalSplitter, 0, 0)
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Controls.Add(Me.pnlEMACrossoverBodyVerticalSplitter, 0, 1)
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Name = "pnlEMACrossoverMainPanelHorizontalSplitter"
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.RowCount = 2
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.TabIndex = 4
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.ColumnCount = 1
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Controls.Add(Me.pnlJoyMaaATMTopHeaderVerticalSplitter, 0, 0)
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Controls.Add(Me.pnlJoyMaaATMBodyVerticalSplitter, 0, 1)
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Name = "pnlJoyMaaATMMainPanelHorizontalSplitter"
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.RowCount = 2
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.TabIndex = 6
         '
-        'pnlEMACrossoverTopHeaderVerticalSplitter
+        'pnlJoyMaaATMTopHeaderVerticalSplitter
         '
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnCount = 15
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.btnEMACrossoverStop, 0, 0)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.btnEMACrossoverStart, 0, 0)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.Panel7, 14, 0)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.btnEMACrossoverSettings, 9, 0)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.linklblEMACrossoverTradableInstrument, 10, 0)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Name = "pnlEMACrossoverTopHeaderVerticalSplitter"
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.RowCount = 1
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.TabIndex = 0
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnCount = 15
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.btnJoyMaaATMStop, 0, 0)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.btnJoyMaaATMStart, 0, 0)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.Panel9, 14, 0)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.btnJoyMaaATMSettings, 9, 0)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.linklblJoyMaaATMTradableInstrument, 10, 0)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Name = "pnlJoyMaaATMTopHeaderVerticalSplitter"
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.RowCount = 1
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.TabIndex = 0
         '
-        'btnEMACrossoverStop
+        'btnJoyMaaATMStop
         '
-        Me.btnEMACrossoverStop.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnEMACrossoverStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnEMACrossoverStop.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnEMACrossoverStop.Name = "btnEMACrossoverStop"
-        Me.btnEMACrossoverStop.Size = New System.Drawing.Size(82, 32)
-        Me.btnEMACrossoverStop.TabIndex = 10
-        Me.btnEMACrossoverStop.Text = "Stop"
-        Me.btnEMACrossoverStop.UseVisualStyleBackColor = True
+        Me.btnJoyMaaATMStop.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnJoyMaaATMStop.Location = New System.Drawing.Point(94, 4)
+        Me.btnJoyMaaATMStop.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnJoyMaaATMStop.Name = "btnJoyMaaATMStop"
+        Me.btnJoyMaaATMStop.Size = New System.Drawing.Size(82, 32)
+        Me.btnJoyMaaATMStop.TabIndex = 10
+        Me.btnJoyMaaATMStop.Text = "Stop"
+        Me.btnJoyMaaATMStop.UseVisualStyleBackColor = True
         '
-        'btnEMACrossoverStart
+        'btnJoyMaaATMStart
         '
-        Me.btnEMACrossoverStart.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnEMACrossoverStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnEMACrossoverStart.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnEMACrossoverStart.Name = "btnEMACrossoverStart"
-        Me.btnEMACrossoverStart.Size = New System.Drawing.Size(82, 32)
-        Me.btnEMACrossoverStart.TabIndex = 2
-        Me.btnEMACrossoverStart.Text = "Start"
-        Me.btnEMACrossoverStart.UseVisualStyleBackColor = True
+        Me.btnJoyMaaATMStart.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnJoyMaaATMStart.Location = New System.Drawing.Point(4, 4)
+        Me.btnJoyMaaATMStart.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnJoyMaaATMStart.Name = "btnJoyMaaATMStart"
+        Me.btnJoyMaaATMStart.Size = New System.Drawing.Size(82, 32)
+        Me.btnJoyMaaATMStart.TabIndex = 2
+        Me.btnJoyMaaATMStart.Text = "Start"
+        Me.btnJoyMaaATMStart.UseVisualStyleBackColor = True
         '
-        'Panel7
+        'Panel9
         '
-        Me.Panel7.Controls.Add(Me.blbEMACrossoverTickerStatus)
-        Me.Panel7.Controls.Add(Me.lblEMACrossoverTickerStatus)
-        Me.Panel7.Location = New System.Drawing.Point(1201, 4)
-        Me.Panel7.Margin = New System.Windows.Forms.Padding(4)
-        Me.Panel7.Name = "Panel7"
-        Me.Panel7.Size = New System.Drawing.Size(147, 31)
-        Me.Panel7.TabIndex = 9
+        Me.Panel9.Controls.Add(Me.blbJoyMaaATMTickerStatus)
+        Me.Panel9.Controls.Add(Me.lblJoyMaaATMTickerStatus)
+        Me.Panel9.Location = New System.Drawing.Point(1201, 4)
+        Me.Panel9.Margin = New System.Windows.Forms.Padding(4)
+        Me.Panel9.Name = "Panel9"
+        Me.Panel9.Size = New System.Drawing.Size(147, 31)
+        Me.Panel9.TabIndex = 9
         '
-        'blbEMACrossoverTickerStatus
+        'blbJoyMaaATMTickerStatus
         '
-        Me.blbEMACrossoverTickerStatus.Color = System.Drawing.Color.Pink
-        Me.blbEMACrossoverTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
-        Me.blbEMACrossoverTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbEMACrossoverTickerStatus.Margin = New System.Windows.Forms.Padding(4)
-        Me.blbEMACrossoverTickerStatus.Name = "blbEMACrossoverTickerStatus"
-        Me.blbEMACrossoverTickerStatus.On = True
-        Me.blbEMACrossoverTickerStatus.Size = New System.Drawing.Size(47, 31)
-        Me.blbEMACrossoverTickerStatus.TabIndex = 7
-        Me.blbEMACrossoverTickerStatus.Text = "LedBulb1"
+        Me.blbJoyMaaATMTickerStatus.Color = System.Drawing.Color.Pink
+        Me.blbJoyMaaATMTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
+        Me.blbJoyMaaATMTickerStatus.Location = New System.Drawing.Point(100, 0)
+        Me.blbJoyMaaATMTickerStatus.Margin = New System.Windows.Forms.Padding(4)
+        Me.blbJoyMaaATMTickerStatus.Name = "blbJoyMaaATMTickerStatus"
+        Me.blbJoyMaaATMTickerStatus.On = True
+        Me.blbJoyMaaATMTickerStatus.Size = New System.Drawing.Size(47, 31)
+        Me.blbJoyMaaATMTickerStatus.TabIndex = 7
+        Me.blbJoyMaaATMTickerStatus.Text = "LedBulb1"
         '
-        'lblEMACrossoverTickerStatus
+        'lblJoyMaaATMTickerStatus
         '
-        Me.lblEMACrossoverTickerStatus.AutoSize = True
-        Me.lblEMACrossoverTickerStatus.Location = New System.Drawing.Point(9, 9)
-        Me.lblEMACrossoverTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblEMACrossoverTickerStatus.Name = "lblEMACrossoverTickerStatus"
-        Me.lblEMACrossoverTickerStatus.Size = New System.Drawing.Size(91, 17)
-        Me.lblEMACrossoverTickerStatus.TabIndex = 9
-        Me.lblEMACrossoverTickerStatus.Text = "Ticker Status"
+        Me.lblJoyMaaATMTickerStatus.AutoSize = True
+        Me.lblJoyMaaATMTickerStatus.Location = New System.Drawing.Point(9, 9)
+        Me.lblJoyMaaATMTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblJoyMaaATMTickerStatus.Name = "lblJoyMaaATMTickerStatus"
+        Me.lblJoyMaaATMTickerStatus.Size = New System.Drawing.Size(91, 17)
+        Me.lblJoyMaaATMTickerStatus.TabIndex = 9
+        Me.lblJoyMaaATMTickerStatus.Text = "Ticker Status"
         '
-        'btnEMACrossoverSettings
+        'btnJoyMaaATMSettings
         '
-        Me.btnEMACrossoverSettings.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnEMACrossoverSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnEMACrossoverSettings.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnEMACrossoverSettings.Name = "btnEMACrossoverSettings"
-        Me.btnEMACrossoverSettings.Size = New System.Drawing.Size(82, 32)
-        Me.btnEMACrossoverSettings.TabIndex = 11
-        Me.btnEMACrossoverSettings.Text = "Settings"
-        Me.btnEMACrossoverSettings.UseVisualStyleBackColor = True
+        Me.btnJoyMaaATMSettings.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnJoyMaaATMSettings.Location = New System.Drawing.Point(814, 4)
+        Me.btnJoyMaaATMSettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnJoyMaaATMSettings.Name = "btnJoyMaaATMSettings"
+        Me.btnJoyMaaATMSettings.Size = New System.Drawing.Size(82, 32)
+        Me.btnJoyMaaATMSettings.TabIndex = 11
+        Me.btnJoyMaaATMSettings.Text = "Settings"
+        Me.btnJoyMaaATMSettings.UseVisualStyleBackColor = True
         '
-        'linklblEMACrossoverTradableInstrument
+        'linklblJoyMaaATMTradableInstrument
         '
-        Me.linklblEMACrossoverTradableInstrument.AutoSize = True
-        Me.linklblEMACrossoverTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.linklblEMACrossoverTradableInstrument.Enabled = False
-        Me.linklblEMACrossoverTradableInstrument.Location = New System.Drawing.Point(903, 0)
-        Me.linklblEMACrossoverTradableInstrument.Name = "linklblEMACrossoverTradableInstrument"
-        Me.linklblEMACrossoverTradableInstrument.Size = New System.Drawing.Size(220, 40)
-        Me.linklblEMACrossoverTradableInstrument.TabIndex = 12
-        Me.linklblEMACrossoverTradableInstrument.TabStop = True
-        Me.linklblEMACrossoverTradableInstrument.Text = "Tradable Instruments: 0"
-        Me.linklblEMACrossoverTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.linklblJoyMaaATMTradableInstrument.AutoSize = True
+        Me.linklblJoyMaaATMTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.linklblJoyMaaATMTradableInstrument.Enabled = False
+        Me.linklblJoyMaaATMTradableInstrument.Location = New System.Drawing.Point(903, 0)
+        Me.linklblJoyMaaATMTradableInstrument.Name = "linklblJoyMaaATMTradableInstrument"
+        Me.linklblJoyMaaATMTradableInstrument.Size = New System.Drawing.Size(220, 40)
+        Me.linklblJoyMaaATMTradableInstrument.TabIndex = 12
+        Me.linklblJoyMaaATMTradableInstrument.TabStop = True
+        Me.linklblJoyMaaATMTradableInstrument.Text = "Tradable Instruments: 0"
+        Me.linklblJoyMaaATMTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
-        'pnlEMACrossoverBodyVerticalSplitter
+        'pnlJoyMaaATMBodyVerticalSplitter
         '
-        Me.pnlEMACrossoverBodyVerticalSplitter.ColumnCount = 2
-        Me.pnlEMACrossoverBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 99.26199!))
-        Me.pnlEMACrossoverBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.7380074!))
-        Me.pnlEMACrossoverBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel5, 0, 0)
-        Me.pnlEMACrossoverBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlEMACrossoverBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
-        Me.pnlEMACrossoverBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlEMACrossoverBodyVerticalSplitter.Name = "pnlEMACrossoverBodyVerticalSplitter"
-        Me.pnlEMACrossoverBodyVerticalSplitter.RowCount = 1
-        Me.pnlEMACrossoverBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlEMACrossoverBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
-        Me.pnlEMACrossoverBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
-        Me.pnlEMACrossoverBodyVerticalSplitter.TabIndex = 1
+        Me.pnlJoyMaaATMBodyVerticalSplitter.ColumnCount = 2
+        Me.pnlJoyMaaATMBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.pnlJoyMaaATMBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlJoyMaaATMBodyVerticalSplitter.Controls.Add(Me.PictureBox8, 0, 0)
+        Me.pnlJoyMaaATMBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel7, 0, 0)
+        Me.pnlJoyMaaATMBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlJoyMaaATMBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
+        Me.pnlJoyMaaATMBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlJoyMaaATMBodyVerticalSplitter.Name = "pnlJoyMaaATMBodyVerticalSplitter"
+        Me.pnlJoyMaaATMBodyVerticalSplitter.RowCount = 1
+        Me.pnlJoyMaaATMBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlJoyMaaATMBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
+        Me.pnlJoyMaaATMBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
+        Me.pnlJoyMaaATMBodyVerticalSplitter.TabIndex = 1
         '
-        'TableLayoutPanel5
+        'TableLayoutPanel7
         '
-        Me.TableLayoutPanel5.ColumnCount = 1
-        Me.TableLayoutPanel5.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.TableLayoutPanel5.Controls.Add(Me.lstEMACrossoverLog, 0, 1)
-        Me.TableLayoutPanel5.Controls.Add(Me.sfdgvEMACrossoverMainDashboard, 0, 0)
-        Me.TableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.TableLayoutPanel5.Location = New System.Drawing.Point(4, 4)
-        Me.TableLayoutPanel5.Margin = New System.Windows.Forms.Padding(4)
-        Me.TableLayoutPanel5.Name = "TableLayoutPanel5"
-        Me.TableLayoutPanel5.RowCount = 2
-        Me.TableLayoutPanel5.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 1.27186!))
-        Me.TableLayoutPanel5.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 98.72814!))
-        Me.TableLayoutPanel5.Size = New System.Drawing.Size(1337, 629)
-        Me.TableLayoutPanel5.TabIndex = 0
+        Me.TableLayoutPanel7.ColumnCount = 1
+        Me.TableLayoutPanel7.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.TableLayoutPanel7.Controls.Add(Me.lstJoyMaaATMLog, 0, 1)
+        Me.TableLayoutPanel7.Controls.Add(Me.sfdgvJoyMaaATMMainDashboard, 0, 0)
+        Me.TableLayoutPanel7.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.TableLayoutPanel7.Location = New System.Drawing.Point(4, 4)
+        Me.TableLayoutPanel7.Margin = New System.Windows.Forms.Padding(4)
+        Me.TableLayoutPanel7.Name = "TableLayoutPanel7"
+        Me.TableLayoutPanel7.RowCount = 2
+        Me.TableLayoutPanel7.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.TableLayoutPanel7.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.TableLayoutPanel7.Size = New System.Drawing.Size(940, 629)
+        Me.TableLayoutPanel7.TabIndex = 0
         '
-        'lstEMACrossoverLog
+        'lstJoyMaaATMLog
         '
-        Me.lstEMACrossoverLog.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.lstEMACrossoverLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
-        Me.lstEMACrossoverLog.FormattingEnabled = True
-        Me.lstEMACrossoverLog.ItemHeight = 16
-        Me.lstEMACrossoverLog.Location = New System.Drawing.Point(4, 12)
-        Me.lstEMACrossoverLog.Margin = New System.Windows.Forms.Padding(4)
-        Me.lstEMACrossoverLog.Name = "lstEMACrossoverLog"
-        Me.lstEMACrossoverLog.Size = New System.Drawing.Size(1329, 613)
-        Me.lstEMACrossoverLog.TabIndex = 9
+        Me.lstJoyMaaATMLog.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstJoyMaaATMLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
+        Me.lstJoyMaaATMLog.FormattingEnabled = True
+        Me.lstJoyMaaATMLog.ItemHeight = 16
+        Me.lstJoyMaaATMLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstJoyMaaATMLog.Margin = New System.Windows.Forms.Padding(4)
+        Me.lstJoyMaaATMLog.Name = "lstJoyMaaATMLog"
+        Me.lstJoyMaaATMLog.Size = New System.Drawing.Size(932, 181)
+        Me.lstJoyMaaATMLog.TabIndex = 9
         '
-        'sfdgvEMACrossoverMainDashboard
+        'sfdgvJoyMaaATMMainDashboard
         '
-        Me.sfdgvEMACrossoverMainDashboard.AccessibleName = "Table"
-        Me.sfdgvEMACrossoverMainDashboard.AllowDraggingColumns = True
-        Me.sfdgvEMACrossoverMainDashboard.AllowEditing = False
-        Me.sfdgvEMACrossoverMainDashboard.AllowFiltering = True
-        Me.sfdgvEMACrossoverMainDashboard.AllowResizingColumns = True
-        Me.sfdgvEMACrossoverMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
-        Me.sfdgvEMACrossoverMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
-        Me.sfdgvEMACrossoverMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvEMACrossoverMainDashboard.Margin = New System.Windows.Forms.Padding(4)
-        Me.sfdgvEMACrossoverMainDashboard.Name = "sfdgvEMACrossoverMainDashboard"
-        Me.sfdgvEMACrossoverMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvEMACrossoverMainDashboard.Size = New System.Drawing.Size(932, 1)
-        Me.sfdgvEMACrossoverMainDashboard.TabIndex = 6
-        Me.sfdgvEMACrossoverMainDashboard.Text = "SfDataGrid1"
-        Me.sfdgvEMACrossoverMainDashboard.Visible = False
+        Me.sfdgvJoyMaaATMMainDashboard.AccessibleName = "Table"
+        Me.sfdgvJoyMaaATMMainDashboard.AllowDraggingColumns = True
+        Me.sfdgvJoyMaaATMMainDashboard.AllowEditing = False
+        Me.sfdgvJoyMaaATMMainDashboard.AllowFiltering = True
+        Me.sfdgvJoyMaaATMMainDashboard.AllowResizingColumns = True
+        Me.sfdgvJoyMaaATMMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
+        Me.sfdgvJoyMaaATMMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
+        Me.sfdgvJoyMaaATMMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.sfdgvJoyMaaATMMainDashboard.Location = New System.Drawing.Point(4, 4)
+        Me.sfdgvJoyMaaATMMainDashboard.Margin = New System.Windows.Forms.Padding(4)
+        Me.sfdgvJoyMaaATMMainDashboard.Name = "sfdgvJoyMaaATMMainDashboard"
+        Me.sfdgvJoyMaaATMMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
+        Me.sfdgvJoyMaaATMMainDashboard.Size = New System.Drawing.Size(932, 432)
+        Me.sfdgvJoyMaaATMMainDashboard.TabIndex = 6
+        Me.sfdgvJoyMaaATMMainDashboard.Text = "SfDataGrid1"
         '
         'tabCandleRangeBreakout
         '
@@ -611,6 +646,7 @@ Partial Class frmMainTabbed
         Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnCount = 2
         Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Controls.Add(Me.PictureBox7, 0, 0)
         Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel6, 0, 0)
         Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
@@ -810,6 +846,7 @@ Partial Class frmMainTabbed
         Me.pnlPetDGandhiBodyVerticalSplitter.ColumnCount = 2
         Me.pnlPetDGandhiBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlPetDGandhiBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlPetDGandhiBodyVerticalSplitter.Controls.Add(Me.PictureBox6, 0, 0)
         Me.pnlPetDGandhiBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel4, 0, 0)
         Me.pnlPetDGandhiBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlPetDGandhiBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
@@ -866,6 +903,205 @@ Partial Class frmMainTabbed
         Me.sfdgvPetDGandhiMainDashboard.Size = New System.Drawing.Size(932, 432)
         Me.sfdgvPetDGandhiMainDashboard.TabIndex = 6
         Me.sfdgvPetDGandhiMainDashboard.Text = "SfDataGrid1"
+        '
+        'tabEMACrossover
+        '
+        Me.tabEMACrossover.Controls.Add(Me.pnlEMACrossoverMainPanelHorizontalSplitter)
+        Me.tabEMACrossover.Location = New System.Drawing.Point(4, 25)
+        Me.tabEMACrossover.Margin = New System.Windows.Forms.Padding(4)
+        Me.tabEMACrossover.Name = "tabEMACrossover"
+        Me.tabEMACrossover.Size = New System.Drawing.Size(1363, 693)
+        Me.tabEMACrossover.TabIndex = 6
+        Me.tabEMACrossover.Text = "EMA Crossover"
+        Me.tabEMACrossover.UseVisualStyleBackColor = True
+        '
+        'pnlEMACrossoverMainPanelHorizontalSplitter
+        '
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.ColumnCount = 1
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Controls.Add(Me.pnlEMACrossoverTopHeaderVerticalSplitter, 0, 0)
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Controls.Add(Me.pnlEMACrossoverBodyVerticalSplitter, 0, 1)
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Name = "pnlEMACrossoverMainPanelHorizontalSplitter"
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.RowCount = 2
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.TabIndex = 4
+        '
+        'pnlEMACrossoverTopHeaderVerticalSplitter
+        '
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnCount = 15
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.btnEMACrossoverStop, 0, 0)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.btnEMACrossoverStart, 0, 0)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.Panel7, 14, 0)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.btnEMACrossoverSettings, 9, 0)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Controls.Add(Me.linklblEMACrossoverTradableInstrument, 10, 0)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Name = "pnlEMACrossoverTopHeaderVerticalSplitter"
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.RowCount = 1
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.TabIndex = 0
+        '
+        'btnEMACrossoverStop
+        '
+        Me.btnEMACrossoverStop.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnEMACrossoverStop.Location = New System.Drawing.Point(94, 4)
+        Me.btnEMACrossoverStop.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnEMACrossoverStop.Name = "btnEMACrossoverStop"
+        Me.btnEMACrossoverStop.Size = New System.Drawing.Size(82, 32)
+        Me.btnEMACrossoverStop.TabIndex = 10
+        Me.btnEMACrossoverStop.Text = "Stop"
+        Me.btnEMACrossoverStop.UseVisualStyleBackColor = True
+        '
+        'btnEMACrossoverStart
+        '
+        Me.btnEMACrossoverStart.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnEMACrossoverStart.Location = New System.Drawing.Point(4, 4)
+        Me.btnEMACrossoverStart.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnEMACrossoverStart.Name = "btnEMACrossoverStart"
+        Me.btnEMACrossoverStart.Size = New System.Drawing.Size(82, 32)
+        Me.btnEMACrossoverStart.TabIndex = 2
+        Me.btnEMACrossoverStart.Text = "Start"
+        Me.btnEMACrossoverStart.UseVisualStyleBackColor = True
+        '
+        'Panel7
+        '
+        Me.Panel7.Controls.Add(Me.blbEMACrossoverTickerStatus)
+        Me.Panel7.Controls.Add(Me.lblEMACrossoverTickerStatus)
+        Me.Panel7.Location = New System.Drawing.Point(1201, 4)
+        Me.Panel7.Margin = New System.Windows.Forms.Padding(4)
+        Me.Panel7.Name = "Panel7"
+        Me.Panel7.Size = New System.Drawing.Size(147, 31)
+        Me.Panel7.TabIndex = 9
+        '
+        'blbEMACrossoverTickerStatus
+        '
+        Me.blbEMACrossoverTickerStatus.Color = System.Drawing.Color.Pink
+        Me.blbEMACrossoverTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
+        Me.blbEMACrossoverTickerStatus.Location = New System.Drawing.Point(100, 0)
+        Me.blbEMACrossoverTickerStatus.Margin = New System.Windows.Forms.Padding(4)
+        Me.blbEMACrossoverTickerStatus.Name = "blbEMACrossoverTickerStatus"
+        Me.blbEMACrossoverTickerStatus.On = True
+        Me.blbEMACrossoverTickerStatus.Size = New System.Drawing.Size(47, 31)
+        Me.blbEMACrossoverTickerStatus.TabIndex = 7
+        Me.blbEMACrossoverTickerStatus.Text = "LedBulb1"
+        '
+        'lblEMACrossoverTickerStatus
+        '
+        Me.lblEMACrossoverTickerStatus.AutoSize = True
+        Me.lblEMACrossoverTickerStatus.Location = New System.Drawing.Point(9, 9)
+        Me.lblEMACrossoverTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblEMACrossoverTickerStatus.Name = "lblEMACrossoverTickerStatus"
+        Me.lblEMACrossoverTickerStatus.Size = New System.Drawing.Size(91, 17)
+        Me.lblEMACrossoverTickerStatus.TabIndex = 9
+        Me.lblEMACrossoverTickerStatus.Text = "Ticker Status"
+        '
+        'btnEMACrossoverSettings
+        '
+        Me.btnEMACrossoverSettings.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnEMACrossoverSettings.Location = New System.Drawing.Point(814, 4)
+        Me.btnEMACrossoverSettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnEMACrossoverSettings.Name = "btnEMACrossoverSettings"
+        Me.btnEMACrossoverSettings.Size = New System.Drawing.Size(82, 32)
+        Me.btnEMACrossoverSettings.TabIndex = 11
+        Me.btnEMACrossoverSettings.Text = "Settings"
+        Me.btnEMACrossoverSettings.UseVisualStyleBackColor = True
+        '
+        'linklblEMACrossoverTradableInstrument
+        '
+        Me.linklblEMACrossoverTradableInstrument.AutoSize = True
+        Me.linklblEMACrossoverTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.linklblEMACrossoverTradableInstrument.Enabled = False
+        Me.linklblEMACrossoverTradableInstrument.Location = New System.Drawing.Point(903, 0)
+        Me.linklblEMACrossoverTradableInstrument.Name = "linklblEMACrossoverTradableInstrument"
+        Me.linklblEMACrossoverTradableInstrument.Size = New System.Drawing.Size(220, 40)
+        Me.linklblEMACrossoverTradableInstrument.TabIndex = 12
+        Me.linklblEMACrossoverTradableInstrument.TabStop = True
+        Me.linklblEMACrossoverTradableInstrument.Text = "Tradable Instruments: 0"
+        Me.linklblEMACrossoverTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'pnlEMACrossoverBodyVerticalSplitter
+        '
+        Me.pnlEMACrossoverBodyVerticalSplitter.ColumnCount = 2
+        Me.pnlEMACrossoverBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 99.26199!))
+        Me.pnlEMACrossoverBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.7380074!))
+        Me.pnlEMACrossoverBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel5, 0, 0)
+        Me.pnlEMACrossoverBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlEMACrossoverBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
+        Me.pnlEMACrossoverBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlEMACrossoverBodyVerticalSplitter.Name = "pnlEMACrossoverBodyVerticalSplitter"
+        Me.pnlEMACrossoverBodyVerticalSplitter.RowCount = 1
+        Me.pnlEMACrossoverBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlEMACrossoverBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
+        Me.pnlEMACrossoverBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
+        Me.pnlEMACrossoverBodyVerticalSplitter.TabIndex = 1
+        '
+        'TableLayoutPanel5
+        '
+        Me.TableLayoutPanel5.ColumnCount = 1
+        Me.TableLayoutPanel5.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.TableLayoutPanel5.Controls.Add(Me.lstEMACrossoverLog, 0, 1)
+        Me.TableLayoutPanel5.Controls.Add(Me.sfdgvEMACrossoverMainDashboard, 0, 0)
+        Me.TableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.TableLayoutPanel5.Location = New System.Drawing.Point(4, 4)
+        Me.TableLayoutPanel5.Margin = New System.Windows.Forms.Padding(4)
+        Me.TableLayoutPanel5.Name = "TableLayoutPanel5"
+        Me.TableLayoutPanel5.RowCount = 2
+        Me.TableLayoutPanel5.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 1.27186!))
+        Me.TableLayoutPanel5.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 98.72814!))
+        Me.TableLayoutPanel5.Size = New System.Drawing.Size(1337, 629)
+        Me.TableLayoutPanel5.TabIndex = 0
+        '
+        'lstEMACrossoverLog
+        '
+        Me.lstEMACrossoverLog.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstEMACrossoverLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
+        Me.lstEMACrossoverLog.FormattingEnabled = True
+        Me.lstEMACrossoverLog.ItemHeight = 16
+        Me.lstEMACrossoverLog.Location = New System.Drawing.Point(4, 11)
+        Me.lstEMACrossoverLog.Margin = New System.Windows.Forms.Padding(4)
+        Me.lstEMACrossoverLog.Name = "lstEMACrossoverLog"
+        Me.lstEMACrossoverLog.Size = New System.Drawing.Size(1329, 614)
+        Me.lstEMACrossoverLog.TabIndex = 9
+        '
+        'sfdgvEMACrossoverMainDashboard
+        '
+        Me.sfdgvEMACrossoverMainDashboard.AccessibleName = "Table"
+        Me.sfdgvEMACrossoverMainDashboard.AllowDraggingColumns = True
+        Me.sfdgvEMACrossoverMainDashboard.AllowEditing = False
+        Me.sfdgvEMACrossoverMainDashboard.AllowFiltering = True
+        Me.sfdgvEMACrossoverMainDashboard.AllowResizingColumns = True
+        Me.sfdgvEMACrossoverMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
+        Me.sfdgvEMACrossoverMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
+        Me.sfdgvEMACrossoverMainDashboard.Location = New System.Drawing.Point(4, 4)
+        Me.sfdgvEMACrossoverMainDashboard.Margin = New System.Windows.Forms.Padding(4)
+        Me.sfdgvEMACrossoverMainDashboard.Name = "sfdgvEMACrossoverMainDashboard"
+        Me.sfdgvEMACrossoverMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
+        Me.sfdgvEMACrossoverMainDashboard.Size = New System.Drawing.Size(932, 1)
+        Me.sfdgvEMACrossoverMainDashboard.TabIndex = 6
+        Me.sfdgvEMACrossoverMainDashboard.Text = "SfDataGrid1"
+        Me.sfdgvEMACrossoverMainDashboard.Visible = False
         '
         'tabNearFarHedging
         '
@@ -1009,6 +1245,7 @@ Partial Class frmMainTabbed
         Me.pnlNearFarHedgingBodyVerticalSplitter.ColumnCount = 2
         Me.pnlNearFarHedgingBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlNearFarHedgingBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlNearFarHedgingBodyVerticalSplitter.Controls.Add(Me.PictureBox5, 0, 0)
         Me.pnlNearFarHedgingBodyVerticalSplitter.Controls.Add(Me.pnlNearFarHedgingBodyHorizontalSplitter, 0, 0)
         Me.pnlNearFarHedgingBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlNearFarHedgingBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
@@ -1221,6 +1458,7 @@ Partial Class frmMainTabbed
         Me.pnlEMA5_20STBodyVerticalSplitter.ColumnCount = 2
         Me.pnlEMA5_20STBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlEMA5_20STBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlEMA5_20STBodyVerticalSplitter.Controls.Add(Me.PictureBox4, 0, 0)
         Me.pnlEMA5_20STBodyVerticalSplitter.Controls.Add(Me.pnlEMA5_20STBodyHorizontalSplitter, 0, 0)
         Me.pnlEMA5_20STBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlEMA5_20STBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
@@ -1421,6 +1659,7 @@ Partial Class frmMainTabbed
         Me.pnlMomentumReversalBodyVerticalSplitter.ColumnCount = 2
         Me.pnlMomentumReversalBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
         Me.pnlMomentumReversalBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlMomentumReversalBodyVerticalSplitter.Controls.Add(Me.PictureBox2, 0, 0)
         Me.pnlMomentumReversalBodyVerticalSplitter.Controls.Add(Me.pnlMomentumReversalBodyHorizontalSplitter, 0, 0)
         Me.pnlMomentumReversalBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlMomentumReversalBodyVerticalSplitter.Location = New System.Drawing.Point(4, 51)
@@ -1933,6 +2172,82 @@ Partial Class frmMainTabbed
         '
         Me.tmrCandleRangeBreakoutTickerStatus.Enabled = True
         '
+        'tmrJoyMaaATMTickerStatus
+        '
+        Me.tmrJoyMaaATMTickerStatus.Enabled = True
+        '
+        'PictureBox2
+        '
+        Me.PictureBox2.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox2.Image = CType(resources.GetObject("PictureBox2.Image"), System.Drawing.Image)
+        Me.PictureBox2.Location = New System.Drawing.Point(945, 2)
+        Me.PictureBox2.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox2.Name = "PictureBox2"
+        Me.PictureBox2.Size = New System.Drawing.Size(399, 626)
+        Me.PictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox2.TabIndex = 2
+        Me.PictureBox2.TabStop = False
+        '
+        'PictureBox4
+        '
+        Me.PictureBox4.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox4.Image = CType(resources.GetObject("PictureBox4.Image"), System.Drawing.Image)
+        Me.PictureBox4.Location = New System.Drawing.Point(951, 2)
+        Me.PictureBox4.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox4.Name = "PictureBox4"
+        Me.PictureBox4.Size = New System.Drawing.Size(401, 633)
+        Me.PictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox4.TabIndex = 2
+        Me.PictureBox4.TabStop = False
+        '
+        'PictureBox5
+        '
+        Me.PictureBox5.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox5.Image = CType(resources.GetObject("PictureBox5.Image"), System.Drawing.Image)
+        Me.PictureBox5.Location = New System.Drawing.Point(951, 2)
+        Me.PictureBox5.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox5.Name = "PictureBox5"
+        Me.PictureBox5.Size = New System.Drawing.Size(401, 633)
+        Me.PictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox5.TabIndex = 2
+        Me.PictureBox5.TabStop = False
+        '
+        'PictureBox6
+        '
+        Me.PictureBox6.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox6.Image = CType(resources.GetObject("PictureBox6.Image"), System.Drawing.Image)
+        Me.PictureBox6.Location = New System.Drawing.Point(951, 2)
+        Me.PictureBox6.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox6.Name = "PictureBox6"
+        Me.PictureBox6.Size = New System.Drawing.Size(401, 633)
+        Me.PictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox6.TabIndex = 2
+        Me.PictureBox6.TabStop = False
+        '
+        'PictureBox7
+        '
+        Me.PictureBox7.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox7.Image = CType(resources.GetObject("PictureBox7.Image"), System.Drawing.Image)
+        Me.PictureBox7.Location = New System.Drawing.Point(951, 2)
+        Me.PictureBox7.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox7.Name = "PictureBox7"
+        Me.PictureBox7.Size = New System.Drawing.Size(401, 633)
+        Me.PictureBox7.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox7.TabIndex = 2
+        Me.PictureBox7.TabStop = False
+        '
+        'PictureBox8
+        '
+        Me.PictureBox8.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox8.Image = CType(resources.GetObject("PictureBox8.Image"), System.Drawing.Image)
+        Me.PictureBox8.Location = New System.Drawing.Point(951, 2)
+        Me.PictureBox8.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox8.Name = "PictureBox8"
+        Me.PictureBox8.Size = New System.Drawing.Size(401, 633)
+        Me.PictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox8.TabIndex = 3
+        Me.PictureBox8.TabStop = False
+        '
         'frmMainTabbed
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
@@ -1949,15 +2264,15 @@ Partial Class frmMainTabbed
         Me.msMainMenuStrip.ResumeLayout(False)
         Me.msMainMenuStrip.PerformLayout()
         Me.tabMain.ResumeLayout(False)
-        Me.tabEMACrossover.ResumeLayout(False)
-        Me.pnlEMACrossoverMainPanelHorizontalSplitter.ResumeLayout(False)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ResumeLayout(False)
-        Me.pnlEMACrossoverTopHeaderVerticalSplitter.PerformLayout()
-        Me.Panel7.ResumeLayout(False)
-        Me.Panel7.PerformLayout()
-        Me.pnlEMACrossoverBodyVerticalSplitter.ResumeLayout(False)
-        Me.TableLayoutPanel5.ResumeLayout(False)
-        CType(Me.sfdgvEMACrossoverMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabJoyMaaATM.ResumeLayout(False)
+        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.ResumeLayout(False)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ResumeLayout(False)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.PerformLayout()
+        Me.Panel9.ResumeLayout(False)
+        Me.Panel9.PerformLayout()
+        Me.pnlJoyMaaATMBodyVerticalSplitter.ResumeLayout(False)
+        Me.TableLayoutPanel7.ResumeLayout(False)
+        CType(Me.sfdgvJoyMaaATMMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabCandleRangeBreakout.ResumeLayout(False)
         Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ResumeLayout(False)
@@ -1976,6 +2291,15 @@ Partial Class frmMainTabbed
         Me.pnlPetDGandhiBodyVerticalSplitter.ResumeLayout(False)
         Me.TableLayoutPanel4.ResumeLayout(False)
         CType(Me.sfdgvPetDGandhiMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.tabEMACrossover.ResumeLayout(False)
+        Me.pnlEMACrossoverMainPanelHorizontalSplitter.ResumeLayout(False)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.ResumeLayout(False)
+        Me.pnlEMACrossoverTopHeaderVerticalSplitter.PerformLayout()
+        Me.Panel7.ResumeLayout(False)
+        Me.Panel7.PerformLayout()
+        Me.pnlEMACrossoverBodyVerticalSplitter.ResumeLayout(False)
+        Me.TableLayoutPanel5.ResumeLayout(False)
+        CType(Me.sfdgvEMACrossoverMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabNearFarHedging.ResumeLayout(False)
         Me.pnlNearFarHedgingMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlNearFarHedgingTopHeaderVerticalSplitter.ResumeLayout(False)
@@ -2023,6 +2347,12 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalBodyHorizontalSplitter.ResumeLayout(False)
         CType(Me.sfdgvAmiSignalMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox4, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox5, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox6, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox7, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -2157,4 +2487,25 @@ Partial Class frmMainTabbed
     Friend WithEvents lstCandleRangeBreakoutLog As ListBox
     Friend WithEvents sfdgvCandleRangeBreakoutMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
     Friend WithEvents tmrCandleRangeBreakoutTickerStatus As Timer
+    Friend WithEvents tabJoyMaaATM As TabPage
+    Friend WithEvents tmrJoyMaaATMTickerStatus As Timer
+    Friend WithEvents pnlJoyMaaATMMainPanelHorizontalSplitter As TableLayoutPanel
+    Friend WithEvents pnlJoyMaaATMTopHeaderVerticalSplitter As TableLayoutPanel
+    Friend WithEvents btnJoyMaaATMStop As Button
+    Friend WithEvents btnJoyMaaATMStart As Button
+    Friend WithEvents Panel9 As Panel
+    Friend WithEvents blbJoyMaaATMTickerStatus As Bulb.LedBulb
+    Friend WithEvents lblJoyMaaATMTickerStatus As Label
+    Friend WithEvents btnJoyMaaATMSettings As Button
+    Friend WithEvents linklblJoyMaaATMTradableInstrument As LinkLabel
+    Friend WithEvents pnlJoyMaaATMBodyVerticalSplitter As TableLayoutPanel
+    Friend WithEvents TableLayoutPanel7 As TableLayoutPanel
+    Friend WithEvents lstJoyMaaATMLog As ListBox
+    Friend WithEvents sfdgvJoyMaaATMMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
+    Friend WithEvents PictureBox8 As PictureBox
+    Friend WithEvents PictureBox7 As PictureBox
+    Friend WithEvents PictureBox6 As PictureBox
+    Friend WithEvents PictureBox5 As PictureBox
+    Friend WithEvents PictureBox4 As PictureBox
+    Friend WithEvents PictureBox2 As PictureBox
 End Class

@@ -44,12 +44,12 @@ Partial Class frmCandleRangeBreakoutSettings
         Me.lblInstrumentDetails = New System.Windows.Forms.Label()
         Me.lblSignalTimeFrame = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.txtInstrumentDetalis = New System.Windows.Forms.TextBox()
-        Me.txtSignalTimeFrame = New System.Windows.Forms.TextBox()
         Me.txtMaxProfitPerDay = New System.Windows.Forms.TextBox()
         Me.lblMaxProfitPerDay = New System.Windows.Forms.Label()
         Me.txtMaxLossPerDay = New System.Windows.Forms.TextBox()
         Me.lblMaxLossPerDay = New System.Windows.Forms.Label()
+        Me.txtInstrumentDetalis = New System.Windows.Forms.TextBox()
+        Me.txtSignalTimeFrame = New System.Windows.Forms.TextBox()
         Me.grpTelegram.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
@@ -262,24 +262,6 @@ Partial Class frmCandleRangeBreakoutSettings
         Me.GroupBox1.TabIndex = 21
         Me.GroupBox1.TabStop = False
         '
-        'txtInstrumentDetalis
-        '
-        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(174, 230)
-        Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
-        Me.txtInstrumentDetalis.ReadOnly = True
-        Me.txtInstrumentDetalis.Size = New System.Drawing.Size(223, 22)
-        Me.txtInstrumentDetalis.TabIndex = 15
-        '
-        'txtSignalTimeFrame
-        '
-        Me.txtSignalTimeFrame.Location = New System.Drawing.Point(175, 16)
-        Me.txtSignalTimeFrame.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtSignalTimeFrame.Name = "txtSignalTimeFrame"
-        Me.txtSignalTimeFrame.Size = New System.Drawing.Size(255, 22)
-        Me.txtSignalTimeFrame.TabIndex = 0
-        Me.txtSignalTimeFrame.Tag = "Signal Time Frame"
-        '
         'txtMaxProfitPerDay
         '
         Me.txtMaxProfitPerDay.Location = New System.Drawing.Point(175, 195)
@@ -318,6 +300,24 @@ Partial Class frmCandleRangeBreakoutSettings
         Me.lblMaxLossPerDay.TabIndex = 30
         Me.lblMaxLossPerDay.Text = "Max Loss Per Day"
         '
+        'txtInstrumentDetalis
+        '
+        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(174, 230)
+        Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
+        Me.txtInstrumentDetalis.ReadOnly = True
+        Me.txtInstrumentDetalis.Size = New System.Drawing.Size(223, 22)
+        Me.txtInstrumentDetalis.TabIndex = 15
+        '
+        'txtSignalTimeFrame
+        '
+        Me.txtSignalTimeFrame.Location = New System.Drawing.Point(175, 16)
+        Me.txtSignalTimeFrame.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtSignalTimeFrame.Name = "txtSignalTimeFrame"
+        Me.txtSignalTimeFrame.Size = New System.Drawing.Size(255, 22)
+        Me.txtSignalTimeFrame.TabIndex = 0
+        Me.txtSignalTimeFrame.Tag = "Signal Time Frame"
+        '
         'frmCandleRangeBreakoutSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
@@ -327,6 +327,8 @@ Partial Class frmCandleRangeBreakoutSettings
         Me.Controls.Add(Me.btnCandleRangeBreakoutSettings)
         Me.Controls.Add(Me.GroupBox1)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
+        Me.MaximizeBox = False
+        Me.MinimizeBox = False
         Me.Name = "frmCandleRangeBreakoutSettings"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Candle Range Breakout Strategy - Settings"

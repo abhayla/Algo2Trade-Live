@@ -5,7 +5,7 @@ Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Strategies
 Imports NLog
 
-Public Class CandleRangeBreakoutStrategy
+Public Class JoyMaaATMStrategy
     Inherits Strategy
 
 #Region "Logging and Status Progress"
@@ -14,7 +14,7 @@ Public Class CandleRangeBreakoutStrategy
 
     Public Sub New(ByVal associatedParentController As APIStrategyController,
                    ByVal strategyIdentifier As String,
-                   ByVal userSettings As CandleRangeBreakoutUserInputs,
+                   ByVal userSettings As JoyMaaATMUserInputs,
                    ByVal maxNumberOfDaysForHistoricalFetch As Integer,
                    ByVal canceller As CancellationTokenSource)
         MyBase.New(associatedParentController, strategyIdentifier, True, userSettings, maxNumberOfDaysForHistoricalFetch, canceller)
@@ -24,6 +24,7 @@ Public Class CandleRangeBreakoutStrategy
         'the fron end grid can bind to this created TradableStrategyInstruments which will be empty
         'TradableStrategyInstruments = New List(Of StrategyInstrument)
     End Sub
+
     Public Overrides Async Function CreateTradableStrategyInstrumentsAsync(allInstruments As IEnumerable(Of IInstrument)) As Task(Of Boolean)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             logger.Debug("CreateTradableStrategyInstrumentsAsync, allInstruments.Count:{0}", allInstruments.Count)
@@ -33,35 +34,18 @@ Public Class CandleRangeBreakoutStrategy
         _cts.Token.ThrowIfCancellationRequested()
         Dim ret As Boolean = False
         Dim retTradableInstrumentsAsPerStrategy As List(Of IInstrument) = Nothing
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
-            Dim userInputs As CandleRangeBreakoutUserInputs = CType(Me.UserSettings, CandleRangeBreakoutUserInputs)
+            Dim userInputs As JoyMaaATMUserInputs = Me.UserSettings
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
-                    Dim runningTradableInstrument As IInstrument = Nothing
-                    Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
-                                                                                                         Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
-                                                                                                             x.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
-                                                                                                             (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX" OrElse x.RawExchange = "CDS")
-                                                                                                     End Function)
-
-                    Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date = Now.Date Then
-                                                                               Return x.Expiry.Value
-                                                                           Else
-                                                                               Return Date.MaxValue
-                                                                           End If
-                                                                       End Function)
-
-                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
-                                                                                Return x.Expiry = minExpiry
-                                                                            End Function)
-
+                    Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
+                                                                                                Return x.TradingSymbol.ToUpper = instrument.Value.InstrumentName.ToUpper
+                                                                                            End Function)
                     _cts.Token.ThrowIfCancellationRequested()
-
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
                     If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
                     ret = True
@@ -69,11 +53,9 @@ Public Class CandleRangeBreakoutStrategy
                 TradableInstrumentsAsPerStrategy = retTradableInstrumentsAsPerStrategy
             End If
         End If
-
         If retTradableInstrumentsAsPerStrategy IsNot Nothing AndAlso retTradableInstrumentsAsPerStrategy.Count > 0 Then
-            'tradableInstrumentsAsPerStrategy = tradableInstrumentsAsPerStrategy.Take(5).ToList
             'Now create the strategy tradable instruments
-            Dim retTradableStrategyInstruments As List(Of CandleRangeBreakoutStrategyInstrument) = Nothing
+            Dim retTradableStrategyInstruments As List(Of JoyMaaATMStrategyInstrument) = Nothing
             logger.Debug("Creating strategy tradable instruments, _tradableInstruments.count:{0}", retTradableInstrumentsAsPerStrategy.Count)
             'Remove the old handlers from the previous strategyinstruments collection
             If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
@@ -89,8 +71,8 @@ Public Class CandleRangeBreakoutStrategy
             'Now create the fresh handlers
             For Each runningTradableInstrument In retTradableInstrumentsAsPerStrategy
                 _cts.Token.ThrowIfCancellationRequested()
-                If retTradableStrategyInstruments Is Nothing Then retTradableStrategyInstruments = New List(Of CandleRangeBreakoutStrategyInstrument)
-                Dim runningTradableStrategyInstrument As New CandleRangeBreakoutStrategyInstrument(runningTradableInstrument, Me, False, _cts)
+                If retTradableStrategyInstruments Is Nothing Then retTradableStrategyInstruments = New List(Of JoyMaaATMStrategyInstrument)
+                Dim runningTradableStrategyInstrument As New JoyMaaATMStrategyInstrument(runningTradableInstrument, Me, False, _cts)
                 AddHandler runningTradableStrategyInstrument.HeartbeatEx, AddressOf OnHeartbeatEx
                 AddHandler runningTradableStrategyInstrument.WaitingForEx, AddressOf OnWaitingForEx
                 AddHandler runningTradableStrategyInstrument.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
@@ -117,7 +99,7 @@ Public Class CandleRangeBreakoutStrategy
         Try
             _cts.Token.ThrowIfCancellationRequested()
             Dim tasks As New List(Of Task)()
-            For Each tradableStrategyInstrument As CandleRangeBreakoutStrategyInstrument In TradableStrategyInstruments
+            For Each tradableStrategyInstrument As JoyMaaATMStrategyInstrument In TradableStrategyInstruments
                 _cts.Token.ThrowIfCancellationRequested()
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
@@ -138,14 +120,10 @@ Public Class CandleRangeBreakoutStrategy
 
     Protected Overrides Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)
         Dim ret As Tuple(Of Boolean, String) = Nothing
-        Dim userSettings As CandleRangeBreakoutUserInputs = Me.UserSettings
+        Dim userSettings As JoyMaaATMUserInputs = Me.UserSettings
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(userSettings.MaxLossPerDay) * -1 Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
-        ElseIf Me.GetTotalPLAfterBrokerage >= Math.Abs(userSettings.MaxProfitPerDay) Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
     End Function
@@ -168,7 +146,7 @@ Public Class CandleRangeBreakoutStrategy
                                                 Math.Round(Me.MaxDrawUp, 2),
                                                 Math.Round(Me.MaxDrawDown, 2))
                     Else
-                        message = String.Format("Candle Range Breakout. PL:{0}, MaxDrawUP:{1}, MaxDrawDown:{2}",
+                        message = String.Format("Joy Maa ATM. PL:{0}, MaxDrawUP:{1}, MaxDrawDown:{2}",
                                                 Math.Round(Me.GetTotalPLAfterBrokerage, 2),
                                                 Math.Round(Me.MaxDrawUp, 2),
                                                 Math.Round(Me.MaxDrawDown, 2))
@@ -177,7 +155,7 @@ Public Class CandleRangeBreakoutStrategy
                         message = message.Replace("&", "_")
                     End If
 
-                    Dim userInputs As CandleRangeBreakoutUserInputs = Me.UserSettings
+                    Dim userInputs As JoyMaaATMUserInputs = Me.UserSettings
                     If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
                         userInputs.TelegramChatID IsNot Nothing AndAlso Not userInputs.TelegramPLChatID.Trim = "" Then
                         Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramPLChatID, _cts)
