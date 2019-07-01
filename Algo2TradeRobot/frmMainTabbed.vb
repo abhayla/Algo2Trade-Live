@@ -3555,23 +3555,23 @@ Public Class frmMainTabbed
         If runningStrategy IsNot Nothing AndAlso runningStrategy.ExportCSV Then
             Select Case runningStrategy.GetType
                 Case GetType(MomentumReversalStrategy)
-                    ExportGridToCSV(sfdgvMomentumReversalMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Momentum Reversal Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Momentum Reversal Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
                 Case GetType(OHLStrategy)
-                    ExportGridToCSV(sfdgvOHLMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("OHL Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("OHL Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
                 Case GetType(AmiSignalStrategy)
-                    ExportGridToCSV(sfdgvAmiSignalMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Ami Signal Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Ami Signal Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
                 Case GetType(EMA_SupertrendStrategy)
-                    ExportGridToCSV(sfdgvEMA_SupertrendMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Supertrend Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Supertrend Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
                 Case GetType(NearFarHedgingStrategy)
-                    ExportGridToCSV(sfdgvNearFarHedgingMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Near Far Hedging Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Near Far Hedging Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
                 Case GetType(PetDGandhiStrategy)
-                    ExportGridToCSV(sfdgvPetDGandhiMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("PetD Gandhi Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("PetD Gandhi Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
                 Case GetType(EMACrossoverStrategy)
-                    ExportGridToCSV(sfdgvEMACrossoverMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Crossover Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Crossover Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
                 Case GetType(CandleRangeBreakoutStrategy)
-                    ExportGridToCSV(sfdgvCandleRangeBreakoutMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Candle Range Breakout Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Candle Range Breakout Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
                 Case GetType(JoyMaaATMStrategy)
-                    ExportGridToCSV(sfdgvJoyMaaATMMainDashboard, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Joy Maa ATM Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Joy Maa ATM Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
                 Case Else
                     Throw New NotImplementedException
             End Select
@@ -3581,56 +3581,39 @@ Public Class frmMainTabbed
 #End Region
 
 #Region "Export Grid"
-    Private Sub ExportGridToCSV(ByVal sfdgv As SfDataGrid, ByVal fileName As String)
-        If sfdgv IsNot Nothing AndAlso sfdgv.RowCount > 0 Then
-            OnHeartbeat("Exoprting datagrid to csv")
+    Private Sub ExportDataToCSV(ByVal runningStrategy As Strategy, ByVal fileName As String)
+        If runningStrategy IsNot Nothing AndAlso runningStrategy.SignalManager IsNot Nothing AndAlso
+            runningStrategy.SignalManager.ActivityDetails IsNot Nothing AndAlso runningStrategy.SignalManager.ActivityDetails.Count > 0 Then
+            OnHeartbeat("Exoprting data to csv")
             Dim dt As DataTable = Nothing
-            Dim totalRows As Integer = sfdgv.RowCount
-            For i As Integer = 1 To totalRows - 1
-                Dim rowData As Syncfusion.Data.NodeEntry = sfdgv.GetRecordEntryAtRowIndex(i)
-                If rowData IsNot Nothing Then
-                    If dt Is Nothing Then
-                        dt = New DataTable
-                        dt.Columns.Add("Trading Date")
-                        dt.Columns.Add("Trading Symbol")
-                        dt.Columns.Add("Entry Direction")
-                        dt.Columns.Add("Entry Time")
-                        dt.Columns.Add("Exit Condition")
-                        dt.Columns.Add("Exit Time")
-                        dt.Columns.Add("Signal PL")
-                        dt.Columns.Add("Strategy Overall PL after brokerage")
-                        dt.Columns.Add("Strategy Max Drawup")
-                        dt.Columns.Add("Strategy Max Drawdown")
-                    End If
-                    Dim rowDatas As String() = rowData.ToString.Split(" ")
-                    If rowDatas IsNot Nothing AndAlso rowDatas.Count > 0 Then
-                        Dim row As System.Data.DataRow = dt.NewRow
-                        For j As Integer = 0 To rowDatas.Count - 1
-                            row("Trading Date") = Now.Date
-                            Select Case j
-                                Case 2
-                                    row("Trading Symbol") = rowDatas(2)
-                                Case 8
-                                    row("Strategy Overall PL after brokerage") = rowDatas(8)
-                                Case 11
-                                    row("Strategy Max Drawup") = rowDatas(11)
-                                Case 14
-                                    row("Strategy Max Drawdown") = rowDatas(14)
-                                Case 20
-                                    row("Signal PL") = rowDatas(20)
-                                Case 30
-                                    row("Entry Direction") = rowDatas(30)
-                                Case 37
-                                    row("Entry Time") = rowDatas(37)
-                                Case 70
-                                    row("Exit Time") = rowDatas(70)
-                                Case 76
-                                    row("Exit Condition") = rowDatas(76)
-                            End Select
-                        Next
-                        dt.Rows.Add(row)
-                    End If
+            For Each rowData In runningStrategy.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
+                                                                                                 Return x.SignalGeneratedTime
+                                                                                             End Function).ToList
+                If dt Is Nothing Then
+                    dt = New DataTable
+                    dt.Columns.Add("Trading Date")
+                    dt.Columns.Add("Trading Symbol")
+                    dt.Columns.Add("Entry Direction")
+                    dt.Columns.Add("Entry Time")
+                    dt.Columns.Add("Exit Condition")
+                    dt.Columns.Add("Exit Time")
+                    dt.Columns.Add("Signal PL")
+                    dt.Columns.Add("Strategy Overall PL after brokerage")
+                    dt.Columns.Add("Strategy Max Drawup")
+                    dt.Columns.Add("Strategy Max Drawdown")
                 End If
+                Dim row As System.Data.DataRow = dt.NewRow
+                row("Trading Date") = Now.Date
+                row("Trading Symbol") = rowData.TradingSymbol
+                row("Strategy Overall PL after brokerage") = rowData.StrategyOverAllPLAfterBrokerage
+                row("Strategy Max Drawup") = rowData.StrategyMaxDrawUp
+                row("Strategy Max Drawdown") = rowData.StrategyMaxDrawDown
+                row("Signal PL") = rowData.SignalPL
+                row("Entry Direction") = rowData.SignalDirection.ToString
+                row("Entry Time") = rowData.EntryRequestTime
+                row("Exit Time") = rowData.CancelRequestTime
+                row("Exit Condition") = rowData.CancelRequestRemarks
+                dt.Rows.Add(row)
             Next
             If dt IsNot Nothing Then
                 Using csvCreator As New Utilities.DAL.CSVHelper(fileName, ",", _cts)

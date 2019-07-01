@@ -150,7 +150,16 @@ Public Class JoyMaaATMStrategyInstrument
                         _lastPlacedOrder = placeOrderResponse
                         _eligibleToTakeTrade = False
                         If placeOrderResponse IsNot Nothing Then
-                            Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Direction:{1}, Signal Candle Time:{2}, Fractal:{3}, ATR:{4}, Entry Price:{5}, Quantity:{6}, Stoploss Price:{7}, Target Price:{8}, LTP:{9}, Timestamp:{10}",
+                            Dim potentialTargetPL As Decimal = 0
+                            Dim potentialStoplossPL As Decimal = 0
+                            If placeOrderResponse.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, placeOrderResponse.ParentOrder.AveragePrice, placeOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, placeOrderResponse.ParentOrder.Quantity)
+                                potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, placeOrderResponse.ParentOrder.AveragePrice, placeOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, placeOrderResponse.ParentOrder.Quantity)
+                            ElseIf placeOrderResponse.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, placeOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, placeOrderResponse.ParentOrder.AveragePrice, placeOrderResponse.ParentOrder.Quantity)
+                                potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, placeOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, placeOrderResponse.ParentOrder.AveragePrice, placeOrderResponse.ParentOrder.Quantity)
+                            End If
+                            Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Direction:{1}, Signal Candle Time:{2}, Fractal:{3}, ATR:{4}, Entry Price:{5}, Quantity:{6}, Stoploss Price:{7}, Target Price:{8}, Potential Target PL:{9}, Potential Stoploss PL:{10}, LTP:{11}, Timestamp:{12}",
                                                                   Me.TradableInstrument.TradingSymbol,
                                                                   placeOrderResponse.ParentOrder.TransactionType.ToString,
                                                                   placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime.ToShortTimeString,
@@ -160,6 +169,8 @@ Public Class JoyMaaATMStrategyInstrument
                                                                   placeOrderResponse.ParentOrder.Quantity,
                                                                   placeOrderResponse.SLOrder.FirstOrDefault.TriggerPrice,
                                                                   placeOrderResponse.TargetOrder.FirstOrDefault.AveragePrice,
+                                                                  Math.Round(potentialTargetPL, 2),
+                                                                  Math.Round(potentialStoplossPL, 2),
                                                                   _lastTick.LastPrice,
                                                                   Now)
                             GenerateTelegramMessageAsync(message)
@@ -260,7 +271,7 @@ Public Class JoyMaaATMStrategyInstrument
             'Dim shortEntryBuffer As Decimal = CalculateBuffer(potentialShortEntryPrice, Me.TradableInstrument.TickSize, Utilities.Numbers.NumberManipulation.RoundOfType.Floor)
             Dim shortEntryBuffer As Decimal = ConvertFloorCeling(atr * 10 / 100, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
 
-            If Not _eligibleToTakeTrade AndAlso
+            If Not _eligibleToTakeTrade AndAlso runningCandlePayload.PreviousPayload.SnapshotDateTime.Date = Now.Date AndAlso
                 (runningCandlePayload.PreviousPayload.HighPrice.Value >= potentialShortEntryPrice AndAlso
                 runningCandlePayload.PreviousPayload.HighPrice.Value <= potentialLongEntryPrice) OrElse
                 (runningCandlePayload.PreviousPayload.LowPrice.Value >= potentialShortEntryPrice AndAlso
@@ -271,7 +282,7 @@ Public Class JoyMaaATMStrategyInstrument
             If _eligibleToTakeTrade AndAlso _lastDayFractalHighChange AndAlso currentTick.LastPrice >= potentialLongEntryPrice + longEntryBuffer Then
                 Dim potentialEntryPrice As Decimal = potentialLongEntryPrice + longEntryBuffer
                 Dim stoploss As Decimal = ConvertFloorCeling(atr, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                Dim target As Decimal = stoploss * userSettings.TargetMultiplier
+                Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                 parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                         {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                          .Price = potentialEntryPrice,
@@ -286,7 +297,7 @@ Public Class JoyMaaATMStrategyInstrument
             ElseIf _eligibleToTakeTrade AndAlso _lastDayFractalLowChange AndAlso currentTick.LastPrice <= potentialShortEntryPrice - shortEntryBuffer Then
                 Dim potentialEntryPrice As Decimal = potentialShortEntryPrice - shortEntryBuffer
                 Dim stoploss As Decimal = ConvertFloorCeling(atr, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                Dim target As Decimal = stoploss * userSettings.TargetMultiplier
+                Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                 parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                         {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                          .Price = potentialEntryPrice,

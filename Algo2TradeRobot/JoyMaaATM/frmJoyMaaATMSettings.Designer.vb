@@ -30,6 +30,8 @@ Partial Class frmJoyMaaATMSettings
         Me.lblNumberOfTrade = New System.Windows.Forms.Label()
         Me.dtpckrTradeStartTime = New System.Windows.Forms.DateTimePicker()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.chkboxReverseTrade = New System.Windows.Forms.CheckBox()
+        Me.lblReverseTrade = New System.Windows.Forms.Label()
         Me.txtATRPeriod = New System.Windows.Forms.TextBox()
         Me.lblATRPeriod = New System.Windows.Forms.Label()
         Me.dtpckrEODExitTime = New System.Windows.Forms.DateTimePicker()
@@ -52,8 +54,6 @@ Partial Class frmJoyMaaATMSettings
         Me.opnFileSettings = New System.Windows.Forms.OpenFileDialog()
         Me.btnJoyMaaATMSettings = New System.Windows.Forms.Button()
         Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
-        Me.chkboxReverseTrade = New System.Windows.Forms.CheckBox()
-        Me.lblReverseTrade = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.grpTelegram.SuspendLayout()
         Me.SuspendLayout()
@@ -64,7 +64,7 @@ Partial Class frmJoyMaaATMSettings
         Me.txtTargetMultiplier.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTargetMultiplier.Name = "txtTargetMultiplier"
         Me.txtTargetMultiplier.Size = New System.Drawing.Size(255, 22)
-        Me.txtTargetMultiplier.TabIndex = 29
+        Me.txtTargetMultiplier.TabIndex = 6
         Me.txtTargetMultiplier.Tag = "Max Profit Per Day"
         '
         'lblTargetMultiplier
@@ -83,7 +83,7 @@ Partial Class frmJoyMaaATMSettings
         Me.txtNumberOfTrade.Margin = New System.Windows.Forms.Padding(4)
         Me.txtNumberOfTrade.Name = "txtNumberOfTrade"
         Me.txtNumberOfTrade.Size = New System.Drawing.Size(255, 22)
-        Me.txtNumberOfTrade.TabIndex = 28
+        Me.txtNumberOfTrade.TabIndex = 5
         Me.txtNumberOfTrade.Tag = "Max Loss Per Day"
         '
         'lblNumberOfTrade
@@ -103,7 +103,7 @@ Partial Class frmJoyMaaATMSettings
         Me.dtpckrTradeStartTime.Name = "dtpckrTradeStartTime"
         Me.dtpckrTradeStartTime.ShowUpDown = True
         Me.dtpckrTradeStartTime.Size = New System.Drawing.Size(255, 22)
-        Me.dtpckrTradeStartTime.TabIndex = 1
+        Me.dtpckrTradeStartTime.TabIndex = 2
         Me.dtpckrTradeStartTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
         'GroupBox1
@@ -135,13 +135,32 @@ Partial Class frmJoyMaaATMSettings
         Me.GroupBox1.TabIndex = 25
         Me.GroupBox1.TabStop = False
         '
+        'chkboxReverseTrade
+        '
+        Me.chkboxReverseTrade.AutoSize = True
+        Me.chkboxReverseTrade.Location = New System.Drawing.Point(174, 266)
+        Me.chkboxReverseTrade.Name = "chkboxReverseTrade"
+        Me.chkboxReverseTrade.Size = New System.Drawing.Size(18, 17)
+        Me.chkboxReverseTrade.TabIndex = 7
+        Me.chkboxReverseTrade.UseVisualStyleBackColor = True
+        '
+        'lblReverseTrade
+        '
+        Me.lblReverseTrade.AutoSize = True
+        Me.lblReverseTrade.Location = New System.Drawing.Point(10, 265)
+        Me.lblReverseTrade.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblReverseTrade.Name = "lblReverseTrade"
+        Me.lblReverseTrade.Size = New System.Drawing.Size(103, 17)
+        Me.lblReverseTrade.TabIndex = 35
+        Me.lblReverseTrade.Text = "Reverse Trade"
+        '
         'txtATRPeriod
         '
         Me.txtATRPeriod.Location = New System.Drawing.Point(175, 15)
         Me.txtATRPeriod.Margin = New System.Windows.Forms.Padding(4)
         Me.txtATRPeriod.Name = "txtATRPeriod"
         Me.txtATRPeriod.Size = New System.Drawing.Size(255, 22)
-        Me.txtATRPeriod.TabIndex = 32
+        Me.txtATRPeriod.TabIndex = 0
         Me.txtATRPeriod.Tag = "Signal Time Frame"
         '
         'lblATRPeriod
@@ -161,7 +180,7 @@ Partial Class frmJoyMaaATMSettings
         Me.dtpckrEODExitTime.Name = "dtpckrEODExitTime"
         Me.dtpckrEODExitTime.ShowUpDown = True
         Me.dtpckrEODExitTime.Size = New System.Drawing.Size(255, 22)
-        Me.dtpckrEODExitTime.TabIndex = 3
+        Me.dtpckrEODExitTime.TabIndex = 4
         Me.dtpckrEODExitTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
         'dtpckrLastTradeEntryTime
@@ -171,7 +190,7 @@ Partial Class frmJoyMaaATMSettings
         Me.dtpckrLastTradeEntryTime.Name = "dtpckrLastTradeEntryTime"
         Me.dtpckrLastTradeEntryTime.ShowUpDown = True
         Me.dtpckrLastTradeEntryTime.Size = New System.Drawing.Size(255, 22)
-        Me.dtpckrLastTradeEntryTime.TabIndex = 2
+        Me.dtpckrLastTradeEntryTime.TabIndex = 3
         Me.dtpckrLastTradeEntryTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
         'lblEODExitTime
@@ -240,7 +259,7 @@ Partial Class frmJoyMaaATMSettings
         Me.txtSignalTimeFrame.Margin = New System.Windows.Forms.Padding(4)
         Me.txtSignalTimeFrame.Name = "txtSignalTimeFrame"
         Me.txtSignalTimeFrame.Size = New System.Drawing.Size(255, 22)
-        Me.txtSignalTimeFrame.TabIndex = 0
+        Me.txtSignalTimeFrame.TabIndex = 1
         Me.txtSignalTimeFrame.Tag = "Signal Time Frame"
         '
         'lblSignalTimeFrame
@@ -269,7 +288,7 @@ Partial Class frmJoyMaaATMSettings
         Me.txtTelegramAPI.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTelegramAPI.Name = "txtTelegramAPI"
         Me.txtTelegramAPI.Size = New System.Drawing.Size(255, 22)
-        Me.txtTelegramAPI.TabIndex = 30
+        Me.txtTelegramAPI.TabIndex = 10
         '
         'lblTelegramAPI
         '
@@ -287,7 +306,7 @@ Partial Class frmJoyMaaATMSettings
         Me.txtTelegramChatIDForPL.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTelegramChatIDForPL.Name = "txtTelegramChatIDForPL"
         Me.txtTelegramChatIDForPL.Size = New System.Drawing.Size(253, 22)
-        Me.txtTelegramChatIDForPL.TabIndex = 36
+        Me.txtTelegramChatIDForPL.TabIndex = 12
         '
         'lblChatIDForPL
         '
@@ -305,7 +324,7 @@ Partial Class frmJoyMaaATMSettings
         Me.txtTelegramChatID.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTelegramChatID.Name = "txtTelegramChatID"
         Me.txtTelegramChatID.Size = New System.Drawing.Size(255, 22)
-        Me.txtTelegramChatID.TabIndex = 32
+        Me.txtTelegramChatID.TabIndex = 11
         '
         'grpTelegram
         '
@@ -334,7 +353,7 @@ Partial Class frmJoyMaaATMSettings
         Me.btnJoyMaaATMSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnJoyMaaATMSettings.Name = "btnJoyMaaATMSettings"
         Me.btnJoyMaaATMSettings.Size = New System.Drawing.Size(112, 58)
-        Me.btnJoyMaaATMSettings.TabIndex = 24
+        Me.btnJoyMaaATMSettings.TabIndex = 9
         Me.btnJoyMaaATMSettings.Text = "&Save"
         Me.btnJoyMaaATMSettings.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         Me.btnJoyMaaATMSettings.UseVisualStyleBackColor = True
@@ -344,25 +363,6 @@ Partial Class frmJoyMaaATMSettings
         Me.ImageList1.ImageStream = CType(resources.GetObject("ImageList1.ImageStream"), System.Windows.Forms.ImageListStreamer)
         Me.ImageList1.TransparentColor = System.Drawing.Color.Transparent
         Me.ImageList1.Images.SetKeyName(0, "save-icon-36533.png")
-        '
-        'chkboxReverseTrade
-        '
-        Me.chkboxReverseTrade.AutoSize = True
-        Me.chkboxReverseTrade.Location = New System.Drawing.Point(174, 266)
-        Me.chkboxReverseTrade.Name = "chkboxReverseTrade"
-        Me.chkboxReverseTrade.Size = New System.Drawing.Size(18, 17)
-        Me.chkboxReverseTrade.TabIndex = 36
-        Me.chkboxReverseTrade.UseVisualStyleBackColor = True
-        '
-        'lblReverseTrade
-        '
-        Me.lblReverseTrade.AutoSize = True
-        Me.lblReverseTrade.Location = New System.Drawing.Point(10, 265)
-        Me.lblReverseTrade.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblReverseTrade.Name = "lblReverseTrade"
-        Me.lblReverseTrade.Size = New System.Drawing.Size(103, 17)
-        Me.lblReverseTrade.TabIndex = 35
-        Me.lblReverseTrade.Text = "Reverse Trade"
         '
         'frmJoyMaaATMSettings
         '
