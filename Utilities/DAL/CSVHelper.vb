@@ -140,23 +140,24 @@ Namespace DAL
         End Function
         Public Sub GetCSVFromDataTable(ByVal dt As DataTable)
             Dim sb As New StringBuilder
-            For i As Integer = 0 To dt.Columns.Count - 1
-                sb.Append(dt.Columns(i))
-                If i < (dt.Columns.Count - 1) Then
-                    sb.Append(_separator)
-                End If
-            Next
-            sb.AppendLine()
+            If Not File.Exists(_CSVFilePath) Then
+                For i As Integer = 0 To dt.Columns.Count - 1
+                    sb.Append(dt.Columns(i))
+                    If i < (dt.Columns.Count - 1) Then
+                        sb.Append(_separator)
+                    End If
+                Next
+            End If
             For Each dr As DataRow In dt.Rows
+                sb.AppendLine()
                 For i As Integer = 0 To dt.Columns.Count - 1
                     sb.Append(dr(i).ToString())
                     If i < (dt.Columns.Count - 1) Then
                         sb.Append(_separator)
                     End If
                 Next
-                sb.AppendLine()
             Next
-            File.WriteAllText(_CSVFilePath, sb.ToString())
+            File.AppendAllText(_CSVFilePath, sb.ToString())
         End Sub
 
         Public Sub GetCSVFromDataGrid(ByVal dg As DataGridView)

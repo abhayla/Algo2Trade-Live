@@ -3555,23 +3555,23 @@ Public Class frmMainTabbed
         If runningStrategy IsNot Nothing AndAlso runningStrategy.ExportCSV Then
             Select Case runningStrategy.GetType
                 Case GetType(MomentumReversalStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Momentum Reversal Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Momentum Reversal Order Book.csv")))
                 Case GetType(OHLStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("OHL Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("OHL Order Book.csv")))
                 Case GetType(AmiSignalStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Ami Signal Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Ami Signal Order Book.csv")))
                 Case GetType(EMA_SupertrendStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Supertrend Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Supertrend Order Book.csv")))
                 Case GetType(NearFarHedgingStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Near Far Hedging Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Near Far Hedging Order Book.csv")))
                 Case GetType(PetDGandhiStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("PetD Gandhi Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("PetD Gandhi Order Book.csv")))
                 Case GetType(EMACrossoverStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Crossover Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Crossover Order Book.csv")))
                 Case GetType(CandleRangeBreakoutStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Candle Range Breakout Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Candle Range Breakout Order Book.csv")))
                 Case GetType(JoyMaaATMStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Joy Maa ATM Order Book {0}.csv", Now.ToString("ddMMyyyy"))))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Joy Maa ATM Order Book.csv")))
                 Case Else
                     Throw New NotImplementedException
             End Select
@@ -3603,15 +3603,15 @@ Public Class frmMainTabbed
                     dt.Columns.Add("Strategy Max Drawdown")
                 End If
                 Dim row As System.Data.DataRow = dt.NewRow
-                row("Trading Date") = Now.Date
+                row("Trading Date") = Now.Date.ToString("dd-MM-yyyy")
                 row("Trading Symbol") = rowData.TradingSymbol
                 row("Strategy Overall PL after brokerage") = rowData.StrategyOverAllPLAfterBrokerage
                 row("Strategy Max Drawup") = rowData.StrategyMaxDrawUp
                 row("Strategy Max Drawdown") = rowData.StrategyMaxDrawDown
                 row("Signal PL") = rowData.SignalPL
                 row("Entry Direction") = rowData.SignalDirection.ToString
-                row("Entry Time") = rowData.EntryRequestTime
-                row("Exit Time") = rowData.CancelRequestTime
+                row("Entry Time") = rowData.EntryRequestTime.ToString("HH:mm:ss")
+                row("Exit Time") = rowData.CancelRequestTime.ToString("HH:mm:ss")
                 row("Exit Condition") = rowData.CancelRequestRemarks
                 dt.Rows.Add(row)
             Next
