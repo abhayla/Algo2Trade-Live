@@ -19,6 +19,7 @@ Public Class JoyMaaATMUserInputs
     <Serializable>
     Public Class InstrumentDetails
         Public Property InstrumentName As String
+        Public Property NumberOfLots As Integer
         Public Property TargetINR As Decimal
     End Class
 
@@ -32,7 +33,7 @@ Public Class JoyMaaATMUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "TARGET INR"}
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "NUMBER OF LOTS", "TARGET INR"}
                         For colCtr = 0 To 1
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
@@ -44,6 +45,7 @@ Public Class JoyMaaATMUserInputs
                         Next
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim instrumentName As String = Nothing
+                            Dim numberOfLots As Integer = Integer.MinValue
                             Dim targetINR As Decimal = Decimal.MinValue
 
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
@@ -57,6 +59,19 @@ Public Class JoyMaaATMUserInputs
                                         End If
                                     End If
                                 ElseIf columnCtr = 1 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
+                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) AndAlso
+                                            Math.Round(Val(instrumentDetails(rowCtr, columnCtr)), 0) = Val(instrumentDetails(rowCtr, columnCtr)) Then
+                                            numberOfLots = instrumentDetails(rowCtr, columnCtr)
+                                            If numberOfLots = 0 Then Throw New ApplicationException(String.Format("Number Of Lots can not be 0(zero) for {0}", instrumentName))
+                                        Else
+                                            Throw New ApplicationException(String.Format("Number Of Lots cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                        End If
+                                    Else
+                                        Throw New ApplicationException(String.Format("Number Of Lots cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                    End If
+                                ElseIf columnCtr = 2 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
@@ -73,6 +88,7 @@ Public Class JoyMaaATMUserInputs
                                 Dim instrumentData As New InstrumentDetails
                                 With instrumentData
                                     .InstrumentName = instrumentName.ToUpper
+                                    .NumberOfLots = numberOfLots
                                     .TargetINR = targetINR
                                 End With
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)

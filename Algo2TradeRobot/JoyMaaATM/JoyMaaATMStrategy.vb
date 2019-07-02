@@ -42,9 +42,22 @@ Public Class JoyMaaATMStrategy
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
-                    Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
-                                                                                                Return x.TradingSymbol.ToUpper = instrument.Value.InstrumentName.ToUpper
-                                                                                            End Function)
+                    Dim runningTradableInstrument As IInstrument = Nothing
+                    Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
+                                                                                                         Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
+                                                                                                            x.RawInstrumentType = "FUT" AndAlso (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX")
+                                                                                                     End Function)
+                    Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
+                                                                           If Not x.Expiry.Value.Date = Now.Date Then
+                                                                               Return x.Expiry.Value
+                                                                           Else
+                                                                               Return Date.MaxValue
+                                                                           End If
+                                                                       End Function)
+                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
+                                                                                Return x.Expiry = minExpiry
+                                                                            End Function)
+
                     _cts.Token.ThrowIfCancellationRequested()
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
                     If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)

@@ -610,6 +610,16 @@ Namespace Strategies
             Next
             Return previousQuantity
         End Function
+        Public Function CalculateTargetFromPL(ByVal buyPrice As Double, ByVal quantity As Integer, ByVal NetProfitLossOfTrade As Double) As Decimal
+            Dim ret As Decimal = buyPrice
+            For ret = buyPrice To Integer.MaxValue Step Me.TradableInstrument.TickSize
+                Dim plAfterBrokerage As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, ret, quantity)
+                If plAfterBrokerage >= NetProfitLossOfTrade Then
+                    Exit For
+                End If
+            Next
+            Return ret
+        End Function
 #End Region
 
 #Region "Public Overridable Functions"
