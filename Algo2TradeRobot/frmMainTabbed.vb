@@ -2394,6 +2394,244 @@ Public Class frmMainTabbed
     End Sub
 #End Region
 
+#Region "Two Third Strategy"
+    Private _TwoThirdUserInputs As TwoThirdUserInputs = Nothing
+    Private _TwoThirdDashboadList As BindingList(Of ActivityDashboard) = Nothing
+    Private _TwoThirdTradableInstruments As IEnumerable(Of TwoThirdStrategyInstrument) = Nothing
+    Private _TwoThirdStrategyToExecute As TwoThirdStrategy = Nothing
+    Private Sub sfdgvTwoThirdMainDashboard_FilterPopupShowing(sender As Object, e As FilterPopupShowingEventArgs) Handles sfdgvTwoThirdMainDashboard.FilterPopupShowing
+        ManipulateGridEx(GridMode.TouchupPopupFilter, e, GetType(TwoThirdStrategy))
+    End Sub
+    Private Sub sfdgvTwoThirdMainDashboard_AutoGeneratingColumn(sender As Object, e As AutoGeneratingColumnArgs) Handles sfdgvTwoThirdMainDashboard.AutoGeneratingColumn
+        ManipulateGridEx(GridMode.TouchupAutogeneratingColumn, e, GetType(TwoThirdStrategy))
+    End Sub
+    Private Async Function TwoThirdWorkerAsync() As Task
+        If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+            MsgBox("Cannot start as another strategy is loggin in")
+            Exit Function
+        End If
+
+        If _cts Is Nothing Then _cts = New CancellationTokenSource
+        _cts.Token.ThrowIfCancellationRequested()
+        _lastException = Nothing
+
+        Try
+            EnableDisableUIEx(UIMode.Active, GetType(TwoThirdStrategy))
+            EnableDisableUIEx(UIMode.BlockOther, GetType(TwoThirdStrategy))
+
+            OnHeartbeat("Validating Strategy user settings")
+            If File.Exists("TwoThirdSettings.Strategy.a2t") Then
+                Dim fs As Stream = New FileStream("TwoThirdSettings.Strategy.a2t", FileMode.Open)
+                Dim bf As BinaryFormatter = New BinaryFormatter()
+                _TwoThirdUserInputs = CType(bf.Deserialize(fs), TwoThirdUserInputs)
+                fs.Close()
+                _TwoThirdUserInputs.InstrumentsData = Nothing
+                _TwoThirdUserInputs.FillInstrumentDetails(_TwoThirdUserInputs.InstrumentDetailsFilePath, _cts)
+            Else
+                Throw New ApplicationException("Settings file not found. Please complete your settings properly.")
+            End If
+            logger.Debug(Utilities.Strings.JsonSerialize(_TwoThirdUserInputs))
+
+            If Not Common.IsZerodhaUserDetailsPopulated(_commonControllerUserInput) Then Throw New ApplicationException("Cannot proceed without API user details being entered")
+            Dim currentUser As ZerodhaUser = Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput)
+            logger.Debug(Utilities.Strings.JsonSerialize(currentUser))
+
+            If _commonController IsNot Nothing Then
+                _commonController.RefreshCancellationToken(_cts)
+            Else
+                _commonController = New ZerodhaStrategyController(currentUser, _commonControllerUserInput, _cts)
+
+                RemoveHandler _commonController.Heartbeat, AddressOf OnHeartbeat
+                RemoveHandler _commonController.WaitingFor, AddressOf OnWaitingFor
+                RemoveHandler _commonController.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+                RemoveHandler _commonController.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+                RemoveHandler _commonController.HeartbeatEx, AddressOf OnHeartbeatEx
+                RemoveHandler _commonController.WaitingForEx, AddressOf OnWaitingForEx
+                RemoveHandler _commonController.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
+                RemoveHandler _commonController.DocumentDownloadCompleteEx, AddressOf OnDocumentDownloadCompleteEx
+                RemoveHandler _commonController.TickerClose, AddressOf OnTickerClose
+                RemoveHandler _commonController.TickerConnect, AddressOf OnTickerConnect
+                RemoveHandler _commonController.TickerError, AddressOf OnTickerError
+                RemoveHandler _commonController.TickerErrorWithStatus, AddressOf OnTickerErrorWithStatus
+                RemoveHandler _commonController.TickerNoReconnect, AddressOf OnTickerNoReconnect
+                RemoveHandler _commonController.FetcherError, AddressOf OnFetcherError
+                RemoveHandler _commonController.CollectorError, AddressOf OnCollectorError
+                RemoveHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
+                RemoveHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                RemoveHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
+
+                AddHandler _commonController.Heartbeat, AddressOf OnHeartbeat
+                AddHandler _commonController.WaitingFor, AddressOf OnWaitingFor
+                AddHandler _commonController.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+                AddHandler _commonController.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+                AddHandler _commonController.HeartbeatEx, AddressOf OnHeartbeatEx
+                AddHandler _commonController.WaitingForEx, AddressOf OnWaitingForEx
+                AddHandler _commonController.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
+                AddHandler _commonController.DocumentDownloadCompleteEx, AddressOf OnDocumentDownloadCompleteEx
+                AddHandler _commonController.TickerClose, AddressOf OnTickerClose
+                AddHandler _commonController.TickerConnect, AddressOf OnTickerConnect
+                AddHandler _commonController.TickerError, AddressOf OnTickerError
+                AddHandler _commonController.TickerErrorWithStatus, AddressOf OnTickerErrorWithStatus
+                AddHandler _commonController.TickerNoReconnect, AddressOf OnTickerNoReconnect
+                AddHandler _commonController.TickerReconnect, AddressOf OnTickerReconnect
+                AddHandler _commonController.FetcherError, AddressOf OnFetcherError
+                AddHandler _commonController.CollectorError, AddressOf OnCollectorError
+                AddHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
+                AddHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                AddHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
+
+#Region "Login"
+                Dim loginMessage As String = Nothing
+                While True
+                    _cts.Token.ThrowIfCancellationRequested()
+                    _connection = Nothing
+                    loginMessage = Nothing
+                    Try
+                        OnHeartbeat("Attempting to get connection to Zerodha API")
+                        _cts.Token.ThrowIfCancellationRequested()
+                        _connection = Await _commonController.LoginAsync().ConfigureAwait(False)
+                        _cts.Token.ThrowIfCancellationRequested()
+                    Catch cx As OperationCanceledException
+                        loginMessage = cx.Message
+                        logger.Error(cx)
+                        Exit While
+                    Catch ex As Exception
+                        loginMessage = ex.Message
+                        logger.Error(ex)
+                    End Try
+                    If _connection Is Nothing Then
+                        If loginMessage IsNot Nothing AndAlso (loginMessage.ToUpper.Contains("password".ToUpper) OrElse loginMessage.ToUpper.Contains("api_key".ToUpper) OrElse loginMessage.ToUpper.Contains("username".ToUpper)) Then
+                            'No need to retry as its a password failure
+                            OnHeartbeat(String.Format("Loging process failed:{0}", loginMessage))
+                            Exit While
+                        Else
+                            OnHeartbeat(String.Format("Loging process failed:{0} | Waiting for 10 seconds before retrying connection", loginMessage))
+                            _cts.Token.ThrowIfCancellationRequested()
+                            Await Task.Delay(10000, _cts.Token).ConfigureAwait(False)
+                            _cts.Token.ThrowIfCancellationRequested()
+                        End If
+                    Else
+                        Exit While
+                    End If
+                End While
+                If _connection Is Nothing Then
+                    If loginMessage IsNot Nothing Then
+                        Throw New ApplicationException(String.Format("No connection to Zerodha API could be established | Details:{0}", loginMessage))
+                    Else
+                        Throw New ApplicationException("No connection to Zerodha API could be established")
+                    End If
+                End If
+#End Region
+
+                OnHeartbeat("Completing all pre-automation requirements")
+                _cts.Token.ThrowIfCancellationRequested()
+                Dim isPreProcessingDone As Boolean = Await _commonController.PrepareToRunStrategyAsync().ConfigureAwait(False)
+                _cts.Token.ThrowIfCancellationRequested()
+
+                If Not isPreProcessingDone Then Throw New ApplicationException("PrepareToRunStrategyAsync did not succeed, cannot progress")
+            End If 'Common controller
+            EnableDisableUIEx(UIMode.ReleaseOther, GetType(TwoThirdStrategy))
+
+            _TwoThirdStrategyToExecute = New TwoThirdStrategy(_commonController, 6, _TwoThirdUserInputs, 5, _cts)
+            OnHeartbeatEx(String.Format("Running strategy:{0}", _TwoThirdStrategyToExecute.ToString), New List(Of Object) From {_TwoThirdStrategyToExecute})
+
+            _cts.Token.ThrowIfCancellationRequested()
+            Await _commonController.SubscribeStrategyAsync(_TwoThirdStrategyToExecute).ConfigureAwait(False)
+            _cts.Token.ThrowIfCancellationRequested()
+
+            _TwoThirdTradableInstruments = _TwoThirdStrategyToExecute.TradableStrategyInstruments
+            SetObjectText_ThreadSafe(linklblTwoThirdTradableInstrument, String.Format("Tradable Instruments: {0}", _TwoThirdTradableInstruments.Count))
+            SetObjectEnableDisable_ThreadSafe(linklblTwoThirdTradableInstrument, True)
+            _cts.Token.ThrowIfCancellationRequested()
+
+            _TwoThirdDashboadList = New BindingList(Of ActivityDashboard)(_TwoThirdStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
+                                                                                                                                                        Return x.SignalGeneratedTime
+                                                                                                                                                    End Function).ToList)
+            SetSFGridDataBind_ThreadSafe(sfdgvTwoThirdMainDashboard, _TwoThirdDashboadList)
+            SetSFGridFreezFirstColumn_ThreadSafe(sfdgvTwoThirdMainDashboard)
+            _cts.Token.ThrowIfCancellationRequested()
+
+            Await _TwoThirdStrategyToExecute.MonitorAsync().ConfigureAwait(False)
+        Catch aex As AdapterBusinessException
+            logger.Error(aex)
+            If aex.ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
+                _lastException = aex
+            Else
+                MsgBox(String.Format("The following error occurred: {0}", aex.Message), MsgBoxStyle.Critical)
+            End If
+        Catch fex As ForceExitException
+            logger.Error(fex)
+            _lastException = fex
+        Catch cx As OperationCanceledException
+            logger.Error(cx)
+            MsgBox(String.Format("The following error occurred: {0}", cx.Message), MsgBoxStyle.Critical)
+        Catch ex As Exception
+            logger.Error(ex)
+            MsgBox(String.Format("The following error occurred: {0}", ex.Message), MsgBoxStyle.Critical)
+        Finally
+            ProgressStatus("No pending actions")
+            EnableDisableUIEx(UIMode.ReleaseOther, GetType(TwoThirdStrategy))
+            EnableDisableUIEx(UIMode.Idle, GetType(TwoThirdStrategy))
+        End Try
+        'If _cts Is Nothing OrElse _cts.IsCancellationRequested Then
+        'Following portion need to be done for any kind of exception. Otherwise if we start again without closing the form then
+        'it will not new object of controller. So orphan exception will throw exception again and information collector, historical data fetcher
+        'and ticker will not work.
+        If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseCollectorIfConnectedAsync(True).ConfigureAwait(False)
+        _commonController = Nothing
+        _connection = Nothing
+        _cts = Nothing
+        'End If
+    End Function
+    Private Async Sub btnTwoThirdStart_Click(sender As Object, e As EventArgs) Handles btnTwoThirdStart.Click
+        'Dim authenticationUserId As String = "YH8805"
+        'If Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper IsNot Nothing AndAlso
+        '    Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper <> "" AndAlso
+        '    (authenticationUserId <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper AndAlso
+        '    "DK4056" <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper) Then
+        '    MsgBox("You are not an authentic user. Kindly contact Algo2Trade", MsgBoxStyle.Critical)
+        '    Exit Sub
+        'End If
+
+        PreviousDayCleanup()
+        Await Task.Run(AddressOf TwoThirdWorkerAsync).ConfigureAwait(False)
+
+        If _lastException IsNot Nothing Then
+            If _lastException.GetType.BaseType Is GetType(AdapterBusinessException) AndAlso
+                CType(_lastException, AdapterBusinessException).ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
+                Debug.WriteLine("Restart for permission")
+                logger.Debug("Restarting the application again as there is premission issue")
+                btnTwoThirdStart_Click(sender, e)
+            ElseIf _lastException.GetType Is GetType(ForceExitException) Then
+                Debug.WriteLine("Restart for daily refresh")
+                logger.Debug("Restarting the application again for daily refresh")
+                btnTwoThirdStart_Click(sender, e)
+            End If
+        End If
+    End Sub
+    Private Sub tmrTwoThirdTickerStatus_Tick(sender As Object, e As EventArgs) Handles tmrTwoThirdTickerStatus.Tick
+        FlashTickerBulbEx(GetType(TwoThirdStrategy))
+    End Sub
+    Private Async Sub btnTwoThirdStop_Click(sender As Object, e As EventArgs) Handles btnTwoThirdStop.Click
+        OnEndOfTheDay(_TwoThirdStrategyToExecute)
+        SetObjectEnableDisable_ThreadSafe(linklblTwoThirdTradableInstrument, False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
+        If _commonController IsNot Nothing Then Await _commonController.CloseCollectorIfConnectedAsync(True).ConfigureAwait(False)
+        _cts.Cancel()
+    End Sub
+    Private Sub btnTwoThirdSettings_Click(sender As Object, e As EventArgs) Handles btnTwoThirdSettings.Click
+        Dim newForm As New frmTwoThirdSettings(_TwoThirdUserInputs)
+        newForm.ShowDialog()
+    End Sub
+    Private Sub linklblTwoThirdTradableInstrument_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles linklblTwoThirdTradableInstrument.LinkClicked
+        Dim newForm As New frmTwoThirdTradableInstrumentList(_TwoThirdTradableInstruments)
+        newForm.ShowDialog()
+    End Sub
+#End Region
+
 #Region "Common to all stratgeies"
 
 #Region "EX function"
@@ -2444,6 +2682,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, Common.LOGIN_PENDING)
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, Common.LOGIN_PENDING)
+                    End If
                 Case UIMode.ReleaseOther
                     If GetObjectText_ThreadSafe(btnOHLStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnOHLStart, "Start")
@@ -2476,6 +2718,10 @@ Public Class frmMainTabbed
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
                     SetObjectEnableDisable_ThreadSafe(btnAmiSignalStart, True)
@@ -2522,6 +2768,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, Common.LOGIN_PENDING)
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, Common.LOGIN_PENDING)
+                    End If
                 Case UIMode.ReleaseOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
@@ -2554,6 +2804,10 @@ Public Class frmMainTabbed
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
                     SetObjectEnableDisable_ThreadSafe(btnOHLStart, True)
@@ -2600,6 +2854,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, Common.LOGIN_PENDING)
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, Common.LOGIN_PENDING)
+                    End If
                 Case UIMode.ReleaseOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
@@ -2632,6 +2890,10 @@ Public Class frmMainTabbed
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
                     SetObjectEnableDisable_ThreadSafe(btnMomentumReversalStart, True)
@@ -2678,6 +2940,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, Common.LOGIN_PENDING)
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, Common.LOGIN_PENDING)
+                    End If
                 Case UIMode.ReleaseOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
@@ -2710,6 +2976,10 @@ Public Class frmMainTabbed
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
                     SetObjectEnableDisable_ThreadSafe(btnEMA_SupertrendStart, True)
@@ -2756,6 +3026,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, Common.LOGIN_PENDING)
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, Common.LOGIN_PENDING)
+                    End If
                 Case UIMode.ReleaseOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
@@ -2788,6 +3062,10 @@ Public Class frmMainTabbed
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
                     SetObjectEnableDisable_ThreadSafe(btnNearFarHedgingStart, True)
@@ -2834,6 +3112,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, Common.LOGIN_PENDING)
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, Common.LOGIN_PENDING)
+                    End If
                 Case UIMode.ReleaseOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
@@ -2866,6 +3148,10 @@ Public Class frmMainTabbed
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
                     SetObjectEnableDisable_ThreadSafe(btnPetDGandhiStart, True)
@@ -2912,6 +3198,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, Common.LOGIN_PENDING)
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, Common.LOGIN_PENDING)
+                    End If
                 Case UIMode.ReleaseOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
@@ -2944,6 +3234,10 @@ Public Class frmMainTabbed
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
                     SetObjectEnableDisable_ThreadSafe(btnEMACrossoverStart, True)
@@ -2990,6 +3284,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, Common.LOGIN_PENDING)
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, Common.LOGIN_PENDING)
+                    End If
                 Case UIMode.ReleaseOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
@@ -3022,6 +3320,10 @@ Public Class frmMainTabbed
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
                         SetObjectText_ThreadSafe(btnJoyMaaATMStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
                     SetObjectEnableDisable_ThreadSafe(btnCandleRangeBreakoutStart, True)
@@ -3068,6 +3370,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, Common.LOGIN_PENDING)
+                    End If
                 Case UIMode.ReleaseOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
@@ -3101,11 +3407,101 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
                         SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
                     End If
+                    If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
+                        SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
+                    End If
                 Case UIMode.Idle
                     SetObjectEnableDisable_ThreadSafe(btnJoyMaaATMStart, True)
                     SetObjectEnableDisable_ThreadSafe(btnJoyMaaATMSettings, True)
                     SetObjectEnableDisable_ThreadSafe(btnJoyMaaATMStop, False)
                     SetSFGridDataBind_ThreadSafe(sfdgvJoyMaaATMMainDashboard, Nothing)
+            End Select
+        ElseIf source Is GetType(TwoThirdStrategy) Then
+            Select Case mode
+                Case UIMode.Active
+                    SetObjectEnableDisable_ThreadSafe(btnTwoThirdStart, False)
+                    SetObjectEnableDisable_ThreadSafe(btnTwoThirdSettings, False)
+                    SetObjectEnableDisable_ThreadSafe(btnTwoThirdStop, True)
+                Case UIMode.BlockOther
+                    If GetObjectText_ThreadSafe(btnAmiSignalStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnAmiSignalStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnAmiSignalStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnOHLStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnOHLStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnOHLStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnMomentumReversalStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnMomentumReversalStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnMomentumReversalStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnEMA_SupertrendStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnEMA_SupertrendStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnEMA_SupertrendStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnNearFarHedgingStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnNearFarHedgingStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnNearFarHedgingStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnEMACrossoverStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnEMACrossoverStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnEMACrossoverStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnPetDGandhiStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    End If
+                    If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnJoyMaaATMStop, Common.LOGIN_PENDING)
+                    End If
+                Case UIMode.ReleaseOther
+                    If GetObjectText_ThreadSafe(btnAmiSignalStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnAmiSignalStart, "Start")
+                        SetObjectText_ThreadSafe(btnAmiSignalStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnOHLStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnOHLStart, "Start")
+                        SetObjectText_ThreadSafe(btnOHLStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnMomentumReversalStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnMomentumReversalStart, "Start")
+                        SetObjectText_ThreadSafe(btnMomentumReversalStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnEMA_SupertrendStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnEMA_SupertrendStart, "Start")
+                        SetObjectText_ThreadSafe(btnEMA_SupertrendStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnNearFarHedgingStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnNearFarHedgingStart, "Start")
+                        SetObjectText_ThreadSafe(btnNearFarHedgingStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnEMACrossoverStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnEMACrossoverStart, "Start")
+                        SetObjectText_ThreadSafe(btnEMACrossoverStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnPetDGandhiStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
+                        SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
+                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    End If
+                    If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnJoyMaaATMStop, "Stop")
+                    End If
+                Case UIMode.Idle
+                    SetObjectEnableDisable_ThreadSafe(btnTwoThirdStart, True)
+                    SetObjectEnableDisable_ThreadSafe(btnTwoThirdSettings, True)
+                    SetObjectEnableDisable_ThreadSafe(btnTwoThirdStop, False)
+                    SetSFGridDataBind_ThreadSafe(sfdgvTwoThirdMainDashboard, Nothing)
             End Select
         End If
     End Sub
@@ -3139,6 +3535,9 @@ Public Class frmMainTabbed
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             blbTickerStatusCommon = blbJoyMaaATMTickerStatus
             tmrTickerStatusCommon = tmrJoyMaaATMTickerStatus
+        ElseIf source Is GetType(TwoThirdStrategy) Then
+            blbTickerStatusCommon = blbTwoThirdTickerStatus
+            tmrTickerStatusCommon = tmrTwoThirdTickerStatus
         End If
 
         tmrTickerStatusCommon.Enabled = False
@@ -3178,6 +3577,8 @@ Public Class frmMainTabbed
             blbTickerStatusCommon = blbCandleRangeBreakoutTickerStatus
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             blbTickerStatusCommon = blbJoyMaaATMTickerStatus
+        ElseIf source Is GetType(TwoThirdStrategy) Then
+            blbTickerStatusCommon = blbTwoThirdTickerStatus
         End If
         blbTickerStatusCommon.Color = color
     End Sub
@@ -3207,6 +3608,8 @@ Public Class frmMainTabbed
             sfdgvCommon = sfdgvCandleRangeBreakoutMainDashboard
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             sfdgvCommon = sfdgvJoyMaaATMMainDashboard
+        ElseIf source Is GetType(TwoThirdStrategy) Then
+            sfdgvCommon = sfdgvTwoThirdMainDashboard
         End If
 
         Dim eFilterPopupShowingEventArgsCommon As FilterPopupShowingEventArgs = Nothing
@@ -3298,6 +3701,11 @@ Public Class frmMainTabbed
                 Case LogMode.One
                     SetListAddItem_ThreadSafe(lstJoyMaaATMLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
             End Select
+        ElseIf source IsNot Nothing AndAlso source.GetType Is GetType(TwoThirdStrategy) Then
+            Select Case mode
+                Case LogMode.One
+                    SetListAddItem_ThreadSafe(lstTwoThirdLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
+            End Select
         ElseIf source Is Nothing Then
             Select Case mode
                 Case LogMode.All
@@ -3310,6 +3718,7 @@ Public Class frmMainTabbed
                     SetListAddItem_ThreadSafe(lstEMACrossoverLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
                     SetListAddItem_ThreadSafe(lstCandleRangeBreakoutLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
                     SetListAddItem_ThreadSafe(lstJoyMaaATMLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
+                    SetListAddItem_ThreadSafe(lstTwoThirdLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
             End Select
         End If
     End Sub
@@ -3359,6 +3768,7 @@ Public Class frmMainTabbed
         EnableDisableUIEx(UIMode.Idle, GetType(EMACrossoverStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(CandleRangeBreakoutStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(JoyMaaATMStrategy))
+        EnableDisableUIEx(UIMode.Idle, GetType(TwoThirdStrategy))
         'tabMain.TabPages.Remove(tabOHL)
         'tabMain.TabPages.Remove(tabMomentumReversal)
         'tabMain.TabPages.Remove(tabAmiSignal)
@@ -3368,6 +3778,7 @@ Public Class frmMainTabbed
         'tabMain.TabPages.Remove(tabPetDGandhi)
         'tabMain.TabPages.Remove(tabEMACrossover)
         'tabMain.TabPages.Remove(tabJoyMaaATM)
+        'tabMain.TabPages.Remove(tabTwoThird)
     End Sub
     Private Sub OnTickerClose()
         ColorTickerBulbEx(GetType(OHLStrategy), Color.Pink)
@@ -3379,6 +3790,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(CandleRangeBreakoutStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Pink)
+        ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Pink)
         OnHeartbeat("Ticker:Closed")
     End Sub
     Private Sub OnTickerConnect()
@@ -3391,6 +3803,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(CandleRangeBreakoutStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Lime)
+        ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Lime)
         OnHeartbeat("Ticker:Connected")
     End Sub
     Private Sub OnTickerErrorWithStatus(ByVal isConnected As Boolean, ByVal errorMsg As String)
@@ -3404,6 +3817,7 @@ Public Class frmMainTabbed
             ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(CandleRangeBreakoutStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Pink)
+            ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Pink)
         End If
     End Sub
     Private Sub OnTickerError(ByVal errorMsg As String)
@@ -3422,6 +3836,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(CandleRangeBreakoutStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Yellow)
+        ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Yellow)
         OnHeartbeat("Ticker:Reconnecting")
     End Sub
     Private Sub OnFetcherError(ByVal instrumentIdentifier As String, ByVal errorMsg As String)
@@ -3486,6 +3901,8 @@ Public Class frmMainTabbed
                     BindingListAdd_ThreadSafe(_CandleRangeBreakoutDashboadList, item)
                 Case GetType(JoyMaaATMStrategy)
                     BindingListAdd_ThreadSafe(_JoyMaaATMDashboadList, item)
+                Case GetType(TwoThirdStrategy)
+                    BindingListAdd_ThreadSafe(_TwoThirdDashboadList, item)
                 Case Else
                     Throw New NotImplementedException
             End Select
@@ -3547,6 +3964,12 @@ Public Class frmMainTabbed
                 _JoyMaaATMDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
                 SetSFGridDataBind_ThreadSafe(sfdgvJoyMaaATMMainDashboard, _JoyMaaATMDashboadList)
                 SetSFGridFreezFirstColumn_ThreadSafe(sfdgvJoyMaaATMMainDashboard)
+            Case GetType(TwoThirdStrategy)
+                SetSFGridDataBind_ThreadSafe(sfdgvTwoThirdMainDashboard, Nothing)
+                _TwoThirdDashboadList = Nothing
+                _TwoThirdDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
+                SetSFGridDataBind_ThreadSafe(sfdgvTwoThirdMainDashboard, _TwoThirdDashboadList)
+                SetSFGridFreezFirstColumn_ThreadSafe(sfdgvTwoThirdMainDashboard)
             Case Else
                 Throw New NotImplementedException
         End Select
@@ -3572,6 +3995,8 @@ Public Class frmMainTabbed
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Candle Range Breakout Order Book.csv")))
                 Case GetType(JoyMaaATMStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Joy Maa ATM Order Book.csv")))
+                Case GetType(TwoThirdStrategy)
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Two Third Strategy Order Book.csv")))
                 Case Else
                     Throw New NotImplementedException
             End Select

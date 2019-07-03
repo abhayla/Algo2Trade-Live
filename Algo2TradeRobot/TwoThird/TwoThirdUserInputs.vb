@@ -4,12 +4,15 @@ Imports Algo2TradeCore.Entities.UserSettings
 Imports Utilities.DAL
 
 <Serializable>
-Public Class JoyMaaATMUserInputs
+Public Class TwoThirdUserInputs
     Inherits StrategyUserInputs
 
     Public Property ATRPeriod As Integer
-    Public Property NumberOfTradePerDay As Integer
+    Public Property NumberOfTradePerStock As Integer
     Public Property ReverseTrade As Boolean
+    Public Property StoplossMovementToBreakeven As Boolean
+    Public Property CountTradesWithBreakevenMovement As Boolean
+
     Public Property TelegramAPIKey As String
     Public Property TelegramChatID As String
     Public Property TelegramPLChatID As String
@@ -19,8 +22,9 @@ Public Class JoyMaaATMUserInputs
     <Serializable>
     Public Class InstrumentDetails
         Public Property InstrumentName As String
-        Public Property NumberOfLots As Integer
-        Public Property TargetINR As Decimal
+        Public Property Quantity As Integer
+        Public Property Capital As Decimal
+        Public Property AllowCapitalToIncrease As Boolean
     End Class
 
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
@@ -33,8 +37,8 @@ Public Class JoyMaaATMUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "NUMBER OF LOTS", "TARGET INR"}
-                        For colCtr = 0 To 2
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "QUANTITY", "CAPITAL", "INCREASE CAPITAL ALLOWED"}
+                        For colCtr = 0 To 3
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -45,8 +49,9 @@ Public Class JoyMaaATMUserInputs
                         Next
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim instrumentName As String = Nothing
-                            Dim numberOfLots As Integer = Integer.MinValue
-                            Dim targetINR As Decimal = Decimal.MinValue
+                            Dim quantity As Integer = Integer.MinValue
+                            Dim capital As Decimal = Decimal.MinValue
+                            Dim allowCapitalIncrease As Decimal = Decimal.MinValue
 
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
@@ -63,39 +68,44 @@ Public Class JoyMaaATMUserInputs
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) AndAlso
                                             Math.Round(Val(instrumentDetails(rowCtr, columnCtr)), 0) = Val(instrumentDetails(rowCtr, columnCtr)) Then
-                                            numberOfLots = instrumentDetails(rowCtr, columnCtr)
-                                            If numberOfLots = 0 Then Throw New ApplicationException(String.Format("Number Of Lots can not be 0(zero) for {0}", instrumentName))
+                                            quantity = instrumentDetails(rowCtr, columnCtr)
                                         Else
-                                            Throw New ApplicationException(String.Format("Number Of Lots cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                            Throw New ApplicationException(String.Format("Quantity cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                         End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Number Of Lots cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
                                 ElseIf columnCtr = 2 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            targetINR = instrumentDetails(rowCtr, columnCtr)
+                                            capital = instrumentDetails(rowCtr, columnCtr)
                                         Else
-                                            Throw New ApplicationException(String.Format("Target INR cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                            Throw New ApplicationException(String.Format("Capital cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                         End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Target INR cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                    End If
+                                ElseIf columnCtr = 3 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        instrumentDetails(rowCtr, columnCtr).ToString.ToUpper = "TRUE" Then
+                                        allowCapitalIncrease = True
                                     End If
                                 End If
                             Next
-                            If instrumentName IsNot Nothing AndAlso targetINR > 0 Then
-                                Dim instrumentData As New InstrumentDetails
-                                With instrumentData
-                                    .InstrumentName = instrumentName.ToUpper
-                                    .NumberOfLots = numberOfLots
-                                    .TargetINR = targetINR
-                                End With
-                                If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
-                                If Me.InstrumentsData.ContainsKey(instrumentData.InstrumentName) Then
-                                    Throw New ApplicationException(String.Format("Duplicate Instrument Name {0}", instrumentData.InstrumentName))
+                            If instrumentName IsNot Nothing Then
+                                If quantity <> Integer.MinValue OrElse capital <> Decimal.MinValue Then
+                                    Dim instrumentData As New InstrumentDetails
+                                    With instrumentData
+                                        .InstrumentName = instrumentName.ToUpper
+                                        .Quantity = quantity
+                                        .Capital = capital
+                                        .AllowCapitalToIncrease = allowCapitalIncrease
+                                    End With
+                                    If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
+                                    If Me.InstrumentsData.ContainsKey(instrumentData.InstrumentName) Then
+                                        Throw New ApplicationException(String.Format("Duplicate Instrument Name {0}", instrumentData.InstrumentName))
+                                    End If
+                                    Me.InstrumentsData.Add(instrumentData.InstrumentName, instrumentData)
+                                Else
+                                    Throw New ApplicationException(String.Format("Quantity and Capital both can not be null for {0}", instrumentName))
                                 End If
-                                Me.InstrumentsData.Add(instrumentData.InstrumentName, instrumentData)
                             End If
                         Next
                     Else

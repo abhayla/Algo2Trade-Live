@@ -287,6 +287,21 @@
     <Compile Include="PetDGandhi\PetDGandhiStrategy.vb" />
     <Compile Include="PetDGandhi\PetDGandhiStrategyInstrument.vb" />
     <Compile Include="PetDGandhi\PetDGandhiUserInputs.vb" />
+    <Compile Include="TwoThird\frmTwoThirdSettings.Designer.vb">
+      <DependentUpon>frmTwoThirdSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="TwoThird\frmTwoThirdSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TwoThird\frmTwoThirdTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmTwoThirdTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="TwoThird\frmTwoThirdTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TwoThird\TwoThirdStrategy.vb" />
+    <Compile Include="TwoThird\TwoThirdStrategyInstrument.vb" />
+    <Compile Include="TwoThird\TwoThirdUserInputs.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AmiSignal\frmAmiSignalSettings.resx">
@@ -360,6 +375,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PetDGandhi\frmPetDGandhiTradableInstrumentList.resx">
       <DependentUpon>frmPetDGandhiTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TwoThird\frmTwoThirdSettings.resx">
+      <DependentUpon>frmTwoThirdSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TwoThird\frmTwoThirdTradableInstrumentList.resx">
+      <DependentUpon>frmTwoThirdTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
