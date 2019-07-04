@@ -48,7 +48,7 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>algo2tradericon 24x24.ico</ApplicationIcon>
+    <ApplicationIcon>algo2tradericon_512x512.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
@@ -407,7 +407,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="algo2tradericon 24x24.ico" />
+    <Content Include="algo2tradericon_512x512.ico" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
