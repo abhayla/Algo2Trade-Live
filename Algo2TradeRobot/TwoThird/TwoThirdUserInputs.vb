@@ -12,6 +12,7 @@ Public Class TwoThirdUserInputs
     Public Property ReverseTrade As Boolean
     Public Property StoplossMovementToBreakeven As Boolean
     Public Property CountTradesWithBreakevenMovement As Boolean
+    Public Property BreakevenPoint As Decimal
 
     Public Property TelegramAPIKey As String
     Public Property TelegramChatID As String

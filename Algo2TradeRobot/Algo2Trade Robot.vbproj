@@ -299,6 +299,7 @@
     <Compile Include="TwoThird\frmTwoThirdTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="TwoThird\TwoThirdFillInstrumentDetails.vb" />
     <Compile Include="TwoThird\TwoThirdStrategy.vb" />
     <Compile Include="TwoThird\TwoThirdStrategyInstrument.vb" />
     <Compile Include="TwoThird\TwoThirdUserInputs.vb" />

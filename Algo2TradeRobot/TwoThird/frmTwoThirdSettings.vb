@@ -46,9 +46,11 @@ Public Class frmTwoThirdSettings
     Private Sub chbStoplossMoveToBreakeven_CheckedChanged(sender As Object, e As EventArgs) Handles chbStoplossMoveToBreakeven.CheckedChanged
         If chbStoplossMoveToBreakeven.Checked Then
             chbCountTradesWithBreakevenMovement.Enabled = True
+            txtBreakevenPoint.Enabled = True
         Else
             chbCountTradesWithBreakevenMovement.Checked = False
             chbCountTradesWithBreakevenMovement.Enabled = False
+            txtBreakevenPoint.Enabled = False
         End If
     End Sub
 
@@ -65,6 +67,7 @@ Public Class frmTwoThirdSettings
             chbReverseTrade.Checked = _settings.ReverseTrade
             chbStoplossMoveToBreakeven.Checked = _settings.StoplossMovementToBreakeven
             chbCountTradesWithBreakevenMovement.Checked = _settings.CountTradesWithBreakevenMovement
+            txtBreakevenPoint.Text = _settings.BreakevenPoint
             txtTelegramAPI.Text = _settings.TelegramAPIKey
             txtTelegramChatID.Text = _settings.TelegramChatID
             txtTelegramChatIDForPL.Text = _settings.TelegramPLChatID
@@ -83,6 +86,7 @@ Public Class frmTwoThirdSettings
         _settings.ReverseTrade = chbReverseTrade.Checked
         _settings.StoplossMovementToBreakeven = chbStoplossMoveToBreakeven.Checked
         _settings.CountTradesWithBreakevenMovement = chbCountTradesWithBreakevenMovement.Checked
+        _settings.BreakevenPoint = txtBreakevenPoint.Text
         _settings.TelegramAPIKey = txtTelegramAPI.Text
         _settings.TelegramChatID = txtTelegramChatID.Text
         _settings.TelegramPLChatID = txtTelegramChatIDForPL.Text

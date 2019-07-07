@@ -53,9 +53,11 @@ Partial Class frmTwoThirdSettings
         Me.lblLastTradeEntryTime = New System.Windows.Forms.Label()
         Me.lblTradeStartTime = New System.Windows.Forms.Label()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
-        Me.chbReverseTrade = New System.Windows.Forms.CheckBox()
-        Me.chbStoplossMoveToBreakeven = New System.Windows.Forms.CheckBox()
         Me.chbCountTradesWithBreakevenMovement = New System.Windows.Forms.CheckBox()
+        Me.chbStoplossMoveToBreakeven = New System.Windows.Forms.CheckBox()
+        Me.chbReverseTrade = New System.Windows.Forms.CheckBox()
+        Me.txtBreakevenPoint = New System.Windows.Forms.TextBox()
+        Me.lblBreakevenPoint = New System.Windows.Forms.Label()
         Me.grpTelegram.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -78,7 +80,7 @@ Partial Class frmTwoThirdSettings
         Me.grpTelegram.Controls.Add(Me.lblTelegramChatID)
         Me.grpTelegram.Controls.Add(Me.txtTelegramAPI)
         Me.grpTelegram.Controls.Add(Me.lblTelegramAPI)
-        Me.grpTelegram.Location = New System.Drawing.Point(493, 134)
+        Me.grpTelegram.Location = New System.Drawing.Point(493, 182)
         Me.grpTelegram.Name = "grpTelegram"
         Me.grpTelegram.Size = New System.Drawing.Size(358, 122)
         Me.grpTelegram.TabIndex = 29
@@ -348,24 +350,26 @@ Partial Class frmTwoThirdSettings
         '
         'GroupBox2
         '
+        Me.GroupBox2.Controls.Add(Me.txtBreakevenPoint)
+        Me.GroupBox2.Controls.Add(Me.lblBreakevenPoint)
         Me.GroupBox2.Controls.Add(Me.chbCountTradesWithBreakevenMovement)
         Me.GroupBox2.Controls.Add(Me.chbStoplossMoveToBreakeven)
         Me.GroupBox2.Controls.Add(Me.chbReverseTrade)
         Me.GroupBox2.Location = New System.Drawing.Point(493, 5)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(358, 119)
+        Me.GroupBox2.Size = New System.Drawing.Size(358, 152)
         Me.GroupBox2.TabIndex = 30
         Me.GroupBox2.TabStop = False
         '
-        'chbReverseTrade
+        'chbCountTradesWithBreakevenMovement
         '
-        Me.chbReverseTrade.AutoSize = True
-        Me.chbReverseTrade.Location = New System.Drawing.Point(18, 17)
-        Me.chbReverseTrade.Name = "chbReverseTrade"
-        Me.chbReverseTrade.Size = New System.Drawing.Size(125, 21)
-        Me.chbReverseTrade.TabIndex = 0
-        Me.chbReverseTrade.Text = "Reverse Trade"
-        Me.chbReverseTrade.UseVisualStyleBackColor = True
+        Me.chbCountTradesWithBreakevenMovement.AutoSize = True
+        Me.chbCountTradesWithBreakevenMovement.Location = New System.Drawing.Point(18, 84)
+        Me.chbCountTradesWithBreakevenMovement.Name = "chbCountTradesWithBreakevenMovement"
+        Me.chbCountTradesWithBreakevenMovement.Size = New System.Drawing.Size(289, 21)
+        Me.chbCountTradesWithBreakevenMovement.TabIndex = 2
+        Me.chbCountTradesWithBreakevenMovement.Text = "Count Trades With Breakeven Movement"
+        Me.chbCountTradesWithBreakevenMovement.UseVisualStyleBackColor = True
         '
         'chbStoplossMoveToBreakeven
         '
@@ -377,15 +381,34 @@ Partial Class frmTwoThirdSettings
         Me.chbStoplossMoveToBreakeven.Text = "Stoploss Movement To Breakeven"
         Me.chbStoplossMoveToBreakeven.UseVisualStyleBackColor = True
         '
-        'chbCountTradesWithBreakevenMovement
+        'chbReverseTrade
         '
-        Me.chbCountTradesWithBreakevenMovement.AutoSize = True
-        Me.chbCountTradesWithBreakevenMovement.Location = New System.Drawing.Point(18, 84)
-        Me.chbCountTradesWithBreakevenMovement.Name = "chbCountTradesWithBreakevenMovement"
-        Me.chbCountTradesWithBreakevenMovement.Size = New System.Drawing.Size(289, 21)
-        Me.chbCountTradesWithBreakevenMovement.TabIndex = 2
-        Me.chbCountTradesWithBreakevenMovement.Text = "Count Trades With Breakeven Movement"
-        Me.chbCountTradesWithBreakevenMovement.UseVisualStyleBackColor = True
+        Me.chbReverseTrade.AutoSize = True
+        Me.chbReverseTrade.Location = New System.Drawing.Point(18, 17)
+        Me.chbReverseTrade.Name = "chbReverseTrade"
+        Me.chbReverseTrade.Size = New System.Drawing.Size(125, 21)
+        Me.chbReverseTrade.TabIndex = 0
+        Me.chbReverseTrade.Text = "Reverse Trade"
+        Me.chbReverseTrade.UseVisualStyleBackColor = True
+        '
+        'txtBreakevenPoint
+        '
+        Me.txtBreakevenPoint.Location = New System.Drawing.Point(157, 116)
+        Me.txtBreakevenPoint.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtBreakevenPoint.Name = "txtBreakevenPoint"
+        Me.txtBreakevenPoint.Size = New System.Drawing.Size(150, 22)
+        Me.txtBreakevenPoint.TabIndex = 32
+        Me.txtBreakevenPoint.Tag = "Max Profit Per Day"
+        '
+        'lblBreakevenPoint
+        '
+        Me.lblBreakevenPoint.AutoSize = True
+        Me.lblBreakevenPoint.Location = New System.Drawing.Point(15, 119)
+        Me.lblBreakevenPoint.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblBreakevenPoint.Name = "lblBreakevenPoint"
+        Me.lblBreakevenPoint.Size = New System.Drawing.Size(112, 17)
+        Me.lblBreakevenPoint.TabIndex = 33
+        Me.lblBreakevenPoint.Text = "Breakeven Point"
         '
         'frmTwoThirdSettings
         '
@@ -442,4 +465,6 @@ Partial Class frmTwoThirdSettings
     Friend WithEvents chbStoplossMoveToBreakeven As CheckBox
     Friend WithEvents chbReverseTrade As CheckBox
     Friend WithEvents chbCountTradesWithBreakevenMovement As CheckBox
+    Friend WithEvents txtBreakevenPoint As TextBox
+    Friend WithEvents lblBreakevenPoint As Label
 End Class

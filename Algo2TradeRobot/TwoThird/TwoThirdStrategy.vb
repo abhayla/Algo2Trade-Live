@@ -39,6 +39,11 @@ Public Class TwoThirdStrategy
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             Dim userInputs As TwoThirdUserInputs = Me.UserSettings
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
+                'For Each runningInstrument In allInstruments
+                '    If runningInstrument.RawExchange = "NFO" Then
+
+                '    End If
+                'Next
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()

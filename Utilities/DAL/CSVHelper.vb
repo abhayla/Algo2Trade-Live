@@ -66,18 +66,22 @@ Namespace DAL
                                                   runningLineNumber,
                                                   totalLinesCtr)
                         Dim data() As String = sr.ReadLine.Split(_separator)
-
+                        If headerScanned Then
+                            ret.Rows.Add(data.ToArray)
+                        End If
                         If Not headerScanned And ((headerLineNumber = 0 And runningLineNumber = 1) Or (headerLineNumber > 0 And runningLineNumber = headerLineNumber)) Then
                             headerScanned = True
                             Dim colCtr As Integer = 0
                             For Each col In data
                                 _canceller.Token.ThrowIfCancellationRequested()
                                 colCtr += 1
-                                ret.Columns.Add(New DataColumn(String.Format("{0}_{1}", col, colCtr), GetType(String)))
+                                If headerLineNumber = 0 Then
+                                    ret.Columns.Add(New DataColumn(String.Format("{0}_{1}", col, colCtr), GetType(String)))
+                                    ret.Rows.Add(data.ToArray)
+                                Else
+                                    ret.Columns.Add(New DataColumn(String.Format("{0}", col), GetType(String)))
+                                End If
                             Next
-                        End If
-                        If headerScanned Then
-                            ret.Rows.Add(data.ToArray)
                         End If
                     End While
                 End Using

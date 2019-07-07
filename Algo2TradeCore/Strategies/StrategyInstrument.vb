@@ -620,6 +620,16 @@ Namespace Strategies
             Next
             Return ret
         End Function
+        Public Function CalculateQuantityFromInvestment(ByVal stockPrice As Double, ByVal marginMultiplier As Decimal, ByVal totalInvestment As Double, ByVal allowCapitalToIncrease As Boolean) As Integer
+            Dim quantity As Integer = Me.TradableInstrument.LotSize
+            Dim quantityMultiplier As Integer = 0
+            If allowCapitalToIncrease Then
+                quantityMultiplier = Math.Ceiling(totalInvestment / (quantity * stockPrice / marginMultiplier))
+            Else
+                quantityMultiplier = Math.Floor(totalInvestment / (quantity * stockPrice / marginMultiplier))
+            End If
+            Return quantity * quantityMultiplier
+        End Function
 #End Region
 
 #Region "Public Overridable Functions"
@@ -1850,6 +1860,7 @@ Namespace Strategies
                             potentialExitOrders.Add(exitOrdersTrigger.Item3)
                             parentBusinessOrder.AllOrder = potentialExitOrders
                             ret = parentBusinessOrder
+                            OnHeartbeat(String.Format("Cancel Order Successful. Order ID:{0}", parentBusinessOrder.ParentOrderIdentifier))
                         End If
                     End If
                 Finally
@@ -1943,11 +1954,59 @@ Namespace Strategies
                                 If targetOrder IsNot Nothing Then potentialExitOrders.Add(targetOrder)
                                 parentBusinessOrder.AllOrder = potentialExitOrders
                                 ret = parentBusinessOrder
+                                'OnHeartbeat(String.Format("Force Cancel Order Successful. Order ID:{0}", parentBusinessOrder.ParentOrderIdentifier))
                             End If
                         Next
                     End If
                 Finally
                     Interlocked.Exchange(_forceCancelOrderLock, 0)
+                End Try
+            End If
+            Return ret
+        End Function
+
+        Private _modifySLOrderLock As Integer = 0
+        Protected Async Function ModifySLPaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
+            Dim ret As IBusinessOrder = Nothing
+            If 0 = Interlocked.Exchange(_modifySLOrderLock, 1) Then
+                Try
+                    Dim modifyOrdersTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = data
+                    If modifyOrdersTrigger IsNot Nothing AndAlso modifyOrdersTrigger.Count > 0 Then
+                        For Each runningOrder In modifyOrdersTrigger
+                            If runningOrder.Item1 = ExecuteCommandAction.Take Then
+                                Dim parentBusinessOrder As IBusinessOrder = GetParentFromChildOrder(runningOrder.Item2)
+
+                                logger.Debug("Modify Order Details-> Parent Order ID:{0}, Direction:{1}, Trigger Price:{2}, Reason:{3}",
+                                             parentBusinessOrder.ParentOrderIdentifier, parentBusinessOrder.ParentOrder.TransactionType.ToString, runningOrder.Item3, runningOrder.Item4)
+
+
+                                Await Me.ParentStrategy.SignalManager.HandleStoplossModifyActivity(runningOrder.Item2.Tag, Me, Nothing, Now, runningOrder.Item3, runningOrder.Item4).ConfigureAwait(False)
+
+                                Dim slOrder As IOrder = runningOrder.Item2
+                                CType(slOrder, PaperOrder).TriggerPrice = runningOrder.Item3
+
+                                Await Me.ParentStrategy.SignalManager.ActivateStoplossModifyActivity(runningOrder.Item2.Tag, Me, Nothing, Now).ConfigureAwait(False)
+                                Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
+                                logger.Debug("Order Modified {0}", Me.TradableInstrument.TradingSymbol)
+
+                                If parentBusinessOrder.SLOrder.Count = 1 Then
+                                    parentBusinessOrder.SLOrder = Nothing
+                                Else
+                                    Throw New ApplicationException("Check why there is more than one sl order")
+                                End If
+                                If parentBusinessOrder.TargetOrder.Count = 1 Then
+                                    parentBusinessOrder.TargetOrder = Nothing
+                                Else
+                                    Throw New ApplicationException("Check why there is more than one target order")
+                                End If
+
+                                ret = parentBusinessOrder
+                                OnHeartbeat(String.Format("Modify Order Successful. Order ID:{0}", parentBusinessOrder.ParentOrderIdentifier))
+                            End If
+                        Next
+                    End If
+                Finally
+                    Interlocked.Exchange(_modifySLOrderLock, 0)
                 End Try
             End If
             Return ret
