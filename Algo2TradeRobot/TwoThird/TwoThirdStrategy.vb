@@ -129,6 +129,10 @@ Public Class TwoThirdStrategy
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
+        ElseIf Me.GetTotalPLAfterBrokerage >= userSettings.MaxProfitPerDay Then
+            ret = New Tuple(Of Boolean, String)(True, "Max Profit of the day reached")
+        ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(userSettings.MaxLossPerDay) * -1 Then
+            ret = New Tuple(Of Boolean, String)(True, "Max Loss of the day reached")
         End If
         Return ret
     End Function

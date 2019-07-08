@@ -46,6 +46,10 @@ Partial Class frmTwoThirdSettings
         Me.txtSignalTimeFrame = New System.Windows.Forms.TextBox()
         Me.lblSignalTimeFrame = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.txtMaxProfitPerDay = New System.Windows.Forms.TextBox()
+        Me.lblMaxProfitPerDay = New System.Windows.Forms.Label()
+        Me.txtMaxLossPerDay = New System.Windows.Forms.TextBox()
+        Me.lblMaxLossPerDay = New System.Windows.Forms.Label()
         Me.lblTargetMultiplier = New System.Windows.Forms.Label()
         Me.txtNumberOfTradePerStock = New System.Windows.Forms.TextBox()
         Me.lblNumberOfTradePerStock = New System.Windows.Forms.Label()
@@ -56,8 +60,6 @@ Partial Class frmTwoThirdSettings
         Me.chbCountTradesWithBreakevenMovement = New System.Windows.Forms.CheckBox()
         Me.chbStoplossMoveToBreakeven = New System.Windows.Forms.CheckBox()
         Me.chbReverseTrade = New System.Windows.Forms.CheckBox()
-        Me.txtBreakevenPoint = New System.Windows.Forms.TextBox()
-        Me.lblBreakevenPoint = New System.Windows.Forms.Label()
         Me.grpTelegram.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -216,7 +218,7 @@ Partial Class frmTwoThirdSettings
         'btnBrowse
         '
         Me.btnBrowse.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnBrowse.Location = New System.Drawing.Point(428, 264)
+        Me.btnBrowse.Location = New System.Drawing.Point(428, 331)
         Me.btnBrowse.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(40, 23)
@@ -226,7 +228,7 @@ Partial Class frmTwoThirdSettings
         '
         'txtInstrumentDetalis
         '
-        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(198, 265)
+        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(198, 332)
         Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
         Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
         Me.txtInstrumentDetalis.ReadOnly = True
@@ -236,7 +238,7 @@ Partial Class frmTwoThirdSettings
         'lblInstrumentDetails
         '
         Me.lblInstrumentDetails.AutoSize = True
-        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 268)
+        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 335)
         Me.lblInstrumentDetails.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblInstrumentDetails.Name = "lblInstrumentDetails"
         Me.lblInstrumentDetails.Size = New System.Drawing.Size(121, 17)
@@ -264,6 +266,10 @@ Partial Class frmTwoThirdSettings
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.txtMaxProfitPerDay)
+        Me.GroupBox1.Controls.Add(Me.lblMaxProfitPerDay)
+        Me.GroupBox1.Controls.Add(Me.txtMaxLossPerDay)
+        Me.GroupBox1.Controls.Add(Me.lblMaxLossPerDay)
         Me.GroupBox1.Controls.Add(Me.txtATRPeriod)
         Me.GroupBox1.Controls.Add(Me.lblATRPeriod)
         Me.GroupBox1.Controls.Add(Me.txtTargetMultiplier)
@@ -285,9 +291,45 @@ Partial Class frmTwoThirdSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(477, 300)
+        Me.GroupBox1.Size = New System.Drawing.Size(477, 367)
         Me.GroupBox1.TabIndex = 28
         Me.GroupBox1.TabStop = False
+        '
+        'txtMaxProfitPerDay
+        '
+        Me.txtMaxProfitPerDay.Location = New System.Drawing.Point(199, 298)
+        Me.txtMaxProfitPerDay.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxProfitPerDay.Name = "txtMaxProfitPerDay"
+        Me.txtMaxProfitPerDay.Size = New System.Drawing.Size(255, 22)
+        Me.txtMaxProfitPerDay.TabIndex = 35
+        '
+        'lblMaxProfitPerDay
+        '
+        Me.lblMaxProfitPerDay.AutoSize = True
+        Me.lblMaxProfitPerDay.Location = New System.Drawing.Point(10, 301)
+        Me.lblMaxProfitPerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxProfitPerDay.Name = "lblMaxProfitPerDay"
+        Me.lblMaxProfitPerDay.Size = New System.Drawing.Size(125, 17)
+        Me.lblMaxProfitPerDay.TabIndex = 37
+        Me.lblMaxProfitPerDay.Text = "Max Profit Per Day"
+        '
+        'txtMaxLossPerDay
+        '
+        Me.txtMaxLossPerDay.Location = New System.Drawing.Point(199, 263)
+        Me.txtMaxLossPerDay.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxLossPerDay.Name = "txtMaxLossPerDay"
+        Me.txtMaxLossPerDay.Size = New System.Drawing.Size(255, 22)
+        Me.txtMaxLossPerDay.TabIndex = 34
+        '
+        'lblMaxLossPerDay
+        '
+        Me.lblMaxLossPerDay.AutoSize = True
+        Me.lblMaxLossPerDay.Location = New System.Drawing.Point(10, 267)
+        Me.lblMaxLossPerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxLossPerDay.Name = "lblMaxLossPerDay"
+        Me.lblMaxLossPerDay.Size = New System.Drawing.Size(122, 17)
+        Me.lblMaxLossPerDay.TabIndex = 36
+        Me.lblMaxLossPerDay.Text = "Max Loss Per Day"
         '
         'lblTargetMultiplier
         '
@@ -350,14 +392,12 @@ Partial Class frmTwoThirdSettings
         '
         'GroupBox2
         '
-        Me.GroupBox2.Controls.Add(Me.txtBreakevenPoint)
-        Me.GroupBox2.Controls.Add(Me.lblBreakevenPoint)
         Me.GroupBox2.Controls.Add(Me.chbCountTradesWithBreakevenMovement)
         Me.GroupBox2.Controls.Add(Me.chbStoplossMoveToBreakeven)
         Me.GroupBox2.Controls.Add(Me.chbReverseTrade)
         Me.GroupBox2.Location = New System.Drawing.Point(493, 5)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(358, 152)
+        Me.GroupBox2.Size = New System.Drawing.Size(358, 125)
         Me.GroupBox2.TabIndex = 30
         Me.GroupBox2.TabStop = False
         '
@@ -391,30 +431,11 @@ Partial Class frmTwoThirdSettings
         Me.chbReverseTrade.Text = "Reverse Trade"
         Me.chbReverseTrade.UseVisualStyleBackColor = True
         '
-        'txtBreakevenPoint
-        '
-        Me.txtBreakevenPoint.Location = New System.Drawing.Point(157, 116)
-        Me.txtBreakevenPoint.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtBreakevenPoint.Name = "txtBreakevenPoint"
-        Me.txtBreakevenPoint.Size = New System.Drawing.Size(150, 22)
-        Me.txtBreakevenPoint.TabIndex = 32
-        Me.txtBreakevenPoint.Tag = "Max Profit Per Day"
-        '
-        'lblBreakevenPoint
-        '
-        Me.lblBreakevenPoint.AutoSize = True
-        Me.lblBreakevenPoint.Location = New System.Drawing.Point(15, 119)
-        Me.lblBreakevenPoint.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblBreakevenPoint.Name = "lblBreakevenPoint"
-        Me.lblBreakevenPoint.Size = New System.Drawing.Size(112, 17)
-        Me.lblBreakevenPoint.TabIndex = 33
-        Me.lblBreakevenPoint.Text = "Breakeven Point"
-        '
         'frmTwoThirdSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(975, 309)
+        Me.ClientSize = New System.Drawing.Size(975, 377)
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.grpTelegram)
         Me.Controls.Add(Me.btnTwoThirdStrayegySettings)
@@ -465,6 +486,8 @@ Partial Class frmTwoThirdSettings
     Friend WithEvents chbStoplossMoveToBreakeven As CheckBox
     Friend WithEvents chbReverseTrade As CheckBox
     Friend WithEvents chbCountTradesWithBreakevenMovement As CheckBox
-    Friend WithEvents txtBreakevenPoint As TextBox
-    Friend WithEvents lblBreakevenPoint As Label
+    Friend WithEvents txtMaxProfitPerDay As TextBox
+    Friend WithEvents lblMaxProfitPerDay As Label
+    Friend WithEvents txtMaxLossPerDay As TextBox
+    Friend WithEvents lblMaxLossPerDay As Label
 End Class

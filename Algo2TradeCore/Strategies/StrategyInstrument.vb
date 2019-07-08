@@ -621,14 +621,35 @@ Namespace Strategies
             Return ret
         End Function
         Public Function CalculateQuantityFromInvestment(ByVal stockPrice As Double, ByVal marginMultiplier As Decimal, ByVal totalInvestment As Double, ByVal allowCapitalToIncrease As Boolean) As Integer
-            Dim quantity As Integer = Me.TradableInstrument.LotSize
-            Dim quantityMultiplier As Integer = 0
+            Dim quantity As Integer = Me.TradableInstrument.LotSize * Me.TradableInstrument.QuantityMultiplier
+            Dim multiplier As Integer = 0
             If allowCapitalToIncrease Then
-                quantityMultiplier = Math.Ceiling(totalInvestment / (quantity * stockPrice / marginMultiplier))
+                multiplier = Math.Ceiling(totalInvestment / (quantity * stockPrice / marginMultiplier))
             Else
-                quantityMultiplier = Math.Floor(totalInvestment / (quantity * stockPrice / marginMultiplier))
+                multiplier = Math.Floor(totalInvestment / (quantity * stockPrice / marginMultiplier))
             End If
-            Return quantity * quantityMultiplier
+            Return quantity * multiplier / Me.TradableInstrument.QuantityMultiplier
+        End Function
+        Public Function GetBreakevenPoint(ByVal entryPrice As Decimal, ByVal quantity As Integer, ByVal direction As IOrder.TypeOfTransaction) As Decimal
+            Dim ret As Decimal = Me.TradableInstrument.TickSize
+            If direction = IOrder.TypeOfTransaction.Buy Then
+                For exitPrice As Decimal = entryPrice To Decimal.MaxValue Step ret
+                    Dim pl As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, entryPrice, exitPrice, quantity)
+                    If pl >= 0 Then
+                        ret = ConvertFloorCeling(exitPrice - entryPrice, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                        Exit For
+                    End If
+                Next
+            ElseIf direction = IOrder.TypeOfTransaction.Sell Then
+                For exitPrice As Decimal = entryPrice To Decimal.MinusOne Step ret * -1
+                    Dim pl As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, exitPrice, entryPrice, quantity)
+                    If pl >= 0 Then
+                        ret = ConvertFloorCeling(entryPrice - exitPrice, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                        Exit For
+                    End If
+                Next
+            End If
+            Return ret
         End Function
 #End Region
 
@@ -1688,6 +1709,7 @@ Namespace Strategies
                         parentOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
                         parentOrder.TransactionType = parentPlaceOrderTrigger.Item3.EntryDirection
                         parentOrder.TimeStamp = Now
+                        parentOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Parent
                         parentOrder.Tag = activityTag
 
                         Dim slOrder As PaperOrder = New PaperOrder
@@ -1700,6 +1722,7 @@ Namespace Strategies
                         slOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
                         slOrder.TransactionType = If(parentPlaceOrderTrigger.Item3.EntryDirection = IOrder.TypeOfTransaction.Buy, IOrder.TypeOfTransaction.Sell, IOrder.TypeOfTransaction.Buy)
                         slOrder.TimeStamp = Now
+                        slOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss
                         slOrder.Tag = activityTag
 
                         Dim slOrderList As List(Of IOrder) = New List(Of IOrder)
@@ -1766,6 +1789,7 @@ Namespace Strategies
                         parentOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
                         parentOrder.TransactionType = parentPlaceOrderTrigger.Item3.EntryDirection
                         parentOrder.TimeStamp = Now
+                        parentOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Parent
                         parentOrder.Tag = activityTag
 
                         Dim slOrder As PaperOrder = New PaperOrder
@@ -1782,6 +1806,7 @@ Namespace Strategies
                         slOrder.ParentOrderIdentifier = parentOrder.OrderIdentifier
                         slOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
                         slOrder.TimeStamp = Now
+                        slOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss
                         slOrder.Tag = activityTag
 
                         Dim targetOrder As PaperOrder = New PaperOrder
@@ -1798,6 +1823,7 @@ Namespace Strategies
                         targetOrder.ParentOrderIdentifier = parentOrder.OrderIdentifier
                         targetOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
                         targetOrder.TimeStamp = Now
+                        targetOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Target
                         targetOrder.Tag = activityTag
 
                         Dim slOrderList As List(Of IOrder) = New List(Of IOrder)
@@ -1988,17 +2014,6 @@ Namespace Strategies
                                 Await Me.ParentStrategy.SignalManager.ActivateStoplossModifyActivity(runningOrder.Item2.Tag, Me, Nothing, Now).ConfigureAwait(False)
                                 Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
                                 logger.Debug("Order Modified {0}", Me.TradableInstrument.TradingSymbol)
-
-                                If parentBusinessOrder.SLOrder.Count = 1 Then
-                                    parentBusinessOrder.SLOrder = Nothing
-                                Else
-                                    Throw New ApplicationException("Check why there is more than one sl order")
-                                End If
-                                If parentBusinessOrder.TargetOrder.Count = 1 Then
-                                    parentBusinessOrder.TargetOrder = Nothing
-                                Else
-                                    Throw New ApplicationException("Check why there is more than one target order")
-                                End If
 
                                 ret = parentBusinessOrder
                                 OnHeartbeat(String.Format("Modify Order Successful. Order ID:{0}", parentBusinessOrder.ParentOrderIdentifier))

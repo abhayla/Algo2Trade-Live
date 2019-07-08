@@ -893,6 +893,7 @@ Namespace Controller
                 For Each parentOrder In parentOrders
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim wrappedParentOrder As ZerodhaOrder = CType(parentOrder, ZerodhaOrder)
+                    wrappedParentOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Parent
                     Dim targetOrder As IEnumerable(Of IOrder) = Nothing
                     Dim slOrder As IEnumerable(Of IOrder) = Nothing
                     Dim allOrder As IEnumerable(Of IOrder) = Nothing
@@ -972,6 +973,16 @@ Namespace Controller
                                                                     Return Nothing
                                                                 End If
                                                             End Function)
+                    End If
+                    If slOrder IsNot Nothing AndAlso slOrder.Count > 0 Then
+                        For Each runningOrder In slOrder
+                            runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss
+                        Next
+                    End If
+                    If targetOrder IsNot Nothing AndAlso targetOrder.Count > 0 Then
+                        For Each runningOrder In targetOrder
+                            runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Target
+                        Next
                     End If
                     Dim businessOrder As New BusinessOrder With {.ParentOrderIdentifier = parentOrder.OrderIdentifier,
                                                                         .ParentOrder = parentOrder,

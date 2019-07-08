@@ -157,5 +157,7 @@ Namespace Entities
             End Get
         End Property
 
+        Public Property LogicalOrderType As IOrder.LogicalTypeOfOrder Implements IOrder.LogicalOrderType
+
     End Class
 End Namespace

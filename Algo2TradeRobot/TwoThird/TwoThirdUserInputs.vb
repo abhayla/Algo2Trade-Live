@@ -9,10 +9,11 @@ Public Class TwoThirdUserInputs
 
     Public Property ATRPeriod As Integer
     Public Property NumberOfTradePerStock As Integer
+    Public Property MaxProfitPerDay As Decimal
+    Public Property MaxLossPerDay As Decimal
     Public Property ReverseTrade As Boolean
     Public Property StoplossMovementToBreakeven As Boolean
     Public Property CountTradesWithBreakevenMovement As Boolean
-    Public Property BreakevenPoint As Decimal
 
     Public Property TelegramAPIKey As String
     Public Property TelegramChatID As String
@@ -100,10 +101,16 @@ Public Class TwoThirdUserInputs
                                         .AllowCapitalToIncrease = allowCapitalIncrease
                                     End With
                                     If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
-                                    If Me.InstrumentsData.ContainsKey(instrumentData.InstrumentName) Then
+                                    Dim rawInstrumentName As String = Nothing
+                                    If instrumentData.InstrumentName.Contains("FUT") Then
+                                        rawInstrumentName = instrumentData.InstrumentName.Remove(instrumentData.InstrumentName.Count - 8)
+                                    Else
+                                        rawInstrumentName = instrumentData.InstrumentName
+                                    End If
+                                    If Me.InstrumentsData.ContainsKey(rawInstrumentName) Then
                                         Throw New ApplicationException(String.Format("Duplicate Instrument Name {0}", instrumentData.InstrumentName))
                                     End If
-                                    Me.InstrumentsData.Add(instrumentData.InstrumentName, instrumentData)
+                                    Me.InstrumentsData.Add(rawInstrumentName, instrumentData)
                                 Else
                                     Throw New ApplicationException(String.Format("Quantity and Capital both can not be null for {0}", instrumentName))
                                 End If

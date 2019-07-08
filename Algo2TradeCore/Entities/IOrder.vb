@@ -20,6 +20,7 @@
         ReadOnly Property RawOrderType As String
         ReadOnly Property OrderType As TypeOfOrder
         ReadOnly Property Broker As APISource
+        Property LogicalOrderType As LogicalTypeOfOrder
 
         Enum TypeOfOrder
             Market = 1
@@ -39,6 +40,12 @@
             Rejected
             Open
             TriggerPending
+            None
+        End Enum
+        Enum LogicalTypeOfOrder
+            Target = 1
+            Stoploss
+            Parent
             None
         End Enum
     End Interface
