@@ -47,24 +47,57 @@ Public Class TwoThirdFillInstrumentDetails
             Throw ex
         End Try
     End Function
-    Public Async Function GetInstrumentData(ByVal instrumentData As KeyValuePair(Of Integer, String), ByVal checkingDate As Date) As Task(Of KeyValuePair(Of Boolean, Decimal))
-        Dim ret As KeyValuePair(Of Boolean, Decimal) = Nothing
-        Dim historicalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(instrumentData.Key, checkingDate, checkingDate.AddDays(-300)).ConfigureAwait(False)
-        If historicalCandlesJSONDict IsNot Nothing AndAlso historicalCandlesJSONDict.Count > 0 Then
-            Dim eodHistoricalData As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(historicalCandlesJSONDict, instrumentData.Value).ConfigureAwait(False)
-            If eodHistoricalData IsNot Nothing AndAlso eodHistoricalData.Count > 0 Then
-                Dim ATRPayload As Dictionary(Of Date, Decimal) = Nothing
-                CalculateATR(14, eodHistoricalData, ATRPayload)
-                Dim lastDayClosePrice As Decimal = eodHistoricalData.LastOrDefault.Value.ClosePrice.Value
-                If lastDayClosePrice >= 80 AndAlso lastDayClosePrice <= 1500 Then
-                    Dim atrPercentage As Decimal = (ATRPayload(eodHistoricalData.LastOrDefault.Key) / lastDayClosePrice) * 100
-                    If atrPercentage >= 3 Then
-
+    Public Async Function GetInstrumentData(ByVal allInstruments As IEnumerable(Of IInstrument), ByVal bannedStock As List(Of String)) As Task
+        If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
+            Dim nfoInstruments As IEnumerable(Of IInstrument) = allInstruments.Where(Function(x)
+                                                                                         Return x.Segment = "NFO-FUT"
+                                                                                     End Function)
+            If nfoInstruments IsNot Nothing AndAlso nfoInstruments.Count > 0 Then
+                Dim highATRStocks As Dictionary(Of String, Decimal) = Nothing
+                For Each runningInstrument In nfoInstruments
+                    If runningInstrument.RawExchange.ToUpper = "NFO" AndAlso (bannedStock Is Nothing OrElse
+                    bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(runningInstrument.RawInstrumentName)) Then
+                        If highATRStocks Is Nothing OrElse (highATRStocks IsNot Nothing AndAlso Not highATRStocks.ContainsKey(runningInstrument.RawInstrumentName)) Then
+                            Dim rawCashInstrument As IInstrument = allInstruments.ToList.Find(Function(x)
+                                                                                                  Return x.TradingSymbol = runningInstrument.RawInstrumentName
+                                                                                              End Function)
+                            If rawCashInstrument IsNot Nothing Then
+                                Dim instrumentData As KeyValuePair(Of Integer, String) = New KeyValuePair(Of Integer, String)(rawCashInstrument.InstrumentIdentifier, rawCashInstrument.TradingSymbol)
+                                Dim historicalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(instrumentData.Key, Now.AddDays(-300), Now.AddDays(-1)).ConfigureAwait(False)
+                                If historicalCandlesJSONDict IsNot Nothing AndAlso historicalCandlesJSONDict.Count > 0 Then
+                                    Dim eodHistoricalData As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(historicalCandlesJSONDict, instrumentData.Value).ConfigureAwait(False)
+                                    If eodHistoricalData IsNot Nothing AndAlso eodHistoricalData.Count > 0 Then
+                                        Dim ATRPayload As Dictionary(Of Date, Decimal) = Nothing
+                                        CalculateATR(14, eodHistoricalData, ATRPayload)
+                                        Dim lastDayClosePrice As Decimal = eodHistoricalData.LastOrDefault.Value.ClosePrice.Value
+                                        If lastDayClosePrice >= 80 AndAlso lastDayClosePrice <= 1500 Then
+                                            Dim atrPercentage As Decimal = (ATRPayload(eodHistoricalData.LastOrDefault.Key) / lastDayClosePrice) * 100
+                                            If atrPercentage >= 3 Then
+                                                Dim volumePayload As IEnumerable(Of KeyValuePair(Of Date, OHLCPayload)) = eodHistoricalData.OrderByDescending(Function(x)
+                                                                                                                                                                  Return x.Key
+                                                                                                                                                              End Function).Take(30)
+                                                If volumePayload IsNot Nothing AndAlso volumePayload.Count > 0 Then
+                                                    Dim avgVolume As Decimal = volumePayload.Average(Function(x)
+                                                                                                         Return CType(x.Value.Volume.Value, Long)
+                                                                                                     End Function)
+                                                    If avgVolume >= (300000 / 100) * lastDayClosePrice Then
+                                                        If highATRStocks Is Nothing Then highATRStocks = New Dictionary(Of String, Decimal)
+                                                        highATRStocks.Add(instrumentData.Value, atrPercentage)
+                                                    End If
+                                                End If
+                                            End If
+                                        End If
+                                    End If
+                                End If
+                            End If
+                        End If
                     End If
+                Next
+                If highATRStocks IsNot Nothing AndAlso highATRStocks.Count > 0 Then
+
                 End If
             End If
         End If
-        Return ret
     End Function
     Private Async Function GetChartFromHistoricalAsync(ByVal historicalCandlesJSONDict As Dictionary(Of String, Object),
                                                        ByVal tradingSymbol As String) As Task(Of Dictionary(Of Date, OHLCPayload))
@@ -76,6 +109,7 @@ Public Class TwoThirdFillInstrumentDetails
                 Dim historicalCandles As ArrayList = historicalCandlesDict("candles")
                 If ret Is Nothing Then ret = New Dictionary(Of Date, OHLCPayload)
                 OnHeartbeat(String.Format("Generating Payload for {0}", tradingSymbol))
+                Dim previousPayload As OHLCPayload = Nothing
                 For Each historicalCandle In historicalCandles
                     cts.Token.ThrowIfCancellationRequested()
                     Dim runningSnapshotTime As Date = Utilities.Time.GetDateTimeTillMinutes(historicalCandle(0))
@@ -84,12 +118,14 @@ Public Class TwoThirdFillInstrumentDetails
                     With runningPayload
                         .SnapshotDateTime = Utilities.Time.GetDateTimeTillMinutes(historicalCandle(0))
                         .TradingSymbol = tradingSymbol
-                        .OpenPrice = historicalCandle(1)
-                        .HighPrice = historicalCandle(2)
-                        .LowPrice = historicalCandle(3)
-                        .ClosePrice = historicalCandle(4)
-                        .Volume = historicalCandle(5)
+                        .OpenPrice.Value = historicalCandle(1)
+                        .HighPrice.Value = historicalCandle(2)
+                        .LowPrice.Value = historicalCandle(3)
+                        .ClosePrice.Value = historicalCandle(4)
+                        .Volume.Value = historicalCandle(5)
+                        .PreviousPayload = previousPayload
                     End With
+                    previousPayload = runningPayload
                     ret.Add(runningSnapshotTime, runningPayload)
                 Next
             End If
@@ -120,7 +156,7 @@ Public Class TwoThirdFillInstrumentDetails
                     firstPayload = False
                 Else
                     highClose = Math.Abs(runningInputPayload.Value.HighPrice.Value - runningInputPayload.Value.PreviousPayload.ClosePrice.Value)
-                    lowClose = Math.Abs(runningInputPayload.Value.LowPrice - runningInputPayload.Value.PreviousPayload.ClosePrice.Value)
+                    lowClose = Math.Abs(runningInputPayload.Value.LowPrice.Value - runningInputPayload.Value.PreviousPayload.ClosePrice.Value)
                     TR = Math.Max(highLow, Math.Max(highClose, lowClose))
                 End If
                 SumTR = SumTR + TR
