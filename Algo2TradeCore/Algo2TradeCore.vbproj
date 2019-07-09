@@ -79,6 +79,7 @@
     <Compile Include="Adapter\APIInformationCollector.vb" />
     <Compile Include="Adapter\APIHistoricalDataFetcher.vb" />
     <Compile Include="Adapter\APITicker.vb" />
+    <Compile Include="Adapter\BannedStockDataFetcher.vb" />
     <Compile Include="Adapter\ZerodhaAdapter.vb" />
     <Compile Include="Adapter\ZerodhaInformationCollector.vb" />
     <Compile Include="Adapter\ZerodhaHistoricalDataFetcher.vb" />

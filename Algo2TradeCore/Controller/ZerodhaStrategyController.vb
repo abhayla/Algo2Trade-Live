@@ -647,8 +647,11 @@ Namespace Controller
             Dim execCommand As ExecutionCommands = ExecutionCommands.GetInstruments
             _AllInstruments = Await ExecuteCommandAsync(execCommand, Nothing).ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
-
             Await FillQuantityMultiplierMapAsync().ConfigureAwait(False)
+            _cts.Token.ThrowIfCancellationRequested()
+            Using bannedStock As New BannedStockDataFetcher(_cts)
+                _AllBannedStock = Await bannedStock.GetBannedStocksData.ConfigureAwait(False)
+            End Using
 
             Return _AllInstruments IsNot Nothing AndAlso _AllInstruments.Count > 0 AndAlso
                 Me._currentUser.DaysStartingCapitals IsNot Nothing AndAlso Me._currentUser.DaysStartingCapitals.Count > 0
@@ -739,7 +742,7 @@ Namespace Controller
                 AddHandler strategyToRun.EndOfTheDay, AddressOf OnEndOfTheDay
                 OnHeartbeatEx(String.Format("As per the strategy logic, tradable instruments being fetched, strategy:{0}", strategyToRun.ToString), New List(Of Object) From {strategyToRun})
                 _cts.Token.ThrowIfCancellationRequested()
-                Dim ret As Boolean = Await strategyToRun.CreateTradableStrategyInstrumentsAsync(_AllInstruments).ConfigureAwait(False)
+                Dim ret As Boolean = Await strategyToRun.CreateTradableStrategyInstrumentsAsync(_AllInstruments, _AllBannedStock).ConfigureAwait(False)
 
                 'Now store the unique instruments across strategies into the local collection
                 If strategyToRun.TradableStrategyInstruments IsNot Nothing AndAlso strategyToRun.TradableStrategyInstruments.Count > 0 Then

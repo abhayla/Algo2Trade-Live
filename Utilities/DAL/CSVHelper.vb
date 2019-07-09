@@ -44,7 +44,7 @@ Namespace DAL
 #End Region
 
 #Region "Public Methods"
-        Public Function GetDataTableFromCSV(ByVal headerLineNumber As Integer) As DataTable
+        Public Function GetDataTableFromCSV(ByVal headerLineNumber As Integer, Optional ByVal addHeaderAsRow As Boolean = False) As DataTable
             logger.Debug("Getting data table from CSV")
             Dim ret As New DataTable
             Dim headerScanned As Boolean = False
@@ -69,7 +69,7 @@ Namespace DAL
                         If headerScanned Then
                             ret.Rows.Add(data.ToArray)
                         End If
-                        If Not headerScanned And ((headerLineNumber = 0 And runningLineNumber = 1) Or (headerLineNumber > 0 And runningLineNumber = headerLineNumber)) Then
+                        If Not headerScanned AndAlso ((headerLineNumber = 0 And runningLineNumber = 1) OrElse (headerLineNumber > 0 And runningLineNumber = headerLineNumber)) Then
                             headerScanned = True
                             Dim colCtr As Integer = 0
                             For Each col In data
@@ -77,11 +77,13 @@ Namespace DAL
                                 colCtr += 1
                                 If headerLineNumber = 0 Then
                                     ret.Columns.Add(New DataColumn(String.Format("{0}_{1}", col, colCtr), GetType(String)))
-                                    ret.Rows.Add(data.ToArray)
                                 Else
                                     ret.Columns.Add(New DataColumn(String.Format("{0}", col), GetType(String)))
                                 End If
                             Next
+                            If headerLineNumber = 0 OrElse addHeaderAsRow Then
+                                ret.Rows.Add(data.ToArray)
+                            End If
                         End If
                     End While
                 End Using

@@ -123,6 +123,7 @@ Namespace Controller
         Protected _APIHistoricalDataFetcher As APIHistoricalDataFetcher
         Protected _APIInformationCollector As APIInformationCollector
         Protected _AllInstruments As IEnumerable(Of IInstrument)
+        Protected _AllBannedStock As List(Of String)
         Protected _AllStrategyUniqueInstruments As IEnumerable(Of IInstrument)
         Protected _AllStrategies As List(Of Strategy)
         Protected _subscribedStrategyInstruments As Dictionary(Of String, Concurrent.ConcurrentBag(Of StrategyInstrument))

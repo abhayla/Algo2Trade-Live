@@ -3734,6 +3734,9 @@ Public Class frmMainTabbed
             For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "*.Margin.a2t")
                 If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
             Next
+            For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "Banned Stock *.csv")
+                If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+            Next
         Catch ex As Exception
             logger.Error(ex)
             MsgBox(String.Format("The following error occurred: {0}", ex.Message), MsgBoxStyle.Critical)
