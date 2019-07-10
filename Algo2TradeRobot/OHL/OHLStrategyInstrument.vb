@@ -199,10 +199,10 @@ Public Class OHLStrategyInstrument
             Dim dummyPayload As OHLCPayload = New OHLCPayload(OHLCPayload.PayloadSource.None) With {.SnapshotDateTime = Now}
             If Not _isBuyOrderPlaced Then
                 Dim open As Decimal = currentTick.Open
-                Dim triggerPrice = open + ConvertFloorCeling(open * 0.5 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                Dim price As Decimal = triggerPrice + ConvertFloorCeling(open * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                Dim stoploss As Decimal = ConvertFloorCeling(open * 0.5 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                Dim target As Decimal = ConvertFloorCeling(stoploss * 3.1, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim triggerPrice = open + ConvertFloorCeling(open * 0.05 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim price As Decimal = triggerPrice + ConvertFloorCeling(open * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim stoploss As Decimal = ConvertFloorCeling(open * 0.05 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim target As Decimal = ConvertFloorCeling(stoploss * 4, Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
                 If currentTick.LastPrice < triggerPrice Then
                     parameters = New PlaceOrderParameters(dummyPayload) With
@@ -215,10 +215,10 @@ Public Class OHLStrategyInstrument
                 End If
             ElseIf Not _isSellOrderPlaced Then
                 Dim open As Decimal = currentTick.Open
-                Dim triggerPrice = open - ConvertFloorCeling(open * 0.5 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                Dim price As Decimal = triggerPrice - ConvertFloorCeling(open * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                Dim stoploss As Decimal = ConvertFloorCeling(open * 0.5 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                Dim target As Decimal = ConvertFloorCeling(stoploss * 3.1, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim triggerPrice = open - ConvertFloorCeling(open * 0.05 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim price As Decimal = triggerPrice - ConvertFloorCeling(open * 0.1 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim stoploss As Decimal = ConvertFloorCeling(open * 0.05 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim target As Decimal = ConvertFloorCeling(stoploss * 4, Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
                 If currentTick.LastPrice > triggerPrice Then
                     parameters = New PlaceOrderParameters(dummyPayload) With

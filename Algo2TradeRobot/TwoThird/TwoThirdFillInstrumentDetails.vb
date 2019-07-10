@@ -2,6 +2,7 @@
 Imports System.Net
 Imports System.Threading
 Imports Utilities.Strings
+Imports Utilities.DAL
 Imports Algo2TradeCore.Entities
 
 Public Class TwoThirdFillInstrumentDetails
@@ -28,11 +29,13 @@ Public Class TwoThirdFillInstrumentDetails
 #End Region
 
     Private _cts As CancellationTokenSource
+    Private ReadOnly _parentStrategy As TwoThirdStrategy
     Private ReadOnly ZerodhaEODHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/day?api_key=kitefront&access_token=K&from={1}&to={2}"
     Private ReadOnly ZerodhaIntradayHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/minute?api_key=kitefront&access_token=K&from={1}&to={2}"
     Private ReadOnly tradingDay As Date = Date.MinValue
-    Public Sub New(ByVal canceller As CancellationTokenSource)
+    Public Sub New(ByVal canceller As CancellationTokenSource, ByVal parentStrategy As TwoThirdStrategy)
         _cts = canceller
+        _parentStrategy = parentStrategy
         tradingDay = Now
     End Sub
 
@@ -116,11 +119,113 @@ Public Class TwoThirdFillInstrumentDetails
                     End If
                 Next
                 If highATRStocks IsNot Nothing AndAlso highATRStocks.Count > 0 Then
-                    Dim a = highATRStocks.OrderByDescending(Function(x)
-                                                                Return x.Value(0)
-                                                            End Function)
-
-                    _cts.Token.ThrowIfCancellationRequested()
+                    Dim capableStocks As Dictionary(Of String, InstrumentDetails) = Nothing
+                    For Each stock In highATRStocks.OrderByDescending(Function(x)
+                                                                          Return x.Value(0)
+                                                                      End Function)
+                        _cts.Token.ThrowIfCancellationRequested()
+                        Dim futureStocks As List(Of IInstrument) = nfoInstruments.ToList.FindAll(Function(x)
+                                                                                                     Return x.RawInstrumentName = stock.Key
+                                                                                                 End Function)
+                        If futureStocks IsNot Nothing AndAlso futureStocks.Count > 0 Then
+                            Dim minexpiry As Date = futureStocks.Min(Function(y)
+                                                                         Return y.Expiry
+                                                                     End Function)
+                            Dim tradingStock As IInstrument = Nothing
+                            Dim volumeCheckingStock As IInstrument = Nothing
+                            _cts.Token.ThrowIfCancellationRequested()
+                            If minexpiry.Date = Now.Date Then
+                                volumeCheckingStock = futureStocks.Find(Function(x)
+                                                                            Return x.Expiry = minexpiry
+                                                                        End Function)
+                                Dim nextMinexpiry As Date = futureStocks.Min(Function(y)
+                                                                                 If Not y.Expiry.Value.Date = Now.Date Then
+                                                                                     Return y.Expiry.Value
+                                                                                 Else
+                                                                                     Return Date.MaxValue
+                                                                                 End If
+                                                                             End Function)
+                                tradingStock = futureStocks.Find(Function(z)
+                                                                     Return z.Expiry = nextMinexpiry
+                                                                 End Function)
+                            Else
+                                tradingStock = futureStocks.Find(Function(x)
+                                                                     Return x.Expiry = minexpiry
+                                                                 End Function)
+                                volumeCheckingStock = tradingStock
+                            End If
+                            _cts.Token.ThrowIfCancellationRequested()
+                            If tradingStock IsNot Nothing AndAlso volumeCheckingStock IsNot Nothing Then
+                                _cts.Token.ThrowIfCancellationRequested()
+                                Dim historicalIntradayCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(volumeCheckingStock.InstrumentIdentifier, lastTradingDay, lastTradingDay, TypeOfData.Intraday).ConfigureAwait(False)
+                                _cts.Token.ThrowIfCancellationRequested()
+                                If historicalIntradayCandlesJSONDict IsNot Nothing AndAlso historicalIntradayCandlesJSONDict.Count > 0 Then
+                                    _cts.Token.ThrowIfCancellationRequested()
+                                    Dim intradayHistoricalData As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(historicalIntradayCandlesJSONDict, volumeCheckingStock.TradingSymbol).ConfigureAwait(False)
+                                    If intradayHistoricalData IsNot Nothing AndAlso intradayHistoricalData.Count > 0 Then
+                                        Dim blankCandlePercentage As Decimal = CalculateBlankVolumePercentage(intradayHistoricalData)
+                                        Dim instrumentData As New InstrumentDetails With
+                                            {.TradingSymbol = tradingStock.TradingSymbol,
+                                             .ATR = stock.Value(0),
+                                             .BlankCandlePercentage = blankCandlePercentage}
+                                        If capableStocks Is Nothing Then capableStocks = New Dictionary(Of String, InstrumentDetails)
+                                        capableStocks.Add(tradingStock.TradingSymbol, instrumentData)
+                                    End If
+                                End If
+                            End If
+                        End If
+                    Next
+                    If capableStocks IsNot Nothing AndAlso capableStocks.Count > 0 Then
+                        Dim todayStockList As List(Of String) = Nothing
+                        Dim stocksLessThanMaxBlankCandlePercentage As IEnumerable(Of KeyValuePair(Of String, InstrumentDetails)) =
+                                    capableStocks.Where(Function(x)
+                                                            Return x.Value.BlankCandlePercentage <> Decimal.MinValue AndAlso
+                                                                  x.Value.BlankCandlePercentage <= 8
+                                                        End Function)
+                        If stocksLessThanMaxBlankCandlePercentage IsNot Nothing AndAlso stocksLessThanMaxBlankCandlePercentage.Count > 0 Then
+                            Dim stockCounter As Integer = 0
+                            For Each stockData In stocksLessThanMaxBlankCandlePercentage.OrderByDescending(Function(x)
+                                                                                                               Return x.Value.ATR
+                                                                                                           End Function)
+                                _cts.Token.ThrowIfCancellationRequested()
+                                If todayStockList Is Nothing Then todayStockList = New List(Of String)
+                                todayStockList.Add(stockData.Key)
+                                stockCounter += 1
+                                If stockCounter = 5 Then Exit For
+                            Next
+                            If stockCounter < 5 Then
+                                Dim stocksLessThanHigherLimitOfMaxBlankCandlePercentage As IEnumerable(Of KeyValuePair(Of String, InstrumentDetails)) =
+                                    capableStocks.Where(Function(x)
+                                                            Return x.Value.BlankCandlePercentage > 8 AndAlso
+                                                                  x.Value.BlankCandlePercentage <= 20
+                                                        End Function)
+                                If stocksLessThanHigherLimitOfMaxBlankCandlePercentage IsNot Nothing AndAlso stocksLessThanHigherLimitOfMaxBlankCandlePercentage.Count > 0 Then
+                                    For Each stockData In stocksLessThanHigherLimitOfMaxBlankCandlePercentage.OrderBy(Function(y)
+                                                                                                                          Return y.Value.BlankCandlePercentage
+                                                                                                                      End Function)
+                                        _cts.Token.ThrowIfCancellationRequested()
+                                        If todayStockList Is Nothing Then todayStockList = New List(Of String)
+                                        todayStockList.Add(stockData.Key)
+                                        stockCounter += 1
+                                        If stockCounter = 5 Then Exit For
+                                    Next
+                                End If
+                            End If
+                        End If
+                        _cts.Token.ThrowIfCancellationRequested()
+                        Dim allStockData As DataTable = Nothing
+                        Using csv As New CSVHelper(CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentDetailsFilePath, ",", _cts)
+                            allStockData = csv.GetDataTableFromCSV(1)
+                            _cts.Token.ThrowIfCancellationRequested()
+                            If allStockData IsNot Nothing AndAlso allStockData.Rows.Count > 0 Then
+                                For i = 0 To allStockData.Rows.Count - 1
+                                    allStockData.Rows(i)(0) = todayStockList(i)
+                                Next
+                                File.Delete(CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentDetailsFilePath)
+                                csv.GetCSVFromDataTable(allStockData)
+                            End If
+                        End Using
+                    End If
                 End If
             End If
         End If
@@ -199,6 +304,29 @@ Public Class TwoThirdFillInstrumentDetails
             Next
         End If
     End Sub
+
+    Private Function CalculateBlankVolumePercentage(ByVal inputPayload As Dictionary(Of Date, OHLCPayload)) As Decimal
+        Dim ret As Decimal = Decimal.MinValue
+        If inputPayload IsNot Nothing AndAlso inputPayload.Count > 0 Then
+            Dim blankCandlePayload As IEnumerable(Of KeyValuePair(Of Date, OHLCPayload)) = inputPayload.Where(Function(x)
+                                                                                                                  Return x.Value.OpenPrice.Value = x.Value.LowPrice.Value AndAlso
+                                                                                                                  x.Value.LowPrice.Value = x.Value.HighPrice.Value AndAlso
+                                                                                                                  x.Value.HighPrice.Value = x.Value.ClosePrice.Value
+                                                                                                              End Function)
+            If blankCandlePayload IsNot Nothing AndAlso blankCandlePayload.Count > 0 Then
+                ret = Math.Round((blankCandlePayload.Count / inputPayload.Count) * 100, 2)
+            Else
+                ret = 0
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Class InstrumentDetails
+        Public TradingSymbol As String
+        Public ATR As Decimal
+        Public BlankCandlePercentage As Decimal
+    End Class
 
     Enum TypeOfData
         Intraday = 1

@@ -38,10 +38,15 @@ Public Class TwoThirdStrategy
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             Dim userInputs As TwoThirdUserInputs = Me.UserSettings
+            Using fillInstrumentDetails As New TwoThirdFillInstrumentDetails(_cts, Me)
+                Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+            End Using
+            If userInputs.InstrumentsData IsNot Nothing Then
+                userInputs.InstrumentsData.Clear()
+                userInputs.InstrumentsData = Nothing
+                userInputs.FillInstrumentDetails(userInputs.InstrumentDetailsFilePath, _cts)
+            End If
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
-                'Using fillInstrumentDetails As New TwoThirdFillInstrumentDetails(_cts)
-                '    Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
-                'End Using
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
