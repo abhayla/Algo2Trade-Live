@@ -213,18 +213,28 @@ Public Class TwoThirdFillInstrumentDetails
                             End If
                         End If
                         _cts.Token.ThrowIfCancellationRequested()
-                        Dim allStockData As DataTable = Nothing
-                        Using csv As New CSVHelper(CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentDetailsFilePath, ",", _cts)
-                            allStockData = csv.GetDataTableFromCSV(1)
-                            _cts.Token.ThrowIfCancellationRequested()
-                            If allStockData IsNot Nothing AndAlso allStockData.Rows.Count > 0 Then
-                                For i = 0 To allStockData.Rows.Count - 1
-                                    allStockData.Rows(i)(0) = todayStockList(i)
-                                Next
-                                File.Delete(CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentDetailsFilePath)
-                                csv.GetCSVFromDataTable(allStockData)
+                        If todayStockList IsNot Nothing AndAlso todayStockList.Count > 0 Then
+                            Dim allStockData As DataTable = Nothing
+                            If CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentDetailsFilePath IsNot Nothing AndAlso
+                                File.Exists(CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentDetailsFilePath) Then
+                                Using csv As New CSVHelper(CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentDetailsFilePath, ",", _cts)
+                                    allStockData = csv.GetDataTableFromCSV(1)
+                                    _cts.Token.ThrowIfCancellationRequested()
+                                    If allStockData IsNot Nothing AndAlso allStockData.Rows.Count > 0 Then
+                                        For i = 0 To allStockData.Rows.Count - 1
+                                            allStockData.Rows(i)(0) = todayStockList(i)
+                                        Next
+                                        File.Delete(CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentDetailsFilePath)
+                                        csv.GetCSVFromDataTable(allStockData)
+                                    End If
+                                End Using
+                                If CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentsData IsNot Nothing Then
+                                    CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentsData.Clear()
+                                    CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentsData = Nothing
+                                    CType(_parentStrategy.UserSettings, TwoThirdUserInputs).FillInstrumentDetails(CType(_parentStrategy.UserSettings, TwoThirdUserInputs).InstrumentDetailsFilePath, _cts)
+                                End If
                             End If
-                        End Using
+                        End If
                     End If
                 End If
             End If
