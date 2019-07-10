@@ -341,7 +341,7 @@ Public Class TwoThirdStrategyInstrument
 
             If _signalCandle Is Nothing Then
                 If runningCandlePayload.PreviousPayload.CandleRange <> 0 AndAlso
-                    runningCandlePayload.PreviousPayload.CandleRange <= atr AndAlso
+                    runningCandlePayload.PreviousPayload.CandleRange < atr AndAlso
                     runningCandlePayload.PreviousPayload.CandleRange >= Math.Max(longBreakevenPoints, shortBreakevenPoints) Then
                     _signalCandle = runningCandlePayload.PreviousPayload
                 End If
@@ -485,67 +485,77 @@ Public Class TwoThirdStrategyInstrument
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         Dim userSettings As TwoThirdUserInputs = Me.ParentStrategy.UserSettings
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
-        If userSettings.StoplossMovementToBreakeven Then
-            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
-                For Each runningOrderID In OrderDetails.Keys
-                    Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
-                    Dim targetReachedForBreakevenMovement As Boolean = False
-                    If bussinessOrder.TargetOrder IsNot Nothing AndAlso bussinessOrder.TargetOrder.Count > 0 Then
-                        For Each runningTragetOrder In bussinessOrder.TargetOrder
-                            If runningTragetOrder.Status <> IOrder.TypeOfStatus.Rejected Then
-                                Dim target As Decimal = 0
-                                Dim potentialTargetPrice As Decimal = 0
-                                If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                    target = runningTragetOrder.AveragePrice - bussinessOrder.ParentOrder.AveragePrice
-                                    potentialTargetPrice = bussinessOrder.ParentOrder.AveragePrice + ConvertFloorCeling(target * 2 / 3, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                                    If currentTick.LastPrice >= potentialTargetPrice Then targetReachedForBreakevenMovement = True
-                                ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                    target = bussinessOrder.ParentOrder.AveragePrice - runningTragetOrder.AveragePrice
-                                    potentialTargetPrice = bussinessOrder.ParentOrder.AveragePrice - ConvertFloorCeling(target * 2 / 3, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                                    If currentTick.LastPrice <= potentialTargetPrice Then targetReachedForBreakevenMovement = True
-                                End If
-                            End If
-                        Next
-                    End If
-                    If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
-                        Dim triggerPrice As Decimal = 0
-                        If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                            If targetReachedForBreakevenMovement Then
-                                triggerPrice = bussinessOrder.ParentOrder.AveragePrice + GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, IOrder.TypeOfTransaction.Buy)
-                            Else
-                                triggerPrice = _signalCandle.LowPrice.Value - CalculateBuffer(_signalCandle.LowPrice.Value, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Floor)
-                            End If
-                        ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                            If targetReachedForBreakevenMovement Then
-                                triggerPrice = bussinessOrder.ParentOrder.AveragePrice - GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, IOrder.TypeOfTransaction.Sell)
-                            Else
-                                triggerPrice = _signalCandle.HighPrice.Value + CalculateBuffer(_signalCandle.HighPrice.Value, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Floor)
+        If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+            For Each runningOrderID In OrderDetails.Keys
+                Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
+                Dim targetReachedForBreakevenMovement As Boolean = False
+                If bussinessOrder.TargetOrder IsNot Nothing AndAlso bussinessOrder.TargetOrder.Count > 0 Then
+                    For Each runningTragetOrder In bussinessOrder.TargetOrder
+                        If runningTragetOrder.Status <> IOrder.TypeOfStatus.Rejected Then
+                            Dim target As Decimal = 0
+                            Dim potentialTargetPrice As Decimal = 0
+                            If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                target = runningTragetOrder.AveragePrice - bussinessOrder.ParentOrder.AveragePrice
+                                potentialTargetPrice = bussinessOrder.ParentOrder.AveragePrice + ConvertFloorCeling(target * 2 / 3, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                                If currentTick.LastPrice >= potentialTargetPrice Then targetReachedForBreakevenMovement = True
+                            ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                target = bussinessOrder.ParentOrder.AveragePrice - runningTragetOrder.AveragePrice
+                                potentialTargetPrice = bussinessOrder.ParentOrder.AveragePrice - ConvertFloorCeling(target * 2 / 3, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                                If currentTick.LastPrice <= potentialTargetPrice Then targetReachedForBreakevenMovement = True
                             End If
                         End If
-                        For Each slOrder In bussinessOrder.SLOrder
-                            If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
-                                Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
-                                Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
-                                If slOrder.TriggerPrice <> triggerPrice Then
-                                    'Below portion have to be done in every modify stoploss order trigger
-                                    Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(slOrder.Tag)
-                                    If currentSignalActivities IsNot Nothing Then
-                                        If currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                            currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
-                                            currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
-                                            If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
-                                                Continue For
-                                            End If
-                                        End If
-                                    End If
-                                    If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
-                                    ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, If(targetReachedForBreakevenMovement, "Move to breakeven", "SL movement to signal candle high/low")))
+                    Next
+                End If
+                If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
+                    Dim triggerPrice As Decimal = 0
+                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        If targetReachedForBreakevenMovement Then
+                            triggerPrice = bussinessOrder.ParentOrder.AveragePrice + GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, IOrder.TypeOfTransaction.Buy)
+                        Else
+                            triggerPrice = _signalCandle.LowPrice.Value - CalculateBuffer(_signalCandle.LowPrice.Value, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Floor)
+                        End If
+                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        If targetReachedForBreakevenMovement Then
+                            triggerPrice = bussinessOrder.ParentOrder.AveragePrice - GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, IOrder.TypeOfTransaction.Sell)
+                        Else
+                            triggerPrice = _signalCandle.HighPrice.Value + CalculateBuffer(_signalCandle.HighPrice.Value, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Floor)
+                        End If
+                    End If
+                    For Each slOrder In bussinessOrder.SLOrder
+                        If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
+                            Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
+                            Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
+
+                            Dim moveToBreakeven As Boolean = False
+                            If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                If slOrder.TriggerPrice - bussinessOrder.ParentOrder.AveragePrice > 0 Then
+                                    moveToBreakeven = True
+                                End If
+                            ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                If bussinessOrder.ParentOrder.AveragePrice - slOrder.TriggerPrice > 0 Then
+                                    moveToBreakeven = True
                                 End If
                             End If
-                        Next
-                    End If
-                Next
-            End If
+
+                            If slOrder.TriggerPrice <> triggerPrice AndAlso Not moveToBreakeven Then
+                                'Below portion have to be done in every modify stoploss order trigger
+                                Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(slOrder.Tag)
+                                If currentSignalActivities IsNot Nothing Then
+                                    If currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
+                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                        If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
+                                            Continue For
+                                        End If
+                                    End If
+                                End If
+                                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, If(targetReachedForBreakevenMovement, "Move to breakeven", "SL movement to signal candle high/low")))
+                            End If
+                        End If
+                    Next
+                End If
+            Next
         End If
         Return ret
     End Function
@@ -606,7 +616,7 @@ Public Class TwoThirdStrategyInstrument
                 ElseIf exitOrderResponse.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                     potentialExitPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, potentialExitPrice, exitOrderResponse.ParentOrder.AveragePrice, exitOrderResponse.ParentOrder.Quantity)
                     slipage = potentialExitPrice - exitPrice
-                    plSlipage = potentialExitPL - orderPL
+                    plSlipage = orderPL - potentialExitPL
                 End If
                 Dim message As String = String.Format("{0}. Trading Symbol:{1}, Signal Candle Time:{2}, Candle Range:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, Capital Required:{8}, {9}Entry Price:{10}, {11}Potential Exit Price:{12}, Exit Price:{13}({14}), {15}Potential Exit PL:{16}, Exit PL:{17}({18}), {19}Total Stock PL:{20}, Number Of Trade:{21}, {22}LTP:{23}, Tick Timestamp:{24}, {25}Timestamp:{26}",
                                                         reason,

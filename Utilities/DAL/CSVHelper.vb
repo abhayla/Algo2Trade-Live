@@ -52,16 +52,16 @@ Namespace DAL
             If IO.File.Exists(_CSVFilePath) Then
                 Dim totalLinesCtr As Long = File.ReadLines(_CSVFilePath).Count()
                 _canceller.Token.ThrowIfCancellationRequested()
-                OnHeartbeat(String.Format("Opening file (File:{0})", _CSVFilePath))
+                'OnHeartbeat(String.Format("Opening file (File:{0})", _CSVFilePath))
                 Using sr As New IO.StreamReader(_CSVFilePath)
                     Dim runningLineNumber As Integer = 0
 
                     While Not sr.EndOfStream
                         runningLineNumber += 1
                         _canceller.Token.ThrowIfCancellationRequested()
-                        OnHeartbeat(String.Format("Reading file({0}/{1})",
-                                                  runningLineNumber,
-                                                  totalLinesCtr))
+                        'OnHeartbeat(String.Format("Reading file({0}/{1})",
+                        '                          runningLineNumber,
+                        '                          totalLinesCtr))
                         logger.Debug("Reading file({0}/{1})",
                                                   runningLineNumber,
                                                   totalLinesCtr)

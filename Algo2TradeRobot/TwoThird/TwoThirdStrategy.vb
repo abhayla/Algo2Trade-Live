@@ -40,7 +40,7 @@ Public Class TwoThirdStrategy
             Dim userInputs As TwoThirdUserInputs = Me.UserSettings
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 'Using fillInstrumentDetails As New TwoThirdFillInstrumentDetails(_cts)
-                '    Await fillInstrumentDetails.GetInstrumentData(allInstruments, Nothing).ConfigureAwait(False)
+                '    Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
                 'End Using
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData

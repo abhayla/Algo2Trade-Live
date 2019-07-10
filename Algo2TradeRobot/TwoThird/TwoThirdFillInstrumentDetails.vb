@@ -27,16 +27,25 @@ Public Class TwoThirdFillInstrumentDetails
     End Sub
 #End Region
 
-    Private cts As CancellationTokenSource
-    Private ReadOnly ZerodhaHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/day?api_key=kitefront&access_token=K&from={1}&to={2}"
+    Private _cts As CancellationTokenSource
+    Private ReadOnly ZerodhaEODHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/day?api_key=kitefront&access_token=K&from={1}&to={2}"
+    Private ReadOnly ZerodhaIntradayHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/minute?api_key=kitefront&access_token=K&from={1}&to={2}"
+    Private ReadOnly tradingDay As Date = Date.MinValue
     Public Sub New(ByVal canceller As CancellationTokenSource)
-        cts = canceller
+        _cts = canceller
+        tradingDay = Now
     End Sub
 
-    Private Async Function GetHistoricalCandleStickAsync(ByVal instrumentToken As String, ByVal fromDate As Date, ByVal toDate As Date) As Task(Of Dictionary(Of String, Object))
+    Private Async Function GetHistoricalCandleStickAsync(ByVal instrumentToken As String, ByVal fromDate As Date, ByVal toDate As Date, ByVal historicalDataType As TypeOfData) As Task(Of Dictionary(Of String, Object))
         Try
-            cts.Token.ThrowIfCancellationRequested()
-            Dim historicalDataURL As String = String.Format(ZerodhaHistoricalURL, instrumentToken, fromDate.ToString("yyyy-MM-dd"), toDate.ToString("yyyy-MM-dd"))
+            _cts.Token.ThrowIfCancellationRequested()
+            Dim historicalDataURL As String = Nothing
+            Select Case historicalDataType
+                Case TypeOfData.Intraday
+                    historicalDataURL = String.Format(ZerodhaIntradayHistoricalURL, instrumentToken, fromDate.ToString("yyyy-MM-dd"), toDate.ToString("yyyy-MM-dd"))
+                Case TypeOfData.EOD
+                    historicalDataURL = String.Format(ZerodhaEODHistoricalURL, instrumentToken, fromDate.ToString("yyyy-MM-dd"), toDate.ToString("yyyy-MM-dd"))
+            End Select
             OnHeartbeat(String.Format("Fetching historical Data: {0}", historicalDataURL))
             Using sr As New StreamReader(HttpWebRequest.Create(historicalDataURL).GetResponseAsync().Result.GetResponseStream)
                 Dim jsonString = Await sr.ReadToEndAsync.ConfigureAwait(False)
@@ -53,36 +62,49 @@ Public Class TwoThirdFillInstrumentDetails
                                                                                          Return x.Segment = "NFO-FUT"
                                                                                      End Function)
             If nfoInstruments IsNot Nothing AndAlso nfoInstruments.Count > 0 Then
-                Dim highATRStocks As Dictionary(Of String, Decimal) = Nothing
+                Dim highATRStocks As Dictionary(Of String, Decimal()) = Nothing
+                Dim lastTradingDay As Date = Date.MinValue
                 For Each runningInstrument In nfoInstruments
+                    _cts.Token.ThrowIfCancellationRequested()
                     If runningInstrument.RawExchange.ToUpper = "NFO" AndAlso (bannedStock Is Nothing OrElse
-                    bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(runningInstrument.RawInstrumentName)) Then
+                        bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(runningInstrument.RawInstrumentName)) Then
                         If highATRStocks Is Nothing OrElse (highATRStocks IsNot Nothing AndAlso Not highATRStocks.ContainsKey(runningInstrument.RawInstrumentName)) Then
                             Dim rawCashInstrument As IInstrument = allInstruments.ToList.Find(Function(x)
                                                                                                   Return x.TradingSymbol = runningInstrument.RawInstrumentName
                                                                                               End Function)
                             If rawCashInstrument IsNot Nothing Then
                                 Dim instrumentData As KeyValuePair(Of Integer, String) = New KeyValuePair(Of Integer, String)(rawCashInstrument.InstrumentIdentifier, rawCashInstrument.TradingSymbol)
-                                Dim historicalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(instrumentData.Key, Now.AddDays(-300), Now.AddDays(-1)).ConfigureAwait(False)
+                                _cts.Token.ThrowIfCancellationRequested()
+                                Dim historicalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(instrumentData.Key, tradingDay.AddDays(-300), tradingDay.AddDays(-1), TypeOfData.EOD).ConfigureAwait(False)
+                                _cts.Token.ThrowIfCancellationRequested()
                                 If historicalCandlesJSONDict IsNot Nothing AndAlso historicalCandlesJSONDict.Count > 0 Then
+                                    _cts.Token.ThrowIfCancellationRequested()
                                     Dim eodHistoricalData As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(historicalCandlesJSONDict, instrumentData.Value).ConfigureAwait(False)
+                                    _cts.Token.ThrowIfCancellationRequested()
                                     If eodHistoricalData IsNot Nothing AndAlso eodHistoricalData.Count > 0 Then
+                                        _cts.Token.ThrowIfCancellationRequested()
                                         Dim ATRPayload As Dictionary(Of Date, Decimal) = Nothing
                                         CalculateATR(14, eodHistoricalData, ATRPayload)
+                                        _cts.Token.ThrowIfCancellationRequested()
                                         Dim lastDayClosePrice As Decimal = eodHistoricalData.LastOrDefault.Value.ClosePrice.Value
+                                        lastTradingDay = eodHistoricalData.LastOrDefault.Key
                                         If lastDayClosePrice >= 80 AndAlso lastDayClosePrice <= 1500 Then
                                             Dim atrPercentage As Decimal = (ATRPayload(eodHistoricalData.LastOrDefault.Key) / lastDayClosePrice) * 100
                                             If atrPercentage >= 3 Then
+                                                _cts.Token.ThrowIfCancellationRequested()
                                                 Dim volumePayload As IEnumerable(Of KeyValuePair(Of Date, OHLCPayload)) = eodHistoricalData.OrderByDescending(Function(x)
                                                                                                                                                                   Return x.Key
-                                                                                                                                                              End Function).Take(30)
+                                                                                                                                                              End Function).Take(5)
+                                                _cts.Token.ThrowIfCancellationRequested()
                                                 If volumePayload IsNot Nothing AndAlso volumePayload.Count > 0 Then
+                                                    _cts.Token.ThrowIfCancellationRequested()
                                                     Dim avgVolume As Decimal = volumePayload.Average(Function(x)
                                                                                                          Return CType(x.Value.Volume.Value, Long)
                                                                                                      End Function)
+                                                    _cts.Token.ThrowIfCancellationRequested()
                                                     If avgVolume >= (300000 / 100) * lastDayClosePrice Then
-                                                        If highATRStocks Is Nothing Then highATRStocks = New Dictionary(Of String, Decimal)
-                                                        highATRStocks.Add(instrumentData.Value, atrPercentage)
+                                                        If highATRStocks Is Nothing Then highATRStocks = New Dictionary(Of String, Decimal())
+                                                        highATRStocks.Add(instrumentData.Value, {atrPercentage, avgVolume * 100 / ((300000 / 100) * lastDayClosePrice)})
                                                     End If
                                                 End If
                                             End If
@@ -94,14 +116,18 @@ Public Class TwoThirdFillInstrumentDetails
                     End If
                 Next
                 If highATRStocks IsNot Nothing AndAlso highATRStocks.Count > 0 Then
+                    Dim a = highATRStocks.OrderByDescending(Function(x)
+                                                                Return x.Value(0)
+                                                            End Function)
 
+                    _cts.Token.ThrowIfCancellationRequested()
                 End If
             End If
         End If
     End Function
     Private Async Function GetChartFromHistoricalAsync(ByVal historicalCandlesJSONDict As Dictionary(Of String, Object),
                                                        ByVal tradingSymbol As String) As Task(Of Dictionary(Of Date, OHLCPayload))
-        Await Task.Delay(0, cts.Token).ConfigureAwait(False)
+        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         Dim ret As Dictionary(Of Date, OHLCPayload) = Nothing
         If historicalCandlesJSONDict.ContainsKey("data") Then
             Dim historicalCandlesDict As Dictionary(Of String, Object) = historicalCandlesJSONDict("data")
@@ -111,7 +137,7 @@ Public Class TwoThirdFillInstrumentDetails
                 OnHeartbeat(String.Format("Generating Payload for {0}", tradingSymbol))
                 Dim previousPayload As OHLCPayload = Nothing
                 For Each historicalCandle In historicalCandles
-                    cts.Token.ThrowIfCancellationRequested()
+                    _cts.Token.ThrowIfCancellationRequested()
                     Dim runningSnapshotTime As Date = Utilities.Time.GetDateTimeTillMinutes(historicalCandle(0))
 
                     Dim runningPayload As OHLCPayload = New OHLCPayload(OHLCPayload.PayloadSource.Historical)
@@ -173,6 +199,11 @@ Public Class TwoThirdFillInstrumentDetails
             Next
         End If
     End Sub
+
+    Enum TypeOfData
+        Intraday = 1
+        EOD
+    End Enum
 
 #Region "IDisposable Support"
     Private disposedValue As Boolean ' To detect redundant calls
