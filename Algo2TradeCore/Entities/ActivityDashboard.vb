@@ -85,7 +85,7 @@ Namespace Entities
         <Display(Name:="Overall PL", Order:=5)>
         Public ReadOnly Property OverallPL As Decimal
             Get
-                _OverallPL = ParentStrategyInstrument.GetOverallPL()
+                _OverallPL = Math.Round(ParentStrategyInstrument.GetOverallPLAfterBrokerage(), 2)
                 Return _OverallPL
             End Get
         End Property
@@ -98,7 +98,7 @@ Namespace Entities
         Public ReadOnly Property SignalPL As Decimal
             Get
                 If ParentOrderID IsNot Nothing Then
-                    _SignalPL = ParentStrategyInstrument.GetTotalPLOfAnOrder(ParentOrderID)
+                    _SignalPL = Math.Round(ParentStrategyInstrument.GetTotalPLOfAnOrderAfterBrokerage(ParentOrderID), 2)
                 End If
                 Return _SignalPL
             End Get
