@@ -159,11 +159,18 @@ Public Class OHLStrategyInstrument
                 Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
                 If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
                     If placeOrderTrigger.Item2.EntryDirection = IOrder.TypeOfTransaction.Buy AndAlso Not _isBuyOrderPlaced Then
-                        Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
                         _isBuyOrderPlaced = True
+                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                            placeOrderResponse("data").ContainsKey("order_id") Then
+                            _isBuyOrderPlaced = True
+                        End If
                     ElseIf placeOrderTrigger.Item2.EntryDirection = IOrder.TypeOfTransaction.Sell AndAlso Not _isSellOrderPlaced Then
-                        Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
-                        _isSellOrderPlaced = True
+                        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                            placeOrderResponse("data").ContainsKey("order_id") Then
+                            _isSellOrderPlaced = True
+                        End If
                     End If
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
