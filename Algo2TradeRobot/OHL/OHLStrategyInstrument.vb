@@ -207,7 +207,7 @@ Public Class OHLStrategyInstrument
                 If currentTick.LastPrice < triggerPrice Then
                     parameters = New PlaceOrderParameters(dummyPayload) With
                                    {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                   .Quantity = 1,
+                                   .Quantity = 1 * Me.TradableInstrument.LotSize,
                                    .Price = price,
                                    .TriggerPrice = triggerPrice,
                                    .SquareOffValue = target,
@@ -223,7 +223,7 @@ Public Class OHLStrategyInstrument
                 If currentTick.LastPrice > triggerPrice Then
                     parameters = New PlaceOrderParameters(dummyPayload) With
                                        {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                       .Quantity = 1,
+                                       .Quantity = 1 * Me.TradableInstrument.LotSize,
                                        .Price = price,
                                        .TriggerPrice = triggerPrice,
                                        .SquareOffValue = target,

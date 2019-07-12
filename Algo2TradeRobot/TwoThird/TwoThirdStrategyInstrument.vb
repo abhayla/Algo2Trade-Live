@@ -93,7 +93,7 @@ Public Class TwoThirdStrategyInstrument
                         Dim modifiedPlaceOrderTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String) = New Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)(placeOrderTrigger.Item1, Me, placeOrderTrigger.Item2, placeOrderTrigger.Item3)
                         Dim placeOrderResponse As IBusinessOrder = Nothing
                         If reverseExit Then
-                            placeOrderResponse = Await TakeBOPaperTradeAsync(modifiedPlaceOrderTrigger).ConfigureAwait(False)
+                            placeOrderResponse = Await TakeBOPaperTradeAsync(modifiedPlaceOrderTrigger, True, _lastTick).ConfigureAwait(False)
                         Else
                             placeOrderResponse = Await TakeBOPaperTradeAsync(modifiedPlaceOrderTrigger, True, _lastTick).ConfigureAwait(False)
                         End If
@@ -137,8 +137,8 @@ Public Class TwoThirdStrategyInstrument
                                                                   placeOrderResponse.TargetOrder.FirstOrDefault.AveragePrice,
                                                                   Math.Round(potentialTargetPL, 2),
                                                                   vbNewLine,
-                                                                  If(reverseExit, "Entered at next available tick", _lastTick.LastPrice),
-                                                                  If(reverseExit, "Entered at next available tick", _lastTick.Timestamp),
+                                                                  _lastTick.LastPrice,
+                                                                  _lastTick.Timestamp,
                                                                   vbNewLine,
                                                                   Now)
                             GenerateTelegramMessageAsync(message)
