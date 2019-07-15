@@ -127,6 +127,7 @@
     <Compile Include="AmiSignal\frmAmiSignalTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ATM\ATMFillInstrumentDetails.vb" />
     <Compile Include="ATM\ATMStrategy.vb" />
     <Compile Include="ATM\ATMStrategyInstrument.vb" />
     <Compile Include="ATM\ATMUserInputs.vb" />

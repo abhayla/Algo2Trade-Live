@@ -36,29 +36,18 @@ Public Class ATMStrategy
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
+            Using fillInstrumentDetails As New ATMFillInstrumentDetails(_cts, Me)
+                Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+            End Using
             Dim userInputs As ATMUserInputs = CType(Me.UserSettings, ATMUserInputs)
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = Nothing
-                    Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
-                                                                                                         Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
-                                                                                                             x.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
-                                                                                                             (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX" OrElse x.RawExchange = "CDS")
-                                                                                                     End Function)
-
-                    Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date = Now.Date Then
-                                                                               Return x.Expiry.Value
-                                                                           Else
-                                                                               Return Date.MaxValue
-                                                                           End If
-                                                                       End Function)
-
-                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
-                                                                                Return x.Expiry = minExpiry
-                                                                            End Function)
+                    runningTradableInstrument = dummyAllInstruments.Find(Function(x)
+                                                                             Return x.TradingSymbol = instrument.Value.TradingSymbol
+                                                                         End Function)
 
                     _cts.Token.ThrowIfCancellationRequested()
 
@@ -122,7 +111,6 @@ Public Class ATMStrategy
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
-            tasks.Add(Task.Run(AddressOf GetOverAllPLDrawUpDrawDownAsync, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
         Catch ex As Exception
             lastException = ex
@@ -142,57 +130,7 @@ Public Class ATMStrategy
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(userSettings.MaxLossPerDay) * -1 Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
-        ElseIf Me.GetTotalPLAfterBrokerage >= Math.Abs(userSettings.MaxProfitPerDay) Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
     End Function
-
-    Private Async Function GetOverAllPLDrawUpDrawDownAsync() As Task
-        Try
-            Dim lastPL As Decimal = Decimal.MinValue
-            While True
-                If Me.ParentController.OrphanException IsNot Nothing Then
-                    Throw Me.ParentController.OrphanException
-                End If
-                _cts.Token.ThrowIfCancellationRequested()
-
-                If Me.GetTotalPLAfterBrokerage <> lastPL AndAlso (Me.GetTotalPLAfterBrokerage <> 0 OrElse Me.MaxDrawUp <> 0 OrElse Me.MaxDrawDown <> 0) Then
-                    Dim message As String = Nothing
-                    If Me.ParentController.UserInputs.FormRemarks IsNot Nothing AndAlso Not Me.ParentController.UserInputs.FormRemarks = "" Then
-                        message = String.Format("{0}{1}PL:{2}, MaxDrawUP:{3}, MaxDrawDown:{4}",
-                                                Me.ParentController.UserInputs.FormRemarks, vbNewLine,
-                                                Math.Round(Me.GetTotalPLAfterBrokerage, 2),
-                                                Math.Round(Me.MaxDrawUp, 2),
-                                                Math.Round(Me.MaxDrawDown, 2))
-                    Else
-                        message = String.Format("Candle Range Breakout. PL:{0}, MaxDrawUP:{1}, MaxDrawDown:{2}",
-                                                Math.Round(Me.GetTotalPLAfterBrokerage, 2),
-                                                Math.Round(Me.MaxDrawUp, 2),
-                                                Math.Round(Me.MaxDrawDown, 2))
-                    End If
-                    If message.Contains("&") Then
-                        message = message.Replace("&", "_")
-                    End If
-
-                    Dim userInputs As ATMUserInputs = Me.UserSettings
-                    If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
-                        userInputs.TelegramChatID IsNot Nothing AndAlso Not userInputs.TelegramPLChatID.Trim = "" Then
-                        Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramPLChatID, _cts)
-                            Dim encodedString As String = Utilities.Strings.EncodeString(message)
-                            Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
-                        End Using
-                    End If
-                End If
-                _cts.Token.ThrowIfCancellationRequested()
-                Await Task.Delay(60000, _cts.Token).ConfigureAwait(False)
-            End While
-        Catch ex As Exception
-            logger.Error("Get OverAll PL DrawUp DrawDown message generation error: {0}", ex.ToString)
-            Throw ex
-        End Try
-    End Function
-
 End Class

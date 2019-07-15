@@ -73,7 +73,7 @@ Partial Class frmATMTradableInstrumentList
         Me.dgvTradableInstruments.Size = New System.Drawing.Size(806, 312)
         Me.dgvTradableInstruments.TabIndex = 3
         '
-        'frmCandleRangeBreakoutTradableInstrumentList
+        'frmATMTradableInstrumentList
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -82,9 +82,9 @@ Partial Class frmATMTradableInstrumentList
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.Name = "frmCandleRangeBreakoutTradableInstrumentList"
+        Me.Name = "frmATMTradableInstrumentList"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Candle Range Breakout Strategy Tradable Instruments"
+        Me.Text = "ATM Strategy Tradable Instruments"
         CType(Me.dgvTradableInstruments, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 

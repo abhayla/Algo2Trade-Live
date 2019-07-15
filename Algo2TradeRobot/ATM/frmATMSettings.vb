@@ -15,7 +15,7 @@ Public Class frmATMSettings
         LoadSettings()
     End Sub
 
-    Private Sub btnCandleRangeBreakoutSettings_Click(sender As Object, e As EventArgs) Handles btnCandleRangeBreakoutSettings.Click
+    Private Sub btnATMSettings_Click(sender As Object, e As EventArgs) Handles btnATMStrategySettings.Click
         Try
             _cts = New CancellationTokenSource
             If _ATMSettings Is Nothing Then _ATMSettings = New ATMUserInputs
@@ -45,30 +45,52 @@ Public Class frmATMSettings
     Private Sub LoadSettings()
         If File.Exists(_ATMSettingsFilename) Then
             _ATMSettings = Utilities.Strings.DeserializeToCollection(Of ATMUserInputs)(_ATMSettingsFilename)
+            txtATRPeriod.Text = _ATMSettings.ATRPeriod
             txtSignalTimeFrame.Text = _ATMSettings.SignalTimeFrame
             dtpckrTradeStartTime.Value = _ATMSettings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _ATMSettings.LastTradeEntryTime
             dtpckrEODExitTime.Value = _ATMSettings.EODExitTime
-            txtMaxLossPerDay.Text = _ATMSettings.MaxLossPerDay
-            txtMaxProfitPerDay.Text = _ATMSettings.MaxProfitPerDay
-            txtTelegramAPI.Text = _ATMSettings.TelegramAPIKey
-            txtTelegramChatID.Text = _ATMSettings.TelegramChatID
-            txtTelegramChatIDForPL.Text = _ATMSettings.TelegramPLChatID
+            txtTargetMultiplier.Text = _ATMSettings.TargetMultiplier
             txtInstrumentDetalis.Text = _ATMSettings.InstrumentDetailsFilePath
+            chbCash.Checked = _ATMSettings.CashInstrument
+            chbFuture.Checked = _ATMSettings.FutureInstrument
+            txtCashMaxSL.Text = _ATMSettings.CashMaxSL
+            txtFutureMinCapital.Text = _ATMSettings.FutureMinCapital
+            If _ATMSettings.ManualInstrumentList IsNot Nothing AndAlso _ATMSettings.ManualInstrumentList.Count > 0 Then
+                Dim manualStocks As String = Nothing
+                For Each manualStock In _ATMSettings.ManualInstrumentList
+                    manualStocks = String.Format("{0},{1}", manualStocks, manualStock)
+                    manualStocks = manualStocks.TrimStart(",")
+                Next
+                txtManualStockList.Text = manualStocks
+            End If
         End If
     End Sub
 
     Private Sub SaveSettings()
+        _ATMSettings.ATRPeriod = txtATRPeriod.Text
         _ATMSettings.SignalTimeFrame = txtSignalTimeFrame.Text
         _ATMSettings.TradeStartTime = dtpckrTradeStartTime.Value
         _ATMSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
         _ATMSettings.EODExitTime = dtpckrEODExitTime.Value
-        _ATMSettings.MaxLossPerDay = txtMaxLossPerDay.Text
-        _ATMSettings.MaxProfitPerDay = txtMaxProfitPerDay.Text
-        _ATMSettings.TelegramAPIKey = txtTelegramAPI.Text
-        _ATMSettings.TelegramChatID = txtTelegramChatID.Text
-        _ATMSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
+        _ATMSettings.TargetMultiplier = txtTargetMultiplier.Text
         _ATMSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+        _ATMSettings.CashInstrument = chbCash.Checked
+        _ATMSettings.FutureInstrument = chbFuture.Checked
+        _ATMSettings.CashMaxSL = txtCashMaxSL.Text
+        _ATMSettings.FutureMinCapital = txtFutureMinCapital.Text
+        If txtManualStockList.Text IsNot Nothing AndAlso txtManualStockList.Text <> "" Then
+            If _ATMSettings.ManualInstrumentList IsNot Nothing Then
+                _ATMSettings.ManualInstrumentList.Clear()
+                _ATMSettings.ManualInstrumentList = Nothing
+            End If
+            Dim manualStocks As String = txtManualStockList.Text
+            Dim manualStockArray As String() = manualStocks.Split(",")
+            For Each stock In manualStockArray
+                If _ATMSettings.ManualInstrumentList Is Nothing Then _ATMSettings.ManualInstrumentList = New List(Of String)
+                _ATMSettings.ManualInstrumentList.Add(stock)
+            Next
+        End If
 
         Utilities.Strings.SerializeFromCollection(Of ATMUserInputs)(_ATMSettingsFilename, _ATMSettings)
     End Sub
@@ -90,8 +112,10 @@ Public Class frmATMSettings
 
     Private Sub ValidateInputs()
         ValidateNumbers(1, 60, txtSignalTimeFrame)
-        ValidateNumbers(Decimal.MinValue, Decimal.MaxValue, txtMaxLossPerDay)
-        ValidateNumbers(0, Decimal.MaxValue, txtMaxProfitPerDay)
+        ValidateNumbers(1, 100, txtATRPeriod)
+        ValidateNumbers(0, Decimal.MaxValue, txtCashMaxSL)
+        ValidateNumbers(0, Decimal.MaxValue, txtFutureMinCapital)
         ValidateFile()
     End Sub
+
 End Class

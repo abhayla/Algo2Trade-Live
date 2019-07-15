@@ -1947,8 +1947,8 @@ Public Class frmMainTabbed
             EnableDisableUIEx(UIMode.BlockOther, GetType(ATMStrategy))
 
             OnHeartbeat("Validating Strategy user settings")
-            If File.Exists("CandleRangeBreakoutSettings.Strategy.a2t") Then
-                Dim fs As Stream = New FileStream("CandleRangeBreakoutSettings.Strategy.a2t", FileMode.Open)
+            If File.Exists("ATMSettings.Strategy.a2t") Then
+                Dim fs As Stream = New FileStream("ATMSettings.Strategy.a2t", FileMode.Open)
                 Dim bf As BinaryFormatter = New BinaryFormatter()
                 _ATMUserInputs = CType(bf.Deserialize(fs), ATMUserInputs)
                 fs.Close()
