@@ -1921,16 +1921,16 @@ Public Class frmMainTabbed
     End Sub
 #End Region
 
-#Region "Candle Range Breakout Strategy"
-    Private _CandleRangeBreakoutUserInputs As CandleRangeBreakoutUserInputs = Nothing
-    Private _CandleRangeBreakoutDashboadList As BindingList(Of ActivityDashboard) = Nothing
-    Private _CandleRangeBreakoutTradableInstruments As IEnumerable(Of CandleRangeBreakoutStrategyInstrument) = Nothing
-    Private _CandleRangeBreakoutStrategyToExecute As CandleRangeBreakoutStrategy = Nothing
+#Region "ATM Strategy"
+    Private _ATMUserInputs As ATMUserInputs = Nothing
+    Private _ATMDashboadList As BindingList(Of ActivityDashboard) = Nothing
+    Private _ATMTradableInstruments As IEnumerable(Of ATMStrategyInstrument) = Nothing
+    Private _ATMStrategyToExecute As ATMStrategy = Nothing
     Private Sub sfdgvCandleRangeBreakoutMainDashboard_FilterPopupShowing(sender As Object, e As FilterPopupShowingEventArgs) Handles sfdgvCandleRangeBreakoutMainDashboard.FilterPopupShowing
-        ManipulateGridEx(GridMode.TouchupPopupFilter, e, GetType(CandleRangeBreakoutStrategy))
+        ManipulateGridEx(GridMode.TouchupPopupFilter, e, GetType(ATMStrategy))
     End Sub
     Private Sub sfdgvCandleRangeBreakoutMainDashboard_AutoGeneratingColumn(sender As Object, e As AutoGeneratingColumnArgs) Handles sfdgvCandleRangeBreakoutMainDashboard.AutoGeneratingColumn
-        ManipulateGridEx(GridMode.TouchupAutogeneratingColumn, e, GetType(CandleRangeBreakoutStrategy))
+        ManipulateGridEx(GridMode.TouchupAutogeneratingColumn, e, GetType(ATMStrategy))
     End Sub
     Private Async Function CandleRangeBreakoutWorkerAsync() As Task
         If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
@@ -1943,21 +1943,21 @@ Public Class frmMainTabbed
         _lastException = Nothing
 
         Try
-            EnableDisableUIEx(UIMode.Active, GetType(CandleRangeBreakoutStrategy))
-            EnableDisableUIEx(UIMode.BlockOther, GetType(CandleRangeBreakoutStrategy))
+            EnableDisableUIEx(UIMode.Active, GetType(ATMStrategy))
+            EnableDisableUIEx(UIMode.BlockOther, GetType(ATMStrategy))
 
             OnHeartbeat("Validating Strategy user settings")
             If File.Exists("CandleRangeBreakoutSettings.Strategy.a2t") Then
                 Dim fs As Stream = New FileStream("CandleRangeBreakoutSettings.Strategy.a2t", FileMode.Open)
                 Dim bf As BinaryFormatter = New BinaryFormatter()
-                _CandleRangeBreakoutUserInputs = CType(bf.Deserialize(fs), CandleRangeBreakoutUserInputs)
+                _ATMUserInputs = CType(bf.Deserialize(fs), ATMUserInputs)
                 fs.Close()
-                _CandleRangeBreakoutUserInputs.InstrumentsData = Nothing
-                _CandleRangeBreakoutUserInputs.FillInstrumentDetails(_CandleRangeBreakoutUserInputs.InstrumentDetailsFilePath, _cts)
+                _ATMUserInputs.InstrumentsData = Nothing
+                _ATMUserInputs.FillInstrumentDetails(_ATMUserInputs.InstrumentDetailsFilePath, _cts)
             Else
                 Throw New ApplicationException("Settings file not found. Please complete your settings properly.")
             End If
-            logger.Debug(Utilities.Strings.JsonSerialize(_CandleRangeBreakoutUserInputs))
+            logger.Debug(Utilities.Strings.JsonSerialize(_ATMUserInputs))
 
             If Not Common.IsZerodhaUserDetailsPopulated(_commonControllerUserInput) Then Throw New ApplicationException("Cannot proceed without API user details being entered")
             Dim currentUser As ZerodhaUser = Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput)
@@ -2055,28 +2055,28 @@ Public Class frmMainTabbed
 
                 If Not isPreProcessingDone Then Throw New ApplicationException("PrepareToRunStrategyAsync did not succeed, cannot progress")
             End If 'Common controller
-            EnableDisableUIEx(UIMode.ReleaseOther, GetType(CandleRangeBreakoutStrategy))
+            EnableDisableUIEx(UIMode.ReleaseOther, GetType(ATMStrategy))
 
-            _CandleRangeBreakoutStrategyToExecute = New CandleRangeBreakoutStrategy(_commonController, 5, _CandleRangeBreakoutUserInputs, 8, _cts)
-            OnHeartbeatEx(String.Format("Running strategy:{0}", _CandleRangeBreakoutStrategyToExecute.ToString), New List(Of Object) From {_CandleRangeBreakoutStrategyToExecute})
+            _ATMStrategyToExecute = New ATMStrategy(_commonController, 5, _ATMUserInputs, 5, _cts)
+            OnHeartbeatEx(String.Format("Running strategy:{0}", _ATMStrategyToExecute.ToString), New List(Of Object) From {_ATMStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()
-            Await _commonController.SubscribeStrategyAsync(_CandleRangeBreakoutStrategyToExecute).ConfigureAwait(False)
+            Await _commonController.SubscribeStrategyAsync(_ATMStrategyToExecute).ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
 
-            _CandleRangeBreakoutTradableInstruments = _CandleRangeBreakoutStrategyToExecute.TradableStrategyInstruments
-            SetObjectText_ThreadSafe(linklblCandleRangeBreakoutTradableInstrument, String.Format("Tradable Instruments: {0}", _CandleRangeBreakoutTradableInstruments.Count))
+            _ATMTradableInstruments = _ATMStrategyToExecute.TradableStrategyInstruments
+            SetObjectText_ThreadSafe(linklblCandleRangeBreakoutTradableInstrument, String.Format("Tradable Instruments: {0}", _ATMTradableInstruments.Count))
             SetObjectEnableDisable_ThreadSafe(linklblCandleRangeBreakoutTradableInstrument, True)
             _cts.Token.ThrowIfCancellationRequested()
 
-            _CandleRangeBreakoutDashboadList = New BindingList(Of ActivityDashboard)(_CandleRangeBreakoutStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
-                                                                                                                                                                            Return x.SignalGeneratedTime
-                                                                                                                                                                        End Function).ToList)
-            SetSFGridDataBind_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard, _CandleRangeBreakoutDashboadList)
+            _ATMDashboadList = New BindingList(Of ActivityDashboard)(_ATMStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
+                                                                                                                                            Return x.SignalGeneratedTime
+                                                                                                                                        End Function).ToList)
+            SetSFGridDataBind_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard, _ATMDashboadList)
             SetSFGridFreezFirstColumn_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard)
             _cts.Token.ThrowIfCancellationRequested()
 
-            Await _CandleRangeBreakoutStrategyToExecute.MonitorAsync().ConfigureAwait(False)
+            Await _ATMStrategyToExecute.MonitorAsync().ConfigureAwait(False)
         Catch aex As AdapterBusinessException
             logger.Error(aex)
             If aex.ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
@@ -2095,8 +2095,8 @@ Public Class frmMainTabbed
             MsgBox(String.Format("The following error occurred: {0}", ex.Message), MsgBoxStyle.Critical)
         Finally
             ProgressStatus("No pending actions")
-            EnableDisableUIEx(UIMode.ReleaseOther, GetType(CandleRangeBreakoutStrategy))
-            EnableDisableUIEx(UIMode.Idle, GetType(CandleRangeBreakoutStrategy))
+            EnableDisableUIEx(UIMode.ReleaseOther, GetType(ATMStrategy))
+            EnableDisableUIEx(UIMode.Idle, GetType(ATMStrategy))
         End Try
         'If _cts Is Nothing OrElse _cts.IsCancellationRequested Then
         'Following portion need to be done for any kind of exception. Otherwise if we start again without closing the form then
@@ -2137,7 +2137,7 @@ Public Class frmMainTabbed
         End If
     End Sub
     Private Sub tmrCandleRangeBreakoutTickerStatus_Tick(sender As Object, e As EventArgs) Handles tmrCandleRangeBreakoutTickerStatus.Tick
-        FlashTickerBulbEx(GetType(CandleRangeBreakoutStrategy))
+        FlashTickerBulbEx(GetType(ATMStrategy))
     End Sub
     Private Async Sub btnCandleRangeBreakoutStop_Click(sender As Object, e As EventArgs) Handles btnCandleRangeBreakoutStop.Click
         SetObjectEnableDisable_ThreadSafe(linklblCandleRangeBreakoutTradableInstrument, False)
@@ -2147,11 +2147,11 @@ Public Class frmMainTabbed
         _cts.Cancel()
     End Sub
     Private Sub btnCandleRangeBreakoutSettings_Click(sender As Object, e As EventArgs) Handles btnCandleRangeBreakoutSettings.Click
-        Dim newForm As New frmCandleRangeBreakoutSettings(_CandleRangeBreakoutUserInputs)
+        Dim newForm As New frmATMSettings(_ATMUserInputs)
         newForm.ShowDialog()
     End Sub
     Private Sub linklblCandleRangeBreakoutTradableInstrument_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles linklblCandleRangeBreakoutTradableInstrument.LinkClicked
-        Dim newForm As New frmCandleRangeBreakoutTradableInstrumentList(_CandleRangeBreakoutTradableInstruments)
+        Dim newForm As New frmATMTradableInstrumentList(_ATMTradableInstruments)
         newForm.ShowDialog()
     End Sub
 #End Region
@@ -2545,8 +2545,8 @@ Public Class frmMainTabbed
             _cts.Token.ThrowIfCancellationRequested()
 
             _TwoThirdDashboadList = New BindingList(Of ActivityDashboard)(_TwoThirdStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
-                                                                                                                                                        Return x.SignalGeneratedTime
-                                                                                                                                                    End Function).ToList)
+                                                                                                                                                      Return x.SignalGeneratedTime
+                                                                                                                                                  End Function).ToList)
             SetSFGridDataBind_ThreadSafe(sfdgvTwoThirdMainDashboard, _TwoThirdDashboadList)
             SetSFGridFreezFirstColumn_ThreadSafe(sfdgvTwoThirdMainDashboard)
             _cts.Token.ThrowIfCancellationRequested()
@@ -3245,7 +3245,7 @@ Public Class frmMainTabbed
                     SetObjectEnableDisable_ThreadSafe(btnEMACrossoverStop, False)
                     SetSFGridDataBind_ThreadSafe(sfdgvEMACrossoverMainDashboard, Nothing)
             End Select
-        ElseIf source Is GetType(CandleRangeBreakoutStrategy) Then
+        ElseIf source Is GetType(ATMStrategy) Then
             Select Case mode
                 Case UIMode.Active
                     SetObjectEnableDisable_ThreadSafe(btnCandleRangeBreakoutStart, False)
@@ -3529,7 +3529,7 @@ Public Class frmMainTabbed
         ElseIf source Is GetType(EMACrossoverStrategy) Then
             blbTickerStatusCommon = blbEMACrossoverTickerStatus
             tmrTickerStatusCommon = tmrEMACrossoverTickerStatus
-        ElseIf source Is GetType(CandleRangeBreakoutStrategy) Then
+        ElseIf source Is GetType(ATMStrategy) Then
             blbTickerStatusCommon = blbCandleRangeBreakoutTickerStatus
             tmrTickerStatusCommon = tmrCandleRangeBreakoutTickerStatus
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
@@ -3573,7 +3573,7 @@ Public Class frmMainTabbed
             blbTickerStatusCommon = blbPetDGandhiTickerStatus
         ElseIf source Is GetType(EMACrossoverStrategy) Then
             blbTickerStatusCommon = blbEMACrossoverTickerStatus
-        ElseIf source Is GetType(CandleRangeBreakoutStrategy) Then
+        ElseIf source Is GetType(ATMStrategy) Then
             blbTickerStatusCommon = blbCandleRangeBreakoutTickerStatus
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             blbTickerStatusCommon = blbJoyMaaATMTickerStatus
@@ -3604,7 +3604,7 @@ Public Class frmMainTabbed
             sfdgvCommon = sfdgvPetDGandhiMainDashboard
         ElseIf source Is GetType(EMACrossoverStrategy) Then
             sfdgvCommon = sfdgvEMACrossoverMainDashboard
-        ElseIf source Is GetType(CandleRangeBreakoutStrategy) Then
+        ElseIf source Is GetType(ATMStrategy) Then
             sfdgvCommon = sfdgvCandleRangeBreakoutMainDashboard
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             sfdgvCommon = sfdgvJoyMaaATMMainDashboard
@@ -3691,7 +3691,7 @@ Public Class frmMainTabbed
                 Case LogMode.One
                     SetListAddItem_ThreadSafe(lstEMACrossoverLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
             End Select
-        ElseIf source IsNot Nothing AndAlso source.GetType Is GetType(CandleRangeBreakoutStrategy) Then
+        ElseIf source IsNot Nothing AndAlso source.GetType Is GetType(ATMStrategy) Then
             Select Case mode
                 Case LogMode.One
                     SetListAddItem_ThreadSafe(lstCandleRangeBreakoutLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
@@ -3769,7 +3769,7 @@ Public Class frmMainTabbed
         EnableDisableUIEx(UIMode.Idle, GetType(NearFarHedgingStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(PetDGandhiStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(EMACrossoverStrategy))
-        EnableDisableUIEx(UIMode.Idle, GetType(CandleRangeBreakoutStrategy))
+        EnableDisableUIEx(UIMode.Idle, GetType(ATMStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(JoyMaaATMStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(TwoThirdStrategy))
         'tabMain.TabPages.Remove(tabOHL)
@@ -3791,7 +3791,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Pink)
-        ColorTickerBulbEx(GetType(CandleRangeBreakoutStrategy), Color.Pink)
+        ColorTickerBulbEx(GetType(ATMStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Pink)
         OnHeartbeat("Ticker:Closed")
@@ -3804,7 +3804,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Lime)
-        ColorTickerBulbEx(GetType(CandleRangeBreakoutStrategy), Color.Lime)
+        ColorTickerBulbEx(GetType(ATMStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Lime)
         OnHeartbeat("Ticker:Connected")
@@ -3818,7 +3818,7 @@ Public Class frmMainTabbed
             ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Pink)
-            ColorTickerBulbEx(GetType(CandleRangeBreakoutStrategy), Color.Pink)
+            ColorTickerBulbEx(GetType(ATMStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Pink)
         End If
@@ -3837,7 +3837,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Yellow)
-        ColorTickerBulbEx(GetType(CandleRangeBreakoutStrategy), Color.Yellow)
+        ColorTickerBulbEx(GetType(ATMStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Yellow)
         OnHeartbeat("Ticker:Reconnecting")
@@ -3900,8 +3900,8 @@ Public Class frmMainTabbed
                     BindingListAdd_ThreadSafe(_PetDGandhiDashboadList, item)
                 Case GetType(EMACrossoverStrategy)
                     BindingListAdd_ThreadSafe(_EMACrossoverDashboadList, item)
-                Case GetType(CandleRangeBreakoutStrategy)
-                    BindingListAdd_ThreadSafe(_CandleRangeBreakoutDashboadList, item)
+                Case GetType(ATMStrategy)
+                    BindingListAdd_ThreadSafe(_ATMDashboadList, item)
                 Case GetType(JoyMaaATMStrategy)
                     BindingListAdd_ThreadSafe(_JoyMaaATMDashboadList, item)
                 Case GetType(TwoThirdStrategy)
@@ -3955,11 +3955,11 @@ Public Class frmMainTabbed
                 _EMACrossoverDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
                 SetSFGridDataBind_ThreadSafe(sfdgvEMACrossoverMainDashboard, _EMACrossoverDashboadList)
                 SetSFGridFreezFirstColumn_ThreadSafe(sfdgvEMACrossoverMainDashboard)
-            Case GetType(CandleRangeBreakoutStrategy)
+            Case GetType(ATMStrategy)
                 SetSFGridDataBind_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard, Nothing)
-                _CandleRangeBreakoutDashboadList = Nothing
-                _CandleRangeBreakoutDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
-                SetSFGridDataBind_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard, _CandleRangeBreakoutDashboadList)
+                _ATMDashboadList = Nothing
+                _ATMDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
+                SetSFGridDataBind_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard, _ATMDashboadList)
                 SetSFGridFreezFirstColumn_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard)
             Case GetType(JoyMaaATMStrategy)
                 SetSFGridDataBind_ThreadSafe(sfdgvJoyMaaATMMainDashboard, Nothing)
@@ -3994,7 +3994,7 @@ Public Class frmMainTabbed
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("PetD Gandhi Order Book.csv")))
                 Case GetType(EMACrossoverStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Crossover Order Book.csv")))
-                Case GetType(CandleRangeBreakoutStrategy)
+                Case GetType(ATMStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Candle Range Breakout Order Book.csv")))
                 Case GetType(JoyMaaATMStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Joy Maa ATM Order Book.csv")))

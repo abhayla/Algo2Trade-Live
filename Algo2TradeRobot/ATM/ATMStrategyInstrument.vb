@@ -5,7 +5,7 @@ Imports Algo2TradeCore.Strategies
 Imports NLog
 Imports Algo2TradeCore.Entities.Indicators
 
-Public Class CandleRangeBreakoutStrategyInstrument
+Public Class ATMStrategyInstrument
     Inherits StrategyInstrument
     Implements IDisposable
 
@@ -49,7 +49,7 @@ Public Class CandleRangeBreakoutStrategyInstrument
 
     Public Overrides Async Function MonitorAsync() As Task
         Try
-            Dim userSettings As CandleRangeBreakoutUserInputs = Me.ParentStrategy.UserSettings
+            Dim userSettings As ATMUserInputs = Me.ParentStrategy.UserSettings
             Dim minTargetPoint As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).MinTargetPoint
             Dim maxStoplossPoint As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).MaxStoplossPoint
             Dim maxStockProfit As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).MaxStockProfit
@@ -218,7 +218,7 @@ Public Class CandleRangeBreakoutStrategyInstrument
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
         Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim userSettings As CandleRangeBreakoutUserInputs = Me.ParentStrategy.UserSettings
+        Dim userSettings As ATMUserInputs = Me.ParentStrategy.UserSettings
         Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
         Dim currentTime As Date = Now()
         Dim minTargetPoint As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).MinTargetPoint
@@ -447,7 +447,7 @@ Public Class CandleRangeBreakoutStrategyInstrument
             message = message.Replace("&", "_")
         End If
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-        Dim userInputs As CandleRangeBreakoutUserInputs = Me.ParentStrategy.UserSettings
+        Dim userInputs As ATMUserInputs = Me.ParentStrategy.UserSettings
         If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
             userInputs.TelegramChatID IsNot Nothing AndAlso Not userInputs.TelegramChatID.Trim = "" Then
             Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramChatID, _cts)

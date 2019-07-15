@@ -1,7 +1,7 @@
-﻿Public Class frmCandleRangeBreakoutTradableInstrumentList
+﻿Public Class frmATMTradableInstrumentList
 
-    Private _TradableInstruments As IEnumerable(Of CandleRangeBreakoutStrategyInstrument)
-    Public Sub New(ByVal associatedTradableInstruments As IEnumerable(Of CandleRangeBreakoutStrategyInstrument))
+    Private _TradableInstruments As IEnumerable(Of ATMStrategyInstrument)
+    Public Sub New(ByVal associatedTradableInstruments As IEnumerable(Of ATMStrategyInstrument))
         InitializeComponent()
         Me._TradableInstruments = associatedTradableInstruments
     End Sub

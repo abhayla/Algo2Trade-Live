@@ -4,7 +4,7 @@ Imports Algo2TradeCore.Entities.UserSettings
 Imports Utilities.DAL
 
 <Serializable>
-Public Class CandleRangeBreakoutUserInputs
+Public Class ATMUserInputs
     Inherits StrategyUserInputs
     Public Property TelegramAPIKey As String
     Public Property TelegramChatID As String

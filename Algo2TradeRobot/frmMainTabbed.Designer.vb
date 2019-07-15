@@ -30,6 +30,21 @@ Partial Class frmMainTabbed
         Me.miAdvancedOptions = New System.Windows.Forms.ToolStripMenuItem()
         Me.miAbout = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabMain = New System.Windows.Forms.TabControl()
+        Me.tabTwoThird = New System.Windows.Forms.TabPage()
+        Me.pnlTwoThirdMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.pnlTwoThirdTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.btnTwoThirdStop = New System.Windows.Forms.Button()
+        Me.btnTwoThirdStart = New System.Windows.Forms.Button()
+        Me.Panel10 = New System.Windows.Forms.Panel()
+        Me.blbTwoThirdTickerStatus = New Bulb.LedBulb()
+        Me.lblTwoThirdTickerStatus = New System.Windows.Forms.Label()
+        Me.btnTwoThirdSettings = New System.Windows.Forms.Button()
+        Me.linklblTwoThirdTradableInstrument = New System.Windows.Forms.LinkLabel()
+        Me.pnlTwoThirdBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.PictureBox9 = New System.Windows.Forms.PictureBox()
+        Me.pnlTwoThirdBodyHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.lstTwoThirdLog = New System.Windows.Forms.ListBox()
+        Me.sfdgvTwoThirdMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
         Me.tabJoyMaaATM = New System.Windows.Forms.TabPage()
         Me.pnlJoyMaaATMMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
@@ -41,6 +56,7 @@ Partial Class frmMainTabbed
         Me.btnJoyMaaATMSettings = New System.Windows.Forms.Button()
         Me.linklblJoyMaaATMTradableInstrument = New System.Windows.Forms.LinkLabel()
         Me.pnlJoyMaaATMBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.PictureBox8 = New System.Windows.Forms.PictureBox()
         Me.TableLayoutPanel7 = New System.Windows.Forms.TableLayoutPanel()
         Me.lstJoyMaaATMLog = New System.Windows.Forms.ListBox()
         Me.sfdgvJoyMaaATMMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
@@ -173,30 +189,23 @@ Partial Class frmMainTabbed
         Me.tmrEMACrossoverTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrCandleRangeBreakoutTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrJoyMaaATMTickerStatus = New System.Windows.Forms.Timer(Me.components)
-        Me.tabTwoThird = New System.Windows.Forms.TabPage()
         Me.tmrTwoThirdTickerStatus = New System.Windows.Forms.Timer(Me.components)
-        Me.pnlTwoThirdMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.pnlTwoThirdTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.btnTwoThirdStop = New System.Windows.Forms.Button()
-        Me.btnTwoThirdStart = New System.Windows.Forms.Button()
-        Me.Panel10 = New System.Windows.Forms.Panel()
-        Me.blbTwoThirdTickerStatus = New Bulb.LedBulb()
-        Me.lblTwoThirdTickerStatus = New System.Windows.Forms.Label()
-        Me.btnTwoThirdSettings = New System.Windows.Forms.Button()
-        Me.linklblTwoThirdTradableInstrument = New System.Windows.Forms.LinkLabel()
-        Me.pnlTwoThirdBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.pnlTwoThirdBodyHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.lstTwoThirdLog = New System.Windows.Forms.ListBox()
-        Me.sfdgvTwoThirdMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
-        Me.PictureBox8 = New System.Windows.Forms.PictureBox()
-        Me.PictureBox9 = New System.Windows.Forms.PictureBox()
         Me.msMainMenuStrip.SuspendLayout()
         Me.tabMain.SuspendLayout()
+        Me.tabTwoThird.SuspendLayout()
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.SuspendLayout()
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.SuspendLayout()
+        Me.Panel10.SuspendLayout()
+        Me.pnlTwoThirdBodyVerticalSplitter.SuspendLayout()
+        CType(Me.PictureBox9, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.pnlTwoThirdBodyHorizontalSplitter.SuspendLayout()
+        CType(Me.sfdgvTwoThirdMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabJoyMaaATM.SuspendLayout()
         Me.pnlJoyMaaATMMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.SuspendLayout()
         Me.Panel9.SuspendLayout()
         Me.pnlJoyMaaATMBodyVerticalSplitter.SuspendLayout()
+        CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TableLayoutPanel7.SuspendLayout()
         CType(Me.sfdgvJoyMaaATMMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabCandleRangeBreakout.SuspendLayout()
@@ -262,15 +271,6 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalBodyHorizontalSplitter.SuspendLayout()
         CType(Me.sfdgvAmiSignalMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabTwoThird.SuspendLayout()
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.SuspendLayout()
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.SuspendLayout()
-        Me.Panel10.SuspendLayout()
-        Me.pnlTwoThirdBodyVerticalSplitter.SuspendLayout()
-        Me.pnlTwoThirdBodyHorizontalSplitter.SuspendLayout()
-        CType(Me.sfdgvTwoThirdMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.PictureBox9, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'msMainMenuStrip
@@ -313,9 +313,9 @@ Partial Class frmMainTabbed
         '
         'tabMain
         '
+        Me.tabMain.Controls.Add(Me.tabCandleRangeBreakout)
         Me.tabMain.Controls.Add(Me.tabTwoThird)
         Me.tabMain.Controls.Add(Me.tabJoyMaaATM)
-        Me.tabMain.Controls.Add(Me.tabCandleRangeBreakout)
         Me.tabMain.Controls.Add(Me.tabPetDGandhi)
         Me.tabMain.Controls.Add(Me.tabEMACrossover)
         Me.tabMain.Controls.Add(Me.tabNearFarHedging)
@@ -330,6 +330,217 @@ Partial Class frmMainTabbed
         Me.tabMain.SelectedIndex = 0
         Me.tabMain.Size = New System.Drawing.Size(1371, 722)
         Me.tabMain.TabIndex = 1
+        '
+        'tabTwoThird
+        '
+        Me.tabTwoThird.Controls.Add(Me.pnlTwoThirdMainPanelHorizontalSplitter)
+        Me.tabTwoThird.Location = New System.Drawing.Point(4, 25)
+        Me.tabTwoThird.Name = "tabTwoThird"
+        Me.tabTwoThird.Size = New System.Drawing.Size(1363, 693)
+        Me.tabTwoThird.TabIndex = 9
+        Me.tabTwoThird.Text = "Two Third"
+        Me.tabTwoThird.UseVisualStyleBackColor = True
+        '
+        'pnlTwoThirdMainPanelHorizontalSplitter
+        '
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.ColumnCount = 1
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.Controls.Add(Me.pnlTwoThirdTopHeaderVerticalSplitter, 0, 0)
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.Controls.Add(Me.pnlTwoThirdBodyVerticalSplitter, 0, 1)
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.Name = "pnlTwoThirdMainPanelHorizontalSplitter"
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.RowCount = 2
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.TabIndex = 7
+        '
+        'pnlTwoThirdTopHeaderVerticalSplitter
+        '
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnCount = 15
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.btnTwoThirdStop, 0, 0)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.btnTwoThirdStart, 0, 0)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.Panel10, 14, 0)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.btnTwoThirdSettings, 9, 0)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.linklblTwoThirdTradableInstrument, 10, 0)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Name = "pnlTwoThirdTopHeaderVerticalSplitter"
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.RowCount = 1
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.TabIndex = 0
+        '
+        'btnTwoThirdStop
+        '
+        Me.btnTwoThirdStop.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnTwoThirdStop.Location = New System.Drawing.Point(94, 4)
+        Me.btnTwoThirdStop.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnTwoThirdStop.Name = "btnTwoThirdStop"
+        Me.btnTwoThirdStop.Size = New System.Drawing.Size(82, 32)
+        Me.btnTwoThirdStop.TabIndex = 10
+        Me.btnTwoThirdStop.Text = "Stop"
+        Me.btnTwoThirdStop.UseVisualStyleBackColor = True
+        '
+        'btnTwoThirdStart
+        '
+        Me.btnTwoThirdStart.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnTwoThirdStart.Location = New System.Drawing.Point(4, 4)
+        Me.btnTwoThirdStart.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnTwoThirdStart.Name = "btnTwoThirdStart"
+        Me.btnTwoThirdStart.Size = New System.Drawing.Size(82, 32)
+        Me.btnTwoThirdStart.TabIndex = 2
+        Me.btnTwoThirdStart.Text = "Start"
+        Me.btnTwoThirdStart.UseVisualStyleBackColor = True
+        '
+        'Panel10
+        '
+        Me.Panel10.Controls.Add(Me.blbTwoThirdTickerStatus)
+        Me.Panel10.Controls.Add(Me.lblTwoThirdTickerStatus)
+        Me.Panel10.Location = New System.Drawing.Point(1201, 4)
+        Me.Panel10.Margin = New System.Windows.Forms.Padding(4)
+        Me.Panel10.Name = "Panel10"
+        Me.Panel10.Size = New System.Drawing.Size(147, 31)
+        Me.Panel10.TabIndex = 9
+        '
+        'blbTwoThirdTickerStatus
+        '
+        Me.blbTwoThirdTickerStatus.Color = System.Drawing.Color.Pink
+        Me.blbTwoThirdTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
+        Me.blbTwoThirdTickerStatus.Location = New System.Drawing.Point(100, 0)
+        Me.blbTwoThirdTickerStatus.Margin = New System.Windows.Forms.Padding(4)
+        Me.blbTwoThirdTickerStatus.Name = "blbTwoThirdTickerStatus"
+        Me.blbTwoThirdTickerStatus.On = True
+        Me.blbTwoThirdTickerStatus.Size = New System.Drawing.Size(47, 31)
+        Me.blbTwoThirdTickerStatus.TabIndex = 7
+        Me.blbTwoThirdTickerStatus.Text = "LedBulb1"
+        '
+        'lblTwoThirdTickerStatus
+        '
+        Me.lblTwoThirdTickerStatus.AutoSize = True
+        Me.lblTwoThirdTickerStatus.Location = New System.Drawing.Point(9, 9)
+        Me.lblTwoThirdTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblTwoThirdTickerStatus.Name = "lblTwoThirdTickerStatus"
+        Me.lblTwoThirdTickerStatus.Size = New System.Drawing.Size(91, 17)
+        Me.lblTwoThirdTickerStatus.TabIndex = 9
+        Me.lblTwoThirdTickerStatus.Text = "Ticker Status"
+        '
+        'btnTwoThirdSettings
+        '
+        Me.btnTwoThirdSettings.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnTwoThirdSettings.Location = New System.Drawing.Point(814, 4)
+        Me.btnTwoThirdSettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnTwoThirdSettings.Name = "btnTwoThirdSettings"
+        Me.btnTwoThirdSettings.Size = New System.Drawing.Size(82, 32)
+        Me.btnTwoThirdSettings.TabIndex = 11
+        Me.btnTwoThirdSettings.Text = "Settings"
+        Me.btnTwoThirdSettings.UseVisualStyleBackColor = True
+        '
+        'linklblTwoThirdTradableInstrument
+        '
+        Me.linklblTwoThirdTradableInstrument.AutoSize = True
+        Me.linklblTwoThirdTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.linklblTwoThirdTradableInstrument.Enabled = False
+        Me.linklblTwoThirdTradableInstrument.Location = New System.Drawing.Point(903, 0)
+        Me.linklblTwoThirdTradableInstrument.Name = "linklblTwoThirdTradableInstrument"
+        Me.linklblTwoThirdTradableInstrument.Size = New System.Drawing.Size(220, 40)
+        Me.linklblTwoThirdTradableInstrument.TabIndex = 12
+        Me.linklblTwoThirdTradableInstrument.TabStop = True
+        Me.linklblTwoThirdTradableInstrument.Text = "Tradable Instruments: 0"
+        Me.linklblTwoThirdTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'pnlTwoThirdBodyVerticalSplitter
+        '
+        Me.pnlTwoThirdBodyVerticalSplitter.ColumnCount = 2
+        Me.pnlTwoThirdBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.pnlTwoThirdBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlTwoThirdBodyVerticalSplitter.Controls.Add(Me.PictureBox9, 0, 0)
+        Me.pnlTwoThirdBodyVerticalSplitter.Controls.Add(Me.pnlTwoThirdBodyHorizontalSplitter, 0, 0)
+        Me.pnlTwoThirdBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlTwoThirdBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
+        Me.pnlTwoThirdBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlTwoThirdBodyVerticalSplitter.Name = "pnlTwoThirdBodyVerticalSplitter"
+        Me.pnlTwoThirdBodyVerticalSplitter.RowCount = 1
+        Me.pnlTwoThirdBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlTwoThirdBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
+        Me.pnlTwoThirdBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
+        Me.pnlTwoThirdBodyVerticalSplitter.TabIndex = 1
+        '
+        'PictureBox9
+        '
+        Me.PictureBox9.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox9.Image = CType(resources.GetObject("PictureBox9.Image"), System.Drawing.Image)
+        Me.PictureBox9.Location = New System.Drawing.Point(951, 2)
+        Me.PictureBox9.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox9.Name = "PictureBox9"
+        Me.PictureBox9.Size = New System.Drawing.Size(401, 633)
+        Me.PictureBox9.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox9.TabIndex = 3
+        Me.PictureBox9.TabStop = False
+        '
+        'pnlTwoThirdBodyHorizontalSplitter
+        '
+        Me.pnlTwoThirdBodyHorizontalSplitter.ColumnCount = 1
+        Me.pnlTwoThirdBodyHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlTwoThirdBodyHorizontalSplitter.Controls.Add(Me.lstTwoThirdLog, 0, 1)
+        Me.pnlTwoThirdBodyHorizontalSplitter.Controls.Add(Me.sfdgvTwoThirdMainDashboard, 0, 0)
+        Me.pnlTwoThirdBodyHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlTwoThirdBodyHorizontalSplitter.Location = New System.Drawing.Point(4, 4)
+        Me.pnlTwoThirdBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlTwoThirdBodyHorizontalSplitter.Name = "pnlTwoThirdBodyHorizontalSplitter"
+        Me.pnlTwoThirdBodyHorizontalSplitter.RowCount = 2
+        Me.pnlTwoThirdBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.pnlTwoThirdBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlTwoThirdBodyHorizontalSplitter.Size = New System.Drawing.Size(940, 629)
+        Me.pnlTwoThirdBodyHorizontalSplitter.TabIndex = 0
+        '
+        'lstTwoThirdLog
+        '
+        Me.lstTwoThirdLog.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstTwoThirdLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
+        Me.lstTwoThirdLog.FormattingEnabled = True
+        Me.lstTwoThirdLog.ItemHeight = 16
+        Me.lstTwoThirdLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstTwoThirdLog.Margin = New System.Windows.Forms.Padding(4)
+        Me.lstTwoThirdLog.Name = "lstTwoThirdLog"
+        Me.lstTwoThirdLog.Size = New System.Drawing.Size(932, 181)
+        Me.lstTwoThirdLog.TabIndex = 9
+        '
+        'sfdgvTwoThirdMainDashboard
+        '
+        Me.sfdgvTwoThirdMainDashboard.AccessibleName = "Table"
+        Me.sfdgvTwoThirdMainDashboard.AllowDraggingColumns = True
+        Me.sfdgvTwoThirdMainDashboard.AllowEditing = False
+        Me.sfdgvTwoThirdMainDashboard.AllowFiltering = True
+        Me.sfdgvTwoThirdMainDashboard.AllowResizingColumns = True
+        Me.sfdgvTwoThirdMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
+        Me.sfdgvTwoThirdMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
+        Me.sfdgvTwoThirdMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.sfdgvTwoThirdMainDashboard.Location = New System.Drawing.Point(4, 4)
+        Me.sfdgvTwoThirdMainDashboard.Margin = New System.Windows.Forms.Padding(4)
+        Me.sfdgvTwoThirdMainDashboard.Name = "sfdgvTwoThirdMainDashboard"
+        Me.sfdgvTwoThirdMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
+        Me.sfdgvTwoThirdMainDashboard.Size = New System.Drawing.Size(932, 432)
+        Me.sfdgvTwoThirdMainDashboard.TabIndex = 6
+        Me.sfdgvTwoThirdMainDashboard.Text = "SfDataGrid1"
         '
         'tabJoyMaaATM
         '
@@ -484,6 +695,18 @@ Partial Class frmMainTabbed
         Me.pnlJoyMaaATMBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
         Me.pnlJoyMaaATMBodyVerticalSplitter.TabIndex = 1
         '
+        'PictureBox8
+        '
+        Me.PictureBox8.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox8.Image = CType(resources.GetObject("PictureBox8.Image"), System.Drawing.Image)
+        Me.PictureBox8.Location = New System.Drawing.Point(951, 2)
+        Me.PictureBox8.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox8.Name = "PictureBox8"
+        Me.PictureBox8.Size = New System.Drawing.Size(401, 633)
+        Me.PictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox8.TabIndex = 3
+        Me.PictureBox8.TabStop = False
+        '
         'TableLayoutPanel7
         '
         Me.TableLayoutPanel7.ColumnCount = 1
@@ -537,7 +760,7 @@ Partial Class frmMainTabbed
         Me.tabCandleRangeBreakout.Name = "tabCandleRangeBreakout"
         Me.tabCandleRangeBreakout.Size = New System.Drawing.Size(1363, 693)
         Me.tabCandleRangeBreakout.TabIndex = 7
-        Me.tabCandleRangeBreakout.Text = "Candle Range Breakout"
+        Me.tabCandleRangeBreakout.Text = "ATM"
         Me.tabCandleRangeBreakout.UseVisualStyleBackColor = True
         '
         'pnlCandleRangeBreakoutMainPanelHorizontalSplitter
@@ -2261,232 +2484,9 @@ Partial Class frmMainTabbed
         '
         Me.tmrJoyMaaATMTickerStatus.Enabled = True
         '
-        'tabTwoThird
-        '
-        Me.tabTwoThird.Controls.Add(Me.pnlTwoThirdMainPanelHorizontalSplitter)
-        Me.tabTwoThird.Location = New System.Drawing.Point(4, 25)
-        Me.tabTwoThird.Name = "tabTwoThird"
-        Me.tabTwoThird.Size = New System.Drawing.Size(1363, 693)
-        Me.tabTwoThird.TabIndex = 9
-        Me.tabTwoThird.Text = "Two Third"
-        Me.tabTwoThird.UseVisualStyleBackColor = True
-        '
         'tmrTwoThirdTickerStatus
         '
         Me.tmrTwoThirdTickerStatus.Enabled = True
-        '
-        'pnlTwoThirdMainPanelHorizontalSplitter
-        '
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.ColumnCount = 1
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.Controls.Add(Me.pnlTwoThirdTopHeaderVerticalSplitter, 0, 0)
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.Controls.Add(Me.pnlTwoThirdBodyVerticalSplitter, 0, 1)
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.Name = "pnlTwoThirdMainPanelHorizontalSplitter"
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.RowCount = 2
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.TabIndex = 7
-        '
-        'pnlTwoThirdTopHeaderVerticalSplitter
-        '
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnCount = 15
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.btnTwoThirdStop, 0, 0)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.btnTwoThirdStart, 0, 0)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.Panel10, 14, 0)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.btnTwoThirdSettings, 9, 0)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Controls.Add(Me.linklblTwoThirdTradableInstrument, 10, 0)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Name = "pnlTwoThirdTopHeaderVerticalSplitter"
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.RowCount = 1
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.TabIndex = 0
-        '
-        'btnTwoThirdStop
-        '
-        Me.btnTwoThirdStop.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnTwoThirdStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnTwoThirdStop.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnTwoThirdStop.Name = "btnTwoThirdStop"
-        Me.btnTwoThirdStop.Size = New System.Drawing.Size(82, 32)
-        Me.btnTwoThirdStop.TabIndex = 10
-        Me.btnTwoThirdStop.Text = "Stop"
-        Me.btnTwoThirdStop.UseVisualStyleBackColor = True
-        '
-        'btnTwoThirdStart
-        '
-        Me.btnTwoThirdStart.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnTwoThirdStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnTwoThirdStart.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnTwoThirdStart.Name = "btnTwoThirdStart"
-        Me.btnTwoThirdStart.Size = New System.Drawing.Size(82, 32)
-        Me.btnTwoThirdStart.TabIndex = 2
-        Me.btnTwoThirdStart.Text = "Start"
-        Me.btnTwoThirdStart.UseVisualStyleBackColor = True
-        '
-        'Panel10
-        '
-        Me.Panel10.Controls.Add(Me.blbTwoThirdTickerStatus)
-        Me.Panel10.Controls.Add(Me.lblTwoThirdTickerStatus)
-        Me.Panel10.Location = New System.Drawing.Point(1201, 4)
-        Me.Panel10.Margin = New System.Windows.Forms.Padding(4)
-        Me.Panel10.Name = "Panel10"
-        Me.Panel10.Size = New System.Drawing.Size(147, 31)
-        Me.Panel10.TabIndex = 9
-        '
-        'blbTwoThirdTickerStatus
-        '
-        Me.blbTwoThirdTickerStatus.Color = System.Drawing.Color.Pink
-        Me.blbTwoThirdTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
-        Me.blbTwoThirdTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbTwoThirdTickerStatus.Margin = New System.Windows.Forms.Padding(4)
-        Me.blbTwoThirdTickerStatus.Name = "blbTwoThirdTickerStatus"
-        Me.blbTwoThirdTickerStatus.On = True
-        Me.blbTwoThirdTickerStatus.Size = New System.Drawing.Size(47, 31)
-        Me.blbTwoThirdTickerStatus.TabIndex = 7
-        Me.blbTwoThirdTickerStatus.Text = "LedBulb1"
-        '
-        'lblTwoThirdTickerStatus
-        '
-        Me.lblTwoThirdTickerStatus.AutoSize = True
-        Me.lblTwoThirdTickerStatus.Location = New System.Drawing.Point(9, 9)
-        Me.lblTwoThirdTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblTwoThirdTickerStatus.Name = "lblTwoThirdTickerStatus"
-        Me.lblTwoThirdTickerStatus.Size = New System.Drawing.Size(91, 17)
-        Me.lblTwoThirdTickerStatus.TabIndex = 9
-        Me.lblTwoThirdTickerStatus.Text = "Ticker Status"
-        '
-        'btnTwoThirdSettings
-        '
-        Me.btnTwoThirdSettings.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnTwoThirdSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnTwoThirdSettings.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnTwoThirdSettings.Name = "btnTwoThirdSettings"
-        Me.btnTwoThirdSettings.Size = New System.Drawing.Size(82, 32)
-        Me.btnTwoThirdSettings.TabIndex = 11
-        Me.btnTwoThirdSettings.Text = "Settings"
-        Me.btnTwoThirdSettings.UseVisualStyleBackColor = True
-        '
-        'linklblTwoThirdTradableInstrument
-        '
-        Me.linklblTwoThirdTradableInstrument.AutoSize = True
-        Me.linklblTwoThirdTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.linklblTwoThirdTradableInstrument.Enabled = False
-        Me.linklblTwoThirdTradableInstrument.Location = New System.Drawing.Point(903, 0)
-        Me.linklblTwoThirdTradableInstrument.Name = "linklblTwoThirdTradableInstrument"
-        Me.linklblTwoThirdTradableInstrument.Size = New System.Drawing.Size(220, 40)
-        Me.linklblTwoThirdTradableInstrument.TabIndex = 12
-        Me.linklblTwoThirdTradableInstrument.TabStop = True
-        Me.linklblTwoThirdTradableInstrument.Text = "Tradable Instruments: 0"
-        Me.linklblTwoThirdTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'pnlTwoThirdBodyVerticalSplitter
-        '
-        Me.pnlTwoThirdBodyVerticalSplitter.ColumnCount = 2
-        Me.pnlTwoThirdBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
-        Me.pnlTwoThirdBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.pnlTwoThirdBodyVerticalSplitter.Controls.Add(Me.PictureBox9, 0, 0)
-        Me.pnlTwoThirdBodyVerticalSplitter.Controls.Add(Me.pnlTwoThirdBodyHorizontalSplitter, 0, 0)
-        Me.pnlTwoThirdBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlTwoThirdBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
-        Me.pnlTwoThirdBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlTwoThirdBodyVerticalSplitter.Name = "pnlTwoThirdBodyVerticalSplitter"
-        Me.pnlTwoThirdBodyVerticalSplitter.RowCount = 1
-        Me.pnlTwoThirdBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlTwoThirdBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
-        Me.pnlTwoThirdBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
-        Me.pnlTwoThirdBodyVerticalSplitter.TabIndex = 1
-        '
-        'pnlTwoThirdBodyHorizontalSplitter
-        '
-        Me.pnlTwoThirdBodyHorizontalSplitter.ColumnCount = 1
-        Me.pnlTwoThirdBodyHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlTwoThirdBodyHorizontalSplitter.Controls.Add(Me.lstTwoThirdLog, 0, 1)
-        Me.pnlTwoThirdBodyHorizontalSplitter.Controls.Add(Me.sfdgvTwoThirdMainDashboard, 0, 0)
-        Me.pnlTwoThirdBodyHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlTwoThirdBodyHorizontalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlTwoThirdBodyHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlTwoThirdBodyHorizontalSplitter.Name = "pnlTwoThirdBodyHorizontalSplitter"
-        Me.pnlTwoThirdBodyHorizontalSplitter.RowCount = 2
-        Me.pnlTwoThirdBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
-        Me.pnlTwoThirdBodyHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.pnlTwoThirdBodyHorizontalSplitter.Size = New System.Drawing.Size(940, 629)
-        Me.pnlTwoThirdBodyHorizontalSplitter.TabIndex = 0
-        '
-        'lstTwoThirdLog
-        '
-        Me.lstTwoThirdLog.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.lstTwoThirdLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
-        Me.lstTwoThirdLog.FormattingEnabled = True
-        Me.lstTwoThirdLog.ItemHeight = 16
-        Me.lstTwoThirdLog.Location = New System.Drawing.Point(4, 444)
-        Me.lstTwoThirdLog.Margin = New System.Windows.Forms.Padding(4)
-        Me.lstTwoThirdLog.Name = "lstTwoThirdLog"
-        Me.lstTwoThirdLog.Size = New System.Drawing.Size(932, 181)
-        Me.lstTwoThirdLog.TabIndex = 9
-        '
-        'sfdgvTwoThirdMainDashboard
-        '
-        Me.sfdgvTwoThirdMainDashboard.AccessibleName = "Table"
-        Me.sfdgvTwoThirdMainDashboard.AllowDraggingColumns = True
-        Me.sfdgvTwoThirdMainDashboard.AllowEditing = False
-        Me.sfdgvTwoThirdMainDashboard.AllowFiltering = True
-        Me.sfdgvTwoThirdMainDashboard.AllowResizingColumns = True
-        Me.sfdgvTwoThirdMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
-        Me.sfdgvTwoThirdMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
-        Me.sfdgvTwoThirdMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.sfdgvTwoThirdMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvTwoThirdMainDashboard.Margin = New System.Windows.Forms.Padding(4)
-        Me.sfdgvTwoThirdMainDashboard.Name = "sfdgvTwoThirdMainDashboard"
-        Me.sfdgvTwoThirdMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvTwoThirdMainDashboard.Size = New System.Drawing.Size(932, 432)
-        Me.sfdgvTwoThirdMainDashboard.TabIndex = 6
-        Me.sfdgvTwoThirdMainDashboard.Text = "SfDataGrid1"
-        '
-        'PictureBox8
-        '
-        Me.PictureBox8.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.PictureBox8.Image = CType(resources.GetObject("PictureBox8.Image"), System.Drawing.Image)
-        Me.PictureBox8.Location = New System.Drawing.Point(951, 2)
-        Me.PictureBox8.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.PictureBox8.Name = "PictureBox8"
-        Me.PictureBox8.Size = New System.Drawing.Size(401, 633)
-        Me.PictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox8.TabIndex = 3
-        Me.PictureBox8.TabStop = False
-        '
-        'PictureBox9
-        '
-        Me.PictureBox9.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.PictureBox9.Image = CType(resources.GetObject("PictureBox9.Image"), System.Drawing.Image)
-        Me.PictureBox9.Location = New System.Drawing.Point(951, 2)
-        Me.PictureBox9.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.PictureBox9.Name = "PictureBox9"
-        Me.PictureBox9.Size = New System.Drawing.Size(401, 633)
-        Me.PictureBox9.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox9.TabIndex = 3
-        Me.PictureBox9.TabStop = False
         '
         'frmMainTabbed
         '
@@ -2504,6 +2504,16 @@ Partial Class frmMainTabbed
         Me.msMainMenuStrip.ResumeLayout(False)
         Me.msMainMenuStrip.PerformLayout()
         Me.tabMain.ResumeLayout(False)
+        Me.tabTwoThird.ResumeLayout(False)
+        Me.pnlTwoThirdMainPanelHorizontalSplitter.ResumeLayout(False)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.ResumeLayout(False)
+        Me.pnlTwoThirdTopHeaderVerticalSplitter.PerformLayout()
+        Me.Panel10.ResumeLayout(False)
+        Me.Panel10.PerformLayout()
+        Me.pnlTwoThirdBodyVerticalSplitter.ResumeLayout(False)
+        CType(Me.PictureBox9, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.pnlTwoThirdBodyHorizontalSplitter.ResumeLayout(False)
+        CType(Me.sfdgvTwoThirdMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabJoyMaaATM.ResumeLayout(False)
         Me.pnlJoyMaaATMMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ResumeLayout(False)
@@ -2511,6 +2521,7 @@ Partial Class frmMainTabbed
         Me.Panel9.ResumeLayout(False)
         Me.Panel9.PerformLayout()
         Me.pnlJoyMaaATMBodyVerticalSplitter.ResumeLayout(False)
+        CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TableLayoutPanel7.ResumeLayout(False)
         CType(Me.sfdgvJoyMaaATMMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabCandleRangeBreakout.ResumeLayout(False)
@@ -2592,17 +2603,6 @@ Partial Class frmMainTabbed
         Me.pnlAmiSignalBodyHorizontalSplitter.ResumeLayout(False)
         CType(Me.sfdgvAmiSignalMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabTwoThird.ResumeLayout(False)
-        Me.pnlTwoThirdMainPanelHorizontalSplitter.ResumeLayout(False)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.ResumeLayout(False)
-        Me.pnlTwoThirdTopHeaderVerticalSplitter.PerformLayout()
-        Me.Panel10.ResumeLayout(False)
-        Me.Panel10.PerformLayout()
-        Me.pnlTwoThirdBodyVerticalSplitter.ResumeLayout(False)
-        Me.pnlTwoThirdBodyHorizontalSplitter.ResumeLayout(False)
-        CType(Me.sfdgvTwoThirdMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.PictureBox9, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 

@@ -127,19 +127,19 @@
     <Compile Include="AmiSignal\frmAmiSignalTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CandleRangeBreakout\CandleRangeBreakoutStrategy.vb" />
-    <Compile Include="CandleRangeBreakout\CandleRangeBreakoutStrategyInstrument.vb" />
-    <Compile Include="CandleRangeBreakout\CandleRangeBreakoutUserInputs.vb" />
-    <Compile Include="CandleRangeBreakout\frmCandleRangeBreakoutSettings.Designer.vb">
-      <DependentUpon>frmCandleRangeBreakoutSettings.vb</DependentUpon>
+    <Compile Include="ATM\ATMStrategy.vb" />
+    <Compile Include="ATM\ATMStrategyInstrument.vb" />
+    <Compile Include="ATM\ATMUserInputs.vb" />
+    <Compile Include="ATM\frmATMSettings.Designer.vb">
+      <DependentUpon>frmATMSettings.vb</DependentUpon>
     </Compile>
-    <Compile Include="CandleRangeBreakout\frmCandleRangeBreakoutSettings.vb">
+    <Compile Include="ATM\frmATMSettings.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CandleRangeBreakout\frmCandleRangeBreakoutTradableInstrumentList.Designer.vb">
-      <DependentUpon>frmCandleRangeBreakoutTradableInstrumentList.vb</DependentUpon>
+    <Compile Include="ATM\frmATMTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmATMTradableInstrumentList.vb</DependentUpon>
     </Compile>
-    <Compile Include="CandleRangeBreakout\frmCandleRangeBreakoutTradableInstrumentList.vb">
+    <Compile Include="ATM\frmATMTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Common.vb" />
@@ -311,11 +311,11 @@
     <EmbeddedResource Include="AmiSignal\frmAmiSignalTradableInstrumentList.resx">
       <DependentUpon>frmAmiSignalTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CandleRangeBreakout\frmCandleRangeBreakoutSettings.resx">
-      <DependentUpon>frmCandleRangeBreakoutSettings.vb</DependentUpon>
+    <EmbeddedResource Include="ATM\frmATMSettings.resx">
+      <DependentUpon>frmATMSettings.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CandleRangeBreakout\frmCandleRangeBreakoutTradableInstrumentList.resx">
-      <DependentUpon>frmCandleRangeBreakoutTradableInstrumentList.vb</DependentUpon>
+    <EmbeddedResource Include="ATM\frmATMTradableInstrumentList.resx">
+      <DependentUpon>frmATMTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EMACrossover\frmEMACrossoverSettings.resx">
       <DependentUpon>frmEMACrossoverSettings.vb</DependentUpon>
