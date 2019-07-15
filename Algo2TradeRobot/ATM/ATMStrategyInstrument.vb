@@ -56,14 +56,14 @@ Public Class ATMStrategyInstrument
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
                 'Place Order block start
-                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
-                    'Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketCNCOrder, Nothing).ConfigureAwait(False)
-                    'If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                    '    placeOrderResponse("data").ContainsKey("order_id") Then
+                'Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                'If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                '    'Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketCNCOrder, Nothing).ConfigureAwait(False)
+                '    'If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                '    '    placeOrderResponse("data").ContainsKey("order_id") Then
 
-                    'End If
-                End If
+                '    'End If
+                'End If
                 'Place Order block end
 
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)

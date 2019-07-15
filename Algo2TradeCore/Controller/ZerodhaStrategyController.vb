@@ -990,6 +990,17 @@ Namespace Controller
                             runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Target
                         Next
                     End If
+                    If allOrder IsNot Nothing AndAlso allOrder.Count > 0 Then
+                        For Each runningOrder In allOrder
+                            If runningOrder.OrderType = IOrder.TypeOfOrder.Limit AndAlso runningOrder.TriggerPrice = 0 Then
+                                runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Target
+                            ElseIf runningOrder.OrderType = IOrder.TypeOfOrder.Limit AndAlso runningOrder.TriggerPrice <> 0 Then
+                                runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss
+                            ElseIf runningOrder.OrderType = IOrder.TypeOfOrder.SL Then
+                                runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss
+                            End If
+                        Next
+                    End If
                     Dim businessOrder As New BusinessOrder With {.ParentOrderIdentifier = parentOrder.OrderIdentifier,
                                                                         .ParentOrder = parentOrder,
                                                                         .SLOrder = slOrder,
