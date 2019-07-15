@@ -4,6 +4,8 @@ Imports System.Threading
 Imports Utilities.Strings
 Imports Utilities.DAL
 Imports Algo2TradeCore.Entities
+Imports Utilities.Network
+Imports System.Net.Http
 
 Public Class TwoThirdFillInstrumentDetails
     Implements IDisposable
@@ -40,24 +42,42 @@ Public Class TwoThirdFillInstrumentDetails
     End Sub
 
     Private Async Function GetHistoricalCandleStickAsync(ByVal instrumentToken As String, ByVal fromDate As Date, ByVal toDate As Date, ByVal historicalDataType As TypeOfData) As Task(Of Dictionary(Of String, Object))
-        Try
-            _cts.Token.ThrowIfCancellationRequested()
-            Dim historicalDataURL As String = Nothing
-            Select Case historicalDataType
-                Case TypeOfData.Intraday
-                    historicalDataURL = String.Format(ZerodhaIntradayHistoricalURL, instrumentToken, fromDate.ToString("yyyy-MM-dd"), toDate.ToString("yyyy-MM-dd"))
-                Case TypeOfData.EOD
-                    historicalDataURL = String.Format(ZerodhaEODHistoricalURL, instrumentToken, fromDate.ToString("yyyy-MM-dd"), toDate.ToString("yyyy-MM-dd"))
-            End Select
-            OnHeartbeat(String.Format("Fetching historical Data: {0}", historicalDataURL))
-            Using sr As New StreamReader(HttpWebRequest.Create(historicalDataURL).GetResponseAsync().Result.GetResponseStream)
-                Dim jsonString = Await sr.ReadToEndAsync.ConfigureAwait(False)
-                Dim retDictionary As Dictionary(Of String, Object) = StringManipulation.JsonDeserialize(jsonString)
-                Return retDictionary
-            End Using
-        Catch ex As Exception
-            Throw ex
-        End Try
+        Dim ret As Dictionary(Of String, Object) = Nothing
+        _cts.Token.ThrowIfCancellationRequested()
+        Dim historicalDataURL As String = Nothing
+        Select Case historicalDataType
+            Case TypeOfData.Intraday
+                historicalDataURL = String.Format(ZerodhaIntradayHistoricalURL, instrumentToken, fromDate.ToString("yyyy-MM-dd"), toDate.ToString("yyyy-MM-dd"))
+            Case TypeOfData.EOD
+                historicalDataURL = String.Format(ZerodhaEODHistoricalURL, instrumentToken, fromDate.ToString("yyyy-MM-dd"), toDate.ToString("yyyy-MM-dd"))
+        End Select
+        OnHeartbeat(String.Format("Fetching historical Data: {0}", historicalDataURL))
+        Dim proxyToBeUsed As HttpProxy = Nothing
+        Using browser As New HttpBrowser(proxyToBeUsed, Net.DecompressionMethods.GZip, New TimeSpan(0, 1, 0), _cts)
+            AddHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+            AddHandler browser.Heartbeat, AddressOf OnHeartbeat
+            AddHandler browser.WaitingFor, AddressOf OnWaitingFor
+            AddHandler browser.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+            'Get to the landing page first
+            Dim l As Tuple(Of Uri, Object) = Await browser.NonPOSTRequestAsync(historicalDataURL,
+                                                                                HttpMethod.Get,
+                                                                                Nothing,
+                                                                                True,
+                                                                                Nothing,
+                                                                                True,
+                                                                                "application/json").ConfigureAwait(False)
+            If l Is Nothing OrElse l.Item2 Is Nothing Then
+                Throw New ApplicationException(String.Format("No response while getting historical data for: {0}", historicalDataURL))
+            End If
+            If l IsNot Nothing AndAlso l.Item2 IsNot Nothing Then
+                ret = l.Item2
+            End If
+            RemoveHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+            RemoveHandler browser.Heartbeat, AddressOf OnHeartbeat
+            RemoveHandler browser.WaitingFor, AddressOf OnWaitingFor
+            RemoveHandler browser.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+        End Using
+        Return ret
     End Function
     Public Async Function GetInstrumentData(ByVal allInstruments As IEnumerable(Of IInstrument), ByVal bannedStock As List(Of String)) As Task
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
@@ -65,51 +85,84 @@ Public Class TwoThirdFillInstrumentDetails
                                                                                          Return x.Segment = "NFO-FUT"
                                                                                      End Function)
             If nfoInstruments IsNot Nothing AndAlso nfoInstruments.Count > 0 Then
+                Dim currentNFOInstruments As List(Of IInstrument) = Nothing
+                For Each runningInstrument In nfoInstruments
+                    If currentNFOInstruments IsNot Nothing AndAlso currentNFOInstruments.Count > 0 Then
+                        Dim availableInstrument As IEnumerable(Of IInstrument) = currentNFOInstruments.FindAll(Function(z)
+                                                                                                                   Return z.RawInstrumentName = runningInstrument.RawInstrumentName
+                                                                                                               End Function)
+                        If availableInstrument IsNot Nothing AndAlso availableInstrument.Count > 0 Then
+                            Continue For
+                        End If
+                    End If
+                    Dim runningIntruments As IEnumerable(Of IInstrument) = nfoInstruments.Where(Function(x)
+                                                                                                    Return x.RawInstrumentName = runningInstrument.RawInstrumentName
+                                                                                                End Function)
+                    Dim minExpiry As Date = runningIntruments.Min(Function(x)
+                                                                      If x.Expiry.Value.Date = Now.Date Then
+                                                                          Return Date.MaxValue
+                                                                      Else
+                                                                          Return x.Expiry
+                                                                      End If
+                                                                  End Function)
+                    Dim currentIntrument As IInstrument = runningIntruments.ToList.Find(Function(y)
+                                                                                            Return y.Expiry.Value.Date = minExpiry.Date
+                                                                                        End Function)
+                    If currentNFOInstruments Is Nothing Then currentNFOInstruments = New List(Of IInstrument)
+                    currentNFOInstruments.Add(currentIntrument)
+                Next
                 Dim highATRStocks As Dictionary(Of String, Decimal()) = Nothing
                 Dim lastTradingDay As Date = Date.MinValue
-                For Each runningInstrument In nfoInstruments
+                For Each runningInstrument In currentNFOInstruments
                     _cts.Token.ThrowIfCancellationRequested()
                     If runningInstrument.RawExchange.ToUpper = "NFO" AndAlso (bannedStock Is Nothing OrElse
                         bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(runningInstrument.RawInstrumentName)) Then
-                        If highATRStocks Is Nothing OrElse (highATRStocks IsNot Nothing AndAlso Not highATRStocks.ContainsKey(runningInstrument.RawInstrumentName)) Then
-                            Dim rawCashInstrument As IInstrument = allInstruments.ToList.Find(Function(x)
-                                                                                                  Return x.TradingSymbol = runningInstrument.RawInstrumentName
-                                                                                              End Function)
-                            If rawCashInstrument IsNot Nothing Then
-                                Dim instrumentData As KeyValuePair(Of Integer, String) = New KeyValuePair(Of Integer, String)(rawCashInstrument.InstrumentIdentifier, rawCashInstrument.TradingSymbol)
-                                _cts.Token.ThrowIfCancellationRequested()
-                                Dim historicalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(instrumentData.Key, tradingDay.AddDays(-300), tradingDay.AddDays(-1), TypeOfData.EOD).ConfigureAwait(False)
-                                _cts.Token.ThrowIfCancellationRequested()
-                                If historicalCandlesJSONDict IsNot Nothing AndAlso historicalCandlesJSONDict.Count > 0 Then
-                                    _cts.Token.ThrowIfCancellationRequested()
-                                    Dim eodHistoricalData As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(historicalCandlesJSONDict, instrumentData.Value).ConfigureAwait(False)
-                                    _cts.Token.ThrowIfCancellationRequested()
-                                    If eodHistoricalData IsNot Nothing AndAlso eodHistoricalData.Count > 0 Then
+                        Dim futureHistoricalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(runningInstrument.InstrumentIdentifier, tradingDay.AddDays(-10), tradingDay.AddDays(-1), TypeOfData.EOD).ConfigureAwait(False)
+                        If futureHistoricalCandlesJSONDict IsNot Nothing AndAlso futureHistoricalCandlesJSONDict.Count > 0 Then
+                            Dim futureEODPayload As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(futureHistoricalCandlesJSONDict, runningInstrument.TradingSymbol).ConfigureAwait(False)
+                            If futureEODPayload IsNot Nothing AndAlso futureEODPayload.Count > 0 Then
+                                Dim lastDayPayload As OHLCPayload = futureEODPayload.LastOrDefault.Value
+                                If lastDayPayload.ClosePrice.Value >= 80 AndAlso lastDayPayload.ClosePrice.Value <= 1500 Then
+                                    Dim rawCashInstrument As IInstrument = allInstruments.ToList.Find(Function(x)
+                                                                                                          Return x.TradingSymbol = runningInstrument.RawInstrumentName
+                                                                                                      End Function)
+                                    If rawCashInstrument IsNot Nothing Then
+                                        Dim instrumentData As KeyValuePair(Of Integer, String) = New KeyValuePair(Of Integer, String)(rawCashInstrument.InstrumentIdentifier, rawCashInstrument.TradingSymbol)
                                         _cts.Token.ThrowIfCancellationRequested()
-                                        Dim ATRPayload As Dictionary(Of Date, Decimal) = Nothing
-                                        CalculateATR(14, eodHistoricalData, ATRPayload)
+                                        Dim historicalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(instrumentData.Key, tradingDay.AddDays(-300), tradingDay.AddDays(-1), TypeOfData.EOD).ConfigureAwait(False)
                                         _cts.Token.ThrowIfCancellationRequested()
-                                        Dim lastDayClosePrice As Decimal = eodHistoricalData.LastOrDefault.Value.ClosePrice.Value
-                                        lastTradingDay = eodHistoricalData.LastOrDefault.Key
-                                        If lastDayClosePrice >= 80 AndAlso lastDayClosePrice <= 1500 Then
-                                            Dim atrPercentage As Decimal = (ATRPayload(eodHistoricalData.LastOrDefault.Key) / lastDayClosePrice) * 100
-                                            If atrPercentage >= 3 Then
+                                        If historicalCandlesJSONDict IsNot Nothing AndAlso historicalCandlesJSONDict.Count > 0 Then
+                                            _cts.Token.ThrowIfCancellationRequested()
+                                            Dim eodHistoricalData As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(historicalCandlesJSONDict, instrumentData.Value).ConfigureAwait(False)
+                                            _cts.Token.ThrowIfCancellationRequested()
+                                            If eodHistoricalData IsNot Nothing AndAlso eodHistoricalData.Count > 0 Then
                                                 _cts.Token.ThrowIfCancellationRequested()
-                                                Dim volumePayload As IEnumerable(Of KeyValuePair(Of Date, OHLCPayload)) = eodHistoricalData.OrderByDescending(Function(x)
-                                                                                                                                                                  Return x.Key
-                                                                                                                                                              End Function).Take(5)
+                                                Dim ATRPayload As Dictionary(Of Date, Decimal) = Nothing
+                                                CalculateATR(14, eodHistoricalData, ATRPayload)
                                                 _cts.Token.ThrowIfCancellationRequested()
-                                                If volumePayload IsNot Nothing AndAlso volumePayload.Count > 0 Then
+                                                Dim lastDayClosePrice As Decimal = eodHistoricalData.LastOrDefault.Value.ClosePrice.Value
+                                                lastTradingDay = eodHistoricalData.LastOrDefault.Key
+                                                'If lastDayClosePrice >= 80 AndAlso lastDayClosePrice <= 1500 Then
+                                                Dim atrPercentage As Decimal = (ATRPayload(eodHistoricalData.LastOrDefault.Key) / lastDayClosePrice) * 100
+                                                If atrPercentage >= 3 Then
                                                     _cts.Token.ThrowIfCancellationRequested()
-                                                    Dim avgVolume As Decimal = volumePayload.Average(Function(x)
-                                                                                                         Return CType(x.Value.Volume.Value, Long)
-                                                                                                     End Function)
+                                                    Dim volumePayload As IEnumerable(Of KeyValuePair(Of Date, OHLCPayload)) = eodHistoricalData.OrderByDescending(Function(x)
+                                                                                                                                                                      Return x.Key
+                                                                                                                                                                  End Function).Take(5)
                                                     _cts.Token.ThrowIfCancellationRequested()
-                                                    If avgVolume >= (300000 / 100) * lastDayClosePrice Then
-                                                        If highATRStocks Is Nothing Then highATRStocks = New Dictionary(Of String, Decimal())
-                                                        highATRStocks.Add(instrumentData.Value, {atrPercentage, avgVolume * 100 / ((300000 / 100) * lastDayClosePrice)})
+                                                    If volumePayload IsNot Nothing AndAlso volumePayload.Count > 0 Then
+                                                        _cts.Token.ThrowIfCancellationRequested()
+                                                        Dim avgVolume As Decimal = volumePayload.Average(Function(x)
+                                                                                                             Return CType(x.Value.Volume.Value, Long)
+                                                                                                         End Function)
+                                                        _cts.Token.ThrowIfCancellationRequested()
+                                                        If avgVolume >= (300000 / 100) * lastDayClosePrice Then
+                                                            If highATRStocks Is Nothing Then highATRStocks = New Dictionary(Of String, Decimal())
+                                                            highATRStocks.Add(instrumentData.Value, {atrPercentage, avgVolume * 100 / ((300000 / 100) * lastDayClosePrice)})
+                                                        End If
                                                     End If
                                                 End If
+                                                'End If
                                             End If
                                         End If
                                     End If
@@ -138,7 +191,7 @@ Public Class TwoThirdFillInstrumentDetails
                                 volumeCheckingStock = futureStocks.Find(Function(x)
                                                                             Return x.Expiry = minexpiry
                                                                         End Function)
-                                Dim nextMinexpiry As Date = futureStocks.Min(Function(y)
+                                Dim nextMinExpiry As Date = futureStocks.Min(Function(y)
                                                                                  If Not y.Expiry.Value.Date = Now.Date Then
                                                                                      Return y.Expiry.Value
                                                                                  Else
@@ -146,7 +199,7 @@ Public Class TwoThirdFillInstrumentDetails
                                                                                  End If
                                                                              End Function)
                                 tradingStock = futureStocks.Find(Function(z)
-                                                                     Return z.Expiry = nextMinexpiry
+                                                                     Return z.Expiry = nextMinExpiry
                                                                  End Function)
                             Else
                                 tradingStock = futureStocks.Find(Function(x)

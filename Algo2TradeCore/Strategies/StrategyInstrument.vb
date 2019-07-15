@@ -442,7 +442,8 @@ Namespace Strategies
 
                 If parentBusinessOrder.AllOrder IsNot Nothing AndAlso parentBusinessOrder.AllOrder.Count > 0 Then
                     For Each order In parentBusinessOrder.AllOrder
-                        If order.Status = IOrder.TypeOfStatus.Cancelled OrElse order.Status = IOrder.TypeOfStatus.Complete Then
+                        'If order.Status = IOrder.TypeOfStatus.Cancelled OrElse order.Status = IOrder.TypeOfStatus.Complete Then
+                        If order.Status = IOrder.TypeOfStatus.Complete Then
                             If order.TransactionType = IOrder.TypeOfTransaction.Buy Then
                                 plOfDay += order.AveragePrice * order.Quantity * -1
                             ElseIf order.TransactionType = IOrder.TypeOfTransaction.Sell Then
@@ -542,7 +543,8 @@ Namespace Strategies
                 If parentBusinessOrder.AllOrder IsNot Nothing AndAlso parentBusinessOrder.AllOrder.Count > 0 Then
                     For Each order In parentBusinessOrder.AllOrder
                         _cts.Token.ThrowIfCancellationRequested()
-                        If order.Status = IOrder.TypeOfStatus.Cancelled OrElse order.Status = IOrder.TypeOfStatus.Complete Then
+                        'If order.Status = IOrder.TypeOfStatus.Cancelled OrElse order.Status = IOrder.TypeOfStatus.Complete Then
+                        If order.Status = IOrder.TypeOfStatus.Complete Then
                             Dim buyPrice As Decimal = Decimal.MinValue
                             Dim sellPrice As Decimal = Decimal.MinValue
                             If parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then

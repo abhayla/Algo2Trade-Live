@@ -1,4 +1,1 @@
-Instrument Name,Quantity,Higher Tail %,Lower Tail %,Minimum Target Point,Minimum Stoploss Point,Maximum Stoploss Point,Reverse Trade,Max Stock Profit,Max Stock Loss
-CRUDEOIL,10,50,25,10,5,10,FALSE,8500000,5000000
-ZINC,5,50,25,0.5,0,0.5,FALSE,8500000,5000000
-NATURALGAS,11,50,25,0.8,0,0.5,FALSE,8500000,5000000
+Trading Symbol
