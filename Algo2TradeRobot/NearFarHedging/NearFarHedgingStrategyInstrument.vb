@@ -315,7 +315,7 @@ Public Class NearFarHedgingStrategyInstrument
         Return ret
     End Function
 
-    Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+    Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)))
         Throw New NotImplementedException
     End Function
 

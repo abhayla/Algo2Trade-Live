@@ -67,41 +67,41 @@ Public Class AmiSignalStrategyInstrument
                 End If
 
                 _cts.Token.ThrowIfCancellationRequested()
-                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
-                    Dim placeOrderResponse As Object = Nothing
-                    If EntrySignals IsNot Nothing AndAlso EntrySignals.Count > 0 AndAlso placeOrderTrigger.Item2.Supporting.Count > 0 AndAlso
-                       EntrySignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
-                       placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.Market Then
-                        placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketMISOrder, Nothing).ConfigureAwait(False)
-                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                            placeOrderResponse("data").ContainsKey("order_id") Then
-                            EntrySignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
-                            EntrySignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
-                        End If
-                    End If
-                    If TargetSignals IsNot Nothing AndAlso TargetSignals.Count > 0 AndAlso placeOrderTrigger.Item2.Supporting.Count > 0 AndAlso
-                        TargetSignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
-                        placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.Limit Then
-                        placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularLimitMISOrder, Nothing).ConfigureAwait(False)
-                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                            placeOrderResponse("data").ContainsKey("order_id") Then
-                            TargetSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
-                            TargetSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
-                        End If
-                    End If
-                    If StoplossSignals IsNot Nothing AndAlso StoplossSignals.Count > 0 AndAlso placeOrderTrigger.Item2.Supporting.Count > 0 AndAlso
-                       StoplossSignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
-                       placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.SL_M Then
-                        placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularSLMMISOrder, Nothing).ConfigureAwait(False)
-                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                            placeOrderResponse("data").ContainsKey("order_id") Then
-                            StoplossSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
-                            StoplossSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
-                        End If
-                    End If
-                    SerializeSignalCollections()
-                End If
+                Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                'If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
+                '    Dim placeOrderResponse As Object = Nothing
+                '    If EntrySignals IsNot Nothing AndAlso EntrySignals.Count > 0 AndAlso placeOrderTrigger.Item2.Supporting.Count > 0 AndAlso
+                '       EntrySignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
+                '       placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.Market Then
+                '        placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketMISOrder, Nothing).ConfigureAwait(False)
+                '        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                '            placeOrderResponse("data").ContainsKey("order_id") Then
+                '            EntrySignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
+                '            EntrySignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
+                '        End If
+                '    End If
+                '    If TargetSignals IsNot Nothing AndAlso TargetSignals.Count > 0 AndAlso placeOrderTrigger.Item2.Supporting.Count > 0 AndAlso
+                '        TargetSignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
+                '        placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.Limit Then
+                '        placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularLimitMISOrder, Nothing).ConfigureAwait(False)
+                '        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                '            placeOrderResponse("data").ContainsKey("order_id") Then
+                '            TargetSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
+                '            TargetSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
+                '        End If
+                '    End If
+                '    If StoplossSignals IsNot Nothing AndAlso StoplossSignals.Count > 0 AndAlso placeOrderTrigger.Item2.Supporting.Count > 0 AndAlso
+                '       StoplossSignals.ContainsKey(placeOrderTrigger.Item2.Supporting.FirstOrDefault) AndAlso
+                '       placeOrderTrigger.Item2.OrderType = IOrder.TypeOfOrder.SL_M Then
+                '        placeOrderResponse = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularSLMMISOrder, Nothing).ConfigureAwait(False)
+                '        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                '            placeOrderResponse("data").ContainsKey("order_id") Then
+                '            StoplossSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderTimestamp = Now()
+                '            StoplossSignals(placeOrderTrigger.Item2.Supporting.FirstOrDefault).OrderID = placeOrderResponse("data")("order_id")
+                '        End If
+                '    End If
+                '    SerializeSignalCollections()
+                'End If
 
                 _cts.Token.ThrowIfCancellationRequested()
                 Dim modifyTargetOrdersTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyTargetOrderAsync(False).ConfigureAwait(False)
@@ -135,8 +135,8 @@ Public Class AmiSignalStrategyInstrument
     Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
         Throw New NotImplementedException()
     End Function
-    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-        Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
+    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)))
+        Dim ret As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         Dim amiUserSettings As AmiSignalUserInputs = Me.ParentStrategy.UserSettings
 
@@ -247,19 +247,22 @@ Public Class AmiSignalStrategyInstrument
                 If currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
                     currentSignalActivities.FirstOrDefault.EntryActivity.LastException IsNot Nothing AndAlso
                     currentSignalActivities.FirstOrDefault.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "Condition Satisfied")
+                    If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                    ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "Condition Satisfied"))
                 ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
-                    'ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
-                    '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters)(ExecuteCommandAction.Take, parameters)
+                    If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                    ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied"))
                 Else
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "Condition Satisfied")
+                    If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                    ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "Condition Satisfied"))
                 End If
             Else
-                ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
+                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied"))
             End If
         Else
-            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
+            If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, ""))
         End If
         Return ret
     End Function

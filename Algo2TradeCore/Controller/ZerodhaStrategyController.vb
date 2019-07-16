@@ -699,6 +699,10 @@ Namespace Controller
                             Else
                                 logger.Warn(String.Format("Commodity Multiplier Map doesn't have this MCX stock - {0}", stockName))
                             End If
+                        ElseIf instrument.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
+                                instrument.ExchangeDetails.ExchangeType = Enums.TypeOfExchage.CDS Then
+                            instrument.QuantityMultiplier = 1000
+                            instrument.BrokerageCategory = Nothing
                         Else
                             instrument.QuantityMultiplier = 1
                             instrument.BrokerageCategory = Nothing

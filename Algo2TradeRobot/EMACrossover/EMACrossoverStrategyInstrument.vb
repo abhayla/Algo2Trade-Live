@@ -79,40 +79,40 @@ Public Class EMACrossoverStrategyInstrument
                     Throw Me.ParentStrategy.ParentController.OrphanException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
-                    If placeOrderTrigger.Item2.Quantity <> 0 Then
-                        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketCNCOrder, Nothing).ConfigureAwait(False)
-                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                            placeOrderResponse("data").ContainsKey("order_id") Then
-                            If ForceExitByUser Then
-                                ForceExitByUser = False
-                                OnHeartbeat(String.Format("Force exit successful: {0}", Me.TradableInstrument.TradingSymbol))
-                            End If
-                            If ForceExitForContractRollover Then
-                                ForceExitForContractRollover = False
-                                OnHeartbeat(String.Format("Force exit for contract rollover successful: {0}", Me.TradableInstrument.TradingSymbol))
-                            End If
-                            If ForceEntryForContractRollover Then
-                                ForceEntryForContractRollover = False
-                                OnHeartbeat(String.Format("Force entry for contract rollover successful: {0}", Me.TradableInstrument.TradingSymbol))
-                            End If
-                        End If
-                    Else
-                        If ForceExitByUser Then
-                            ForceExitByUser = False
-                            OnHeartbeat(String.Format("No position available for force exit: {0}", Me.TradableInstrument.TradingSymbol))
-                        End If
-                        If ForceExitForContractRollover Then
-                            ForceExitForContractRollover = False
-                            OnHeartbeat(String.Format("No position available for contract rollover force exit: {0}", Me.TradableInstrument.TradingSymbol))
-                        End If
-                        If ForceEntryForContractRollover Then
-                            ForceEntryForContractRollover = False
-                            OnHeartbeat(String.Format("No position available for contract rollover force entry: {0}", Me.TradableInstrument.TradingSymbol))
-                        End If
-                    End If
-                End If
+                'Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                'If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                '    If placeOrderTrigger.Item2.Quantity <> 0 Then
+                '        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceRegularMarketCNCOrder, Nothing).ConfigureAwait(False)
+                '        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                '            placeOrderResponse("data").ContainsKey("order_id") Then
+                '            If ForceExitByUser Then
+                '                ForceExitByUser = False
+                '                OnHeartbeat(String.Format("Force exit successful: {0}", Me.TradableInstrument.TradingSymbol))
+                '            End If
+                '            If ForceExitForContractRollover Then
+                '                ForceExitForContractRollover = False
+                '                OnHeartbeat(String.Format("Force exit for contract rollover successful: {0}", Me.TradableInstrument.TradingSymbol))
+                '            End If
+                '            If ForceEntryForContractRollover Then
+                '                ForceEntryForContractRollover = False
+                '                OnHeartbeat(String.Format("Force entry for contract rollover successful: {0}", Me.TradableInstrument.TradingSymbol))
+                '            End If
+                '        End If
+                '    Else
+                '        If ForceExitByUser Then
+                '            ForceExitByUser = False
+                '            OnHeartbeat(String.Format("No position available for force exit: {0}", Me.TradableInstrument.TradingSymbol))
+                '        End If
+                '        If ForceExitForContractRollover Then
+                '            ForceExitForContractRollover = False
+                '            OnHeartbeat(String.Format("No position available for contract rollover force exit: {0}", Me.TradableInstrument.TradingSymbol))
+                '        End If
+                '        If ForceEntryForContractRollover Then
+                '            ForceEntryForContractRollover = False
+                '            OnHeartbeat(String.Format("No position available for contract rollover force entry: {0}", Me.TradableInstrument.TradingSymbol))
+                '        End If
+                '    End If
+                'End If
 
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While
@@ -128,8 +128,8 @@ Public Class EMACrossoverStrategyInstrument
         Throw New NotImplementedException()
     End Function
 
-    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-        Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
+    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)))
+        Dim ret As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         Dim emaCrossoverUserSettings As EMACrossoverUserInputs = Me.ParentStrategy.UserSettings
         Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(emaCrossoverUserSettings.SignalTimeFrame)
@@ -231,84 +231,84 @@ Public Class EMACrossoverStrategyInstrument
         End If
 
         'Below portion have to be done in every place order trigger
-        If parameters IsNot Nothing Then
-            Try
-                If forcePrint Then
-                    logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
-                    If Me.TradableInstrument.IsHistoricalCompleted Then
-                        logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
-                        logger.Debug("PlaceOrder-> Rest all parameters: 
-                                    RunningCandlePayloadSnapshotDateTime:{0}, PayloadGeneratedBy:{1}, 
-                                    IsHistoricalCompleted:{2}, IsFirstTimeInformationCollected:{3}, 
-                                    IsCrossover(above):{4}, IsCrossover(below):{5}, 
-                                    EMA({6}):{7}, EMA({8}):{9}, 
-                                    Force Exit by user:{10}, Quantity:{11},
-                                    Exchange Start Time:{12}, Exchange End Time:{13},
-                                    Current Time:{14}, Trade entry delay:{15},
-                                    Is My Another Contract Available:{16}, Contract Rollover Time:{17},
-                                    Contract Rollover Force Exit:{18}, Contract Rollover Force Entry:{19},
-                                    TradingSymbol:{20}",
-                                    runningCandlePayload.SnapshotDateTime.ToString,
-                                    runningCandlePayload.PayloadGeneratedBy.ToString,
-                                    Me.TradableInstrument.IsHistoricalCompleted,
-                                    Me.ParentStrategy.IsFirstTimeInformationCollected,
-                                    IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, True),
-                                    IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, True),
-                                    emaCrossoverUserSettings.FastEMAPeriod,
-                                    fastEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
-                                    emaCrossoverUserSettings.SlowEMAPeriod,
-                                    slowEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
-                                    Me.ForceExitByUser,
-                                    GetQuantityToTrade(),
-                                    Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.ToString,
-                                    Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
-                                    currentTime.ToString,
-                                    emaCrossoverUserSettings.TradeEntryDelay,
-                                    IsMyAnotherContractAvailable(),
-                                    Me.TradableInstrument.ExchangeDetails.ContractRolloverTime.ToString,
-                                    Me.ForceExitForContractRollover,
-                                    Me.ForceEntryForContractRollover,
-                                    Me.TradableInstrument.TradingSymbol)
-                    ElseIf ForceExitByUser Then
-                        logger.Debug("PlaceOrder-> Rest all parameters:
-                                    Force exit done by user before historical completed. 
-                                    IsHistoricalCompleted:{0}, IsFirstTimeInformationCollected:{1}, 
-                                    Force Exit by user:{2}, Quantity:{3},
-                                    Exchange Start Time:{4}, Exchange End Time:{5},
-                                    Current Time:{6}, Trading Symbol:{7}",
-                                    Me.TradableInstrument.IsHistoricalCompleted,
-                                    Me.ParentStrategy.IsFirstTimeInformationCollected,
-                                    ForceExitByUser,
-                                    GetQuantityToTrade(),
-                                    Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.ToString,
-                                    Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
-                                    currentTime.ToString,
-                                    Me.TradableInstrument.TradingSymbol)
-                    End If
-                End If
-            Catch ex As Exception
-                logger.Error(ex)
-            End Try
+        'If parameters IsNot Nothing Then
+        '    Try
+        '        If forcePrint Then
+        '            logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+        '            If Me.TradableInstrument.IsHistoricalCompleted Then
+        '                logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
+        '                logger.Debug("PlaceOrder-> Rest all parameters: 
+        '                            RunningCandlePayloadSnapshotDateTime:{0}, PayloadGeneratedBy:{1}, 
+        '                            IsHistoricalCompleted:{2}, IsFirstTimeInformationCollected:{3}, 
+        '                            IsCrossover(above):{4}, IsCrossover(below):{5}, 
+        '                            EMA({6}):{7}, EMA({8}):{9}, 
+        '                            Force Exit by user:{10}, Quantity:{11},
+        '                            Exchange Start Time:{12}, Exchange End Time:{13},
+        '                            Current Time:{14}, Trade entry delay:{15},
+        '                            Is My Another Contract Available:{16}, Contract Rollover Time:{17},
+        '                            Contract Rollover Force Exit:{18}, Contract Rollover Force Entry:{19},
+        '                            TradingSymbol:{20}",
+        '                            runningCandlePayload.SnapshotDateTime.ToString,
+        '                            runningCandlePayload.PayloadGeneratedBy.ToString,
+        '                            Me.TradableInstrument.IsHistoricalCompleted,
+        '                            Me.ParentStrategy.IsFirstTimeInformationCollected,
+        '                            IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, True),
+        '                            IsCrossover(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, True),
+        '                            emaCrossoverUserSettings.FastEMAPeriod,
+        '                            fastEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+        '                            emaCrossoverUserSettings.SlowEMAPeriod,
+        '                            slowEMAConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+        '                            Me.ForceExitByUser,
+        '                            GetQuantityToTrade(),
+        '                            Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.ToString,
+        '                            Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
+        '                            currentTime.ToString,
+        '                            emaCrossoverUserSettings.TradeEntryDelay,
+        '                            IsMyAnotherContractAvailable(),
+        '                            Me.TradableInstrument.ExchangeDetails.ContractRolloverTime.ToString,
+        '                            Me.ForceExitForContractRollover,
+        '                            Me.ForceEntryForContractRollover,
+        '                            Me.TradableInstrument.TradingSymbol)
+        '            ElseIf ForceExitByUser Then
+        '                logger.Debug("PlaceOrder-> Rest all parameters:
+        '                            Force exit done by user before historical completed. 
+        '                            IsHistoricalCompleted:{0}, IsFirstTimeInformationCollected:{1}, 
+        '                            Force Exit by user:{2}, Quantity:{3},
+        '                            Exchange Start Time:{4}, Exchange End Time:{5},
+        '                            Current Time:{6}, Trading Symbol:{7}",
+        '                            Me.TradableInstrument.IsHistoricalCompleted,
+        '                            Me.ParentStrategy.IsFirstTimeInformationCollected,
+        '                            ForceExitByUser,
+        '                            GetQuantityToTrade(),
+        '                            Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.ToString,
+        '                            Me.TradableInstrument.ExchangeDetails.ExchangeEndTime.ToString,
+        '                            currentTime.ToString,
+        '                            Me.TradableInstrument.TradingSymbol)
+        '            End If
+        '        End If
+        '    Catch ex As Exception
+        '        logger.Error(ex)
+        '    End Try
 
-            Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
-            If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
-                If currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
-                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException IsNot Nothing AndAlso
-                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "Condition Satisfied")
-                ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
-                    'ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
-                    '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters)(ExecuteCommandAction.Take, parameters)
-                Else
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "Condition Satisfied")
-                End If
-            Else
-                ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
-            End If
-        Else
-            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
-        End If
+        '    Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
+        '    If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
+        '        If currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
+        '            currentSignalActivities.FirstOrDefault.EntryActivity.LastException IsNot Nothing AndAlso
+        '            currentSignalActivities.FirstOrDefault.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
+        '            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "Condition Satisfied")
+        '        ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded Then
+        '            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
+        '            'ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
+        '            '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters)(ExecuteCommandAction.Take, parameters)
+        '        Else
+        '            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "Condition Satisfied")
+        '        End If
+        '    Else
+        '        ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
+        '    End If
+        'Else
+        '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
+        'End If
         Return ret
     End Function
 

@@ -70,15 +70,15 @@ Public Class EMA_SupertrendStrategyInstrument
                 End If
 
                 _cts.Token.ThrowIfCancellationRequested()
-                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
-                    Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceCOMarketMISOrder, Nothing).ConfigureAwait(False)
-                    If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                        placeOrderResponse("data").ContainsKey("order_id") Then
-                        _sendParentOrderDetailsOfOrderId = placeOrderResponse("data")("order_id")
-                        GenerateTelegramMessageAsync(String.Format("{0}, {1} - Order Placed, Direction: {2}, Quantity: {3}, Proposed SL Price: {4}", Now, Me.TradableInstrument.TradingSymbol, placeOrderTrigger.Item2.EntryDirection.ToString, placeOrderTrigger.Item2.Quantity, placeOrderTrigger.Item2.TriggerPrice))
-                    End If
-                End If
+                Dim placeOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                'If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                '    Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceCOMarketMISOrder, Nothing).ConfigureAwait(False)
+                '    If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                '        placeOrderResponse("data").ContainsKey("order_id") Then
+                '        _sendParentOrderDetailsOfOrderId = placeOrderResponse("data")("order_id")
+                '        GenerateTelegramMessageAsync(String.Format("{0}, {1} - Order Placed, Direction: {2}, Quantity: {3}, Proposed SL Price: {4}", Now, Me.TradableInstrument.TradingSymbol, placeOrderTrigger.Item2.EntryDirection.ToString, placeOrderTrigger.Item2.Quantity, placeOrderTrigger.Item2.TriggerPrice))
+                '    End If
+                'End If
                 _cts.Token.ThrowIfCancellationRequested()
                 Dim modifyStoplossOrdersTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
                 If modifyStoplossOrdersTrigger IsNot Nothing AndAlso modifyStoplossOrdersTrigger.Count > 0 Then
@@ -120,8 +120,8 @@ Public Class EMA_SupertrendStrategyInstrument
     Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
         Throw New NotImplementedException()
     End Function
-    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-        Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
+    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)))
+        Dim ret As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         Dim emaStUserSettings As EMA_SupertrendUserInputs = Me.ParentStrategy.UserSettings
         Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(emaStUserSettings.SignalTimeFrame)
@@ -200,65 +200,65 @@ Public Class EMA_SupertrendStrategyInstrument
         End If
 
         'Below portion have to be done in every place order trigger
-        If parameters IsNot Nothing Then
+        'If parameters IsNot Nothing Then
 
-            Try
-                If forcePrint Then
-                    logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
-                    logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
-                    logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, LastTradeEntryTime:{1}, RunningCandlePayloadSnapshotDateTime:{2},
-                                PayloadGeneratedBy:{3}, IsActiveInstrument:{4}, IsHistoricalCompleted:{5}, MTM Loss: {6}, MTM Profit: {7}, 
-                                TotalStrategyPL:{8}, IsAboveOrBelow(above):{9}, IsAboveOrBelow(below):{10}, SupertrendColor:{11}, Quantity:{12},
-                                Stoploss%(SL):{13}, IT%:{14}, T%:{15}, LVT%:{16}, LVStartTime:{17}, LVEndYime:{18}, 
-                                MarketPrice(MP):{19}, TriggerPrice[MP{20}MP*SL/100]:{21}, IsTransitionAchieved:{22}, TradingSymbol:{23}",
-                                    emaStUserSettings.TradeStartTime,
-                                    emaStUserSettings.LastTradeEntryTime,
-                                    runningCandlePayload.SnapshotDateTime.ToString,
-                                    runningCandlePayload.PayloadGeneratedBy.ToString,
-                                    IsActiveInstrument(),
-                                    Me.TradableInstrument.IsHistoricalCompleted,
-                                    capitalAtDayStart * Math.Abs(emaStUserSettings.MaxLossPercentagePerDay) * -1 / 100,
-                                    capitalAtDayStart * Math.Abs(emaStUserSettings.MaxProfitPercentagePerDay) / 100,
-                                    Me.ParentStrategy.GetTotalPL,
-                                    IsAboveOrBelow(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, True),
-                                    IsAboveOrBelow(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, True),
-                                    CType(supertrendConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), SupertrendConsumer.SupertrendPayload).SupertrendColor.ToString,
-                                    Me.TradableInstrument.LotSize * emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Quantity,
-                                    emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).StoplossPercentage,
-                                    emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).IntemediateTargetPercentage,
-                                    emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).TargetPercentage,
-                                    emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).LowVolatilityTargetPercentage,
-                                    emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).LowVolatilityStartTime.ToString,
-                                    emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).LowVolatilityExitTime.ToString,
-                                    marketPrice,
-                                    If(parameters.EntryDirection = IOrder.TypeOfTransaction.Buy, "-", "+"),
-                                    parameters.TriggerPrice,
-                                    IsTransitionAchieved(runningCandlePayload, True),
-                                    Me.TradableInstrument.TradingSymbol)
-                End If
-            Catch ex As Exception
-                logger.Error(ex)
-            End Try
+        '    Try
+        '        If forcePrint Then
+        '            logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+        '            logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
+        '            logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, LastTradeEntryTime:{1}, RunningCandlePayloadSnapshotDateTime:{2},
+        '                        PayloadGeneratedBy:{3}, IsActiveInstrument:{4}, IsHistoricalCompleted:{5}, MTM Loss: {6}, MTM Profit: {7}, 
+        '                        TotalStrategyPL:{8}, IsAboveOrBelow(above):{9}, IsAboveOrBelow(below):{10}, SupertrendColor:{11}, Quantity:{12},
+        '                        Stoploss%(SL):{13}, IT%:{14}, T%:{15}, LVT%:{16}, LVStartTime:{17}, LVEndYime:{18}, 
+        '                        MarketPrice(MP):{19}, TriggerPrice[MP{20}MP*SL/100]:{21}, IsTransitionAchieved:{22}, TradingSymbol:{23}",
+        '                            emaStUserSettings.TradeStartTime,
+        '                            emaStUserSettings.LastTradeEntryTime,
+        '                            runningCandlePayload.SnapshotDateTime.ToString,
+        '                            runningCandlePayload.PayloadGeneratedBy.ToString,
+        '                            IsActiveInstrument(),
+        '                            Me.TradableInstrument.IsHistoricalCompleted,
+        '                            capitalAtDayStart * Math.Abs(emaStUserSettings.MaxLossPercentagePerDay) * -1 / 100,
+        '                            capitalAtDayStart * Math.Abs(emaStUserSettings.MaxProfitPercentagePerDay) / 100,
+        '                            Me.ParentStrategy.GetTotalPL,
+        '                            IsAboveOrBelow(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Above, True),
+        '                            IsAboveOrBelow(_dummyFastEMAConsumer, _dummySlowEMAConsumer, TypeOfField.EMA, TypeOfField.EMA, runningCandlePayload, Positions.Below, True),
+        '                            CType(supertrendConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), SupertrendConsumer.SupertrendPayload).SupertrendColor.ToString,
+        '                            Me.TradableInstrument.LotSize * emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Quantity,
+        '                            emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).StoplossPercentage,
+        '                            emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).IntemediateTargetPercentage,
+        '                            emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).TargetPercentage,
+        '                            emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).LowVolatilityTargetPercentage,
+        '                            emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).LowVolatilityStartTime.ToString,
+        '                            emaStUserSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).LowVolatilityExitTime.ToString,
+        '                            marketPrice,
+        '                            If(parameters.EntryDirection = IOrder.TypeOfTransaction.Buy, "-", "+"),
+        '                            parameters.TriggerPrice,
+        '                            IsTransitionAchieved(runningCandlePayload, True),
+        '                            Me.TradableInstrument.TradingSymbol)
+        '        End If
+        '    Catch ex As Exception
+        '        logger.Error(ex)
+        '    End Try
 
-            Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
-            If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
-                If currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
-                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException IsNot Nothing AndAlso
-                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "Condition Satisfied")
-                ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
-                    'ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
-                    '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters)(ExecuteCommandAction.Take, parameters)
-                Else
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "Condition Satisfied")
-                End If
-            Else
-                ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
-            End If
-        Else
-            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
-        End If
+        '    Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
+        '    If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
+        '        If currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
+        '            currentSignalActivities.FirstOrDefault.EntryActivity.LastException IsNot Nothing AndAlso
+        '            currentSignalActivities.FirstOrDefault.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
+        '            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "Condition Satisfied")
+        '        ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded Then
+        '            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
+        '            'ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
+        '            '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters)(ExecuteCommandAction.Take, parameters)
+        '        Else
+        '            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "Condition Satisfied")
+        '        End If
+        '    Else
+        '        ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "Condition Satisfied")
+        '    End If
+        'Else
+        '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
+        'End If
         Return ret
     End Function
 

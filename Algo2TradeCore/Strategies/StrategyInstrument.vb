@@ -1125,7 +1125,7 @@ Namespace Strategies
 #Region "Public MustOverride Functions"
         Public MustOverride Async Function MonitorAsync() As Task
         Public MustOverride Async Function MonitorAsync(ByVal command As ExecuteCommands, ByVal data As Object) As Task
-        Protected MustOverride Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+        Protected MustOverride Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)))
         Protected MustOverride Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean, ByVal data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
         Protected MustOverride Async Function IsTriggerReceivedForModifyStoplossOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
         Protected MustOverride Async Function IsTriggerReceivedForModifyTargetOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
@@ -1173,9 +1173,10 @@ Namespace Strategies
                         _cts.Token.ThrowIfCancellationRequested()
                         Select Case command
                             Case ExecuteCommands.PlaceBOLimitMISOrder
-                                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
-                                If placeOrderTrigger IsNot Nothing AndAlso (placeOrderTrigger.Item1 = ExecuteCommandAction.Take OrElse
-                                    placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
+                                If placeOrderTriggers IsNot Nothing AndAlso (placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.Take OrElse
+                                    placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = placeOrderTriggers.FirstOrDefault
 
                                     activityTag = GenerateFreshTagForNewSignal(activityTag, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime)
 
@@ -1333,38 +1334,50 @@ Namespace Strategies
                                     Exit For
                                 End If
                             Case ExecuteCommands.PlaceBOSLMISOrder
-                                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
-                                If placeOrderTrigger IsNot Nothing AndAlso (placeOrderTrigger.Item1 = ExecuteCommandAction.Take OrElse
-                                    placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
+                                If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
+                                    Dim placeOrderResponses As List(Of Object) = Nothing
+                                    Dim tasks = placeOrderTriggers.Select(Async Function(x)
+                                                                              Try
+                                                                                  _cts.Token.ThrowIfCancellationRequested()
+                                                                                  If x.Item1 = ExecuteCommandAction.Take OrElse x.Item1 = ExecuteCommandAction.WaitAndTake Then
+                                                                                      activityTag = GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime)
 
-                                    activityTag = GenerateFreshTagForNewSignal(activityTag, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime)
+                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
 
-                                    If placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
 
-                                    Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime, placeOrderTrigger.Item2.EntryDirection, Now, placeOrderTrigger.Item3).ConfigureAwait(False)
-
-                                    Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
-                                    placeOrderResponse = Await _APIAdapter.PlaceBOSLMISOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
-                                                                                                    tradingSymbol:=Me.TradableInstrument.TradingSymbol,
-                                                                                                    transaction:=placeOrderTrigger.Item2.EntryDirection,
-                                                                                                    quantity:=placeOrderTrigger.Item2.Quantity,
-                                                                                                    price:=placeOrderTrigger.Item2.Price,
-                                                                                                    triggerPrice:=placeOrderTrigger.Item2.TriggerPrice,
-                                                                                                    squareOffValue:=placeOrderTrigger.Item2.SquareOffValue,
-                                                                                                    stopLossValue:=placeOrderTrigger.Item2.StoplossValue,
-                                                                                                    tag:=activityTag).ConfigureAwait(False)
-                                    If placeOrderResponse IsNot Nothing Then
-                                        logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
-                                        Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
-                                        lastException = Nothing
-                                        allOKWithoutException = True
-                                        _cts.Token.ThrowIfCancellationRequested()
-                                        ret = placeOrderResponse
-                                        _cts.Token.ThrowIfCancellationRequested()
-                                        Exit For
-                                    Else
-                                        Throw New ApplicationException(String.Format("Place order did not succeed"))
-                                    End If
+                                                                                      Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
+                                                                                      placeOrderResponse = Await _APIAdapter.PlaceBOSLMISOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
+                                                                                                                                                      tradingSymbol:=Me.TradableInstrument.TradingSymbol,
+                                                                                                                                                      transaction:=x.Item2.EntryDirection,
+                                                                                                                                                      quantity:=x.Item2.Quantity,
+                                                                                                                                                      price:=x.Item2.Price,
+                                                                                                                                                      triggerPrice:=x.Item2.TriggerPrice,
+                                                                                                                                                      squareOffValue:=x.Item2.SquareOffValue,
+                                                                                                                                                      stopLossValue:=x.Item2.StoplossValue,
+                                                                                                                                                      tag:=activityTag).ConfigureAwait(False)
+                                                                                      If placeOrderResponse IsNot Nothing Then
+                                                                                          logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
+                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
+                                                                                          lastException = Nothing
+                                                                                          allOKWithoutException = True
+                                                                                          _cts.Token.ThrowIfCancellationRequested()
+                                                                                          If placeOrderResponses Is Nothing Then placeOrderResponses = New List(Of Object)
+                                                                                          placeOrderResponses.Add(placeOrderResponse)
+                                                                                          _cts.Token.ThrowIfCancellationRequested()
+                                                                                      Else
+                                                                                          Throw New ApplicationException(String.Format("Place order did not succeed"))
+                                                                                      End If
+                                                                                  End If
+                                                                              Catch ex As Exception
+                                                                                  logger.Error(ex)
+                                                                                  Throw ex
+                                                                              End Try
+                                                                              Return True
+                                                                          End Function)
+                                    Await Task.WhenAll(tasks).ConfigureAwait(False)
+                                    ret = placeOrderResponses
                                 Else
                                     lastException = Nothing
                                     allOKWithoutException = True
@@ -1372,9 +1385,10 @@ Namespace Strategies
                                     Exit For
                                 End If
                             Case ExecuteCommands.PlaceCOMarketMISOrder
-                                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
-                                If placeOrderTrigger IsNot Nothing AndAlso (placeOrderTrigger.Item1 = ExecuteCommandAction.Take OrElse
-                                    placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
+                                If placeOrderTriggers IsNot Nothing AndAlso (placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.Take OrElse
+                                    placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = placeOrderTriggers.FirstOrDefault
 
                                     activityTag = GenerateFreshTagForNewSignal(activityTag, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime)
 
@@ -1408,9 +1422,10 @@ Namespace Strategies
                                     Exit For
                                 End If
                             Case ExecuteCommands.PlaceRegularMarketMISOrder
-                                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
-                                If placeOrderTrigger IsNot Nothing AndAlso (placeOrderTrigger.Item1 = ExecuteCommandAction.Take OrElse
-                                    placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
+                                If placeOrderTriggers IsNot Nothing AndAlso (placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.Take OrElse
+                                    placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = placeOrderTriggers.FirstOrDefault
 
                                     activityTag = GenerateFreshTagForNewSignal(activityTag, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime)
 
@@ -1443,9 +1458,10 @@ Namespace Strategies
                                     Exit For
                                 End If
                             Case ExecuteCommands.PlaceRegularLimitMISOrder
-                                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
-                                If placeOrderTrigger IsNot Nothing AndAlso (placeOrderTrigger.Item1 = ExecuteCommandAction.Take OrElse
-                                    placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
+                                If placeOrderTriggers IsNot Nothing AndAlso (placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.Take OrElse
+                                    placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = placeOrderTriggers.FirstOrDefault
 
                                     activityTag = GenerateFreshTagForNewSignal(activityTag, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime)
 
@@ -1479,9 +1495,10 @@ Namespace Strategies
                                     Exit For
                                 End If
                             Case ExecuteCommands.PlaceRegularSLMMISOrder
-                                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
-                                If placeOrderTrigger IsNot Nothing AndAlso (placeOrderTrigger.Item1 = ExecuteCommandAction.Take OrElse
-                                    placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
+                                If placeOrderTriggers IsNot Nothing AndAlso (placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.Take OrElse
+                                    placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = placeOrderTriggers.FirstOrDefault
 
                                     activityTag = GenerateFreshTagForNewSignal(activityTag, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime)
 
@@ -1515,9 +1532,10 @@ Namespace Strategies
                                     Exit For
                                 End If
                             Case ExecuteCommands.PlaceRegularMarketCNCOrder
-                                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
-                                If placeOrderTrigger IsNot Nothing AndAlso (placeOrderTrigger.Item1 = ExecuteCommandAction.Take OrElse
-                                    placeOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(True).ConfigureAwait(False)
+                                If placeOrderTriggers IsNot Nothing AndAlso (placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.Take OrElse
+                                    placeOrderTriggers.FirstOrDefault.Item1 = ExecuteCommandAction.WaitAndTake) Then
+                                    Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = placeOrderTriggers.FirstOrDefault
 
                                     activityTag = GenerateFreshTagForNewSignal(activityTag, placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime)
 

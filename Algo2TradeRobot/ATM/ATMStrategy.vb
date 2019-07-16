@@ -36,9 +36,9 @@ Public Class ATMStrategy
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
-            'Using fillInstrumentDetails As New ATMFillInstrumentDetails(_cts, Me)
-            '    Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
-            'End Using
+            Using fillInstrumentDetails As New ATMFillInstrumentDetails(_cts, Me)
+                Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+            End Using
             Dim userInputs As ATMUserInputs = CType(Me.UserSettings, ATMUserInputs)
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList

@@ -156,23 +156,23 @@ Public Class OHLStrategyInstrument
                     Throw Me.ParentStrategy.ParentController.OrphanException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-                Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
-                    If placeOrderTrigger.Item2.EntryDirection = IOrder.TypeOfTransaction.Buy AndAlso Not _isBuyOrderPlaced Then
-                        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
-                        _isBuyOrderPlaced = True
-                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                            placeOrderResponse("data").ContainsKey("order_id") Then
-                            _isBuyOrderPlaced = True
-                        End If
-                    ElseIf placeOrderTrigger.Item2.EntryDirection = IOrder.TypeOfTransaction.Sell AndAlso Not _isSellOrderPlaced Then
-                        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
-                        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
-                            placeOrderResponse("data").ContainsKey("order_id") Then
-                            _isSellOrderPlaced = True
-                        End If
-                    End If
-                End If
+                'Dim placeOrderTrigger As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                'If placeOrderTrigger IsNot Nothing AndAlso placeOrderTrigger.Item1 = ExecuteCommandAction.Take Then
+                '    If placeOrderTrigger.Item2.EntryDirection = IOrder.TypeOfTransaction.Buy AndAlso Not _isBuyOrderPlaced Then
+                '        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                '        _isBuyOrderPlaced = True
+                '        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                '            placeOrderResponse("data").ContainsKey("order_id") Then
+                '            _isBuyOrderPlaced = True
+                '        End If
+                '    ElseIf placeOrderTrigger.Item2.EntryDirection = IOrder.TypeOfTransaction.Sell AndAlso Not _isSellOrderPlaced Then
+                '        Dim placeOrderResponse As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                '        If placeOrderResponse IsNot Nothing AndAlso placeOrderResponse.ContainsKey("data") AndAlso
+                '            placeOrderResponse("data").ContainsKey("order_id") Then
+                '            _isSellOrderPlaced = True
+                '        End If
+                '    End If
+                'End If
                 _cts.Token.ThrowIfCancellationRequested()
 
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
@@ -185,8 +185,8 @@ Public Class OHLStrategyInstrument
         End Try
     End Function
 
-    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-        Dim ret As Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String) = Nothing
+    Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)))
+        Dim ret As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         Dim startTime As Date = New Date(Now.Year, Now.Month, Now.Day, 9, 15, 0)
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
@@ -240,32 +240,32 @@ Public Class OHLStrategyInstrument
         End If
 
         'Below portion have to be done in every place order trigger
-        If parameters IsNot Nothing Then
-            Try
-                logger.Debug("*******Place Order******* Open:{0}, LTP:{1}, Order Timestamp:{2}, Last Trade Entry Time:{3}", currentTick.Open, currentTick.LastPrice, currentTick.Timestamp.Value, currentTick.LastTradeTime.Value)
-            Catch ex As Exception
-                logger.Error("Error in place order log")
-            End Try
+        'If parameters IsNot Nothing Then
+        '    Try
+        '        logger.Debug("*******Place Order******* Open:{0}, LTP:{1}, Order Timestamp:{2}, Last Trade Entry Time:{3}", currentTick.Open, currentTick.LastPrice, currentTick.Timestamp.Value, currentTick.LastTradeTime.Value)
+        '    Catch ex As Exception
+        '        logger.Error("Error in place order log")
+        '    End Try
 
-            Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
-            If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
-                If currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
-                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException IsNot Nothing AndAlso
-                    currentSignalActivities.FirstOrDefault.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "")
-                ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded Then
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "")
-                    'ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
-                    '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters)(ExecuteCommandAction.Take, parameters)
-                Else
-                    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
-                End If
-            Else
-                ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "")
-            End If
-        Else
-            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
-        End If
+        '    Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
+        '    If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
+        '        If currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
+        '            currentSignalActivities.FirstOrDefault.EntryActivity.LastException IsNot Nothing AndAlso
+        '            currentSignalActivities.FirstOrDefault.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
+        '            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters, "")
+        '        ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded Then
+        '            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "")
+        '            'ElseIf currentSignalActivities.FirstOrDefault.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
+        '            '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters)(ExecuteCommandAction.Take, parameters)
+        '        Else
+        '            ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
+        '        End If
+        '    Else
+        '        ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, "")
+        '    End If
+        'Else
+        '    ret = New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, Nothing, "")
+        'End If
         Return ret
     End Function
     Protected Overrides Async Function IsTriggerReceivedForModifyStoplossOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
