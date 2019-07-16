@@ -11,13 +11,14 @@ Public Class ATMUserInputs
     Public Property FutureInstrument As Boolean
     Public Property CashMaxSL As Decimal
     Public Property FutureMinCapital As Decimal
-    Public Property ManualInstrumentList As List(Of String)
+    Public Property ManualInstrumentList As String
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 
     <Serializable>
     Public Class InstrumentDetails
         Public Property TradingSymbol As String
+        Public Property MarginMultiplier As Decimal
     End Class
 
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
@@ -30,9 +31,9 @@ Public Class ATMUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL"}
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "MARGIN MULTIPLIER"}
 
-                        For colCtr = 0 To 0
+                        For colCtr = 0 To 1
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -43,7 +44,7 @@ Public Class ATMUserInputs
                         Next
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim instrumentName As String = Nothing
-
+                            Dim margin As Decimal = Decimal.MinValue
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
@@ -54,12 +55,24 @@ Public Class ATMUserInputs
                                             Throw New ApplicationException(String.Format("Instrument Name Missing or Blank Row. RowNumber: {0}", rowCtr))
                                         End If
                                     End If
+                                ElseIf columnCtr = 1 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
+                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
+                                            margin = instrumentDetails(rowCtr, columnCtr)
+                                        Else
+                                            Throw New ApplicationException(String.Format("Margin Multiplier cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                        End If
+                                    Else
+                                        Throw New ApplicationException(String.Format("Margin Multiplier cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                    End If
                                 End If
                             Next
                             If instrumentName IsNot Nothing Then
                                 Dim instrumentData As New InstrumentDetails
                                 With instrumentData
                                     .TradingSymbol = instrumentName.ToUpper
+                                    .MarginMultiplier = margin
                                 End With
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
                                 If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then

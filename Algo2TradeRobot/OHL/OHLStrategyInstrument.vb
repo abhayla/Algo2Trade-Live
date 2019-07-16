@@ -196,7 +196,7 @@ Public Class OHLStrategyInstrument
         End If
 
         Try
-            logger.Debug("Place Order-> LTP:{0}, Timestamp:{1}", currentTick.LastPrice, currentTick.Timestamp.Value)
+            logger.Debug("Place Order-> Open:{0}, LTP:{1}, Timestamp:{2}, Last Trade Entry Time:{3}", currentTick.Open, currentTick.LastPrice, currentTick.Timestamp.Value, currentTick.LastTradeTime.Value)
         Catch ex As Exception
             logger.Error("Error in tick log")
         End Try
@@ -223,7 +223,7 @@ Public Class OHLStrategyInstrument
             ElseIf Not _isSellOrderPlaced Then
                 Dim open As Decimal = currentTick.Open
                 Dim triggerPrice = open - ConvertFloorCeling(open * 0.05 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                Dim price As Decimal = triggerPrice - ConvertFloorCeling(open * 0.1 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim price As Decimal = triggerPrice - ConvertFloorCeling(open * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                 Dim stoploss As Decimal = ConvertFloorCeling(open * 0.05 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                 Dim target As Decimal = ConvertFloorCeling(stoploss * 4, Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
@@ -242,7 +242,7 @@ Public Class OHLStrategyInstrument
         'Below portion have to be done in every place order trigger
         If parameters IsNot Nothing Then
             Try
-                logger.Debug("*******Place Order******* Open:{0}, Order Place Time:{1}, LTP:{2}", currentTick.Open, currentTick.Timestamp.Value, currentTick.LastPrice)
+                logger.Debug("*******Place Order******* Open:{0}, LTP:{1}, Order Timestamp:{2}, Last Trade Entry Time:{3}", currentTick.Open, currentTick.LastPrice, currentTick.Timestamp.Value, currentTick.LastTradeTime.Value)
             Catch ex As Exception
                 logger.Error("Error in place order log")
             End Try

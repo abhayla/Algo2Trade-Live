@@ -276,24 +276,30 @@ Public Class ATMFillInstrumentDetails
                                     _cts.Token.ThrowIfCancellationRequested()
                                     allStockData = New DataTable
                                     allStockData.Columns.Add("Trading Symbol")
+                                    allStockData.Columns.Add("Margin Multiplier")
                                     For Each stock In todayStockList
                                         If CType(_parentStrategy.UserSettings, ATMUserInputs).CashInstrument Then
                                             Dim row As DataRow = allStockData.NewRow
                                             row("Trading Symbol") = stock.Remove(stock.Count - 8)
+                                            row("Margin Multiplier") = 13
                                             allStockData.Rows.Add(row)
                                         End If
                                         If CType(_parentStrategy.UserSettings, ATMUserInputs).FutureInstrument Then
                                             Dim row As DataRow = allStockData.NewRow
                                             row("Trading Symbol") = stock
+                                            row("Margin Multiplier") = 30
                                             allStockData.Rows.Add(row)
                                         End If
                                     Next
                                     If CType(_parentStrategy.UserSettings, ATMUserInputs).ManualInstrumentList IsNot Nothing AndAlso
-                                        CType(_parentStrategy.UserSettings, ATMUserInputs).ManualInstrumentList.Count > 0 Then
-                                        For Each manualStock In CType(_parentStrategy.UserSettings, ATMUserInputs).ManualInstrumentList
+                                        CType(_parentStrategy.UserSettings, ATMUserInputs).ManualInstrumentList <> "" Then
+                                        Dim manualStockData As String() = CType(_parentStrategy.UserSettings, ATMUserInputs).ManualInstrumentList.Trim.Split(vbNewLine)
+                                        For Each manualStock In manualStockData
                                             _cts.Token.ThrowIfCancellationRequested()
+                                            Dim stockData As String() = manualStock.Trim.Split(",")
                                             Dim row As DataRow = allStockData.NewRow
-                                            row("Trading Symbol") = manualStock
+                                            row("Trading Symbol") = stockData(0)
+                                            row("Margin Multiplier") = stockData(1)
                                             allStockData.Rows.Add(row)
                                         Next
                                     End If

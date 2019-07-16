@@ -612,6 +612,23 @@ Namespace Strategies
             Next
             Return previousQuantity
         End Function
+        Public Function CalculateQuantityFromStoploss(ByVal buyPrice As Double, ByVal sellPrice As Double, ByVal NetProfitLossOfTrade As Double) As Integer
+            Dim lotSize As Integer = Me.TradableInstrument.LotSize
+            Dim quantityMultiplier As Integer = 1
+            Dim previousQuantity As Integer = lotSize
+            For quantityMultiplier = 1 To Integer.MaxValue
+                Dim plAfterBrokerage As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, sellPrice, lotSize * quantityMultiplier)
+                If NetProfitLossOfTrade > 0 Then
+                    If plAfterBrokerage <= Math.Abs(NetProfitLossOfTrade) * -1 Then
+                        previousQuantity = lotSize * (quantityMultiplier - 1)
+                        Exit For
+                    Else
+                        previousQuantity = lotSize * quantityMultiplier
+                    End If
+                End If
+            Next
+            Return previousQuantity
+        End Function
         Public Function CalculateTargetFromPL(ByVal buyPrice As Double, ByVal quantity As Integer, ByVal NetProfitLossOfTrade As Double) As Decimal
             Dim ret As Decimal = buyPrice
             For ret = buyPrice To Integer.MaxValue Step Me.TradableInstrument.TickSize

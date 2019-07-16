@@ -56,14 +56,7 @@ Public Class frmATMSettings
             chbFuture.Checked = _ATMSettings.FutureInstrument
             txtCashMaxSL.Text = _ATMSettings.CashMaxSL
             txtFutureMinCapital.Text = _ATMSettings.FutureMinCapital
-            If _ATMSettings.ManualInstrumentList IsNot Nothing AndAlso _ATMSettings.ManualInstrumentList.Count > 0 Then
-                Dim manualStocks As String = Nothing
-                For Each manualStock In _ATMSettings.ManualInstrumentList
-                    manualStocks = String.Format("{0},{1}", manualStocks, manualStock)
-                    manualStocks = manualStocks.TrimStart(",")
-                Next
-                txtManualStockList.Text = manualStocks
-            End If
+            txtManualStockList.Text = _ATMSettings.ManualInstrumentList
         End If
     End Sub
 
@@ -79,18 +72,7 @@ Public Class frmATMSettings
         _ATMSettings.FutureInstrument = chbFuture.Checked
         _ATMSettings.CashMaxSL = txtCashMaxSL.Text
         _ATMSettings.FutureMinCapital = txtFutureMinCapital.Text
-        If txtManualStockList.Text IsNot Nothing AndAlso txtManualStockList.Text <> "" Then
-            If _ATMSettings.ManualInstrumentList IsNot Nothing Then
-                _ATMSettings.ManualInstrumentList.Clear()
-                _ATMSettings.ManualInstrumentList = Nothing
-            End If
-            Dim manualStocks As String = txtManualStockList.Text
-            Dim manualStockArray As String() = manualStocks.Split(",")
-            For Each stock In manualStockArray
-                If _ATMSettings.ManualInstrumentList Is Nothing Then _ATMSettings.ManualInstrumentList = New List(Of String)
-                _ATMSettings.ManualInstrumentList.Add(stock)
-            Next
-        End If
+        _ATMSettings.ManualInstrumentList = txtManualStockList.Text
 
         Utilities.Strings.SerializeFromCollection(Of ATMUserInputs)(_ATMSettingsFilename, _ATMSettings)
     End Sub
