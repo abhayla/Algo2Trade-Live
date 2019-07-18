@@ -42,6 +42,7 @@ Public Class TwoThirdStrategy
                 Using fillInstrumentDetails As New TwoThirdFillInstrumentDetails(_cts, Me)
                     Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
                 End Using
+                logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()

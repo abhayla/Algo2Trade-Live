@@ -39,6 +39,7 @@ Public Class ATMStrategy
             Using fillInstrumentDetails As New ATMFillInstrumentDetails(_cts, Me)
                 Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
             End Using
+            logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
             Dim userInputs As ATMUserInputs = CType(Me.UserSettings, ATMUserInputs)
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList

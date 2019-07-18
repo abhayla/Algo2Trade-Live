@@ -1932,7 +1932,7 @@ Public Class frmMainTabbed
     Private Sub sfdgvCandleRangeBreakoutMainDashboard_AutoGeneratingColumn(sender As Object, e As AutoGeneratingColumnArgs) Handles sfdgvCandleRangeBreakoutMainDashboard.AutoGeneratingColumn
         ManipulateGridEx(GridMode.TouchupAutogeneratingColumn, e, GetType(ATMStrategy))
     End Sub
-    Private Async Function CandleRangeBreakoutWorkerAsync() As Task
+    Private Async Function ATMWorkerAsync() As Task
         If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
             MsgBox("Cannot start as another strategy is loggin in")
             Exit Function
@@ -1985,6 +1985,7 @@ Public Class frmMainTabbed
                 RemoveHandler _commonController.CollectorError, AddressOf OnCollectorError
                 RemoveHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
                 RemoveHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                RemoveHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
 
                 AddHandler _commonController.Heartbeat, AddressOf OnHeartbeat
                 AddHandler _commonController.WaitingFor, AddressOf OnWaitingFor
@@ -2004,6 +2005,7 @@ Public Class frmMainTabbed
                 AddHandler _commonController.CollectorError, AddressOf OnCollectorError
                 AddHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
                 AddHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                AddHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
 
 #Region "Login"
                 Dim loginMessage As String = Nothing
@@ -2121,7 +2123,7 @@ Public Class frmMainTabbed
         'End If
 
         PreviousDayCleanup()
-        Await Task.Run(AddressOf CandleRangeBreakoutWorkerAsync).ConfigureAwait(False)
+        Await Task.Run(AddressOf ATMWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
             If _lastException.GetType.BaseType Is GetType(AdapterBusinessException) AndAlso
@@ -2140,6 +2142,7 @@ Public Class frmMainTabbed
         FlashTickerBulbEx(GetType(ATMStrategy))
     End Sub
     Private Async Sub btnCandleRangeBreakoutStop_Click(sender As Object, e As EventArgs) Handles btnCandleRangeBreakoutStop.Click
+        OnEndOfTheDay(_ATMStrategyToExecute)
         SetObjectEnableDisable_ThreadSafe(linklblCandleRangeBreakoutTradableInstrument, False)
         If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
         If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
@@ -3995,11 +3998,12 @@ Public Class frmMainTabbed
                 Case GetType(EMACrossoverStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Crossover Order Book.csv")))
                 Case GetType(ATMStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Candle Range Breakout Order Book.csv")))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("ATM Order Book.csv")))
                 Case GetType(JoyMaaATMStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Joy Maa ATM Order Book.csv")))
                 Case GetType(TwoThirdStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Two Third Strategy Order Book.csv")))
+
                 Case Else
                     Throw New NotImplementedException
             End Select
@@ -4028,14 +4032,18 @@ Public Class frmMainTabbed
                     dt.Columns.Add("Signal PL")
                     dt.Columns.Add("Strategy Overall PL after brokerage")
                     dt.Columns.Add("Strategy Max Drawup")
+                    dt.Columns.Add("Strategy Max Drawup Time")
                     dt.Columns.Add("Strategy Max Drawdown")
+                    dt.Columns.Add("Strategy Max Drawdown Time")
                 End If
                 Dim row As System.Data.DataRow = dt.NewRow
                 row("Trading Date") = Now.Date.ToString("dd-MM-yyyy")
                 row("Trading Symbol") = rowData.TradingSymbol
                 row("Strategy Overall PL after brokerage") = rowData.StrategyOverAllPLAfterBrokerage
                 row("Strategy Max Drawup") = rowData.StrategyMaxDrawUp
+                row("Strategy Max Drawup Time") = rowData.StrategyMaxDrawUpTime.ToString("HH:mm:ss")
                 row("Strategy Max Drawdown") = rowData.StrategyMaxDrawDown
+                row("Strategy Max Drawdown Time") = rowData.StrategyMaxDrawDownTime.ToString("HH:mm:ss")
                 row("Signal PL") = rowData.SignalPL
                 row("Entry Direction") = rowData.SignalDirection.ToString
                 row("Entry Time") = rowData.EntryRequestTime.ToString("HH:mm:ss")

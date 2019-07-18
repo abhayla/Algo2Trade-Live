@@ -90,7 +90,9 @@ Namespace Strategies
         Public ReadOnly Property IsTickPopulationNeeded As Boolean
         Public Property IsFirstTimeInformationCollected As Boolean
         Public Property MaxDrawUp As Decimal = Decimal.MinValue
+        Public Property MaxDrawUpTime As Date = Date.MinValue
         Public Property MaxDrawDown As Decimal = Decimal.MaxValue
+        Public Property MaxDrawDownTime As Date = Date.MinValue
         Public Property ExportCSV As Boolean
 
         Protected _cts As CancellationTokenSource
@@ -143,8 +145,16 @@ Namespace Strategies
                     plOfDay += runningStrategyInstrument.GetOverallPLAfterBrokerage()
                 Next
             End If
-            MaxDrawUp = Math.Max(MaxDrawUp, plOfDay)
-            MaxDrawDown = Math.Min(MaxDrawDown, plOfDay)
+            'MaxDrawUp = Math.Max(MaxDrawUp, plOfDay)
+            If plOfDay > MaxDrawUp Then
+                MaxDrawUp = plOfDay
+                MaxDrawUpTime = Now
+            End If
+            'MaxDrawDown = Math.Min(MaxDrawDown, plOfDay)
+            If plOfDay < MaxDrawDown Then
+                MaxDrawDown = plOfDay
+                MaxDrawDownTime = Now
+            End If
             Return plOfDay
         End Function
 #End Region

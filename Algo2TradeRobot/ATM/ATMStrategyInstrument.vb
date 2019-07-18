@@ -59,6 +59,11 @@ Public Class ATMStrategyInstrument
                 If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
                     Throw Me.ParentStrategy.ParentController.OrphanException
                 End If
+                If Me._RMSException IsNot Nothing AndAlso
+                    _RMSException.ExceptionType = Algo2TradeCore.Exceptions.AdapterBusinessException.TypeOfException.RMSError Then
+                    OnHeartbeat(String.Format("{0}:Will not take no more action in this instrument as RMS Error occured. Error-{1}", Me.TradableInstrument.TradingSymbol, _RMSException.Message))
+                    Throw Me._RMSException
+                End If
                 _cts.Token.ThrowIfCancellationRequested()
                 'Force Cancel block strat
                 If IsAnyTradeTargetReached() Then
@@ -69,7 +74,7 @@ Public Class ATMStrategyInstrument
                 'Place Order block start
                 Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
                 If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
-                    Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                    Dim placeOrderResponses As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
                 End If
                 'Place Order block end
                 _cts.Token.ThrowIfCancellationRequested()
@@ -114,52 +119,23 @@ Public Class ATMStrategyInstrument
         Dim sellPlaceLevel As Decimal = Decimal.MinValue
 
         If currentTick Is Nothing OrElse currentTick.Timestamp Is Nothing OrElse currentTick.Timestamp.Value = Date.MinValue OrElse currentTick.Timestamp.Value = New Date(1970, 1, 1, 5, 30, 0) Then
+            'Return ret
             'Exit Function
             'Do nothing
         Else
             Dim longActiveTrades As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.Buy)
             Dim shortActiveTrades As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.Sell)
-            If _usableATR <> Decimal.MinValue AndAlso _currentDayOpen <> Decimal.MinValue Then
-                longEntryPrice = _currentDayOpen + ConvertFloorCeling(_usableATR, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                shortEntryPrice = _currentDayOpen - ConvertFloorCeling(_usableATR, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                buyPlaceLevel = _currentDayOpen + ConvertFloorCeling((longEntryPrice - _currentDayOpen) * _levelPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                sellPlaceLevel = _currentDayOpen - ConvertFloorCeling((_currentDayOpen - shortEntryPrice) * _levelPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-            End If
-            Try
-                If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
-                    If _lastTick Is Nothing OrElse Not currentTick.Timestamp.Value = _lastTick.Timestamp.Value Then
-                        _lastTick = currentTick
-                        logger.Debug("Place Order-> Current Tick: {0}", Utilities.Strings.JsonSerialize(currentTick))
-                        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, Previous Day ATR:{5}, Current Day Open:{6}, Buy Price:{7}, Sell Price:{8}, Long Entry Level:{9}, Short Entry Level:{10}, Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, Trading Symbol:{14}",
-                                     currentTick.Timestamp.Value.ToString,
-                                     userSettings.TradeStartTime.ToString,
-                                     userSettings.LastTradeEntryTime.ToString,
-                                     Me.TradableInstrument.IsHistoricalCompleted,
-                                     IsAnyTradeTargetReached,
-                                     If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
-                                     If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
-                                     If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
-                                     If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
-                                     If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
-                                     If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
-                                     GetTotalExecutedOrders(),
-                                     If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
-                                     If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
-                                     Me.TradableInstrument.TradingSymbol)
-                    End If
-                End If
-            Catch ex As Exception
-                logger.Error(ex)
-            End Try
 
-            If _currentDayOpen = Decimal.MinValue Then
-                Dim lastDayPayload As OHLCPayload = Await GetPreviosDayPayload().ConfigureAwait(False)
-                If lastDayPayload IsNot Nothing AndAlso lastDayPayload.OpenPrice.Value <> currentTick.Open AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
-                    _currentDayOpen = currentTick.Open
-                    logger.Debug("Level Price:{0}", _currentDayOpen)
-                    Debug.WriteLine(String.Format("Level Price:{0}", _currentDayOpen))
-                End If
+            If _currentDayOpen = Decimal.MinValue AndAlso currentTick.LastTradeTime.Value >= userSettings.TradeStartTime AndAlso
+            Me.TradableInstrument.IsHistoricalCompleted Then
+                'Dim lastDayPayload As OHLCPayload = Await GetPreviosDayPayload().ConfigureAwait(False)
+                'If lastDayPayload IsNot Nothing AndAlso lastDayPayload.OpenPrice.Value <> currentTick.Open Then
+                _currentDayOpen = currentTick.Open
+                logger.Debug("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol)
+                Debug.WriteLine(String.Format("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol))
+                'End If
             End If
+
             If _usableATR = Decimal.MinValue AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
                 Dim lastDayLastCandlePayload As OHLCPayload = Nothing
                 If Me.RawPayloadDependentConsumers IsNot Nothing AndAlso Me.RawPayloadDependentConsumers.Count > 0 Then
@@ -172,7 +148,7 @@ Public Class ATMStrategyInstrument
                                                                                                              End Function)
 
                     If XMinutePayloadConsumer IsNot Nothing AndAlso
-                        XMinutePayloadConsumer.ConsumerPayloads IsNot Nothing AndAlso XMinutePayloadConsumer.ConsumerPayloads.Count > 0 Then
+                    XMinutePayloadConsumer.ConsumerPayloads IsNot Nothing AndAlso XMinutePayloadConsumer.ConsumerPayloads.Count > 0 Then
                         Dim lastDayLastCandlePayloadTime As Date = XMinutePayloadConsumer.ConsumerPayloads.Max(Function(x)
                                                                                                                    If CType(x.Value, OHLCPayload).SnapshotDateTime.Date = Now.Date Then
                                                                                                                        Return Date.MinValue
@@ -187,11 +163,47 @@ Public Class ATMStrategyInstrument
                     _usableATR = CType(atrConsumer.ConsumerPayloads(lastDayLastCandlePayload.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
                 End If
             End If
+
+            If _usableATR <> Decimal.MinValue AndAlso _currentDayOpen <> Decimal.MinValue Then
+                longEntryPrice = _currentDayOpen + ConvertFloorCeling(_usableATR, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                shortEntryPrice = _currentDayOpen - ConvertFloorCeling(_usableATR, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                buyPlaceLevel = _currentDayOpen + ConvertFloorCeling((longEntryPrice - _currentDayOpen) * _levelPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                sellPlaceLevel = _currentDayOpen - ConvertFloorCeling((_currentDayOpen - shortEntryPrice) * _levelPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+            End If
+
+            Try
+                If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
+                    If _lastTick Is Nothing OrElse Not currentTick.Timestamp.Value = _lastTick.Timestamp.Value Then
+                        _lastTick = currentTick
+                        logger.Debug("Place Order-> Current Tick: {0}", Utilities.Strings.JsonSerialize(currentTick))
+                        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, Previous Day ATR:{5}, Current Day Open:{6}, Buy Price:{7}, Sell Price:{8}, Long Entry Level:{9}, Short Entry Level:{10}, Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, Last Executed Order SL Point:{14}, Trading Symbol:{15}",
+                                 currentTick.Timestamp.Value.ToString,
+                                 userSettings.TradeStartTime.ToString,
+                                 userSettings.LastTradeEntryTime.ToString,
+                                 Me.TradableInstrument.IsHistoricalCompleted,
+                                 IsAnyTradeTargetReached,
+                                 If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                                 If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                                 If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                                 If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                                 If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                                 If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                                 GetTotalExecutedOrders(),
+                                 If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                                 If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                                 If(GetLastExecutedOrderStoplossPoint() <> Decimal.MinValue, GetLastExecutedOrderStoplossPoint(), "Nothing"),
+                                 Me.TradableInstrument.TradingSymbol)
+                    End If
+                End If
+            Catch ex As Exception
+                logger.Error(ex)
+            End Try
+
             Dim parameters1 As PlaceOrderParameters = Nothing
             Dim parameters2 As PlaceOrderParameters = Nothing
             If currentTick.Timestamp.Value >= userSettings.TradeStartTime AndAlso currentTick.Timestamp.Value <= userSettings.LastTradeEntryTime AndAlso
-                runningCandlePayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso
-                Not IsAnyTradeTargetReached() AndAlso _usableATR <> Decimal.MinValue AndAlso _currentDayOpen <> Decimal.MinValue Then
+            runningCandlePayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso
+            Not IsAnyTradeTargetReached() AndAlso _usableATR <> Decimal.MinValue AndAlso _currentDayOpen <> Decimal.MinValue Then
 
                 Dim stoplossPoint As Decimal = ConvertFloorCeling(_usableATR, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                 Dim quantity As Integer = 0
@@ -208,12 +220,12 @@ Public Class ATMStrategyInstrument
                         Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                         If currentTick.LastPrice < triggerPrice Then
                             parameters1 = New PlaceOrderParameters(runningCandlePayload) With
-                                           {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                           .Quantity = quantity,
-                                           .Price = price,
-                                           .TriggerPrice = triggerPrice,
-                                           .SquareOffValue = target,
-                                           .StoplossValue = stoploss}
+                                       {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                       .Quantity = quantity,
+                                       .Price = price,
+                                       .TriggerPrice = triggerPrice,
+                                       .SquareOffValue = target,
+                                       .StoplossValue = stoploss}
                         End If
                     End If
                     If shortActiveTrades Is Nothing OrElse shortActiveTrades.Count = 0 Then
@@ -222,74 +234,78 @@ Public Class ATMStrategyInstrument
                         Dim stoploss As Decimal = _currentDayOpen - triggerPrice
                         Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                         If currentTick.LastPrice > triggerPrice Then
-                            parameters1 = New PlaceOrderParameters(runningCandlePayload) With
-                                               {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                               .Quantity = quantity,
-                                               .Price = price,
-                                               .TriggerPrice = triggerPrice,
-                                               .SquareOffValue = target,
-                                               .StoplossValue = stoploss}
+                            parameters2 = New PlaceOrderParameters(runningCandlePayload) With
+                                           {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                                           .Quantity = quantity,
+                                           .Price = price,
+                                           .TriggerPrice = triggerPrice,
+                                           .SquareOffValue = target,
+                                           .StoplossValue = stoploss}
                         End If
                     End If
                 Else
                     If currentTick.LastPrice > buyPlaceLevel Then
-                        If longActiveTrades Is Nothing OrElse longActiveTrades.Count = 0 Then
+                        If longActiveTrades Is Nothing OrElse longActiveTrades.Count = 0 AndAlso
+                            GetLastExecutedOrderStoplossPoint() <> Decimal.MinValue Then
                             Dim triggerPrice = longEntryPrice
                             Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                             Dim stoploss As Decimal = triggerPrice - _currentDayOpen
                             Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                             If currentTick.LastPrice <= triggerPrice Then
                                 parameters1 = New PlaceOrderParameters(runningCandlePayload) With
-                                           {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                           .Quantity = quantity,
-                                           .Price = price,
-                                           .TriggerPrice = triggerPrice,
-                                           .SquareOffValue = target,
-                                           .StoplossValue = stoploss}
+                                       {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                       .Quantity = quantity,
+                                       .Price = price,
+                                       .TriggerPrice = triggerPrice,
+                                       .SquareOffValue = target,
+                                       .StoplossValue = stoploss}
                             End If
                             'ElseIf longActiveTrades IsNot Nothing AndAlso longActiveTrades.Count = 1 Then
                             'Dim triggerPrice = longEntryPrice
                             'Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                             'Dim stoploss As Decimal = triggerPrice - _currentDayOpen
-                            target = ConvertFloorCeling(stoploss * 1, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                            target = ConvertFloorCeling(GetLastExecutedOrderStoplossPoint() * 1.1, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                             If currentTick.LastPrice <= triggerPrice Then
                                 parameters2 = New PlaceOrderParameters(runningCandlePayload) With
-                                           {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                           .Quantity = quantity,
-                                           .Price = price,
-                                           .TriggerPrice = triggerPrice,
-                                           .SquareOffValue = target,
-                                           .StoplossValue = stoploss}
+                                       {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                       .Quantity = quantity,
+                                       .Price = price,
+                                       .TriggerPrice = triggerPrice,
+                                       .SquareOffValue = target,
+                                       .StoplossValue = stoploss,
+                                       .GenerateDifferentTag = True}
                             End If
                         End If
                     ElseIf currentTick.LastPrice < sellPlaceLevel Then
-                        If shortActiveTrades Is Nothing OrElse shortActiveTrades.Count = 0 Then
+                        If shortActiveTrades Is Nothing OrElse shortActiveTrades.Count = 0 AndAlso
+                            GetLastExecutedOrderStoplossPoint() <> Decimal.MinValue Then
                             Dim triggerPrice = shortEntryPrice
                             Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                             Dim stoploss As Decimal = _currentDayOpen - triggerPrice
                             Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                             If currentTick.LastPrice >= triggerPrice Then
                                 parameters1 = New PlaceOrderParameters(runningCandlePayload) With
-                                                   {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                                   .Quantity = quantity,
-                                                   .Price = price,
-                                                   .TriggerPrice = triggerPrice,
-                                                   .SquareOffValue = target,
-                                                   .StoplossValue = stoploss}
+                                               {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                                               .Quantity = quantity,
+                                               .Price = price,
+                                               .TriggerPrice = triggerPrice,
+                                               .SquareOffValue = target,
+                                               .StoplossValue = stoploss}
                             End If
                             'ElseIf shortActiveTrades IsNot Nothing AndAlso shortActiveTrades.Count = 1 Then
                             'Dim triggerPrice = shortEntryPrice
                             'Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                             'Dim stoploss As Decimal = _currentDayOpen - triggerPrice
-                            target = ConvertFloorCeling(stoploss * 1, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                            target = ConvertFloorCeling(GetLastExecutedOrderStoplossPoint() * 1.1, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                             If currentTick.LastPrice >= triggerPrice Then
                                 parameters2 = New PlaceOrderParameters(runningCandlePayload) With
-                                                   {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                                   .Quantity = quantity,
-                                                   .Price = price,
-                                                   .TriggerPrice = triggerPrice,
-                                                   .SquareOffValue = target,
-                                                   .StoplossValue = stoploss}
+                                               {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                                               .Quantity = quantity,
+                                               .Price = price,
+                                               .TriggerPrice = triggerPrice,
+                                               .SquareOffValue = target,
+                                               .StoplossValue = stoploss,
+                                               .GenerateDifferentTag = True}
                             End If
                         End If
                     End If
@@ -308,8 +324,8 @@ Public Class ATMStrategyInstrument
                                                                                                    Return x.EntryActivity.RequestTime
                                                                                                End Function).LastOrDefault
                         If lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
-                            lastPlacedActivity.EntryActivity.LastException IsNot Nothing AndAlso
-                            lastPlacedActivity.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
+                        lastPlacedActivity.EntryActivity.LastException IsNot Nothing AndAlso
+                        lastPlacedActivity.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
                             If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                             ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters1, parameters1.ToString))
                             If parameters2 IsNot Nothing Then
@@ -325,22 +341,22 @@ Public Class ATMStrategyInstrument
                                                 Long Entry Level:{9}, Short Entry Level:{10}, 
                                                 Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
                                                 Trading Symbol:{14}, Last Activity:{15}",
-                                                currentTick.Timestamp.Value.ToString,
-                                                userSettings.TradeStartTime.ToString,
-                                                userSettings.LastTradeEntryTime.ToString,
-                                                Me.TradableInstrument.IsHistoricalCompleted,
-                                                IsAnyTradeTargetReached,
-                                                If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
-                                                If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
-                                                If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
-                                                If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
-                                                If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
-                                                If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
-                                                GetTotalExecutedOrders(),
-                                                If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
-                                                If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
-                                                Me.TradableInstrument.TradingSymbol,
-                                                lastPlacedActivity.EntryActivity.RequestStatus.ToString)
+                                            currentTick.Timestamp.Value.ToString,
+                                            userSettings.TradeStartTime.ToString,
+                                            userSettings.LastTradeEntryTime.ToString,
+                                            Me.TradableInstrument.IsHistoricalCompleted,
+                                            IsAnyTradeTargetReached,
+                                            If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                                            If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                                            If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                                            If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                                            If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                                            If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                                            GetTotalExecutedOrders(),
+                                            If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                                            If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                                            Me.TradableInstrument.TradingSymbol,
+                                            lastPlacedActivity.EntryActivity.RequestStatus.ToString)
                                 End If
                             Catch ex As Exception
                                 logger.Error(ex)
@@ -413,6 +429,12 @@ Public Class ATMStrategyInstrument
                             'Catch ex As Exception
                             '    logger.Error(ex)
                             'End Try
+                        ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
+                            If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters1, parameters1.ToString))
+                            If parameters2 IsNot Nothing Then
+                                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters2, parameters1.ToString))
+                            End If
                         Else
                             If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                             ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters1, parameters1.ToString))
@@ -429,22 +451,22 @@ Public Class ATMStrategyInstrument
                                         Long Entry Level:{9}, Short Entry Level:{10}, 
                                         Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
                                         Trading Symbol:{14}, Last Activity:{15}",
-                                                currentTick.Timestamp.Value.ToString,
-                                                userSettings.TradeStartTime.ToString,
-                                                userSettings.LastTradeEntryTime.ToString,
-                                                Me.TradableInstrument.IsHistoricalCompleted,
-                                                IsAnyTradeTargetReached,
-                                                If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
-                                                If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
-                                                If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
-                                                If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
-                                                If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
-                                                If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
-                                                GetTotalExecutedOrders(),
-                                                If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
-                                                If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
-                                                Me.TradableInstrument.TradingSymbol,
-                                                lastPlacedActivity.EntryActivity.RequestStatus.ToString)
+                                            currentTick.Timestamp.Value.ToString,
+                                            userSettings.TradeStartTime.ToString,
+                                            userSettings.LastTradeEntryTime.ToString,
+                                            Me.TradableInstrument.IsHistoricalCompleted,
+                                            IsAnyTradeTargetReached,
+                                            If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                                            If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                                            If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                                            If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                                            If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                                            If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                                            GetTotalExecutedOrders(),
+                                            If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                                            If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                                            Me.TradableInstrument.TradingSymbol,
+                                            lastPlacedActivity.EntryActivity.RequestStatus.ToString)
                                 End If
                             Catch ex As Exception
                                 logger.Error(ex)
@@ -466,22 +488,22 @@ Public Class ATMStrategyInstrument
                                             Long Entry Level:{9}, Short Entry Level:{10}, 
                                             Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
                                             Trading Symbol:{14}, Last Activity:{15}",
-                                            currentTick.Timestamp.Value.ToString,
-                                            userSettings.TradeStartTime.ToString,
-                                            userSettings.LastTradeEntryTime.ToString,
-                                            Me.TradableInstrument.IsHistoricalCompleted,
-                                            IsAnyTradeTargetReached,
-                                            If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
-                                            If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
-                                            If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
-                                            If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
-                                            If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
-                                            If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
-                                            GetTotalExecutedOrders(),
-                                            If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
-                                            If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
-                                            Me.TradableInstrument.TradingSymbol,
-                                            "Nothing")
+                                        currentTick.Timestamp.Value.ToString,
+                                        userSettings.TradeStartTime.ToString,
+                                        userSettings.LastTradeEntryTime.ToString,
+                                        Me.TradableInstrument.IsHistoricalCompleted,
+                                        IsAnyTradeTargetReached,
+                                        If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                                        If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                                        If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                                        If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                                        If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                                        If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                                        GetTotalExecutedOrders(),
+                                        If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                                        If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                                        Me.TradableInstrument.TradingSymbol,
+                                        "Nothing")
                             End If
                         Catch ex As Exception
                             logger.Error(ex)
@@ -503,22 +525,22 @@ Public Class ATMStrategyInstrument
                                         Long Entry Level:{9}, Short Entry Level:{10}, 
                                         Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
                                         Trading Symbol:{14}, Last Activity:{15}",
-                                        currentTick.Timestamp.Value.ToString,
-                                        userSettings.TradeStartTime.ToString,
-                                        userSettings.LastTradeEntryTime.ToString,
-                                        Me.TradableInstrument.IsHistoricalCompleted,
-                                        IsAnyTradeTargetReached,
-                                        If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
-                                        If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
-                                        If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
-                                        If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
-                                        If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
-                                        If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
-                                        GetTotalExecutedOrders(),
-                                        If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
-                                        If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
-                                        Me.TradableInstrument.TradingSymbol,
-                                        "Nothing")
+                                    currentTick.Timestamp.Value.ToString,
+                                    userSettings.TradeStartTime.ToString,
+                                    userSettings.LastTradeEntryTime.ToString,
+                                    Me.TradableInstrument.IsHistoricalCompleted,
+                                    IsAnyTradeTargetReached,
+                                    If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                                    If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                                    If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                                    If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                                    If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                                    If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                                    GetTotalExecutedOrders(),
+                                    If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                                    If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                                    Me.TradableInstrument.TradingSymbol,
+                                    "Nothing")
                         End If
                     Catch ex As Exception
                         logger.Error(ex)
@@ -577,7 +599,8 @@ Public Class ATMStrategyInstrument
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
         Dim allActiveOrders As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.None)
-        If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 AndAlso GetTotalExecutedOrders() > 0 Then
+        If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 AndAlso GetTotalExecutedOrders() > 0 AndAlso
+            _currentDayOpen <> Decimal.MinValue AndAlso _usableATR <> Decimal.MinValue Then
             Dim longEntryPrice As Decimal = _currentDayOpen + ConvertFloorCeling(_usableATR, Me.TradableInstrument.TickSize, RoundOfType.Celing)
             Dim shortEntryPrice As Decimal = _currentDayOpen - ConvertFloorCeling(_usableATR, Me.TradableInstrument.TickSize, RoundOfType.Celing)
             Dim buyPlaceLevel As Decimal = _currentDayOpen + ConvertFloorCeling((longEntryPrice - _currentDayOpen) * _levelPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
@@ -663,7 +686,8 @@ Public Class ATMStrategyInstrument
                             ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                                 target = bussinessOrder.ParentOrder.AveragePrice - order.AveragePrice
                             End If
-                            If _usableATR <> Decimal.MinValue AndAlso target >= _usableATR * (Me.ParentStrategy.UserSettings.TargetMultiplier - 1) Then
+                            If _usableATR <> Decimal.MinValue AndAlso
+                                target >= ConvertFloorCeling(_usableATR, Me.TradableInstrument.TickSize, RoundOfType.Celing) * (Me.ParentStrategy.UserSettings.TargetMultiplier - 1) Then
                                 ret = True
                                 Exit For
                             End If
@@ -671,6 +695,58 @@ Public Class ATMStrategyInstrument
                     Next
                 End If
                 If ret Then Exit For
+            Next
+        End If
+        Return ret
+    End Function
+
+    Private Function GetLastExecutedStoplossOrder() As IBusinessOrder
+        Dim ret As IBusinessOrder = Nothing
+        If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+            For Each parentOrder In OrderDetails.OrderByDescending(Function(x)
+                                                                       Return x.Value.ParentOrder.TimeStamp
+                                                                   End Function)
+                Dim bussinessOrder As IBusinessOrder = OrderDetails(parentOrder.Key)
+                If bussinessOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
+                    bussinessOrder.AllOrder IsNot Nothing AndAlso bussinessOrder.AllOrder.Count > 0 Then
+                    For Each order In bussinessOrder.AllOrder
+                        If order.LogicalOrderType = IOrder.LogicalTypeOfOrder.Target AndAlso order.Status = IOrder.TypeOfStatus.Cancelled Then
+                            Dim target As Decimal = 0
+                            If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                target = order.Price - bussinessOrder.ParentOrder.AveragePrice
+                            ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                target = bussinessOrder.ParentOrder.AveragePrice - order.Price
+                            End If
+                            If _usableATR <> Decimal.MinValue AndAlso
+                                target >= ConvertFloorCeling(_usableATR, Me.TradableInstrument.TickSize, RoundOfType.Celing) * (Me.ParentStrategy.UserSettings.TargetMultiplier - 1) Then
+                                ret = bussinessOrder
+                                Exit For
+                            End If
+                        End If
+                    Next
+                End If
+                If ret IsNot Nothing Then Exit For
+            Next
+        End If
+        Return ret
+    End Function
+
+    Private Function GetLastExecutedOrderStoplossPoint() As Decimal
+        Dim ret As Decimal = Decimal.MinValue
+        Dim order As IBusinessOrder = GetLastExecutedStoplossOrder()
+        If order IsNot Nothing AndAlso order.ParentOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
+            order.AllOrder IsNot Nothing AndAlso order.AllOrder.Count > 0 Then
+            For Each runningOrder In order.AllOrder
+                If runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss AndAlso
+                    runningOrder.Status = IOrder.TypeOfStatus.Complete Then
+                    If order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        ret = order.ParentOrder.AveragePrice - runningOrder.AveragePrice
+                        Exit For
+                    ElseIf order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        ret = runningOrder.AveragePrice - order.ParentOrder.AveragePrice
+                        Exit For
+                    End If
+                End If
             Next
         End If
         Return ret
