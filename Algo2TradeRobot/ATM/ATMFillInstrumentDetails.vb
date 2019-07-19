@@ -123,7 +123,7 @@ Public Class ATMFillInstrumentDetails
                             Dim futureEODPayload As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(futureHistoricalCandlesJSONDict, runningInstrument.TradingSymbol).ConfigureAwait(False)
                             If futureEODPayload IsNot Nothing AndAlso futureEODPayload.Count > 0 Then
                                 Dim lastDayPayload As OHLCPayload = futureEODPayload.LastOrDefault.Value
-                                If lastDayPayload.ClosePrice.Value >= 80 AndAlso lastDayPayload.ClosePrice.Value <= 1500 Then
+                                If lastDayPayload.ClosePrice.Value >= 100 AndAlso lastDayPayload.ClosePrice.Value <= 1500 Then
                                     Dim rawCashInstrument As IInstrument = allInstruments.ToList.Find(Function(x)
                                                                                                           Return x.TradingSymbol = runningInstrument.RawInstrumentName
                                                                                                       End Function)

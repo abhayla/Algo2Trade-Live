@@ -365,25 +365,34 @@ Namespace Strategies
 
             Return GenerateTag(Now)
         End Function
-        Private Function GenerateFreshTagForNewSignal(ByVal currentActivityTag As String, ByVal signalTime As Date, ByVal signalDirection As IOrder.TypeOfTransaction, Optional ByVal forceGenerateFreshTag As Boolean = False) As String
+
+        Private _tagLock As Integer = 0
+        Private Async Function GenerateFreshTagForNewSignal(ByVal currentActivityTag As String, ByVal signalTime As Date, ByVal signalDirection As IOrder.TypeOfTransaction, Optional ByVal forceGenerateFreshTag As Boolean = False) As Task(Of String)
             Dim ret As String = currentActivityTag
-            If Me.ParentStrategy.SignalManager.ActivityDetails IsNot Nothing AndAlso
+            Try
+                While 1 = Interlocked.Exchange(_tagLock, 1)
+                    Await Task.Delay(5, _cts.Token).ConfigureAwait(False)
+                End While
+                If Me.ParentStrategy.SignalManager.ActivityDetails IsNot Nothing AndAlso
                 Me.ParentStrategy.SignalManager.ActivityDetails.ContainsKey(currentActivityTag) Then
 
-                Dim currentActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.ActivityDetails(currentActivityTag)
+                    Dim currentActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.ActivityDetails(currentActivityTag)
 
-                If forceGenerateFreshTag Then
-                    ret = GenerateTag(Now)
-                Else
-                    If Not Utilities.Time.IsDateTimeEqualTillMinutes(currentActivities.SignalGeneratedTime, signalTime) Then
+                    If forceGenerateFreshTag Then
                         ret = GenerateTag(Now)
                     Else
-                        If currentActivities.SignalDirection <> signalDirection Then
+                        If Not Utilities.Time.IsDateTimeEqualTillMinutes(currentActivities.SignalGeneratedTime, signalTime) Then
                             ret = GenerateTag(Now)
+                        Else
+                            If currentActivities.SignalDirection <> signalDirection Then
+                                ret = GenerateTag(Now)
+                            End If
                         End If
                     End If
                 End If
-            End If
+            Finally
+                Interlocked.Exchange(_tagLock, 0)
+            End Try
             Return ret
         End Function
         Protected Function GetSignalCandleOfAnOrder(ByVal parentOrderID As String, ByVal timeFrame As Integer) As OHLCPayload
@@ -631,7 +640,7 @@ Namespace Strategies
                 Dim plAfterBrokerage As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, sellPrice, lotSize * quantityMultiplier)
                 If NetProfitLossOfTrade > 0 Then
                     If plAfterBrokerage <= Math.Abs(NetProfitLossOfTrade) * -1 Then
-                        previousQuantity = lotSize * (quantityMultiplier - 1)
+                        previousQuantity = lotSize * If(quantityMultiplier - 1 = 0, 1, quantityMultiplier - 1)
                         Exit For
                     Else
                         previousQuantity = lotSize * quantityMultiplier
@@ -699,7 +708,7 @@ Namespace Strategies
             Return Hex(CLng(String.Format("{0}{1}{2}",
                                  Me.ParentStrategy.StrategyIdentifier,
                                  instrumentIdentifier,
-                                 DateDiff(DateInterval.Second, Now.Date, timeOfOrder))))
+                                 Right(timeOfOrder.Ticks, 5))))
             'Date.Parse(timeOfOrder).Subtract(Date.Parse(Now.Date)).TotalSeconds)))
         End Function
         Public Overridable Async Function HandleTickTriggerToUIETCAsync() As Task
@@ -1316,11 +1325,11 @@ Namespace Strategies
                                                                               Try
                                                                                   _cts.Token.ThrowIfCancellationRequested()
                                                                                   If x.Item1 = ExecuteCommandAction.Take OrElse x.Item1 = ExecuteCommandAction.WaitAndTake Then
-                                                                                      activityTag = GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection)
+                                                                                      Dim freshActivityTag As String = Await GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection).ConfigureAwait(False)
 
-                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then freshActivityTag = Await WaitAndGenerateFreshTag(freshActivityTag).ConfigureAwait(False)
 
-                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
+                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(freshActivityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
 
                                                                                       Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
                                                                                       placeOrderResponse = Await _APIAdapter.PlaceBOLimitMISOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
@@ -1330,10 +1339,10 @@ Namespace Strategies
                                                                                                                                                     price:=x.Item2.Price,
                                                                                                                                                     squareOffValue:=x.Item2.SquareOffValue,
                                                                                                                                                     stopLossValue:=x.Item2.StoplossValue,
-                                                                                                                                                    tag:=activityTag).ConfigureAwait(False)
+                                                                                                                                                    tag:=freshActivityTag).ConfigureAwait(False)
                                                                                       If placeOrderResponse IsNot Nothing Then
                                                                                           logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
-                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
+                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(freshActivityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
                                                                                           lastException = Nothing
                                                                                           allOKWithoutException = True
                                                                                           _cts.Token.ThrowIfCancellationRequested()
@@ -1370,11 +1379,11 @@ Namespace Strategies
                                                                               Try
                                                                                   _cts.Token.ThrowIfCancellationRequested()
                                                                                   If x.Item1 = ExecuteCommandAction.Take OrElse x.Item1 = ExecuteCommandAction.WaitAndTake Then
-                                                                                      activityTag = GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, x.Item2.GenerateDifferentTag)
+                                                                                      Dim freshActivityTag As String = Await GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, x.Item2.GenerateDifferentTag).ConfigureAwait(False)
 
-                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then freshActivityTag = Await WaitAndGenerateFreshTag(freshActivityTag).ConfigureAwait(False)
 
-                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
+                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(freshActivityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
 
                                                                                       Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
                                                                                       placeOrderResponse = Await _APIAdapter.PlaceBOSLMISOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
@@ -1385,10 +1394,10 @@ Namespace Strategies
                                                                                                                                                   triggerPrice:=x.Item2.TriggerPrice,
                                                                                                                                                   squareOffValue:=x.Item2.SquareOffValue,
                                                                                                                                                   stopLossValue:=x.Item2.StoplossValue,
-                                                                                                                                                  tag:=activityTag).ConfigureAwait(False)
+                                                                                                                                                  tag:=freshActivityTag).ConfigureAwait(False)
                                                                                       If placeOrderResponse IsNot Nothing Then
                                                                                           logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
-                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
+                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(freshActivityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
                                                                                           lastException = Nothing
                                                                                           allOKWithoutException = True
                                                                                           _cts.Token.ThrowIfCancellationRequested()
@@ -1425,11 +1434,11 @@ Namespace Strategies
                                                                               Try
                                                                                   _cts.Token.ThrowIfCancellationRequested()
                                                                                   If x.Item1 = ExecuteCommandAction.Take OrElse x.Item1 = ExecuteCommandAction.WaitAndTake Then
-                                                                                      activityTag = GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection)
+                                                                                      Dim freshActivityTag As String = Await GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection).ConfigureAwait(False)
 
-                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then freshActivityTag = Await WaitAndGenerateFreshTag(freshActivityTag).ConfigureAwait(False)
 
-                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
+                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(freshActivityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
 
                                                                                       Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
                                                                                       placeOrderResponse = Await _APIAdapter.PlaceCOMarketMISOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
@@ -1437,10 +1446,10 @@ Namespace Strategies
                                                                                                                                                     transaction:=x.Item2.EntryDirection,
                                                                                                                                                     quantity:=x.Item2.Quantity,
                                                                                                                                                     triggerPrice:=x.Item2.TriggerPrice,
-                                                                                                                                                    tag:=activityTag).ConfigureAwait(False)
+                                                                                                                                                    tag:=freshActivityTag).ConfigureAwait(False)
                                                                                       If placeOrderResponse IsNot Nothing Then
                                                                                           logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
-                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
+                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(freshActivityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
                                                                                           lastException = Nothing
                                                                                           allOKWithoutException = True
                                                                                           _cts.Token.ThrowIfCancellationRequested()
@@ -1477,21 +1486,21 @@ Namespace Strategies
                                                                               Try
                                                                                   _cts.Token.ThrowIfCancellationRequested()
                                                                                   If x.Item1 = ExecuteCommandAction.Take OrElse x.Item1 = ExecuteCommandAction.WaitAndTake Then
-                                                                                      activityTag = GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection)
+                                                                                      Dim freshActivityTag As String = Await GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection).ConfigureAwait(False)
 
-                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then freshActivityTag = Await WaitAndGenerateFreshTag(freshActivityTag).ConfigureAwait(False)
 
-                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
+                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(freshActivityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
 
                                                                                       Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
                                                                                       placeOrderResponse = Await _APIAdapter.PlaceRegularMarketMISOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
                                                                                                                                                             tradingSymbol:=Me.TradableInstrument.TradingSymbol,
                                                                                                                                                             transaction:=x.Item2.EntryDirection,
                                                                                                                                                             quantity:=x.Item2.Quantity,
-                                                                                                                                                            tag:=activityTag).ConfigureAwait(False)
+                                                                                                                                                            tag:=freshActivityTag).ConfigureAwait(False)
                                                                                       If placeOrderResponse IsNot Nothing Then
                                                                                           logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
-                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
+                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(freshActivityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
                                                                                           lastException = Nothing
                                                                                           allOKWithoutException = True
                                                                                           _cts.Token.ThrowIfCancellationRequested()
@@ -1528,11 +1537,11 @@ Namespace Strategies
                                                                               Try
                                                                                   _cts.Token.ThrowIfCancellationRequested()
                                                                                   If x.Item1 = ExecuteCommandAction.Take OrElse x.Item1 = ExecuteCommandAction.WaitAndTake Then
-                                                                                      activityTag = GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection)
+                                                                                      Dim freshActivityTag As String = Await GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection).ConfigureAwait(False)
 
-                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then freshActivityTag = Await WaitAndGenerateFreshTag(freshActivityTag).ConfigureAwait(False)
 
-                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
+                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(freshActivityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
 
                                                                                       Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
                                                                                       placeOrderResponse = Await _APIAdapter.PlaceRegularLimitMISOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
@@ -1540,10 +1549,10 @@ Namespace Strategies
                                                                                                                                                             transaction:=x.Item2.EntryDirection,
                                                                                                                                                             quantity:=x.Item2.Quantity,
                                                                                                                                                             price:=x.Item2.Price,
-                                                                                                                                                            tag:=activityTag).ConfigureAwait(False)
+                                                                                                                                                            tag:=freshActivityTag).ConfigureAwait(False)
                                                                                       If placeOrderResponse IsNot Nothing Then
                                                                                           logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
-                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
+                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(freshActivityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
                                                                                           lastException = Nothing
                                                                                           allOKWithoutException = True
                                                                                           _cts.Token.ThrowIfCancellationRequested()
@@ -1580,11 +1589,11 @@ Namespace Strategies
                                                                               Try
                                                                                   _cts.Token.ThrowIfCancellationRequested()
                                                                                   If x.Item1 = ExecuteCommandAction.Take OrElse x.Item1 = ExecuteCommandAction.WaitAndTake Then
-                                                                                      activityTag = GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection)
+                                                                                      Dim freshActivityTag As String = Await GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection).ConfigureAwait(False)
 
-                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then freshActivityTag = Await WaitAndGenerateFreshTag(freshActivityTag).ConfigureAwait(False)
 
-                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
+                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(freshActivityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
 
                                                                                       Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
                                                                                       placeOrderResponse = Await _APIAdapter.PlaceRegularSLMMISOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
@@ -1592,10 +1601,10 @@ Namespace Strategies
                                                                                                                                                         transaction:=x.Item2.EntryDirection,
                                                                                                                                                         quantity:=x.Item2.Quantity,
                                                                                                                                                         triggerPrice:=x.Item2.TriggerPrice,
-                                                                                                                                                        tag:=activityTag).ConfigureAwait(False)
+                                                                                                                                                        tag:=freshActivityTag).ConfigureAwait(False)
                                                                                       If placeOrderResponse IsNot Nothing Then
                                                                                           logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
-                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
+                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(freshActivityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
                                                                                           lastException = Nothing
                                                                                           allOKWithoutException = True
                                                                                           _cts.Token.ThrowIfCancellationRequested()
@@ -1632,21 +1641,21 @@ Namespace Strategies
                                                                               Try
                                                                                   _cts.Token.ThrowIfCancellationRequested()
                                                                                   If x.Item1 = ExecuteCommandAction.Take OrElse x.Item1 = ExecuteCommandAction.WaitAndTake Then
-                                                                                      activityTag = GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection)
+                                                                                      Dim freshActivityTag As String = Await GenerateFreshTagForNewSignal(activityTag, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection).ConfigureAwait(False)
 
-                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
+                                                                                      If x.Item1 = ExecuteCommandAction.WaitAndTake Then freshActivityTag = Await WaitAndGenerateFreshTag(freshActivityTag).ConfigureAwait(False)
 
-                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
+                                                                                      Await Me.ParentStrategy.SignalManager.HandleEntryActivity(freshActivityTag, Me, Nothing, x.Item2.SignalCandle.SnapshotDateTime, x.Item2.EntryDirection, Now, x.Item3).ConfigureAwait(False)
 
                                                                                       Dim placeOrderResponse As Dictionary(Of String, Object) = Nothing
                                                                                       placeOrderResponse = Await _APIAdapter.PlaceRegularMarketCNCOrderAsync(tradeExchange:=Me.TradableInstrument.RawExchange,
                                                                                                                                                             tradingSymbol:=Me.TradableInstrument.TradingSymbol,
                                                                                                                                                             transaction:=x.Item2.EntryDirection,
                                                                                                                                                             quantity:=x.Item2.Quantity,
-                                                                                                                                                            tag:=activityTag).ConfigureAwait(False)
+                                                                                                                                                            tag:=freshActivityTag).ConfigureAwait(False)
                                                                                       If placeOrderResponse IsNot Nothing Then
                                                                                           logger.Debug("Place order is completed, placeOrderResponse:{0}", Strings.JsonSerialize(placeOrderResponse))
-                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(activityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
+                                                                                          Await Me.ParentStrategy.SignalManager.ActivateEntryActivity(freshActivityTag, Me, placeOrderResponse("data")("order_id"), Now).ConfigureAwait(False)
                                                                                           lastException = Nothing
                                                                                           allOKWithoutException = True
                                                                                           _cts.Token.ThrowIfCancellationRequested()
@@ -1833,7 +1842,7 @@ Namespace Strategies
                                     End While
                                 End If
 
-                                activityTag = GenerateFreshTagForNewSignal(activityTag, runningPlaceOrderTrigger.Item3.SignalCandle.SnapshotDateTime, runningPlaceOrderTrigger.Item3.EntryDirection)
+                                activityTag = Await GenerateFreshTagForNewSignal(activityTag, runningPlaceOrderTrigger.Item3.SignalCandle.SnapshotDateTime, runningPlaceOrderTrigger.Item3.EntryDirection).ConfigureAwait(False)
 
                                 If runningPlaceOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
 
@@ -1918,7 +1927,7 @@ Namespace Strategies
                                     End While
                                 End If
 
-                                activityTag = GenerateFreshTagForNewSignal(activityTag, runningPlaceOrderTrigger.Item3.SignalCandle.SnapshotDateTime, runningPlaceOrderTrigger.Item3.EntryDirection)
+                                activityTag = Await GenerateFreshTagForNewSignal(activityTag, runningPlaceOrderTrigger.Item3.SignalCandle.SnapshotDateTime, runningPlaceOrderTrigger.Item3.EntryDirection).ConfigureAwait(False)
 
                                 If runningPlaceOrderTrigger.Item1 = ExecuteCommandAction.WaitAndTake Then activityTag = Await WaitAndGenerateFreshTag(activityTag).ConfigureAwait(False)
 
