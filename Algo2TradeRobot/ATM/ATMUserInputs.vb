@@ -7,6 +7,7 @@ Imports Utilities.DAL
 Public Class ATMUserInputs
     Inherits StrategyUserInputs
     Public Property ATRPeriod As Integer
+    Public Property AutoSelectStock As Boolean
     Public Property CashInstrument As Boolean
     Public Property FutureInstrument As Boolean
     Public Property CashMaxSL As Decimal
@@ -14,6 +15,13 @@ Public Class ATMUserInputs
     Public Property ManualInstrumentList As String
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
+
+    Public Property MinPrice As Decimal
+    Public Property MaxPrice As Decimal
+    Public Property ATRPercentage As Decimal
+    Public Property MinVolume As Decimal
+    Public Property NumberOfStock As Integer
+
 
     <Serializable>
     Public Class InstrumentDetails

@@ -52,11 +52,17 @@ Public Class frmATMSettings
             dtpckrEODExitTime.Value = _ATMSettings.EODExitTime
             txtTargetMultiplier.Text = _ATMSettings.TargetMultiplier
             txtInstrumentDetalis.Text = _ATMSettings.InstrumentDetailsFilePath
+            chbAutoSelectStock.Checked = _ATMSettings.AutoSelectStock
             chbCash.Checked = _ATMSettings.CashInstrument
             chbFuture.Checked = _ATMSettings.FutureInstrument
             txtCashMaxSL.Text = _ATMSettings.CashMaxSL
             txtFutureMinCapital.Text = _ATMSettings.FutureMinCapital
             txtManualStockList.Text = _ATMSettings.ManualInstrumentList
+            txtMinPrice.Text = _ATMSettings.MinPrice
+            txtMaxPrice.Text = _ATMSettings.MaxPrice
+            txtATRPercentage.Text = _ATMSettings.ATRPercentage
+            txtMinVolume.Text = _ATMSettings.MinVolume
+            txtNumberOfStock.Text = _ATMSettings.NumberOfStock
         End If
     End Sub
 
@@ -68,11 +74,17 @@ Public Class frmATMSettings
         _ATMSettings.EODExitTime = dtpckrEODExitTime.Value
         _ATMSettings.TargetMultiplier = txtTargetMultiplier.Text
         _ATMSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+        _ATMSettings.AutoSelectStock = chbAutoSelectStock.Checked
         _ATMSettings.CashInstrument = chbCash.Checked
         _ATMSettings.FutureInstrument = chbFuture.Checked
         _ATMSettings.CashMaxSL = txtCashMaxSL.Text
         _ATMSettings.FutureMinCapital = txtFutureMinCapital.Text
         _ATMSettings.ManualInstrumentList = txtManualStockList.Text
+        _ATMSettings.MinPrice = txtMinPrice.Text
+        _ATMSettings.MaxPrice = txtMaxPrice.Text
+        _ATMSettings.ATRPercentage = txtATRPercentage.Text
+        _ATMSettings.MinVolume = txtMinVolume.Text
+        _ATMSettings.NumberOfStock = txtNumberOfStock.Text
 
         Utilities.Strings.SerializeFromCollection(Of ATMUserInputs)(_ATMSettingsFilename, _ATMSettings)
     End Sub

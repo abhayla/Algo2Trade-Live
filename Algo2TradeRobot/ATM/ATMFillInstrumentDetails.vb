@@ -1,7 +1,5 @@
 ﻿Imports System.IO
-Imports System.Net
 Imports System.Threading
-Imports Utilities.Strings
 Imports Utilities.DAL
 Imports Algo2TradeCore.Entities
 Imports Utilities.Network
@@ -33,12 +31,14 @@ Public Class ATMFillInstrumentDetails
 
     Private _cts As CancellationTokenSource
     Private ReadOnly _parentStrategy As ATMStrategy
+    Private ReadOnly _userInputs As ATMUserInputs
     Private ReadOnly ZerodhaEODHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/day?api_key=kitefront&access_token=K&from={1}&to={2}"
     Private ReadOnly ZerodhaIntradayHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/minute?api_key=kitefront&access_token=K&from={1}&to={2}"
     Private ReadOnly tradingDay As Date = Date.MinValue
     Public Sub New(ByVal canceller As CancellationTokenSource, ByVal parentStrategy As ATMStrategy)
         _cts = canceller
         _parentStrategy = parentStrategy
+        _userInputs = _parentStrategy.UserSettings
         tradingDay = Now
     End Sub
 
@@ -123,7 +123,7 @@ Public Class ATMFillInstrumentDetails
                             Dim futureEODPayload As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(futureHistoricalCandlesJSONDict, runningInstrument.TradingSymbol).ConfigureAwait(False)
                             If futureEODPayload IsNot Nothing AndAlso futureEODPayload.Count > 0 Then
                                 Dim lastDayPayload As OHLCPayload = futureEODPayload.LastOrDefault.Value
-                                If lastDayPayload.ClosePrice.Value >= 100 AndAlso lastDayPayload.ClosePrice.Value <= 1500 Then
+                                If lastDayPayload.ClosePrice.Value >= _userInputs.MinPrice AndAlso lastDayPayload.ClosePrice.Value <= _userInputs.MaxPrice Then
                                     Dim rawCashInstrument As IInstrument = allInstruments.ToList.Find(Function(x)
                                                                                                           Return x.TradingSymbol = runningInstrument.RawInstrumentName
                                                                                                       End Function)
@@ -145,7 +145,7 @@ Public Class ATMFillInstrumentDetails
                                                 lastTradingDay = eodHistoricalData.LastOrDefault.Key
                                                 'If lastDayClosePrice >= 80 AndAlso lastDayClosePrice <= 1500 Then
                                                 Dim atrPercentage As Decimal = (ATRPayload(eodHistoricalData.LastOrDefault.Key) / lastDayClosePrice) * 100
-                                                If atrPercentage >= 3 Then
+                                                If atrPercentage >= _userInputs.ATRPercentage Then
                                                     _cts.Token.ThrowIfCancellationRequested()
                                                     Dim volumePayload As IEnumerable(Of KeyValuePair(Of Date, OHLCPayload)) = eodHistoricalData.OrderByDescending(Function(x)
                                                                                                                                                                       Return x.Key
@@ -157,9 +157,9 @@ Public Class ATMFillInstrumentDetails
                                                                                                              Return CType(x.Value.Volume.Value, Long)
                                                                                                          End Function)
                                                         _cts.Token.ThrowIfCancellationRequested()
-                                                        If avgVolume >= (300000 / 100) * lastDayClosePrice Then
+                                                        If avgVolume >= (_userInputs.MinVolume / 100) * lastDayClosePrice Then
                                                             If highATRStocks Is Nothing Then highATRStocks = New Dictionary(Of String, Decimal())
-                                                            highATRStocks.Add(instrumentData.Value, {atrPercentage, avgVolume * 100 / ((300000 / 100) * lastDayClosePrice)})
+                                                            highATRStocks.Add(instrumentData.Value, {atrPercentage, avgVolume * 100 / ((_userInputs.MinVolume / 100) * lastDayClosePrice)})
                                                         End If
                                                     End If
                                                 End If
@@ -245,9 +245,9 @@ Public Class ATMFillInstrumentDetails
                                 If todayStockList Is Nothing Then todayStockList = New List(Of String)
                                 todayStockList.Add(stockData.Key)
                                 stockCounter += 1
-                                If stockCounter = 5 Then Exit For
+                                If stockCounter = _userInputs.NumberOfStock Then Exit For
                             Next
-                            If stockCounter < 5 Then
+                            If stockCounter < _userInputs.NumberOfStock Then
                                 Dim stocksLessThanHigherLimitOfMaxBlankCandlePercentage As IEnumerable(Of KeyValuePair(Of String, InstrumentDetails)) =
                                     capableStocks.Where(Function(x)
                                                             Return x.Value.BlankCandlePercentage > 8 AndAlso
@@ -261,7 +261,7 @@ Public Class ATMFillInstrumentDetails
                                         If todayStockList Is Nothing Then todayStockList = New List(Of String)
                                         todayStockList.Add(stockData.Key)
                                         stockCounter += 1
-                                        If stockCounter = 5 Then Exit For
+                                        If stockCounter = _userInputs.NumberOfStock Then Exit For
                                     Next
                                 End If
                             End If

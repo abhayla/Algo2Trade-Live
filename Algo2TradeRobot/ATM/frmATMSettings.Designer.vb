@@ -52,8 +52,21 @@ Partial Class frmATMSettings
         Me.btnATMStrategySettings = New System.Windows.Forms.Button()
         Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
         Me.opnFileSettings = New System.Windows.Forms.OpenFileDialog()
+        Me.GroupBox3 = New System.Windows.Forms.GroupBox()
+        Me.txtMinPrice = New System.Windows.Forms.TextBox()
+        Me.lblMinPrice = New System.Windows.Forms.Label()
+        Me.txtMaxPrice = New System.Windows.Forms.TextBox()
+        Me.lblMaxPrice = New System.Windows.Forms.Label()
+        Me.txtATRPercentage = New System.Windows.Forms.TextBox()
+        Me.lblATR = New System.Windows.Forms.Label()
+        Me.txtMinVolume = New System.Windows.Forms.TextBox()
+        Me.lblMinVolume = New System.Windows.Forms.Label()
+        Me.txtNumberOfStock = New System.Windows.Forms.TextBox()
+        Me.lblNumberOfStock = New System.Windows.Forms.Label()
+        Me.chbAutoSelectStock = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
+        Me.GroupBox3.SuspendLayout()
         Me.SuspendLayout()
         '
         'GroupBox1
@@ -230,6 +243,7 @@ Partial Class frmATMSettings
         '
         'GroupBox2
         '
+        Me.GroupBox2.Controls.Add(Me.chbAutoSelectStock)
         Me.GroupBox2.Controls.Add(Me.txtManualStockList)
         Me.GroupBox2.Controls.Add(Me.lblManualStock)
         Me.GroupBox2.Controls.Add(Me.txtFutureMinCapital)
@@ -246,18 +260,18 @@ Partial Class frmATMSettings
         '
         'txtManualStockList
         '
-        Me.txtManualStockList.Location = New System.Drawing.Point(146, 110)
+        Me.txtManualStockList.Location = New System.Drawing.Point(146, 132)
         Me.txtManualStockList.Margin = New System.Windows.Forms.Padding(4)
         Me.txtManualStockList.Multiline = True
         Me.txtManualStockList.Name = "txtManualStockList"
-        Me.txtManualStockList.Size = New System.Drawing.Size(201, 137)
+        Me.txtManualStockList.Size = New System.Drawing.Size(201, 116)
         Me.txtManualStockList.TabIndex = 38
         Me.txtManualStockList.Tag = "Signal Time Frame"
         '
         'lblManualStock
         '
         Me.lblManualStock.AutoSize = True
-        Me.lblManualStock.Location = New System.Drawing.Point(6, 113)
+        Me.lblManualStock.Location = New System.Drawing.Point(6, 135)
         Me.lblManualStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblManualStock.Name = "lblManualStock"
         Me.lblManualStock.Size = New System.Drawing.Size(119, 17)
@@ -266,7 +280,7 @@ Partial Class frmATMSettings
         '
         'txtFutureMinCapital
         '
-        Me.txtFutureMinCapital.Location = New System.Drawing.Point(146, 80)
+        Me.txtFutureMinCapital.Location = New System.Drawing.Point(146, 102)
         Me.txtFutureMinCapital.Margin = New System.Windows.Forms.Padding(4)
         Me.txtFutureMinCapital.Name = "txtFutureMinCapital"
         Me.txtFutureMinCapital.Size = New System.Drawing.Size(201, 22)
@@ -276,7 +290,7 @@ Partial Class frmATMSettings
         'lblFutureMinCapital
         '
         Me.lblFutureMinCapital.AutoSize = True
-        Me.lblFutureMinCapital.Location = New System.Drawing.Point(6, 83)
+        Me.lblFutureMinCapital.Location = New System.Drawing.Point(6, 105)
         Me.lblFutureMinCapital.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblFutureMinCapital.Name = "lblFutureMinCapital"
         Me.lblFutureMinCapital.Size = New System.Drawing.Size(122, 17)
@@ -285,7 +299,7 @@ Partial Class frmATMSettings
         '
         'txtCashMaxSL
         '
-        Me.txtCashMaxSL.Location = New System.Drawing.Point(146, 51)
+        Me.txtCashMaxSL.Location = New System.Drawing.Point(146, 73)
         Me.txtCashMaxSL.Margin = New System.Windows.Forms.Padding(4)
         Me.txtCashMaxSL.Name = "txtCashMaxSL"
         Me.txtCashMaxSL.Size = New System.Drawing.Size(201, 22)
@@ -295,7 +309,7 @@ Partial Class frmATMSettings
         'lblCashMaxStoplossAmount
         '
         Me.lblCashMaxStoplossAmount.AutoSize = True
-        Me.lblCashMaxStoplossAmount.Location = New System.Drawing.Point(6, 54)
+        Me.lblCashMaxStoplossAmount.Location = New System.Drawing.Point(6, 76)
         Me.lblCashMaxStoplossAmount.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblCashMaxStoplossAmount.Name = "lblCashMaxStoplossAmount"
         Me.lblCashMaxStoplossAmount.Size = New System.Drawing.Size(90, 17)
@@ -305,7 +319,7 @@ Partial Class frmATMSettings
         'chbFuture
         '
         Me.chbFuture.AutoSize = True
-        Me.chbFuture.Location = New System.Drawing.Point(90, 18)
+        Me.chbFuture.Location = New System.Drawing.Point(84, 43)
         Me.chbFuture.Name = "chbFuture"
         Me.chbFuture.Size = New System.Drawing.Size(71, 21)
         Me.chbFuture.TabIndex = 1
@@ -315,7 +329,7 @@ Partial Class frmATMSettings
         'chbCash
         '
         Me.chbCash.AutoSize = True
-        Me.chbCash.Location = New System.Drawing.Point(18, 17)
+        Me.chbCash.Location = New System.Drawing.Point(12, 42)
         Me.chbCash.Name = "chbCash"
         Me.chbCash.Size = New System.Drawing.Size(62, 21)
         Me.chbCash.TabIndex = 0
@@ -342,11 +356,139 @@ Partial Class frmATMSettings
         Me.ImageList1.TransparentColor = System.Drawing.Color.Transparent
         Me.ImageList1.Images.SetKeyName(0, "save-icon-36533.png")
         '
+        'opnFileSettings
+        '
+        '
+        'GroupBox3
+        '
+        Me.GroupBox3.Controls.Add(Me.txtNumberOfStock)
+        Me.GroupBox3.Controls.Add(Me.lblNumberOfStock)
+        Me.GroupBox3.Controls.Add(Me.txtMinVolume)
+        Me.GroupBox3.Controls.Add(Me.lblMinVolume)
+        Me.GroupBox3.Controls.Add(Me.txtATRPercentage)
+        Me.GroupBox3.Controls.Add(Me.lblATR)
+        Me.GroupBox3.Controls.Add(Me.txtMaxPrice)
+        Me.GroupBox3.Controls.Add(Me.lblMaxPrice)
+        Me.GroupBox3.Controls.Add(Me.txtMinPrice)
+        Me.GroupBox3.Controls.Add(Me.lblMinPrice)
+        Me.GroupBox3.Location = New System.Drawing.Point(5, 261)
+        Me.GroupBox3.Name = "GroupBox3"
+        Me.GroupBox3.Size = New System.Drawing.Size(843, 100)
+        Me.GroupBox3.TabIndex = 35
+        Me.GroupBox3.TabStop = False
+        Me.GroupBox3.Text = "Stock Selection Settings"
+        '
+        'txtMinPrice
+        '
+        Me.txtMinPrice.Location = New System.Drawing.Point(86, 25)
+        Me.txtMinPrice.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMinPrice.Name = "txtMinPrice"
+        Me.txtMinPrice.Size = New System.Drawing.Size(114, 22)
+        Me.txtMinPrice.TabIndex = 34
+        Me.txtMinPrice.Tag = "Min Price"
+        '
+        'lblMinPrice
+        '
+        Me.lblMinPrice.AutoSize = True
+        Me.lblMinPrice.Location = New System.Drawing.Point(9, 28)
+        Me.lblMinPrice.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMinPrice.Name = "lblMinPrice"
+        Me.lblMinPrice.Size = New System.Drawing.Size(66, 17)
+        Me.lblMinPrice.TabIndex = 35
+        Me.lblMinPrice.Text = "Min Price"
+        '
+        'txtMaxPrice
+        '
+        Me.txtMaxPrice.Location = New System.Drawing.Point(288, 25)
+        Me.txtMaxPrice.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxPrice.Name = "txtMaxPrice"
+        Me.txtMaxPrice.Size = New System.Drawing.Size(114, 22)
+        Me.txtMaxPrice.TabIndex = 36
+        Me.txtMaxPrice.Tag = "Max Price"
+        '
+        'lblMaxPrice
+        '
+        Me.lblMaxPrice.AutoSize = True
+        Me.lblMaxPrice.Location = New System.Drawing.Point(211, 28)
+        Me.lblMaxPrice.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxPrice.Name = "lblMaxPrice"
+        Me.lblMaxPrice.Size = New System.Drawing.Size(69, 17)
+        Me.lblMaxPrice.TabIndex = 37
+        Me.lblMaxPrice.Text = "Max Price"
+        '
+        'txtATRPercentage
+        '
+        Me.txtATRPercentage.Location = New System.Drawing.Point(480, 26)
+        Me.txtATRPercentage.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtATRPercentage.Name = "txtATRPercentage"
+        Me.txtATRPercentage.Size = New System.Drawing.Size(114, 22)
+        Me.txtATRPercentage.TabIndex = 38
+        Me.txtATRPercentage.Tag = "ATR %"
+        '
+        'lblATR
+        '
+        Me.lblATR.AutoSize = True
+        Me.lblATR.Location = New System.Drawing.Point(417, 29)
+        Me.lblATR.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblATR.Name = "lblATR"
+        Me.lblATR.Size = New System.Drawing.Size(52, 17)
+        Me.lblATR.TabIndex = 39
+        Me.lblATR.Text = "ATR %"
+        '
+        'txtMinVolume
+        '
+        Me.txtMinVolume.Location = New System.Drawing.Point(704, 26)
+        Me.txtMinVolume.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMinVolume.Name = "txtMinVolume"
+        Me.txtMinVolume.Size = New System.Drawing.Size(122, 22)
+        Me.txtMinVolume.TabIndex = 40
+        Me.txtMinVolume.Tag = "Min Volume"
+        '
+        'lblMinVolume
+        '
+        Me.lblMinVolume.AutoSize = True
+        Me.lblMinVolume.Location = New System.Drawing.Point(615, 29)
+        Me.lblMinVolume.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMinVolume.Name = "lblMinVolume"
+        Me.lblMinVolume.Size = New System.Drawing.Size(81, 17)
+        Me.lblMinVolume.TabIndex = 41
+        Me.lblMinVolume.Text = "Min Volume"
+        '
+        'txtNumberOfStock
+        '
+        Me.txtNumberOfStock.Location = New System.Drawing.Point(133, 63)
+        Me.txtNumberOfStock.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtNumberOfStock.Name = "txtNumberOfStock"
+        Me.txtNumberOfStock.Size = New System.Drawing.Size(122, 22)
+        Me.txtNumberOfStock.TabIndex = 42
+        Me.txtNumberOfStock.Tag = "Number Of Stock"
+        '
+        'lblNumberOfStock
+        '
+        Me.lblNumberOfStock.AutoSize = True
+        Me.lblNumberOfStock.Location = New System.Drawing.Point(9, 66)
+        Me.lblNumberOfStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblNumberOfStock.Name = "lblNumberOfStock"
+        Me.lblNumberOfStock.Size = New System.Drawing.Size(116, 17)
+        Me.lblNumberOfStock.TabIndex = 43
+        Me.lblNumberOfStock.Text = "Number Of Stock"
+        '
+        'chbAutoSelectStock
+        '
+        Me.chbAutoSelectStock.AutoSize = True
+        Me.chbAutoSelectStock.Location = New System.Drawing.Point(12, 14)
+        Me.chbAutoSelectStock.Name = "chbAutoSelectStock"
+        Me.chbAutoSelectStock.Size = New System.Drawing.Size(141, 21)
+        Me.chbAutoSelectStock.TabIndex = 40
+        Me.chbAutoSelectStock.Text = "Auto Select Stock"
+        Me.chbAutoSelectStock.UseVisualStyleBackColor = True
+        '
         'frmATMSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(974, 258)
+        Me.ClientSize = New System.Drawing.Size(974, 365)
+        Me.Controls.Add(Me.GroupBox3)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.btnATMStrategySettings)
@@ -360,6 +502,8 @@ Partial Class frmATMSettings
         Me.GroupBox1.PerformLayout()
         Me.GroupBox2.ResumeLayout(False)
         Me.GroupBox2.PerformLayout()
+        Me.GroupBox3.ResumeLayout(False)
+        Me.GroupBox3.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -392,4 +536,16 @@ Partial Class frmATMSettings
     Friend WithEvents lblFutureMinCapital As Label
     Friend WithEvents txtCashMaxSL As TextBox
     Friend WithEvents lblCashMaxStoplossAmount As Label
+    Friend WithEvents GroupBox3 As GroupBox
+    Friend WithEvents txtMaxPrice As TextBox
+    Friend WithEvents lblMaxPrice As Label
+    Friend WithEvents txtMinPrice As TextBox
+    Friend WithEvents lblMinPrice As Label
+    Friend WithEvents txtATRPercentage As TextBox
+    Friend WithEvents lblATR As Label
+    Friend WithEvents txtMinVolume As TextBox
+    Friend WithEvents lblMinVolume As Label
+    Friend WithEvents txtNumberOfStock As TextBox
+    Friend WithEvents lblNumberOfStock As Label
+    Friend WithEvents chbAutoSelectStock As CheckBox
 End Class
