@@ -2017,41 +2017,47 @@ Namespace Strategies
 
         Private _cancelOrderLock As Integer = 0
         Public PairStrategyCancellationRequest As Boolean = False
-        Protected Async Function CancelPaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
-            Dim ret As IBusinessOrder = Nothing
+        Protected Async Function CancelPaperTradeAsync(ByVal data As Object) As Task(Of List(Of IBusinessOrder))
+            Dim ret As List(Of IBusinessOrder) = Nothing
             If 0 = Interlocked.Exchange(_cancelOrderLock, 1) Then
                 Try
                     PairStrategyCancellationRequest = True
-                    Dim exitOrdersTrigger As Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String) = data
-                    If exitOrdersTrigger IsNot Nothing AndAlso exitOrdersTrigger.Item1 = ExecuteCommandAction.Take Then
-                        Dim potentialExitOrders As List(Of IOrder) = Nothing
-                        If exitOrdersTrigger.Item1 = ExecuteCommandAction.Take Then
+                    Dim exitOrdersTriggers As List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)) = data
+                    If exitOrdersTriggers IsNot Nothing AndAlso exitOrdersTriggers.Count > 0 Then
+                        For Each runningExitOrdersTrigger In exitOrdersTriggers
+                            If runningExitOrdersTrigger.Item1 = ExecuteCommandAction.Take Then
+                                Dim potentialExitOrders As List(Of IOrder) = Nothing
+                                If runningExitOrdersTrigger.Item1 = ExecuteCommandAction.Take Then
 
-                            Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
-                            While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
-                                Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
-                            End While
+                                    Dim lastTradeTime As Date = Me.TradableInstrument.LastTick.LastTradeTime.Value
+                                    While Utilities.Time.IsTimeEqualTillSeconds(Me.TradableInstrument.LastTick.LastTradeTime.Value, lastTradeTime)
+                                        Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                                    End While
 
-                            Dim parentBusinessOrder As IBusinessOrder = GetParentFromChildOrder(exitOrdersTrigger.Item3)
-                            Await Me.ParentStrategy.SignalManager.HandleCancelActivity(exitOrdersTrigger.Item3.Tag, Me, Nothing, Now, exitOrdersTrigger.Item4).ConfigureAwait(False)
-                            CType(exitOrdersTrigger.Item3, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
-                            CType(exitOrdersTrigger.Item3, PaperOrder).AveragePrice = Me.TradableInstrument.LastTick.LastPrice
-                            Await Me.ParentStrategy.SignalManager.ActivateCancelActivity(exitOrdersTrigger.Item3.Tag, Me, Nothing, Now).ConfigureAwait(False)
-                            Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
-                            logger.Debug("Order Exited {0}", Me.TradableInstrument.TradingSymbol)
+                                    Dim parentBusinessOrder As IBusinessOrder = GetParentFromChildOrder(runningExitOrdersTrigger.Item3)
+                                    Await Me.ParentStrategy.SignalManager.HandleCancelActivity(runningExitOrdersTrigger.Item3.Tag, Me, Nothing, Now, runningExitOrdersTrigger.Item4).ConfigureAwait(False)
+                                    CType(runningExitOrdersTrigger.Item3, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                    CType(runningExitOrdersTrigger.Item3, PaperOrder).AveragePrice = Me.TradableInstrument.LastTick.LastPrice
+                                    Await Me.ParentStrategy.SignalManager.ActivateCancelActivity(runningExitOrdersTrigger.Item3.Tag, Me, Nothing, Now).ConfigureAwait(False)
+                                    Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
+                                    logger.Debug("Order Exited {0}", Me.TradableInstrument.TradingSymbol)
 
-                            If parentBusinessOrder.SLOrder.Count = 1 Then
-                                parentBusinessOrder.SLOrder = Nothing
-                            Else
-                                Throw New ApplicationException("Check why there is more than one sl order")
+                                    If parentBusinessOrder.SLOrder.Count = 1 Then
+                                        parentBusinessOrder.SLOrder = Nothing
+                                    Else
+                                        Throw New ApplicationException("Check why there is more than one sl order")
+                                    End If
+
+                                    If potentialExitOrders Is Nothing Then potentialExitOrders = New List(Of IOrder)
+                                    potentialExitOrders.Add(runningExitOrdersTrigger.Item3)
+                                    parentBusinessOrder.AllOrder = potentialExitOrders
+
+                                    If ret Is Nothing Then ret = New List(Of IBusinessOrder)
+                                    ret.Add(parentBusinessOrder)
+                                    OnHeartbeat(String.Format("Cancel Order Successful. Order ID:{0}", parentBusinessOrder.ParentOrderIdentifier))
+                                End If
                             End If
-
-                            If potentialExitOrders Is Nothing Then potentialExitOrders = New List(Of IOrder)
-                            potentialExitOrders.Add(exitOrdersTrigger.Item3)
-                            parentBusinessOrder.AllOrder = potentialExitOrders
-                            ret = parentBusinessOrder
-                            OnHeartbeat(String.Format("Cancel Order Successful. Order ID:{0}", parentBusinessOrder.ParentOrderIdentifier))
-                        End If
+                        Next
                     End If
                 Finally
                     Interlocked.Exchange(_cancelOrderLock, 0)
@@ -2062,8 +2068,8 @@ Namespace Strategies
         End Function
 
         Private _forceCancelOrderLock As Integer = 0
-        Protected Async Function ForceCancelPaperTradeAsync(ByVal data As Object, Optional ByVal exitImmediately As Boolean = False, Optional ByVal currentTick As ITick = Nothing) As Task(Of IBusinessOrder)
-            Dim ret As IBusinessOrder = Nothing
+        Protected Async Function ForceCancelPaperTradeAsync(ByVal data As Object, Optional ByVal exitImmediately As Boolean = False, Optional ByVal currentTick As ITick = Nothing) As Task(Of List(Of IBusinessOrder))
+            Dim ret As List(Of IBusinessOrder) = Nothing
             If 0 = Interlocked.Exchange(_forceCancelOrderLock, 1) Then
                 Try
                     Dim exitOrdersTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = data
@@ -2143,7 +2149,8 @@ Namespace Strategies
                                 potentialExitOrders.Add(runningExitOrder.Item2)
                                 If targetOrder IsNot Nothing Then potentialExitOrders.Add(targetOrder)
                                 parentBusinessOrder.AllOrder = potentialExitOrders
-                                ret = parentBusinessOrder
+                                If ret Is Nothing Then ret = New List(Of IBusinessOrder)
+                                ret.Add(parentBusinessOrder)
                                 'OnHeartbeat(String.Format("Force Cancel Order Successful. Order ID:{0}", parentBusinessOrder.ParentOrderIdentifier))
                             End If
                         Next
@@ -2156,8 +2163,8 @@ Namespace Strategies
         End Function
 
         Private _modifySLOrderLock As Integer = 0
-        Protected Async Function ModifySLPaperTradeAsync(ByVal data As Object) As Task(Of IBusinessOrder)
-            Dim ret As IBusinessOrder = Nothing
+        Protected Async Function ModifySLPaperTradeAsync(ByVal data As Object) As Task(Of List(Of IBusinessOrder))
+            Dim ret As List(Of IBusinessOrder) = Nothing
             If 0 = Interlocked.Exchange(_modifySLOrderLock, 1) Then
                 Try
                     Dim modifyOrdersTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = data
@@ -2178,8 +2185,8 @@ Namespace Strategies
                                 Await Me.ParentStrategy.SignalManager.ActivateStoplossModifyActivity(runningOrder.Item2.Tag, Me, Nothing, Now).ConfigureAwait(False)
                                 Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
                                 logger.Debug("Order Modified {0}", Me.TradableInstrument.TradingSymbol)
-
-                                ret = parentBusinessOrder
+                                If ret Is Nothing Then ret = New List(Of IBusinessOrder)
+                                ret.Add(parentBusinessOrder)
                                 OnHeartbeat(String.Format("Modify Order Successful. Order ID:{0}", parentBusinessOrder.ParentOrderIdentifier))
                             End If
                         Next

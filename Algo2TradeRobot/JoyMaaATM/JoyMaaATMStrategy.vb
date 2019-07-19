@@ -37,28 +37,24 @@ Public Class JoyMaaATMStrategy
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
-            Dim userInputs As JoyMaaATMUserInputs = Me.UserSettings
+            Dim userInputs As JoyMaaATMUserInputs = CType(Me.UserSettings, JoyMaaATMUserInputs)
+            If userInputs.AutoSelectStock Then
+                Using fillInstrumentDetails As New JoyMaaATMFillInstrumentDetails(_cts, Me)
+                    Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+                End Using
+                logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
+            End If
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = Nothing
-                    Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
-                                                                                                         Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
-                                                                                                            x.RawInstrumentType = "FUT" AndAlso (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX")
-                                                                                                     End Function)
-                    Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date = Now.Date Then
-                                                                               Return x.Expiry.Value
-                                                                           Else
-                                                                               Return Date.MaxValue
-                                                                           End If
-                                                                       End Function)
-                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
-                                                                                Return x.Expiry = minExpiry
-                                                                            End Function)
+                    runningTradableInstrument = dummyAllInstruments.Find(Function(x)
+                                                                             Return x.TradingSymbol = instrument.Value.TradingSymbol
+                                                                         End Function)
 
                     _cts.Token.ThrowIfCancellationRequested()
+
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
                     If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
                     ret = True

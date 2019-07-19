@@ -6,21 +6,30 @@ Imports Utilities.DAL
 <Serializable>
 Public Class JoyMaaATMUserInputs
     Inherits StrategyUserInputs
-
     Public Property ATRPeriod As Integer
-    Public Property NumberOfTradePerDay As Integer
-    Public Property ReverseTrade As Boolean
-    Public Property TelegramAPIKey As String
-    Public Property TelegramChatID As String
-    Public Property TelegramPLChatID As String
+    Public Property AutoSelectStock As Boolean
+    Public Property CashInstrument As Boolean
+    Public Property FutureInstrument As Boolean
+    Public Property CashMaxSL As Decimal
+    Public Property FutureMinCapital As Decimal
+    Public Property ManualInstrumentList As String
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 
+    Public Property MinPrice As Decimal
+    Public Property MaxPrice As Decimal
+    Public Property ATRPercentage As Decimal
+    Public Property MinVolume As Decimal
+    Public Property NumberOfStock As Integer
+
+    Public Property TelegramAPIKey As String
+    Public Property TelegramChatID As String
+    Public Property TelegramPLChatID As String
+
     <Serializable>
     Public Class InstrumentDetails
-        Public Property InstrumentName As String
-        Public Property NumberOfLots As Integer
-        Public Property TargetINR As Decimal
+        Public Property TradingSymbol As String
+        Public Property MarginMultiplier As Decimal
     End Class
 
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
@@ -33,8 +42,9 @@ Public Class JoyMaaATMUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "NUMBER OF LOTS", "TARGET INR"}
-                        For colCtr = 0 To 2
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "MARGIN MULTIPLIER"}
+
+                        For colCtr = 0 To 1
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -45,9 +55,7 @@ Public Class JoyMaaATMUserInputs
                         Next
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim instrumentName As String = Nothing
-                            Dim numberOfLots As Integer = Integer.MinValue
-                            Dim targetINR As Decimal = Decimal.MinValue
-
+                            Dim margin As Decimal = Decimal.MinValue
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
@@ -61,41 +69,27 @@ Public Class JoyMaaATMUserInputs
                                 ElseIf columnCtr = 1 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) AndAlso
-                                            Math.Round(Val(instrumentDetails(rowCtr, columnCtr)), 0) = Val(instrumentDetails(rowCtr, columnCtr)) Then
-                                            numberOfLots = instrumentDetails(rowCtr, columnCtr)
-                                            If numberOfLots = 0 Then Throw New ApplicationException(String.Format("Number Of Lots can not be 0(zero) for {0}", instrumentName))
-                                        Else
-                                            Throw New ApplicationException(String.Format("Number Of Lots cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Number Of Lots cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                    End If
-                                ElseIf columnCtr = 2 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            targetINR = instrumentDetails(rowCtr, columnCtr)
+                                            margin = instrumentDetails(rowCtr, columnCtr)
                                         Else
-                                            Throw New ApplicationException(String.Format("Target INR cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                            Throw New ApplicationException(String.Format("Margin Multiplier cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                         End If
                                     Else
-                                        Throw New ApplicationException(String.Format("Target INR cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                        Throw New ApplicationException(String.Format("Margin Multiplier cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
                                 End If
                             Next
-                            If instrumentName IsNot Nothing AndAlso targetINR > 0 Then
+                            If instrumentName IsNot Nothing Then
                                 Dim instrumentData As New InstrumentDetails
                                 With instrumentData
-                                    .InstrumentName = instrumentName.ToUpper
-                                    .NumberOfLots = numberOfLots
-                                    .TargetINR = targetINR
+                                    .TradingSymbol = instrumentName.ToUpper
+                                    .MarginMultiplier = margin
                                 End With
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
-                                If Me.InstrumentsData.ContainsKey(instrumentData.InstrumentName) Then
-                                    Throw New ApplicationException(String.Format("Duplicate Instrument Name {0}", instrumentData.InstrumentName))
+                                If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then
+                                    Throw New ApplicationException(String.Format("Duplicate Instrument Name {0}", instrumentData.TradingSymbol))
                                 End If
-                                Me.InstrumentsData.Add(instrumentData.InstrumentName, instrumentData)
+                                Me.InstrumentsData.Add(instrumentData.TradingSymbol, instrumentData)
                             End If
                         Next
                     Else

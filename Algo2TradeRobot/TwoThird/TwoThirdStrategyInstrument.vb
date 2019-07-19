@@ -153,7 +153,11 @@ Public Class TwoThirdStrategyInstrument
                 'Modify Order block start
                 Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
                 If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
-                    Dim modifyOrderResponse As IBusinessOrder = Await ModifySLPaperTradeAsync(modifyStoplossOrderTrigger).ConfigureAwait(False)
+                    Dim modifyOrderResponses As List(Of IBusinessOrder) = Await ModifySLPaperTradeAsync(modifyStoplossOrderTrigger).ConfigureAwait(False)
+                    Dim modifyOrderResponse As IBusinessOrder = Nothing
+                    If modifyOrderResponses IsNot Nothing AndAlso modifyOrderResponses.Count > 0 Then
+                        modifyOrderResponse = modifyOrderResponses.FirstOrDefault
+                    End If
                     If modifyOrderResponse IsNot Nothing Then
                         Dim potentialTargetPL As Decimal = 0
                         Dim potentialStoplossPL As Decimal = 0
@@ -601,19 +605,23 @@ Public Class TwoThirdStrategyInstrument
             }
 
             Dim potentialExitPrice As Decimal = 0
-            Dim exitOrderResponse As IBusinessOrder = Nothing
+            Dim exitOrderResponses As List(Of IBusinessOrder) = Nothing
             If reason.ToUpper = "TARGET REACHED" Then
                 potentialExitPrice = GetParentFromChildOrder(cancellableOrder.LastOrDefault.Item2).TargetOrder.LastOrDefault.AveragePrice
-                exitOrderResponse = Await ForceCancelPaperTradeAsync(cancellableOrder, True, _lastTick).ConfigureAwait(False)
+                exitOrderResponses = Await ForceCancelPaperTradeAsync(cancellableOrder, True, _lastTick).ConfigureAwait(False)
             ElseIf reason.ToUpper = "STOPLOSS REACHED" OrElse
                 reason.ToUpper = "FORCE EXIT ORDER FOR REVERSE ENTRY" Then
                 potentialExitPrice = GetParentFromChildOrder(cancellableOrder.LastOrDefault.Item2).SLOrder.LastOrDefault.TriggerPrice
-                exitOrderResponse = Await ForceCancelPaperTradeAsync(cancellableOrder, True, _lastTick).ConfigureAwait(False)
+                exitOrderResponses = Await ForceCancelPaperTradeAsync(cancellableOrder, True, _lastTick).ConfigureAwait(False)
             Else
                 potentialExitPrice = GetParentFromChildOrder(cancellableOrder.LastOrDefault.Item2).SLOrder.LastOrDefault.TriggerPrice
-                exitOrderResponse = Await ForceCancelPaperTradeAsync(cancellableOrder).ConfigureAwait(False)
+                exitOrderResponses = Await ForceCancelPaperTradeAsync(cancellableOrder).ConfigureAwait(False)
             End If
 
+            Dim exitOrderResponse As IBusinessOrder = Nothing
+            If exitOrderResponses IsNot Nothing AndAlso exitOrderResponses.Count > 0 Then
+                exitOrderResponse = exitOrderResponses.FirstOrDefault
+            End If
             If exitOrderResponse IsNot Nothing AndAlso exitOrderResponse.AllOrder IsNot Nothing AndAlso exitOrderResponse.AllOrder.Count > 0 Then
                 Dim exitPrice As Decimal = Decimal.MinValue
                 For Each runningOrder In exitOrderResponse.AllOrder

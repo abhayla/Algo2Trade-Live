@@ -15,7 +15,7 @@ Public Class frmJoyMaaATMSettings
         LoadSettings()
     End Sub
 
-    Private Sub btnJoyMaaATMSettings_Click(sender As Object, e As EventArgs) Handles btnJoyMaaATMSettings.Click
+    Private Sub btnJoyMaaATMSettings_Click(sender As Object, e As EventArgs) Handles btnJoyMaaATMStrategySettings.Click
         Try
             _cts = New CancellationTokenSource
             If _JoyMaaATMSettings Is Nothing Then _JoyMaaATMSettings = New JoyMaaATMUserInputs
@@ -50,13 +50,22 @@ Public Class frmJoyMaaATMSettings
             dtpckrTradeStartTime.Value = _JoyMaaATMSettings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _JoyMaaATMSettings.LastTradeEntryTime
             dtpckrEODExitTime.Value = _JoyMaaATMSettings.EODExitTime
-            txtNumberOfTrade.Text = _JoyMaaATMSettings.NumberOfTradePerDay
             txtTargetMultiplier.Text = _JoyMaaATMSettings.TargetMultiplier
-            chkboxReverseTrade.Checked = _JoyMaaATMSettings.ReverseTrade
+            txtInstrumentDetalis.Text = _JoyMaaATMSettings.InstrumentDetailsFilePath
+            chbAutoSelectStock.Checked = _JoyMaaATMSettings.AutoSelectStock
+            chbCash.Checked = _JoyMaaATMSettings.CashInstrument
+            chbFuture.Checked = _JoyMaaATMSettings.FutureInstrument
+            txtCashMaxSL.Text = _JoyMaaATMSettings.CashMaxSL
+            txtFutureMinCapital.Text = _JoyMaaATMSettings.FutureMinCapital
+            txtManualStockList.Text = _JoyMaaATMSettings.ManualInstrumentList
+            txtMinPrice.Text = _JoyMaaATMSettings.MinPrice
+            txtMaxPrice.Text = _JoyMaaATMSettings.MaxPrice
+            txtATRPercentage.Text = _JoyMaaATMSettings.ATRPercentage
+            txtMinVolume.Text = _JoyMaaATMSettings.MinVolume
+            txtNumberOfStock.Text = _JoyMaaATMSettings.NumberOfStock
             txtTelegramAPI.Text = _JoyMaaATMSettings.TelegramAPIKey
             txtTelegramChatID.Text = _JoyMaaATMSettings.TelegramChatID
             txtTelegramChatIDForPL.Text = _JoyMaaATMSettings.TelegramPLChatID
-            txtInstrumentDetalis.Text = _JoyMaaATMSettings.InstrumentDetailsFilePath
         End If
     End Sub
 
@@ -66,13 +75,22 @@ Public Class frmJoyMaaATMSettings
         _JoyMaaATMSettings.TradeStartTime = dtpckrTradeStartTime.Value
         _JoyMaaATMSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
         _JoyMaaATMSettings.EODExitTime = dtpckrEODExitTime.Value
-        _JoyMaaATMSettings.NumberOfTradePerDay = txtNumberOfTrade.Text
         _JoyMaaATMSettings.TargetMultiplier = txtTargetMultiplier.Text
-        _JoyMaaATMSettings.ReverseTrade = chkboxReverseTrade.Checked
+        _JoyMaaATMSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+        _JoyMaaATMSettings.AutoSelectStock = chbAutoSelectStock.Checked
+        _JoyMaaATMSettings.CashInstrument = chbCash.Checked
+        _JoyMaaATMSettings.FutureInstrument = chbFuture.Checked
+        _JoyMaaATMSettings.CashMaxSL = txtCashMaxSL.Text
+        _JoyMaaATMSettings.FutureMinCapital = txtFutureMinCapital.Text
+        _JoyMaaATMSettings.ManualInstrumentList = txtManualStockList.Text
+        _JoyMaaATMSettings.MinPrice = txtMinPrice.Text
+        _JoyMaaATMSettings.MaxPrice = txtMaxPrice.Text
+        _JoyMaaATMSettings.ATRPercentage = txtATRPercentage.Text
+        _JoyMaaATMSettings.MinVolume = txtMinVolume.Text
+        _JoyMaaATMSettings.NumberOfStock = txtNumberOfStock.Text
         _JoyMaaATMSettings.TelegramAPIKey = txtTelegramAPI.Text
         _JoyMaaATMSettings.TelegramChatID = txtTelegramChatID.Text
         _JoyMaaATMSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
-        _JoyMaaATMSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         Utilities.Strings.SerializeFromCollection(Of JoyMaaATMUserInputs)(_JoyMaaATMSettingsFilename, _JoyMaaATMSettings)
     End Sub
@@ -94,8 +112,9 @@ Public Class frmJoyMaaATMSettings
 
     Private Sub ValidateInputs()
         ValidateNumbers(1, 60, txtSignalTimeFrame)
-        ValidateNumbers(Decimal.MinValue, Decimal.MaxValue, txtNumberOfTrade)
-        ValidateNumbers(0, Decimal.MaxValue, txtTargetMultiplier)
+        ValidateNumbers(1, 100, txtATRPeriod)
+        ValidateNumbers(0, Decimal.MaxValue, txtCashMaxSL)
+        ValidateNumbers(0, Decimal.MaxValue, txtFutureMinCapital)
         ValidateFile()
     End Sub
 End Class
