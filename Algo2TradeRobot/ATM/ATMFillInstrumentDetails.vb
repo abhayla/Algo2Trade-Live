@@ -4,9 +4,15 @@ Imports Utilities.DAL
 Imports Algo2TradeCore.Entities
 Imports Utilities.Network
 Imports System.Net.Http
+Imports NLog
 
 Public Class ATMFillInstrumentDetails
     Implements IDisposable
+
+
+#Region "Logging and Status Progress"
+    Public Shared Shadows logger As Logger = LogManager.GetCurrentClassLogger
+#End Region
 
 
 #Region "Events/Event handlers"
@@ -39,7 +45,7 @@ Public Class ATMFillInstrumentDetails
         _cts = canceller
         _parentStrategy = parentStrategy
         _userInputs = _parentStrategy.UserSettings
-        tradingDay = Now
+        tradingDay = Now.Date
     End Sub
 
     Private Async Function GetHistoricalCandleStickAsync(ByVal instrumentToken As String, ByVal fromDate As Date, ByVal toDate As Date, ByVal historicalDataType As TypeOfData) As Task(Of Dictionary(Of String, Object))
@@ -112,66 +118,95 @@ Public Class ATMFillInstrumentDetails
                     If currentNFOInstruments Is Nothing Then currentNFOInstruments = New List(Of IInstrument)
                     currentNFOInstruments.Add(currentIntrument)
                 Next
-                Dim highATRStocks As Dictionary(Of String, Decimal()) = Nothing
                 Dim lastTradingDay As Date = Date.MinValue
-                For Each runningInstrument In currentNFOInstruments
-                    _cts.Token.ThrowIfCancellationRequested()
-                    If runningInstrument.RawExchange.ToUpper = "NFO" AndAlso (bannedStock Is Nothing OrElse
-                        bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(runningInstrument.RawInstrumentName)) Then
-                        Dim futureHistoricalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(runningInstrument.InstrumentIdentifier, tradingDay.AddDays(-10), tradingDay.AddDays(-1), TypeOfData.EOD).ConfigureAwait(False)
-                        If futureHistoricalCandlesJSONDict IsNot Nothing AndAlso futureHistoricalCandlesJSONDict.Count > 0 Then
-                            Dim futureEODPayload As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(futureHistoricalCandlesJSONDict, runningInstrument.TradingSymbol).ConfigureAwait(False)
-                            If futureEODPayload IsNot Nothing AndAlso futureEODPayload.Count > 0 Then
-                                Dim lastDayPayload As OHLCPayload = futureEODPayload.LastOrDefault.Value
-                                If lastDayPayload.ClosePrice.Value >= _userInputs.MinPrice AndAlso lastDayPayload.ClosePrice.Value <= _userInputs.MaxPrice Then
-                                    Dim rawCashInstrument As IInstrument = allInstruments.ToList.Find(Function(x)
-                                                                                                          Return x.TradingSymbol = runningInstrument.RawInstrumentName
-                                                                                                      End Function)
-                                    If rawCashInstrument IsNot Nothing Then
-                                        Dim instrumentData As KeyValuePair(Of Integer, String) = New KeyValuePair(Of Integer, String)(rawCashInstrument.InstrumentIdentifier, rawCashInstrument.TradingSymbol)
-                                        _cts.Token.ThrowIfCancellationRequested()
-                                        Dim historicalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(instrumentData.Key, tradingDay.AddDays(-300), tradingDay.AddDays(-1), TypeOfData.EOD).ConfigureAwait(False)
-                                        _cts.Token.ThrowIfCancellationRequested()
-                                        If historicalCandlesJSONDict IsNot Nothing AndAlso historicalCandlesJSONDict.Count > 0 Then
-                                            _cts.Token.ThrowIfCancellationRequested()
-                                            Dim eodHistoricalData As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(historicalCandlesJSONDict, instrumentData.Value).ConfigureAwait(False)
-                                            _cts.Token.ThrowIfCancellationRequested()
-                                            If eodHistoricalData IsNot Nothing AndAlso eodHistoricalData.Count > 0 Then
-                                                _cts.Token.ThrowIfCancellationRequested()
-                                                Dim ATRPayload As Dictionary(Of Date, Decimal) = Nothing
-                                                CalculateATR(14, eodHistoricalData, ATRPayload)
-                                                _cts.Token.ThrowIfCancellationRequested()
-                                                Dim lastDayClosePrice As Decimal = eodHistoricalData.LastOrDefault.Value.ClosePrice.Value
-                                                lastTradingDay = eodHistoricalData.LastOrDefault.Key
-                                                'If lastDayClosePrice >= 80 AndAlso lastDayClosePrice <= 1500 Then
-                                                Dim atrPercentage As Decimal = (ATRPayload(eodHistoricalData.LastOrDefault.Key) / lastDayClosePrice) * 100
-                                                If atrPercentage >= _userInputs.ATRPercentage Then
-                                                    _cts.Token.ThrowIfCancellationRequested()
-                                                    Dim volumePayload As IEnumerable(Of KeyValuePair(Of Date, OHLCPayload)) = eodHistoricalData.OrderByDescending(Function(x)
-                                                                                                                                                                      Return x.Key
-                                                                                                                                                                  End Function).Take(5)
-                                                    _cts.Token.ThrowIfCancellationRequested()
-                                                    If volumePayload IsNot Nothing AndAlso volumePayload.Count > 0 Then
-                                                        _cts.Token.ThrowIfCancellationRequested()
-                                                        Dim avgVolume As Decimal = volumePayload.Average(Function(x)
-                                                                                                             Return CType(x.Value.Volume.Value, Long)
-                                                                                                         End Function)
-                                                        _cts.Token.ThrowIfCancellationRequested()
-                                                        If avgVolume >= (_userInputs.MinVolume / 100) * lastDayClosePrice Then
-                                                            If highATRStocks Is Nothing Then highATRStocks = New Dictionary(Of String, Decimal())
-                                                            highATRStocks.Add(instrumentData.Value, {atrPercentage, avgVolume * 100 / ((_userInputs.MinVolume / 100) * lastDayClosePrice)})
-                                                        End If
-                                                    End If
-                                                End If
-                                                'End If
-                                            End If
-                                        End If
-                                    End If
-                                End If
+                Dim highATRStocks As Concurrent.ConcurrentDictionary(Of String, Decimal()) = Nothing
+                Try
+                    If currentNFOInstruments IsNot Nothing AndAlso currentNFOInstruments.Count > 0 Then
+                        For i As Integer = 0 To currentNFOInstruments.Count - 1 Step 20
+                            Dim numberOfData As Integer = If(currentNFOInstruments.Count - i > 20, 20, currentNFOInstruments.Count - i)
+                            Dim tasks As IEnumerable(Of Task(Of Boolean)) = Nothing
+                            tasks = currentNFOInstruments.GetRange(i, numberOfData).Select(Async Function(y)
+                                                                                               Try
+                                                                                                   _cts.Token.ThrowIfCancellationRequested()
+                                                                                                   If y.RawExchange.ToUpper = "NFO" AndAlso (bannedStock Is Nothing OrElse
+                                                                                                                   bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(y.RawInstrumentName)) Then
+                                                                                                       Dim futureHistoricalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(y.InstrumentIdentifier, tradingDay.AddDays(-10), tradingDay.AddDays(-1), TypeOfData.EOD).ConfigureAwait(False)
+                                                                                                       If futureHistoricalCandlesJSONDict IsNot Nothing AndAlso futureHistoricalCandlesJSONDict.Count > 0 Then
+                                                                                                           Dim futureEODPayload As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(futureHistoricalCandlesJSONDict, y.TradingSymbol).ConfigureAwait(False)
+                                                                                                           If futureEODPayload IsNot Nothing AndAlso futureEODPayload.Count > 0 Then
+                                                                                                               Dim lastDayPayload As OHLCPayload = futureEODPayload.LastOrDefault.Value
+                                                                                                               If lastDayPayload.ClosePrice.Value >= _userInputs.MinPrice AndAlso lastDayPayload.ClosePrice.Value <= _userInputs.MaxPrice Then
+                                                                                                                   Dim rawCashInstrument As IInstrument = allInstruments.ToList.Find(Function(x)
+                                                                                                                                                                                         Return x.TradingSymbol = y.RawInstrumentName
+                                                                                                                                                                                     End Function)
+                                                                                                                   If rawCashInstrument IsNot Nothing Then
+                                                                                                                       Dim instrumentData As KeyValuePair(Of Integer, String) = New KeyValuePair(Of Integer, String)(rawCashInstrument.InstrumentIdentifier, rawCashInstrument.TradingSymbol)
+                                                                                                                       _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                       Dim historicalCandlesJSONDict As Dictionary(Of String, Object) = Await GetHistoricalCandleStickAsync(instrumentData.Key, tradingDay.AddDays(-300), tradingDay.AddDays(-1), TypeOfData.EOD).ConfigureAwait(False)
+                                                                                                                       _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                       If historicalCandlesJSONDict IsNot Nothing AndAlso historicalCandlesJSONDict.Count > 0 Then
+                                                                                                                           _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                           Dim eodHistoricalData As Dictionary(Of Date, OHLCPayload) = Await GetChartFromHistoricalAsync(historicalCandlesJSONDict, instrumentData.Value).ConfigureAwait(False)
+                                                                                                                           _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                           If eodHistoricalData IsNot Nothing AndAlso eodHistoricalData.Count > 0 Then
+                                                                                                                               _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                               Dim ATRPayload As Dictionary(Of Date, Decimal) = Nothing
+                                                                                                                               CalculateATR(14, eodHistoricalData, ATRPayload)
+                                                                                                                               _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                               Dim lastDayClosePrice As Decimal = eodHistoricalData.LastOrDefault.Value.ClosePrice.Value
+                                                                                                                               lastTradingDay = eodHistoricalData.LastOrDefault.Key
+                                                                                                                               Dim atrPercentage As Decimal = (ATRPayload(eodHistoricalData.LastOrDefault.Key) / lastDayClosePrice) * 100
+                                                                                                                               If atrPercentage >= _userInputs.ATRPercentage Then
+                                                                                                                                   _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                                   Dim volumePayload As IEnumerable(Of KeyValuePair(Of Date, OHLCPayload)) = eodHistoricalData.OrderByDescending(Function(x)
+                                                                                                                                                                                                                                                     Return x.Key
+                                                                                                                                                                                                                                                 End Function).Take(5)
+                                                                                                                                   _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                                   If volumePayload IsNot Nothing AndAlso volumePayload.Count > 0 Then
+                                                                                                                                       _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                                       Dim avgVolume As Decimal = volumePayload.Average(Function(x)
+                                                                                                                                                                                            Return CType(x.Value.Volume.Value, Long)
+                                                                                                                                                                                        End Function)
+                                                                                                                                       _cts.Token.ThrowIfCancellationRequested()
+                                                                                                                                       If avgVolume >= (_userInputs.MinVolume / 100) * lastDayClosePrice Then
+                                                                                                                                           If highATRStocks Is Nothing Then highATRStocks = New Concurrent.ConcurrentDictionary(Of String, Decimal())
+                                                                                                                                           highATRStocks.TryAdd(instrumentData.Value, {atrPercentage, avgVolume * 100 / ((_userInputs.MinVolume / 100) * lastDayClosePrice)})
+                                                                                                                                       End If
+                                                                                                                                   End If
+                                                                                                                               End If
+                                                                                                                           End If
+                                                                                                                       End If
+                                                                                                                   End If
+                                                                                                               End If
+                                                                                                           End If
+                                                                                                       End If
+                                                                                                   End If
+                                                                                               Catch ex As Exception
+                                                                                                   logger.Error(ex)
+                                                                                                   Throw ex
+                                                                                               End Try
+                                                                                               Return True
+                                                                                           End Function)
+
+                            Dim mainTask As Task = Task.WhenAll(tasks)
+                            Await mainTask.ConfigureAwait(False)
+                            If mainTask.Exception IsNot Nothing Then
+                                logger.Error(mainTask.Exception)
+                                Throw mainTask.Exception
                             End If
-                        End If
+                        Next
                     End If
-                Next
+                Catch cex As TaskCanceledException
+                    logger.Error(cex)
+                    Throw cex
+                Catch aex As AggregateException
+                    logger.Error(aex)
+                    Throw aex
+                Catch ex As Exception
+                    logger.Error(ex)
+                    Throw ex
+                End Try
+
                 If highATRStocks IsNot Nothing AndAlso highATRStocks.Count > 0 Then
                     Dim capableStocks As Dictionary(Of String, InstrumentDetails) = Nothing
                     For Each stock In highATRStocks.OrderByDescending(Function(x)
