@@ -77,7 +77,7 @@ Public Class ATMStrategyInstrument
                 'Place Order block start
                 Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
                 If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
-                    Dim placeOrderResponses As Object = Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                    Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
                 End If
                 'Place Order block end
                 _cts.Token.ThrowIfCancellationRequested()
@@ -131,13 +131,9 @@ Public Class ATMStrategyInstrument
 
             If _currentDayOpen = Decimal.MinValue AndAlso currentTick.LastTradeTime.Value >= userSettings.TradeStartTime AndAlso
             Me.TradableInstrument.IsHistoricalCompleted Then
-                'Dim lastDayPayload As OHLCPayload = Await GetPreviosDayPayload().ConfigureAwait(False)
-                'If lastDayPayload IsNot Nothing AndAlso lastDayPayload.OpenPrice.Value <> currentTick.Open Then
-                _currentDayOpen = currentTick.LastPrice
-                '_currentDayOpen = currentTick.Open
+                _currentDayOpen = currentTick.Open
                 logger.Debug("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol)
                 Debug.WriteLine(String.Format("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol))
-                'End If
             End If
 
             If _usableATR = Decimal.MinValue AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
