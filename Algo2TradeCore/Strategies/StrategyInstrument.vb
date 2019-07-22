@@ -2122,7 +2122,7 @@ Namespace Strategies
                                         CType(slOrder, PaperOrder).AveragePrice = exitPrice
                                     End If
                                 Else
-                                    CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                    CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Complete
                                     CType(slOrder, PaperOrder).AveragePrice = exitPrice
                                     If targetOrder IsNot Nothing Then
                                         CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
