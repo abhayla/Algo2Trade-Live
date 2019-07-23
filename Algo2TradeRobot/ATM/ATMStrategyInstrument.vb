@@ -21,8 +21,9 @@ Public Class ATMStrategyInstrument
     Private _usableATR As Decimal = Decimal.MinValue
     Private _longEntryAllowed As Boolean = True
     Private _shortEntryAllowed As Boolean = True
+    Private ReadOnly _signalCandleTime As Date
     Private ReadOnly _levelPercentage As Decimal = 30
-    Private ReadOnly _ATRMultiplier As Decimal = 1.5
+    Private ReadOnly _ATRMultiplier As Decimal = 1
     Private ReadOnly _dummyATRConsumer As ATRConsumer
     Public Sub New(ByVal associatedInstrument As IInstrument,
                    ByVal associatedParentStrategy As Strategy,
@@ -53,6 +54,7 @@ Public Class ATMStrategyInstrument
                 Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
             End If
         End If
+        _signalCandleTime = New Date(Now.Year, Now.Month, Now.Day, 9, 16, 0)
     End Sub
 
     Public Overrides Async Function MonitorAsync() As Task
@@ -130,8 +132,10 @@ Public Class ATMStrategyInstrument
             Dim shortActiveTrades As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.Sell)
 
             If _currentDayOpen = Decimal.MinValue AndAlso currentTick.LastTradeTime.Value >= userSettings.TradeStartTime AndAlso
-            Me.TradableInstrument.IsHistoricalCompleted Then
-                _currentDayOpen = currentTick.Open
+                Me.TradableInstrument.IsHistoricalCompleted AndAlso runningCandlePayload IsNot Nothing AndAlso
+                runningCandlePayload.SnapshotDateTime = _signalCandleTime Then
+                '_currentDayOpen = currentTick.Open
+                _currentDayOpen = runningCandlePayload.OpenPrice.Value
                 logger.Debug("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol)
                 Debug.WriteLine(String.Format("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol))
             End If
