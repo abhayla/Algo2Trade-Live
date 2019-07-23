@@ -896,7 +896,6 @@ Namespace Controller
             Dim allOrders As IEnumerable(Of IOrder) = Await ExecuteCommandAsync(execCommand, Nothing).ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
             If allOrders IsNot Nothing AndAlso allOrders.Count > 0 Then
-                'logger.Debug("Processing order details")
                 Dim parentOrders As IEnumerable(Of IOrder) = allOrders.Where(Function(x)
                                                                                  Dim y As ZerodhaOrder = CType(x, ZerodhaOrder)
                                                                                  Return y.WrappedOrder.ParentOrderId Is Nothing
@@ -1176,7 +1175,7 @@ Namespace Controller
                 orderData.Status = "CANCELLED" OrElse
                 orderData.Status = "OPEN" OrElse
                 orderData.Status = "TRIGGER PENDING" Then
-                FillOrderDetailsAsync()
+                FillOrderDetailsAsync(True)
                 FillPositionDetailsAsync()
             End If
         End Sub

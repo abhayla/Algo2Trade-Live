@@ -19,8 +19,8 @@ Public Class ATMStrategyInstrument
     Private _lastTick As ITick = Nothing
     Private _currentDayOpen As Decimal = Decimal.MinValue
     Private _usableATR As Decimal = Decimal.MinValue
-    Private _longEntryAllowed As Boolean = False
-    Private _shortEntryAllowed As Boolean = False
+    Private _longEntryAllowed As Boolean = True
+    Private _shortEntryAllowed As Boolean = True
     Private ReadOnly _levelPercentage As Decimal = 30
     Private ReadOnly _ATRMultiplier As Decimal = 1.5
     Private ReadOnly _dummyATRConsumer As ATRConsumer
@@ -326,6 +326,12 @@ Public Class ATMStrategyInstrument
 
             'Below portion have to be done in every place order trigger
             If parameters1 IsNot Nothing Then
+                Try
+                    If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}", parameters1.ToString)
+                Catch ex As Exception
+                    logger.Error(ex.ToString)
+                End Try
+
                 Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters1.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
                 If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
                     Dim placedActivities As IEnumerable(Of ActivityDashboard) = currentSignalActivities.Where(Function(x)
@@ -336,171 +342,313 @@ Public Class ATMStrategyInstrument
                                                                                                    Return x.EntryActivity.RequestTime
                                                                                                End Function).LastOrDefault
                         If lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
-                        lastPlacedActivity.EntryActivity.LastException IsNot Nothing AndAlso
-                        lastPlacedActivity.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
+                            lastPlacedActivity.EntryActivity.LastException IsNot Nothing AndAlso
+                            lastPlacedActivity.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
                             If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                             ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters1, parameters1.ToString))
-                            If parameters2 IsNot Nothing Then
-                                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters2, parameters1.ToString))
-                            End If
-                            Try
-                                If forcePrint Then
-                                    logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
-                                    logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
-                                                Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
-                                                Previous Day ATR:{5}, Current Day Open:{6}, 
-                                                Buy Price:{7}, Sell Price:{8}, 
-                                                Long Entry Level:{9}, Short Entry Level:{10}, 
-                                                Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
-                                                Trading Symbol:{14}, Last Activity:{15}",
-                                                currentTick.Timestamp.Value.ToString,
-                                                userSettings.TradeStartTime.ToString,
-                                                userSettings.LastTradeEntryTime.ToString,
-                                                Me.TradableInstrument.IsHistoricalCompleted,
-                                                IsAnyTradeTargetReached,
-                                                If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
-                                                If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
-                                                If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
-                                                If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
-                                                If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
-                                                If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
-                                                GetTotalExecutedOrders(),
-                                                If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
-                                                If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
-                                                Me.TradableInstrument.TradingSymbol,
-                                                lastPlacedActivity.EntryActivity.RequestStatus.ToString)
-                                End If
-                            Catch ex As Exception
-                                logger.Error(ex)
-                            End Try
+                            'Try
+                            '    If forcePrint Then
+                            '        logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+                            '        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
+                            '                    Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
+                            '                    Previous Day ATR:{5}, Current Day Open:{6}, 
+                            '                    Buy Price:{7}, Sell Price:{8}, 
+                            '                    Long Entry Level:{9}, Short Entry Level:{10}, 
+                            '                    Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
+                            '                    Trading Symbol:{14}, Last Activity:{15}",
+                            '                    currentTick.Timestamp.Value.ToString,
+                            '                    userSettings.TradeStartTime.ToString,
+                            '                    userSettings.LastTradeEntryTime.ToString,
+                            '                    Me.TradableInstrument.IsHistoricalCompleted,
+                            '                    IsAnyTradeTargetReached,
+                            '                    If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                            '                    If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                            '                    If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                            '                    If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                            '                    If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                            '                    If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                            '                    GetTotalExecutedOrders(),
+                            '                    If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                            '                    If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                            '                    Me.TradableInstrument.TradingSymbol,
+                            '                    lastPlacedActivity.EntryActivity.RequestStatus.ToString)
+                            '    End If
+                            'Catch ex As Exception
+                            '    logger.Error(ex)
+                            'End Try
                         ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled Then
                             If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                             ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters1, parameters1.ToString))
-                            If parameters2 IsNot Nothing Then
-                                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters2, parameters1.ToString))
-                            End If
                         ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated Then
                             If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                             ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters1, parameters1.ToString))
-                            If parameters2 IsNot Nothing Then
-                                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters2, parameters1.ToString))
-                            End If
                         ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
                             If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                             ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters1, parameters1.ToString))
-                            If parameters2 IsNot Nothing Then
-                                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters2, parameters1.ToString))
-                            End If
                         Else
                             If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                             ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters1, parameters1.ToString))
-                            If parameters2 IsNot Nothing Then
-                                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters2, parameters1.ToString))
-                            End If
-                            Try
-                                If forcePrint Then
-                                    logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
-                                    logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
-                                                Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
-                                                Previous Day ATR:{5}, Current Day Open:{6}, 
-                                                Buy Price:{7}, Sell Price:{8}, 
-                                                Long Entry Level:{9}, Short Entry Level:{10}, 
-                                                Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
-                                                Trading Symbol:{14}, Last Activity:{15}",
-                                                currentTick.Timestamp.Value.ToString,
-                                                userSettings.TradeStartTime.ToString,
-                                                userSettings.LastTradeEntryTime.ToString,
-                                                Me.TradableInstrument.IsHistoricalCompleted,
-                                                IsAnyTradeTargetReached,
-                                                If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
-                                                If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
-                                                If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
-                                                If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
-                                                If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
-                                                If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
-                                                GetTotalExecutedOrders(),
-                                                If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
-                                                If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
-                                                Me.TradableInstrument.TradingSymbol,
-                                                lastPlacedActivity.EntryActivity.RequestStatus.ToString)
-                                End If
-                            Catch ex As Exception
-                                logger.Error(ex)
-                            End Try
+                            'Try
+                            '    If forcePrint Then
+                            '        logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+                            '        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
+                            '                    Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
+                            '                    Previous Day ATR:{5}, Current Day Open:{6}, 
+                            '                    Buy Price:{7}, Sell Price:{8}, 
+                            '                    Long Entry Level:{9}, Short Entry Level:{10}, 
+                            '                    Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
+                            '                    Trading Symbol:{14}, Last Activity:{15}",
+                            '                    currentTick.Timestamp.Value.ToString,
+                            '                    userSettings.TradeStartTime.ToString,
+                            '                    userSettings.LastTradeEntryTime.ToString,
+                            '                    Me.TradableInstrument.IsHistoricalCompleted,
+                            '                    IsAnyTradeTargetReached,
+                            '                    If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                            '                    If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                            '                    If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                            '                    If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                            '                    If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                            '                    If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                            '                    GetTotalExecutedOrders(),
+                            '                    If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                            '                    If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                            '                    Me.TradableInstrument.TradingSymbol,
+                            '                    lastPlacedActivity.EntryActivity.RequestStatus.ToString)
+                            '    End If
+                            'Catch ex As Exception
+                            '    logger.Error(ex)
+                            'End Try
                         End If
                     Else
                         If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                         ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters1, parameters1.ToString))
-                        If parameters2 IsNot Nothing Then
-                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters2, parameters1.ToString))
-                        End If
-                        Try
-                            If forcePrint Then
-                                logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
-                                logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
-                                            Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
-                                            Previous Day ATR:{5}, Current Day Open:{6}, 
-                                            Buy Price:{7}, Sell Price:{8}, 
-                                            Long Entry Level:{9}, Short Entry Level:{10}, 
-                                            Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
-                                            Trading Symbol:{14}, Last Activity:{15}",
-                                            currentTick.Timestamp.Value.ToString,
-                                            userSettings.TradeStartTime.ToString,
-                                            userSettings.LastTradeEntryTime.ToString,
-                                            Me.TradableInstrument.IsHistoricalCompleted,
-                                            IsAnyTradeTargetReached,
-                                            If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
-                                            If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
-                                            If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
-                                            If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
-                                            If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
-                                            If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
-                                            GetTotalExecutedOrders(),
-                                            If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
-                                            If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
-                                            Me.TradableInstrument.TradingSymbol,
-                                            "Nothing")
-                            End If
-                        Catch ex As Exception
-                            logger.Error(ex)
-                        End Try
+                        'Try
+                        '    If forcePrint Then
+                        '        logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+                        '        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
+                        '                    Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
+                        '                    Previous Day ATR:{5}, Current Day Open:{6}, 
+                        '                    Buy Price:{7}, Sell Price:{8}, 
+                        '                    Long Entry Level:{9}, Short Entry Level:{10}, 
+                        '                    Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
+                        '                    Trading Symbol:{14}, Last Activity:{15}",
+                        '                    currentTick.Timestamp.Value.ToString,
+                        '                    userSettings.TradeStartTime.ToString,
+                        '                    userSettings.LastTradeEntryTime.ToString,
+                        '                    Me.TradableInstrument.IsHistoricalCompleted,
+                        '                    IsAnyTradeTargetReached,
+                        '                    If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                        '                    If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                        '                    If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                        '                    If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                        '                    If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                        '                    If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                        '                    GetTotalExecutedOrders(),
+                        '                    If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                        '                    If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                        '                    Me.TradableInstrument.TradingSymbol,
+                        '                    "Nothing")
+                        '    End If
+                        'Catch ex As Exception
+                        '    logger.Error(ex)
+                        'End Try
                     End If
                 Else
                     If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                     ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters1, parameters1.ToString))
-                    If parameters2 IsNot Nothing Then
-                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters2, parameters1.ToString))
-                    End If
-                    Try
-                        If forcePrint Then
-                            logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
-                            logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
-                                        Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
-                                        Previous Day ATR:{5}, Current Day Open:{6}, 
-                                        Buy Price:{7}, Sell Price:{8}, 
-                                        Long Entry Level:{9}, Short Entry Level:{10}, 
-                                        Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
-                                        Trading Symbol:{14}, Last Activity:{15}",
-                                        currentTick.Timestamp.Value.ToString,
-                                        userSettings.TradeStartTime.ToString,
-                                        userSettings.LastTradeEntryTime.ToString,
-                                        Me.TradableInstrument.IsHistoricalCompleted,
-                                        IsAnyTradeTargetReached,
-                                        If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
-                                        If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
-                                        If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
-                                        If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
-                                        If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
-                                        If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
-                                        GetTotalExecutedOrders(),
-                                        If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
-                                        If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
-                                        Me.TradableInstrument.TradingSymbol,
-                                        "Nothing")
+                    'Try
+                    '    If forcePrint Then
+                    '        logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+                    '        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
+                    '                    Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
+                    '                    Previous Day ATR:{5}, Current Day Open:{6}, 
+                    '                    Buy Price:{7}, Sell Price:{8}, 
+                    '                    Long Entry Level:{9}, Short Entry Level:{10}, 
+                    '                    Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
+                    '                    Trading Symbol:{14}, Last Activity:{15}",
+                    '                    currentTick.Timestamp.Value.ToString,
+                    '                    userSettings.TradeStartTime.ToString,
+                    '                    userSettings.LastTradeEntryTime.ToString,
+                    '                    Me.TradableInstrument.IsHistoricalCompleted,
+                    '                    IsAnyTradeTargetReached,
+                    '                    If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                    '                    If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                    '                    If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                    '                    If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                    '                    If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                    '                    If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                    '                    GetTotalExecutedOrders(),
+                    '                    If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                    '                    If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                    '                    Me.TradableInstrument.TradingSymbol,
+                    '                    "Nothing")
+                    '    End If
+                    'Catch ex As Exception
+                    '    logger.Error(ex)
+                    'End Try
+                End If
+            End If
+            If parameters2 IsNot Nothing Then
+                Try
+                    If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}", parameters2.ToString)
+                Catch ex As Exception
+                    logger.Error(ex.ToString)
+                End Try
+
+                Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters2.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
+                If currentSignalActivities IsNot Nothing AndAlso currentSignalActivities.Count > 0 Then
+                    Dim placedActivities As IEnumerable(Of ActivityDashboard) = currentSignalActivities.Where(Function(x)
+                                                                                                                  Return x.EntryActivity.RequestRemarks = parameters2.ToString
+                                                                                                              End Function)
+                    If placedActivities IsNot Nothing AndAlso placedActivities.Count > 0 Then
+                        Dim lastPlacedActivity As ActivityDashboard = placedActivities.OrderBy(Function(x)
+                                                                                                   Return x.EntryActivity.RequestTime
+                                                                                               End Function).LastOrDefault
+                        If lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
+                            lastPlacedActivity.EntryActivity.LastException IsNot Nothing AndAlso
+                            lastPlacedActivity.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
+                            If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.WaitAndTake, parameters2, parameters2.ToString))
+                            'Try
+                            '    If forcePrint Then
+                            '        logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+                            '        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
+                            '                    Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
+                            '                    Previous Day ATR:{5}, Current Day Open:{6}, 
+                            '                    Buy Price:{7}, Sell Price:{8}, 
+                            '                    Long Entry Level:{9}, Short Entry Level:{10}, 
+                            '                    Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
+                            '                    Trading Symbol:{14}, Last Activity:{15}",
+                            '                    currentTick.Timestamp.Value.ToString,
+                            '                    userSettings.TradeStartTime.ToString,
+                            '                    userSettings.LastTradeEntryTime.ToString,
+                            '                    Me.TradableInstrument.IsHistoricalCompleted,
+                            '                    IsAnyTradeTargetReached,
+                            '                    If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                            '                    If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                            '                    If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                            '                    If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                            '                    If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                            '                    If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                            '                    GetTotalExecutedOrders(),
+                            '                    If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                            '                    If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                            '                    Me.TradableInstrument.TradingSymbol,
+                            '                    lastPlacedActivity.EntryActivity.RequestStatus.ToString)
+                            '    End If
+                            'Catch ex As Exception
+                            '    logger.Error(ex)
+                            'End Try
+                        ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled Then
+                            If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters2, parameters2.ToString))
+                        ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated Then
+                            If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters2, parameters2.ToString))
+                        ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
+                            If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameters2, parameters2.ToString))
+                        Else
+                            If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters2, parameters2.ToString))
+                            'Try
+                            '    If forcePrint Then
+                            '        logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+                            '        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
+                            '                    Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
+                            '                    Previous Day ATR:{5}, Current Day Open:{6}, 
+                            '                    Buy Price:{7}, Sell Price:{8}, 
+                            '                    Long Entry Level:{9}, Short Entry Level:{10}, 
+                            '                    Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
+                            '                    Trading Symbol:{14}, Last Activity:{15}",
+                            '                    currentTick.Timestamp.Value.ToString,
+                            '                    userSettings.TradeStartTime.ToString,
+                            '                    userSettings.LastTradeEntryTime.ToString,
+                            '                    Me.TradableInstrument.IsHistoricalCompleted,
+                            '                    IsAnyTradeTargetReached,
+                            '                    If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                            '                    If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                            '                    If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                            '                    If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                            '                    If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                            '                    If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                            '                    GetTotalExecutedOrders(),
+                            '                    If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                            '                    If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                            '                    Me.TradableInstrument.TradingSymbol,
+                            '                    lastPlacedActivity.EntryActivity.RequestStatus.ToString)
+                            '    End If
+                            'Catch ex As Exception
+                            '    logger.Error(ex)
+                            'End Try
                         End If
-                    Catch ex As Exception
-                        logger.Error(ex)
-                    End Try
+                    Else
+                        If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters2, parameters2.ToString))
+                        'Try
+                        '    If forcePrint Then
+                        '        logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+                        '        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
+                        '                    Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
+                        '                    Previous Day ATR:{5}, Current Day Open:{6}, 
+                        '                    Buy Price:{7}, Sell Price:{8}, 
+                        '                    Long Entry Level:{9}, Short Entry Level:{10}, 
+                        '                    Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
+                        '                    Trading Symbol:{14}, Last Activity:{15}",
+                        '                    currentTick.Timestamp.Value.ToString,
+                        '                    userSettings.TradeStartTime.ToString,
+                        '                    userSettings.LastTradeEntryTime.ToString,
+                        '                    Me.TradableInstrument.IsHistoricalCompleted,
+                        '                    IsAnyTradeTargetReached,
+                        '                    If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                        '                    If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                        '                    If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                        '                    If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                        '                    If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                        '                    If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                        '                    GetTotalExecutedOrders(),
+                        '                    If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                        '                    If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                        '                    Me.TradableInstrument.TradingSymbol,
+                        '                    "Nothing")
+                        '    End If
+                        'Catch ex As Exception
+                        '    logger.Error(ex)
+                        'End Try
+                    End If
+                Else
+                    If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                    ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters2, parameters2.ToString))
+                    'Try
+                    '    If forcePrint Then
+                    '        logger.Debug("PlaceOrder-> ************************************************ {0}", Me.TradableInstrument.TradingSymbol)
+                    '        logger.Debug("Place Order-> Current Tick Timestamp:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, 
+                    '                    Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, 
+                    '                    Previous Day ATR:{5}, Current Day Open:{6}, 
+                    '                    Buy Price:{7}, Sell Price:{8}, 
+                    '                    Long Entry Level:{9}, Short Entry Level:{10}, 
+                    '                    Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, 
+                    '                    Trading Symbol:{14}, Last Activity:{15}",
+                    '                    currentTick.Timestamp.Value.ToString,
+                    '                    userSettings.TradeStartTime.ToString,
+                    '                    userSettings.LastTradeEntryTime.ToString,
+                    '                    Me.TradableInstrument.IsHistoricalCompleted,
+                    '                    IsAnyTradeTargetReached,
+                    '                    If(_usableATR <> Decimal.MinValue, _usableATR, "Nothing"),
+                    '                    If(_currentDayOpen <> Decimal.MinValue, _currentDayOpen, "Nothing"),
+                    '                    If(longEntryPrice <> Decimal.MinValue, longEntryPrice, "Nothing"),
+                    '                    If(shortEntryPrice <> Decimal.MinValue, shortEntryPrice, "Nothing"),
+                    '                    If(buyPlaceLevel <> Decimal.MinValue, buyPlaceLevel, "Nothing"),
+                    '                    If(sellPlaceLevel <> Decimal.MinValue, sellPlaceLevel, "Nothing"),
+                    '                    GetTotalExecutedOrders(),
+                    '                    If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
+                    '                    If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                    '                    Me.TradableInstrument.TradingSymbol,
+                    '                    "Nothing")
+                    '    End If
+                    'Catch ex As Exception
+                    '    logger.Error(ex)
+                    'End Try
                 End If
             End If
         End If
