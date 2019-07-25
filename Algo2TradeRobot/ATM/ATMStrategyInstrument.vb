@@ -131,11 +131,17 @@ Public Class ATMStrategyInstrument
             Dim longActiveTrades As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.Buy)
             Dim shortActiveTrades As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.Sell)
 
+            'If _currentDayOpen = Decimal.MinValue AndAlso currentTick.LastTradeTime.Value >= userSettings.TradeStartTime AndAlso
+            '    Me.TradableInstrument.IsHistoricalCompleted AndAlso runningCandlePayload IsNot Nothing AndAlso
+            '    runningCandlePayload.SnapshotDateTime = _signalCandleTime Then
+            '    '_currentDayOpen = currentTick.Open
+            '    _currentDayOpen = runningCandlePayload.OpenPrice.Value
+            '    logger.Debug("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol)
+            '    Debug.WriteLine(String.Format("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol))
+            'End If
             If _currentDayOpen = Decimal.MinValue AndAlso currentTick.LastTradeTime.Value >= userSettings.TradeStartTime AndAlso
-                Me.TradableInstrument.IsHistoricalCompleted AndAlso runningCandlePayload IsNot Nothing AndAlso
-                runningCandlePayload.SnapshotDateTime = _signalCandleTime Then
-                '_currentDayOpen = currentTick.Open
-                _currentDayOpen = runningCandlePayload.OpenPrice.Value
+                Me.TradableInstrument.IsHistoricalCompleted Then
+                _currentDayOpen = currentTick.LastPrice
                 logger.Debug("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol)
                 Debug.WriteLine(String.Format("Level Price:{0}, Trading Symbol:{1}", _currentDayOpen, Me.TradableInstrument.TradingSymbol))
             End If
@@ -176,12 +182,22 @@ Public Class ATMStrategyInstrument
             End If
 
             If currentTick.LastPrice > longEntryPrice Then
-                _longEntryAllowed = False
+                Dim lastOrder As IBusinessOrder = GetLastPlacedOrder()
+                If lastOrder IsNot Nothing AndAlso lastOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                    _longEntryAllowed = False
+                Else
+                    _longEntryAllowed = True
+                End If
             ElseIf currentTick.LastPrice <= _currentDayOpen Then
                 _longEntryAllowed = True
             End If
             If currentTick.LastPrice < shortEntryPrice Then
-                _shortEntryAllowed = False
+                Dim lastOrder As IBusinessOrder = GetLastPlacedOrder()
+                If lastOrder IsNot Nothing AndAlso lastOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                    _shortEntryAllowed = False
+                Else
+                    _shortEntryAllowed = True
+                End If
             ElseIf currentTick.LastPrice >= _currentDayOpen Then
                 _shortEntryAllowed = True
             End If
@@ -190,7 +206,7 @@ Public Class ATMStrategyInstrument
                 If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
                     If _lastTick Is Nothing OrElse Not currentTick.Timestamp.Value = _lastTick.Timestamp.Value OrElse forcePrint Then
                         _lastTick = currentTick
-                        logger.Debug("Place Order-> Current Tick: {0}", Utilities.Strings.JsonSerialize(currentTick))
+                        'logger.Debug("Place Order-> Current Tick: {0}", Utilities.Strings.JsonSerialize(currentTick))
                         logger.Debug("Place Order-> Current Tick:{0}, Trade Start Time:{1}, Last Trade Entry Time:{2}, Is Historial Completed:{3}, Is Any Trade Target Reached:{4}, Previous Day ATR:{5}, Current Day Open:{6}, Buy Price:{7}, Sell Price:{8}, Long Entry Level:{9}, Short Entry Level:{10}, Total Executed Order:{11}, Long Active Trades:{12}, Short Active Trades:{13}, Last Executed Order SL Point:{14}, Long Entry Allowed:{15}, Short Entry Allowed:{16}, Trading Symbol:{17}",
                                      String.Format("Timestamp - {0}, LTP - {1}", currentTick.Timestamp.Value.ToString, currentTick.LastPrice),
                                      userSettings.TradeStartTime.ToString,
@@ -262,6 +278,7 @@ Public Class ATMStrategyInstrument
                 Else
                     If currentTick.LastPrice > buyPlaceLevel Then
                         If _longEntryAllowed AndAlso (longActiveTrades Is Nothing OrElse longActiveTrades.Count = 0) AndAlso
+                            _shortEntryAllowed AndAlso (shortActiveTrades Is Nothing OrElse shortActiveTrades.Count = 0) AndAlso
                             GetLastExecutedOrderStoplossPoint() <> Decimal.MinValue Then
                             Dim triggerPrice = longEntryPrice
                             Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
@@ -294,6 +311,7 @@ Public Class ATMStrategyInstrument
                         End If
                     ElseIf currentTick.LastPrice < sellPlaceLevel Then
                         If _shortEntryAllowed AndAlso (shortActiveTrades Is Nothing OrElse shortActiveTrades.Count = 0) AndAlso
+                            _longEntryAllowed AndAlso (longActiveTrades Is Nothing OrElse longActiveTrades.Count = 0) AndAlso
                             GetLastExecutedOrderStoplossPoint() <> Decimal.MinValue Then
                             Dim triggerPrice = shortEntryPrice
                             Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
@@ -331,7 +349,7 @@ Public Class ATMStrategyInstrument
             'Below portion have to be done in every place order trigger
             If parameters1 IsNot Nothing Then
                 Try
-                    If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}", parameters1.ToString)
+                    If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}, {1}", parameters1.ToString, Me.TradableInstrument.TradingSymbol)
                 Catch ex As Exception
                     logger.Error(ex.ToString)
                 End Try
@@ -494,7 +512,7 @@ Public Class ATMStrategyInstrument
             End If
             If parameters2 IsNot Nothing Then
                 Try
-                    If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}", parameters2.ToString)
+                    If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}, {1}", parameters2.ToString, Me.TradableInstrument.TradingSymbol)
                 Catch ex As Exception
                     logger.Error(ex.ToString)
                 End Try
@@ -860,68 +878,12 @@ Public Class ATMStrategyInstrument
         Return ret
     End Function
 
-    Private Async Function GetPreviosDayPayload() As Task(Of OHLCPayload)
-        Dim ret As OHLCPayload = Nothing
-        _cts.Token.ThrowIfCancellationRequested()
-        Dim ZerodhaEODHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/day?api_key=kitefront&access_token=K&from={1}&to={2}"
-        Dim historicalDataURL As String = String.Format(ZerodhaEODHistoricalURL, Me.TradableInstrument.InstrumentIdentifier, Now.AddDays(-10).ToString("yyyy-MM-dd"), Now.AddDays(-1).ToString("yyyy-MM-dd"))
-        'OnHeartbeat(String.Format("Fetching historical Data: {0}", historicalDataURL))
-        Dim historicalJson As Dictionary(Of String, Object) = Nothing
-        Dim proxyToBeUsed As HttpProxy = Nothing
-        Using browser As New HttpBrowser(proxyToBeUsed, Net.DecompressionMethods.GZip, New TimeSpan(0, 1, 0), _cts)
-            AddHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
-            'AddHandler browser.Heartbeat, AddressOf OnHeartbeat
-            AddHandler browser.WaitingFor, AddressOf OnWaitingFor
-            AddHandler browser.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
-            'Get to the landing page first
-            Dim l As Tuple(Of Uri, Object) = Await browser.NonPOSTRequestAsync(historicalDataURL,
-                                                                                HttpMethod.Get,
-                                                                                Nothing,
-                                                                                True,
-                                                                                Nothing,
-                                                                                True,
-                                                                                "application/json").ConfigureAwait(False)
-            If l Is Nothing OrElse l.Item2 Is Nothing Then
-                Throw New ApplicationException(String.Format("No response while getting historical data for: {0}", historicalDataURL))
-            End If
-            If l IsNot Nothing AndAlso l.Item2 IsNot Nothing Then
-                historicalJson = l.Item2
-            End If
-            RemoveHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
-            'RemoveHandler browser.Heartbeat, AddressOf OnHeartbeat
-            RemoveHandler browser.WaitingFor, AddressOf OnWaitingFor
-            RemoveHandler browser.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
-        End Using
-        If historicalJson IsNot Nothing AndAlso historicalJson.Count > 0 Then
-            Dim eodPayload As Dictionary(Of Date, OHLCPayload) = Nothing
-            If historicalJson.ContainsKey("data") Then
-                Dim historicalCandlesDict As Dictionary(Of String, Object) = historicalJson("data")
-                If historicalCandlesDict.ContainsKey("candles") AndAlso historicalCandlesDict("candles").count > 0 Then
-                    Dim historicalCandles As ArrayList = historicalCandlesDict("candles")
-                    Dim previousPayload As OHLCPayload = Nothing
-                    For Each historicalCandle In historicalCandles
-                        _cts.Token.ThrowIfCancellationRequested()
-                        Dim runningSnapshotTime As Date = Utilities.Time.GetDateTimeTillMinutes(historicalCandle(0))
-                        Dim runningPayload As OHLCPayload = New OHLCPayload(OHLCPayload.PayloadSource.Historical)
-                        With runningPayload
-                            .SnapshotDateTime = Utilities.Time.GetDateTimeTillMinutes(historicalCandle(0))
-                            .TradingSymbol = Me.TradableInstrument.TradingSymbol
-                            .OpenPrice.Value = historicalCandle(1)
-                            .HighPrice.Value = historicalCandle(2)
-                            .LowPrice.Value = historicalCandle(3)
-                            .ClosePrice.Value = historicalCandle(4)
-                            .Volume.Value = historicalCandle(5)
-                            .PreviousPayload = previousPayload
-                        End With
-                        previousPayload = runningPayload
-                        If eodPayload Is Nothing Then eodPayload = New Dictionary(Of Date, OHLCPayload)
-                        eodPayload.Add(runningSnapshotTime, runningPayload)
-                    Next
-                End If
-            End If
-            If eodPayload IsNot Nothing AndAlso eodPayload.Count > 0 Then
-                ret = eodPayload.LastOrDefault.Value
-            End If
+    Private Function GetLastPlacedOrder() As IBusinessOrder
+        Dim ret As IBusinessOrder = Nothing
+        If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+            ret = OrderDetails.OrderByDescending(Function(x)
+                                                     Return x.Value.ParentOrder.TimeStamp
+                                                 End Function).LastOrDefault.Value
         End If
         Return ret
     End Function

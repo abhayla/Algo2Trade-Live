@@ -436,26 +436,17 @@ Namespace Controller
                 Next
             End If
         End Sub
-        Protected Overridable Async Function FillOrderDetailsAsync(Optional ByVal triggerFromTickOrderUpdate As Boolean = False) As Task
+        Protected Overridable Async Function ProcessTickOrderUpdateAsync(ByVal orderData As IOrder) As Task
             Try
                 Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
                 _cts.Token.ThrowIfCancellationRequested()
-                Dim orderDetails As Concurrent.ConcurrentBag(Of IBusinessOrder) = Await GetOrderDetailsAsync().ConfigureAwait(False)
-                If orderDetails IsNot Nothing AndAlso orderDetails.Count > 0 Then
-                    If triggerFromTickOrderUpdate Then
-                        logger.Debug("Processing Order Data from tick order update")
-                    Else
-                        logger.Debug("Processing Order Data normal")
+                If orderData IsNot Nothing AndAlso orderData.Status <> IOrder.TypeOfStatus.None Then
+                    If _AllStrategies IsNot Nothing AndAlso _AllStrategies.Count > 0 Then
+                        For Each strategyToRun In _AllStrategies
+                            _cts.Token.ThrowIfCancellationRequested()
+                            strategyToRun.ProcessOrderUpdateAsync(orderData)
+                        Next
                     End If
-                    For Each orderData In orderDetails
-                        _cts.Token.ThrowIfCancellationRequested()
-                        If _AllStrategies IsNot Nothing AndAlso _AllStrategies.Count > 0 Then
-                            For Each strategyToRun In _AllStrategies
-                                _cts.Token.ThrowIfCancellationRequested()
-                                Await strategyToRun.ProcessOrderAsync(orderData).ConfigureAwait(False)
-                            Next
-                        End If
-                    Next
                 End If
             Catch cex As OperationCanceledException
                 logger.Warn(cex)

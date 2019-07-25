@@ -66,8 +66,8 @@ Namespace Adapter
                             Throw New ForceExitException()
                         End If
 
-                        Await GetPositionUpdatesAsync().ConfigureAwait(False)
-                        Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
+                        'Await GetPositionUpdatesAsync().ConfigureAwait(False)
+                        'Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
                         Await GetOrderUpdatesAsync().ConfigureAwait(False)
                     Catch fex As ForceExitException
                         logger.Error(fex)

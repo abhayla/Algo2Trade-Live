@@ -253,17 +253,47 @@ Namespace Strategies
                 Throw ex
             End Try
         End Function
+        Private Function IsOrderAssociatedWithThisStrategy(ByVal orderData As IOrder) As Boolean
+            Dim ret As Boolean = False
+            If orderData.Tag IsNot Nothing Then
+                Dim decodedTag As String = Convert.ToInt64(orderData.Tag, 16)
+                If decodedTag.Substring(0, 1).Equals(Me.StrategyIdentifier) Then
+                    ret = True
+                End If
+            End If
+            Return ret
+        End Function
+        Public Overridable Async Function ProcessOrderUpdateAsync(ByVal orderData As IOrder) As Task
+            'logger.Debug("ProcessOrderAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
+            Try
+                Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+                If orderData IsNot Nothing AndAlso TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
+                    For Each runningTradableStrategyInstrument In TradableStrategyInstruments
+                        _cts.Token.ThrowIfCancellationRequested()
+                        If runningTradableStrategyInstrument.TradableInstrument.InstrumentIdentifier = orderData.InstrumentIdentifier Then
+                            If IsOrderAssociatedWithThisStrategy(orderData) Then
+                                runningTradableStrategyInstrument.ProcessOrderUpadteAsync(orderData)
+                            End If
+                        End If
+                    Next
+                End If
+            Catch cex As OperationCanceledException
+                logger.Warn(cex)
+                Me.ParentController.OrphanException = cex
+            Catch ex As Exception
+                'Neglect error as in the next minute, it will be run again,
+                'till that time tick based candles will be used
+                logger.Warn(ex)
+            End Try
+        End Function
         Public Overridable Async Function ProcessOrderAsync(ByVal orderData As IBusinessOrder) As Task
             'logger.Debug("ProcessOrderAsync, parameters:{0}", Utilities.Strings.JsonSerialize(orderData))
             If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
                 For Each runningTradableStrategyInstrument In TradableStrategyInstruments
                     _cts.Token.ThrowIfCancellationRequested()
                     If runningTradableStrategyInstrument.TradableInstrument.InstrumentIdentifier = orderData.ParentOrder.InstrumentIdentifier Then
-                        If orderData.ParentOrder.Tag IsNot Nothing Then
-                            Dim decodedTag As String = Convert.ToInt64(orderData.ParentOrder.Tag, 16)
-                            If decodedTag.Substring(0, 1).Equals(Me.StrategyIdentifier) Then
-                                Await runningTradableStrategyInstrument.ProcessOrderAsync(orderData).ConfigureAwait(False)
-                            End If
+                        If IsOrderAssociatedWithThisStrategy(orderData.ParentOrder) Then
+                            Await runningTradableStrategyInstrument.ProcessOrderAsync(orderData).ConfigureAwait(False)
                         End If
                     End If
                 Next

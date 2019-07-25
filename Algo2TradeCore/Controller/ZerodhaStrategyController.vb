@@ -1032,6 +1032,7 @@ Namespace Controller
                     'End If
                 Next
             End If
+            logger.Debug("Normal Order update")
             Return ret
         End Function
         Public Overrides Async Function GetHoldingDetailsAsync() As Task(Of ConcurrentBag(Of IHolding))
@@ -1126,7 +1127,11 @@ Namespace Controller
         End Sub
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
             Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-
+            Try
+                logger.Fatal(Utilities.Strings.JsonSerialize(tickData))
+            Catch ex As Exception
+                'Do nothing
+            End Try
             Dim runningTick As New ZerodhaTick() With {.WrappedTick = tickData}
             Dim runningInstruments As IEnumerable(Of IInstrument) = _AllStrategyUniqueInstruments.Where(Function(x)
                                                                                                             Return x.InstrumentIdentifier = tickData.InstrumentToken
@@ -1175,8 +1180,7 @@ Namespace Controller
                 orderData.Status = "CANCELLED" OrElse
                 orderData.Status = "OPEN" OrElse
                 orderData.Status = "TRIGGER PENDING" Then
-                FillOrderDetailsAsync(True)
-                FillPositionDetailsAsync()
+                ProcessTickOrderUpdateAsync(New ZerodhaOrder With {.WrappedOrder = orderData})
             End If
         End Sub
 #End Region
