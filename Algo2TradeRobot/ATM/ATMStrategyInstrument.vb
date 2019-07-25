@@ -182,7 +182,7 @@ Public Class ATMStrategyInstrument
             End If
 
             If currentTick.LastPrice > longEntryPrice Then
-                Dim lastOrder As IBusinessOrder = GetLastPlacedOrder()
+                Dim lastOrder As IBusinessOrder = GetLastExecutedOrder()
                 If lastOrder IsNot Nothing AndAlso lastOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
                     _longEntryAllowed = False
                 Else
@@ -192,7 +192,7 @@ Public Class ATMStrategyInstrument
                 _longEntryAllowed = True
             End If
             If currentTick.LastPrice < shortEntryPrice Then
-                Dim lastOrder As IBusinessOrder = GetLastPlacedOrder()
+                Dim lastOrder As IBusinessOrder = GetLastExecutedOrder()
                 If lastOrder IsNot Nothing AndAlso lastOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                     _shortEntryAllowed = False
                 Else
@@ -874,16 +874,6 @@ Public Class ATMStrategyInstrument
                     End If
                 End If
             Next
-        End If
-        Return ret
-    End Function
-
-    Private Function GetLastPlacedOrder() As IBusinessOrder
-        Dim ret As IBusinessOrder = Nothing
-        If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
-            ret = OrderDetails.OrderByDescending(Function(x)
-                                                     Return x.Value.ParentOrder.TimeStamp
-                                                 End Function).LastOrDefault.Value
         End If
         Return ret
     End Function
