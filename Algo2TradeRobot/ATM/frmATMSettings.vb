@@ -50,6 +50,7 @@ Public Class frmATMSettings
             dtpckrTradeStartTime.Value = _ATMSettings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _ATMSettings.LastTradeEntryTime
             dtpckrEODExitTime.Value = _ATMSettings.EODExitTime
+            txtATRMultiplier.Text = _ATMSettings.ATRMultiplier
             txtTargetMultiplier.Text = _ATMSettings.TargetMultiplier
             txtInstrumentDetalis.Text = _ATMSettings.InstrumentDetailsFilePath
             chbAutoSelectStock.Checked = _ATMSettings.AutoSelectStock
@@ -72,6 +73,7 @@ Public Class frmATMSettings
         _ATMSettings.TradeStartTime = dtpckrTradeStartTime.Value
         _ATMSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
         _ATMSettings.EODExitTime = dtpckrEODExitTime.Value
+        _ATMSettings.ATRMultiplier = txtATRMultiplier.Text
         _ATMSettings.TargetMultiplier = txtTargetMultiplier.Text
         _ATMSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
         _ATMSettings.AutoSelectStock = chbAutoSelectStock.Checked
@@ -107,6 +109,8 @@ Public Class frmATMSettings
     Private Sub ValidateInputs()
         ValidateNumbers(1, 60, txtSignalTimeFrame)
         ValidateNumbers(1, 100, txtATRPeriod)
+        ValidateNumbers(1, 100, txtATRMultiplier)
+        ValidateNumbers(1, 100, txtTargetMultiplier)
         ValidateNumbers(0, Decimal.MaxValue, txtCashMaxSL)
         ValidateNumbers(0, Decimal.MaxValue, txtFutureMinCapital)
         ValidateFile()

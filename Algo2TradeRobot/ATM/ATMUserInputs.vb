@@ -7,6 +7,7 @@ Imports Utilities.DAL
 Public Class ATMUserInputs
     Inherits StrategyUserInputs
     Public Property ATRPeriod As Integer
+    Public Property ATRMultiplier As Decimal
     Public Property AutoSelectStock As Boolean
     Public Property CashInstrument As Boolean
     Public Property FutureInstrument As Boolean
