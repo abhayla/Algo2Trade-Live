@@ -1128,7 +1128,7 @@ Namespace Controller
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
             Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
             Try
-                logger.Fatal(Utilities.Strings.JsonSerialize(tickData))
+                logger.Fatal("Tick Data: {0}", Utilities.Strings.JsonSerialize(tickData))
             Catch ex As Exception
                 'Do nothing
             End Try
@@ -1180,6 +1180,11 @@ Namespace Controller
                 orderData.Status = "CANCELLED" OrElse
                 orderData.Status = "OPEN" OrElse
                 orderData.Status = "TRIGGER PENDING" Then
+                Try
+                    logger.Fatal("Order Update: {0}", Utilities.Strings.JsonSerialize(orderData))
+                Catch ex As Exception
+                    'Do nothing
+                End Try
                 ProcessTickOrderUpdateAsync(New ZerodhaOrder With {.WrappedOrder = orderData})
             End If
         End Sub

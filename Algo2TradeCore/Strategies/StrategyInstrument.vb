@@ -958,11 +958,12 @@ Namespace Strategies
                                 If OrderDetails(parentOrderID).AllOrder IsNot Nothing AndAlso OrderDetails(parentOrderID).AllOrder.Count > 0 Then
                                     logger.Debug("Before modifying all order list. Count:{0}, List Count:{1}. {2}", OrderDetails(parentOrderID).AllOrder.Count, allOrderList.Count, Me.TradableInstrument.TradingSymbol)
                                     For Each order In OrderDetails(parentOrderID).AllOrder
-                                        If orderData.OrderIdentifier <> orderData.OrderIdentifier Then
+                                        If order.OrderIdentifier <> orderData.OrderIdentifier Then
                                             allOrderList.Add(order)
                                         End If
                                     Next
                                 End If
+                                OrderDetails(parentOrderID).AllOrder = Nothing
                                 OrderDetails(parentOrderID).AllOrder = allOrderList
                                 logger.Debug("After modifying all order list. Count:{0}, List Count:{1}. {2}", OrderDetails(parentOrderID).AllOrder.Count, allOrderList.Count, Me.TradableInstrument.TradingSymbol)
                                 If orderData.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss Then
