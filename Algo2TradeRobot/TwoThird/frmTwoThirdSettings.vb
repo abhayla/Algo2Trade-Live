@@ -67,9 +67,16 @@ Public Class frmTwoThirdSettings
             chbReverseTrade.Checked = _settings.ReverseTrade
             chbStoplossMoveToBreakeven.Checked = _settings.StoplossMovementToBreakeven
             chbCountTradesWithBreakevenMovement.Checked = _settings.CountTradesWithBreakevenMovement
-            txtTelegramAPI.Text = _settings.TelegramAPIKey
-            txtTelegramChatID.Text = _settings.TelegramChatID
-            txtTelegramChatIDForPL.Text = _settings.TelegramPLChatID
+            chbAutoSelectStock.Checked = _settings.AutoSelectStock
+            chbCash.Checked = _settings.CashInstrument
+            chbFuture.Checked = _settings.FutureInstrument
+            txtFutureMinCapital.Text = _settings.MinCapital
+            txtManualStockList.Text = _settings.ManualInstrumentList
+            txtMinPrice.Text = _settings.MinPrice
+            txtMaxPrice.Text = _settings.MaxPrice
+            txtATRPercentage.Text = _settings.ATRPercentage
+            txtMinVolume.Text = _settings.MinVolume
+            txtNumberOfStock.Text = _settings.NumberOfStock
             txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
         End If
     End Sub
@@ -87,9 +94,16 @@ Public Class frmTwoThirdSettings
         _settings.ReverseTrade = chbReverseTrade.Checked
         _settings.StoplossMovementToBreakeven = chbStoplossMoveToBreakeven.Checked
         _settings.CountTradesWithBreakevenMovement = chbCountTradesWithBreakevenMovement.Checked
-        _settings.TelegramAPIKey = txtTelegramAPI.Text
-        _settings.TelegramChatID = txtTelegramChatID.Text
-        _settings.TelegramPLChatID = txtTelegramChatIDForPL.Text
+        _settings.AutoSelectStock = chbAutoSelectStock.Checked
+        _settings.CashInstrument = chbCash.Checked
+        _settings.FutureInstrument = chbFuture.Checked
+        _settings.MinCapital = txtFutureMinCapital.Text
+        _settings.ManualInstrumentList = txtManualStockList.Text
+        _settings.MinPrice = txtMinPrice.Text
+        _settings.MaxPrice = txtMaxPrice.Text
+        _settings.ATRPercentage = txtATRPercentage.Text
+        _settings.MinVolume = txtMinVolume.Text
+        _settings.NumberOfStock = txtNumberOfStock.Text
         _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         Utilities.Strings.SerializeFromCollection(Of TwoThirdUserInputs)(_settingsFilename, _settings)

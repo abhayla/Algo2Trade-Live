@@ -672,12 +672,13 @@ Namespace Strategies
         End Function
         Public Function CalculateQuantityFromInvestment(ByVal stockPrice As Double, ByVal marginMultiplier As Decimal, ByVal totalInvestment As Double, ByVal allowCapitalToIncrease As Boolean) As Integer
             Dim quantity As Integer = Me.TradableInstrument.LotSize * Me.TradableInstrument.QuantityMultiplier
-            Dim multiplier As Integer = 0
+            Dim multiplier As Integer = 1
             If allowCapitalToIncrease Then
                 multiplier = Math.Ceiling(totalInvestment / (quantity * stockPrice / marginMultiplier))
             Else
                 multiplier = Math.Floor(totalInvestment / (quantity * stockPrice / marginMultiplier))
             End If
+            If multiplier = 0 Then multiplier = 1
             Return quantity * multiplier / Me.TradableInstrument.QuantityMultiplier
         End Function
         Public Function GetBreakevenPoint(ByVal entryPrice As Decimal, ByVal quantity As Integer, ByVal direction As IOrder.TypeOfTransaction) As Decimal

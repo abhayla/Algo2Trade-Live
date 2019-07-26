@@ -266,7 +266,7 @@ Public Class ATMStrategyInstrument
                     End If
                     If currentTick.LastPrice >= currentTick.Open Then
                         Dim triggerPrice = currentTick.LastPrice
-                        Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                        Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                         Dim stoploss As Decimal = ConvertFloorCeling(_usableATR * _ATRMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                         Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                         'If currentTick.LastPrice < triggerPrice Then
@@ -281,7 +281,7 @@ Public Class ATMStrategyInstrument
                         'End If
                     ElseIf currentTick.LastPrice < currentTick.Open Then
                         Dim triggerPrice = currentTick.LastPrice
-                        Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                        Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                         Dim stoploss As Decimal = ConvertFloorCeling(_usableATR * _ATRMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                         Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                         'If currentTick.LastPrice > triggerPrice Then
@@ -307,7 +307,7 @@ Public Class ATMStrategyInstrument
                             (shortActiveTrades Is Nothing OrElse shortActiveTrades.Count = 0) AndAlso
                             GetLastExecutedOrderStoplossPoint() <> Decimal.MinValue Then
                             Dim triggerPrice = longEntryPrice
-                            Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                            Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                             Dim stoploss As Decimal = triggerPrice - _currentDayOpen
                             Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                             If currentTick.LastPrice < triggerPrice Then
@@ -339,7 +339,7 @@ Public Class ATMStrategyInstrument
                             (longActiveTrades Is Nothing OrElse longActiveTrades.Count = 0) AndAlso
                             GetLastExecutedOrderStoplossPoint() <> Decimal.MinValue Then
                             Dim triggerPrice = shortEntryPrice
-                            Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.03 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                            Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                             Dim stoploss As Decimal = _currentDayOpen - triggerPrice
                             Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                             If currentTick.LastPrice > triggerPrice Then
@@ -586,7 +586,7 @@ Public Class ATMStrategyInstrument
                 New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, order, reason)
             }
 
-            Dim exitOrderResponse As IBusinessOrder = Await ExecuteCommandAsync(ExecuteCommands.ForceCancelBOOrder, cancellableOrder).ConfigureAwait(False)
+            Await ExecuteCommandAsync(ExecuteCommands.ForceCancelBOOrder, cancellableOrder).ConfigureAwait(False)
         End If
     End Function
 

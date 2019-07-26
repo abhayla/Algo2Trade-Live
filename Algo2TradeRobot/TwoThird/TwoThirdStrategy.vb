@@ -38,16 +38,18 @@ Public Class TwoThirdStrategy
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             Dim userInputs As TwoThirdUserInputs = Me.UserSettings
-            If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
+            If userInputs.AutoSelectStock Then
                 Using fillInstrumentDetails As New TwoThirdFillInstrumentDetails(_cts, Me)
                     Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
                 End Using
                 logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
+            End If
+            If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
-                                                                                                Return x.TradingSymbol = instrument.Value.InstrumentName
+                                                                                                Return x.TradingSymbol = instrument.Value.TradingSymbol
                                                                                             End Function)
                     _cts.Token.ThrowIfCancellationRequested()
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
@@ -108,7 +110,6 @@ Public Class TwoThirdStrategy
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
-            tasks.Add(Task.Run(AddressOf GetOverAllPLDrawUpDrawDownAsync, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
         Catch ex As Exception
             lastException = ex
@@ -134,50 +135,5 @@ Public Class TwoThirdStrategy
             ret = New Tuple(Of Boolean, String)(True, "Max Loss of the day reached")
         End If
         Return ret
-    End Function
-
-    Private Async Function GetOverAllPLDrawUpDrawDownAsync() As Task
-        Try
-            Dim lastPL As Decimal = Decimal.MinValue
-            While True
-                If Me.ParentController.OrphanException IsNot Nothing Then
-                    Throw Me.ParentController.OrphanException
-                End If
-                _cts.Token.ThrowIfCancellationRequested()
-
-                If Me.GetTotalPLAfterBrokerage <> lastPL AndAlso (Me.GetTotalPLAfterBrokerage <> 0 OrElse Me.MaxDrawUp <> 0 OrElse Me.MaxDrawDown <> 0) Then
-                    Dim message As String = Nothing
-                    If Me.ParentController.UserInputs.FormRemarks IsNot Nothing AndAlso Not Me.ParentController.UserInputs.FormRemarks = "" Then
-                        message = String.Format("{0}{1}PL:{2}, MaxDrawUP:{3}, MaxDrawDown:{4}",
-                                                Me.ParentController.UserInputs.FormRemarks, vbNewLine,
-                                                Math.Round(Me.GetTotalPLAfterBrokerage, 2),
-                                                Math.Round(Me.MaxDrawUp, 2),
-                                                Math.Round(Me.MaxDrawDown, 2))
-                    Else
-                        message = String.Format("Joy Maa ATM. PL:{0}, MaxDrawUP:{1}, MaxDrawDown:{2}",
-                                                Math.Round(Me.GetTotalPLAfterBrokerage, 2),
-                                                Math.Round(Me.MaxDrawUp, 2),
-                                                Math.Round(Me.MaxDrawDown, 2))
-                    End If
-                    If message.Contains("&") Then
-                        message = message.Replace("&", "_")
-                    End If
-
-                    Dim userInputs As TwoThirdUserInputs = Me.UserSettings
-                    If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
-                        userInputs.TelegramChatID IsNot Nothing AndAlso Not userInputs.TelegramPLChatID.Trim = "" Then
-                        Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramPLChatID, _cts)
-                            Dim encodedString As String = Utilities.Strings.EncodeString(message)
-                            Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
-                        End Using
-                    End If
-                End If
-                _cts.Token.ThrowIfCancellationRequested()
-                Await Task.Delay(60000, _cts.Token).ConfigureAwait(False)
-            End While
-        Catch ex As Exception
-            logger.Error("Get OverAll PL DrawUp DrawDown message generation error: {0}", ex.ToString)
-            Throw ex
-        End Try
     End Function
 End Class
