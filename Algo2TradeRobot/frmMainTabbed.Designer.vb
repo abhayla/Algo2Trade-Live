@@ -30,6 +30,21 @@ Partial Class frmMainTabbed
         Me.miAdvancedOptions = New System.Windows.Forms.ToolStripMenuItem()
         Me.miAbout = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabMain = New System.Windows.Forms.TabControl()
+        Me.tabATM = New System.Windows.Forms.TabPage()
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.btnATMStop = New System.Windows.Forms.Button()
+        Me.btnATMStart = New System.Windows.Forms.Button()
+        Me.Panel8 = New System.Windows.Forms.Panel()
+        Me.blbATMTickerStatus = New Bulb.LedBulb()
+        Me.lblCandleRangeBreakoutTickerStatus = New System.Windows.Forms.Label()
+        Me.btnATMSettings = New System.Windows.Forms.Button()
+        Me.linklblATMTradableInstrument = New System.Windows.Forms.LinkLabel()
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.PictureBox7 = New System.Windows.Forms.PictureBox()
+        Me.TableLayoutPanel6 = New System.Windows.Forms.TableLayoutPanel()
+        Me.lstCandleRangeBreakoutLog = New System.Windows.Forms.ListBox()
+        Me.sfdgvATMMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
         Me.tabTwoThird = New System.Windows.Forms.TabPage()
         Me.pnlTwoThirdMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlTwoThirdTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
@@ -60,21 +75,6 @@ Partial Class frmMainTabbed
         Me.TableLayoutPanel7 = New System.Windows.Forms.TableLayoutPanel()
         Me.lstJoyMaaATMLog = New System.Windows.Forms.ListBox()
         Me.sfdgvJoyMaaATMMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
-        Me.tabCandleRangeBreakout = New System.Windows.Forms.TabPage()
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.btnCandleRangeBreakoutStop = New System.Windows.Forms.Button()
-        Me.btnCandleRangeBreakoutStart = New System.Windows.Forms.Button()
-        Me.Panel8 = New System.Windows.Forms.Panel()
-        Me.blbCandleRangeBreakoutTickerStatus = New Bulb.LedBulb()
-        Me.lblCandleRangeBreakoutTickerStatus = New System.Windows.Forms.Label()
-        Me.btnCandleRangeBreakoutSettings = New System.Windows.Forms.Button()
-        Me.linklblCandleRangeBreakoutTradableInstrument = New System.Windows.Forms.LinkLabel()
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.PictureBox7 = New System.Windows.Forms.PictureBox()
-        Me.TableLayoutPanel6 = New System.Windows.Forms.TableLayoutPanel()
-        Me.lstCandleRangeBreakoutLog = New System.Windows.Forms.ListBox()
-        Me.sfdgvCandleRangeBreakoutMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
         Me.tabPetDGandhi = New System.Windows.Forms.TabPage()
         Me.pnlPetDGandhiMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlPetDGandhiTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
@@ -187,11 +187,19 @@ Partial Class frmMainTabbed
         Me.tmrNearFarHedgingTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrPetDGandhiTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrEMACrossoverTickerStatus = New System.Windows.Forms.Timer(Me.components)
-        Me.tmrCandleRangeBreakoutTickerStatus = New System.Windows.Forms.Timer(Me.components)
+        Me.tmrATMStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrJoyMaaATMTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrTwoThirdTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.msMainMenuStrip.SuspendLayout()
         Me.tabMain.SuspendLayout()
+        Me.tabATM.SuspendLayout()
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.SuspendLayout()
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.SuspendLayout()
+        Me.Panel8.SuspendLayout()
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.SuspendLayout()
+        CType(Me.PictureBox7, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.TableLayoutPanel6.SuspendLayout()
+        CType(Me.sfdgvATMMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabTwoThird.SuspendLayout()
         Me.pnlTwoThirdMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlTwoThirdTopHeaderVerticalSplitter.SuspendLayout()
@@ -208,14 +216,6 @@ Partial Class frmMainTabbed
         CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TableLayoutPanel7.SuspendLayout()
         CType(Me.sfdgvJoyMaaATMMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabCandleRangeBreakout.SuspendLayout()
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.SuspendLayout()
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.SuspendLayout()
-        Me.Panel8.SuspendLayout()
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.SuspendLayout()
-        CType(Me.PictureBox7, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.TableLayoutPanel6.SuspendLayout()
-        CType(Me.sfdgvCandleRangeBreakoutMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabPetDGandhi.SuspendLayout()
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.SuspendLayout()
@@ -313,7 +313,7 @@ Partial Class frmMainTabbed
         '
         'tabMain
         '
-        Me.tabMain.Controls.Add(Me.tabCandleRangeBreakout)
+        Me.tabMain.Controls.Add(Me.tabATM)
         Me.tabMain.Controls.Add(Me.tabTwoThird)
         Me.tabMain.Controls.Add(Me.tabJoyMaaATM)
         Me.tabMain.Controls.Add(Me.tabPetDGandhi)
@@ -330,6 +330,217 @@ Partial Class frmMainTabbed
         Me.tabMain.SelectedIndex = 0
         Me.tabMain.Size = New System.Drawing.Size(1371, 722)
         Me.tabMain.TabIndex = 1
+        '
+        'tabATM
+        '
+        Me.tabATM.Controls.Add(Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter)
+        Me.tabATM.Location = New System.Drawing.Point(4, 25)
+        Me.tabATM.Name = "tabATM"
+        Me.tabATM.Size = New System.Drawing.Size(1363, 693)
+        Me.tabATM.TabIndex = 7
+        Me.tabATM.Text = "ATM"
+        Me.tabATM.UseVisualStyleBackColor = True
+        '
+        'pnlCandleRangeBreakoutMainPanelHorizontalSplitter
+        '
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ColumnCount = 1
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Controls.Add(Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter, 0, 0)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Controls.Add(Me.pnlCandleRangeBreakoutBodyVerticalSplitter, 0, 1)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Name = "pnlCandleRangeBreakoutMainPanelHorizontalSplitter"
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.RowCount = 2
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.TabIndex = 5
+        '
+        'pnlCandleRangeBreakoutTopHeaderVerticalSplitter
+        '
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnCount = 15
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnATMStop, 0, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnATMStart, 0, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.Panel8, 14, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnATMSettings, 9, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.linklblATMTradableInstrument, 10, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Name = "pnlCandleRangeBreakoutTopHeaderVerticalSplitter"
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.RowCount = 1
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.TabIndex = 0
+        '
+        'btnATMStop
+        '
+        Me.btnATMStop.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnATMStop.Location = New System.Drawing.Point(94, 4)
+        Me.btnATMStop.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnATMStop.Name = "btnATMStop"
+        Me.btnATMStop.Size = New System.Drawing.Size(82, 32)
+        Me.btnATMStop.TabIndex = 10
+        Me.btnATMStop.Text = "Stop"
+        Me.btnATMStop.UseVisualStyleBackColor = True
+        '
+        'btnATMStart
+        '
+        Me.btnATMStart.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnATMStart.Location = New System.Drawing.Point(4, 4)
+        Me.btnATMStart.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnATMStart.Name = "btnATMStart"
+        Me.btnATMStart.Size = New System.Drawing.Size(82, 32)
+        Me.btnATMStart.TabIndex = 2
+        Me.btnATMStart.Text = "Start"
+        Me.btnATMStart.UseVisualStyleBackColor = True
+        '
+        'Panel8
+        '
+        Me.Panel8.Controls.Add(Me.blbATMTickerStatus)
+        Me.Panel8.Controls.Add(Me.lblCandleRangeBreakoutTickerStatus)
+        Me.Panel8.Location = New System.Drawing.Point(1201, 4)
+        Me.Panel8.Margin = New System.Windows.Forms.Padding(4)
+        Me.Panel8.Name = "Panel8"
+        Me.Panel8.Size = New System.Drawing.Size(147, 31)
+        Me.Panel8.TabIndex = 9
+        '
+        'blbATMTickerStatus
+        '
+        Me.blbATMTickerStatus.Color = System.Drawing.Color.Pink
+        Me.blbATMTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
+        Me.blbATMTickerStatus.Location = New System.Drawing.Point(100, 0)
+        Me.blbATMTickerStatus.Margin = New System.Windows.Forms.Padding(4)
+        Me.blbATMTickerStatus.Name = "blbATMTickerStatus"
+        Me.blbATMTickerStatus.On = True
+        Me.blbATMTickerStatus.Size = New System.Drawing.Size(47, 31)
+        Me.blbATMTickerStatus.TabIndex = 7
+        Me.blbATMTickerStatus.Text = "LedBulb1"
+        '
+        'lblCandleRangeBreakoutTickerStatus
+        '
+        Me.lblCandleRangeBreakoutTickerStatus.AutoSize = True
+        Me.lblCandleRangeBreakoutTickerStatus.Location = New System.Drawing.Point(9, 9)
+        Me.lblCandleRangeBreakoutTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblCandleRangeBreakoutTickerStatus.Name = "lblCandleRangeBreakoutTickerStatus"
+        Me.lblCandleRangeBreakoutTickerStatus.Size = New System.Drawing.Size(91, 17)
+        Me.lblCandleRangeBreakoutTickerStatus.TabIndex = 9
+        Me.lblCandleRangeBreakoutTickerStatus.Text = "Ticker Status"
+        '
+        'btnATMSettings
+        '
+        Me.btnATMSettings.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnATMSettings.Location = New System.Drawing.Point(814, 4)
+        Me.btnATMSettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnATMSettings.Name = "btnATMSettings"
+        Me.btnATMSettings.Size = New System.Drawing.Size(82, 32)
+        Me.btnATMSettings.TabIndex = 11
+        Me.btnATMSettings.Text = "Settings"
+        Me.btnATMSettings.UseVisualStyleBackColor = True
+        '
+        'linklblATMTradableInstrument
+        '
+        Me.linklblATMTradableInstrument.AutoSize = True
+        Me.linklblATMTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.linklblATMTradableInstrument.Enabled = False
+        Me.linklblATMTradableInstrument.Location = New System.Drawing.Point(903, 0)
+        Me.linklblATMTradableInstrument.Name = "linklblATMTradableInstrument"
+        Me.linklblATMTradableInstrument.Size = New System.Drawing.Size(220, 40)
+        Me.linklblATMTradableInstrument.TabIndex = 12
+        Me.linklblATMTradableInstrument.TabStop = True
+        Me.linklblATMTradableInstrument.Text = "Tradable Instruments: 0"
+        Me.linklblATMTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'pnlCandleRangeBreakoutBodyVerticalSplitter
+        '
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnCount = 2
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Controls.Add(Me.PictureBox7, 0, 0)
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel6, 0, 0)
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Name = "pnlCandleRangeBreakoutBodyVerticalSplitter"
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.RowCount = 1
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.TabIndex = 1
+        '
+        'PictureBox7
+        '
+        Me.PictureBox7.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox7.Image = CType(resources.GetObject("PictureBox7.Image"), System.Drawing.Image)
+        Me.PictureBox7.Location = New System.Drawing.Point(951, 2)
+        Me.PictureBox7.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox7.Name = "PictureBox7"
+        Me.PictureBox7.Size = New System.Drawing.Size(401, 633)
+        Me.PictureBox7.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox7.TabIndex = 2
+        Me.PictureBox7.TabStop = False
+        '
+        'TableLayoutPanel6
+        '
+        Me.TableLayoutPanel6.ColumnCount = 1
+        Me.TableLayoutPanel6.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.TableLayoutPanel6.Controls.Add(Me.lstCandleRangeBreakoutLog, 0, 1)
+        Me.TableLayoutPanel6.Controls.Add(Me.sfdgvATMMainDashboard, 0, 0)
+        Me.TableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.TableLayoutPanel6.Location = New System.Drawing.Point(4, 4)
+        Me.TableLayoutPanel6.Margin = New System.Windows.Forms.Padding(4)
+        Me.TableLayoutPanel6.Name = "TableLayoutPanel6"
+        Me.TableLayoutPanel6.RowCount = 2
+        Me.TableLayoutPanel6.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.TableLayoutPanel6.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.TableLayoutPanel6.Size = New System.Drawing.Size(940, 629)
+        Me.TableLayoutPanel6.TabIndex = 0
+        '
+        'lstCandleRangeBreakoutLog
+        '
+        Me.lstCandleRangeBreakoutLog.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstCandleRangeBreakoutLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
+        Me.lstCandleRangeBreakoutLog.FormattingEnabled = True
+        Me.lstCandleRangeBreakoutLog.ItemHeight = 16
+        Me.lstCandleRangeBreakoutLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstCandleRangeBreakoutLog.Margin = New System.Windows.Forms.Padding(4)
+        Me.lstCandleRangeBreakoutLog.Name = "lstCandleRangeBreakoutLog"
+        Me.lstCandleRangeBreakoutLog.Size = New System.Drawing.Size(932, 181)
+        Me.lstCandleRangeBreakoutLog.TabIndex = 9
+        '
+        'sfdgvATMMainDashboard
+        '
+        Me.sfdgvATMMainDashboard.AccessibleName = "Table"
+        Me.sfdgvATMMainDashboard.AllowDraggingColumns = True
+        Me.sfdgvATMMainDashboard.AllowEditing = False
+        Me.sfdgvATMMainDashboard.AllowFiltering = True
+        Me.sfdgvATMMainDashboard.AllowResizingColumns = True
+        Me.sfdgvATMMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
+        Me.sfdgvATMMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
+        Me.sfdgvATMMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.sfdgvATMMainDashboard.Location = New System.Drawing.Point(4, 4)
+        Me.sfdgvATMMainDashboard.Margin = New System.Windows.Forms.Padding(4)
+        Me.sfdgvATMMainDashboard.Name = "sfdgvATMMainDashboard"
+        Me.sfdgvATMMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
+        Me.sfdgvATMMainDashboard.Size = New System.Drawing.Size(932, 432)
+        Me.sfdgvATMMainDashboard.TabIndex = 6
+        Me.sfdgvATMMainDashboard.Text = "SfDataGrid1"
         '
         'tabTwoThird
         '
@@ -752,217 +963,6 @@ Partial Class frmMainTabbed
         Me.sfdgvJoyMaaATMMainDashboard.Size = New System.Drawing.Size(932, 432)
         Me.sfdgvJoyMaaATMMainDashboard.TabIndex = 6
         Me.sfdgvJoyMaaATMMainDashboard.Text = "SfDataGrid1"
-        '
-        'tabCandleRangeBreakout
-        '
-        Me.tabCandleRangeBreakout.Controls.Add(Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter)
-        Me.tabCandleRangeBreakout.Location = New System.Drawing.Point(4, 25)
-        Me.tabCandleRangeBreakout.Name = "tabCandleRangeBreakout"
-        Me.tabCandleRangeBreakout.Size = New System.Drawing.Size(1363, 693)
-        Me.tabCandleRangeBreakout.TabIndex = 7
-        Me.tabCandleRangeBreakout.Text = "ATM"
-        Me.tabCandleRangeBreakout.UseVisualStyleBackColor = True
-        '
-        'pnlCandleRangeBreakoutMainPanelHorizontalSplitter
-        '
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ColumnCount = 1
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Controls.Add(Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter, 0, 0)
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Controls.Add(Me.pnlCandleRangeBreakoutBodyVerticalSplitter, 0, 1)
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Name = "pnlCandleRangeBreakoutMainPanelHorizontalSplitter"
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.RowCount = 2
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.TabIndex = 5
-        '
-        'pnlCandleRangeBreakoutTopHeaderVerticalSplitter
-        '
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnCount = 15
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnCandleRangeBreakoutStop, 0, 0)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnCandleRangeBreakoutStart, 0, 0)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.Panel8, 14, 0)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnCandleRangeBreakoutSettings, 9, 0)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.linklblCandleRangeBreakoutTradableInstrument, 10, 0)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Name = "pnlCandleRangeBreakoutTopHeaderVerticalSplitter"
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.RowCount = 1
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.TabIndex = 0
-        '
-        'btnCandleRangeBreakoutStop
-        '
-        Me.btnCandleRangeBreakoutStop.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnCandleRangeBreakoutStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnCandleRangeBreakoutStop.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnCandleRangeBreakoutStop.Name = "btnCandleRangeBreakoutStop"
-        Me.btnCandleRangeBreakoutStop.Size = New System.Drawing.Size(82, 32)
-        Me.btnCandleRangeBreakoutStop.TabIndex = 10
-        Me.btnCandleRangeBreakoutStop.Text = "Stop"
-        Me.btnCandleRangeBreakoutStop.UseVisualStyleBackColor = True
-        '
-        'btnCandleRangeBreakoutStart
-        '
-        Me.btnCandleRangeBreakoutStart.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnCandleRangeBreakoutStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnCandleRangeBreakoutStart.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnCandleRangeBreakoutStart.Name = "btnCandleRangeBreakoutStart"
-        Me.btnCandleRangeBreakoutStart.Size = New System.Drawing.Size(82, 32)
-        Me.btnCandleRangeBreakoutStart.TabIndex = 2
-        Me.btnCandleRangeBreakoutStart.Text = "Start"
-        Me.btnCandleRangeBreakoutStart.UseVisualStyleBackColor = True
-        '
-        'Panel8
-        '
-        Me.Panel8.Controls.Add(Me.blbCandleRangeBreakoutTickerStatus)
-        Me.Panel8.Controls.Add(Me.lblCandleRangeBreakoutTickerStatus)
-        Me.Panel8.Location = New System.Drawing.Point(1201, 4)
-        Me.Panel8.Margin = New System.Windows.Forms.Padding(4)
-        Me.Panel8.Name = "Panel8"
-        Me.Panel8.Size = New System.Drawing.Size(147, 31)
-        Me.Panel8.TabIndex = 9
-        '
-        'blbCandleRangeBreakoutTickerStatus
-        '
-        Me.blbCandleRangeBreakoutTickerStatus.Color = System.Drawing.Color.Pink
-        Me.blbCandleRangeBreakoutTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
-        Me.blbCandleRangeBreakoutTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbCandleRangeBreakoutTickerStatus.Margin = New System.Windows.Forms.Padding(4)
-        Me.blbCandleRangeBreakoutTickerStatus.Name = "blbCandleRangeBreakoutTickerStatus"
-        Me.blbCandleRangeBreakoutTickerStatus.On = True
-        Me.blbCandleRangeBreakoutTickerStatus.Size = New System.Drawing.Size(47, 31)
-        Me.blbCandleRangeBreakoutTickerStatus.TabIndex = 7
-        Me.blbCandleRangeBreakoutTickerStatus.Text = "LedBulb1"
-        '
-        'lblCandleRangeBreakoutTickerStatus
-        '
-        Me.lblCandleRangeBreakoutTickerStatus.AutoSize = True
-        Me.lblCandleRangeBreakoutTickerStatus.Location = New System.Drawing.Point(9, 9)
-        Me.lblCandleRangeBreakoutTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblCandleRangeBreakoutTickerStatus.Name = "lblCandleRangeBreakoutTickerStatus"
-        Me.lblCandleRangeBreakoutTickerStatus.Size = New System.Drawing.Size(91, 17)
-        Me.lblCandleRangeBreakoutTickerStatus.TabIndex = 9
-        Me.lblCandleRangeBreakoutTickerStatus.Text = "Ticker Status"
-        '
-        'btnCandleRangeBreakoutSettings
-        '
-        Me.btnCandleRangeBreakoutSettings.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnCandleRangeBreakoutSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnCandleRangeBreakoutSettings.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnCandleRangeBreakoutSettings.Name = "btnCandleRangeBreakoutSettings"
-        Me.btnCandleRangeBreakoutSettings.Size = New System.Drawing.Size(82, 32)
-        Me.btnCandleRangeBreakoutSettings.TabIndex = 11
-        Me.btnCandleRangeBreakoutSettings.Text = "Settings"
-        Me.btnCandleRangeBreakoutSettings.UseVisualStyleBackColor = True
-        '
-        'linklblCandleRangeBreakoutTradableInstrument
-        '
-        Me.linklblCandleRangeBreakoutTradableInstrument.AutoSize = True
-        Me.linklblCandleRangeBreakoutTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.linklblCandleRangeBreakoutTradableInstrument.Enabled = False
-        Me.linklblCandleRangeBreakoutTradableInstrument.Location = New System.Drawing.Point(903, 0)
-        Me.linklblCandleRangeBreakoutTradableInstrument.Name = "linklblCandleRangeBreakoutTradableInstrument"
-        Me.linklblCandleRangeBreakoutTradableInstrument.Size = New System.Drawing.Size(220, 40)
-        Me.linklblCandleRangeBreakoutTradableInstrument.TabIndex = 12
-        Me.linklblCandleRangeBreakoutTradableInstrument.TabStop = True
-        Me.linklblCandleRangeBreakoutTradableInstrument.Text = "Tradable Instruments: 0"
-        Me.linklblCandleRangeBreakoutTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'pnlCandleRangeBreakoutBodyVerticalSplitter
-        '
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnCount = 2
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Controls.Add(Me.PictureBox7, 0, 0)
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel6, 0, 0)
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Name = "pnlCandleRangeBreakoutBodyVerticalSplitter"
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.RowCount = 1
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.TabIndex = 1
-        '
-        'PictureBox7
-        '
-        Me.PictureBox7.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.PictureBox7.Image = CType(resources.GetObject("PictureBox7.Image"), System.Drawing.Image)
-        Me.PictureBox7.Location = New System.Drawing.Point(951, 2)
-        Me.PictureBox7.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.PictureBox7.Name = "PictureBox7"
-        Me.PictureBox7.Size = New System.Drawing.Size(401, 633)
-        Me.PictureBox7.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox7.TabIndex = 2
-        Me.PictureBox7.TabStop = False
-        '
-        'TableLayoutPanel6
-        '
-        Me.TableLayoutPanel6.ColumnCount = 1
-        Me.TableLayoutPanel6.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.TableLayoutPanel6.Controls.Add(Me.lstCandleRangeBreakoutLog, 0, 1)
-        Me.TableLayoutPanel6.Controls.Add(Me.sfdgvCandleRangeBreakoutMainDashboard, 0, 0)
-        Me.TableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.TableLayoutPanel6.Location = New System.Drawing.Point(4, 4)
-        Me.TableLayoutPanel6.Margin = New System.Windows.Forms.Padding(4)
-        Me.TableLayoutPanel6.Name = "TableLayoutPanel6"
-        Me.TableLayoutPanel6.RowCount = 2
-        Me.TableLayoutPanel6.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
-        Me.TableLayoutPanel6.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.TableLayoutPanel6.Size = New System.Drawing.Size(940, 629)
-        Me.TableLayoutPanel6.TabIndex = 0
-        '
-        'lstCandleRangeBreakoutLog
-        '
-        Me.lstCandleRangeBreakoutLog.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.lstCandleRangeBreakoutLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
-        Me.lstCandleRangeBreakoutLog.FormattingEnabled = True
-        Me.lstCandleRangeBreakoutLog.ItemHeight = 16
-        Me.lstCandleRangeBreakoutLog.Location = New System.Drawing.Point(4, 444)
-        Me.lstCandleRangeBreakoutLog.Margin = New System.Windows.Forms.Padding(4)
-        Me.lstCandleRangeBreakoutLog.Name = "lstCandleRangeBreakoutLog"
-        Me.lstCandleRangeBreakoutLog.Size = New System.Drawing.Size(932, 181)
-        Me.lstCandleRangeBreakoutLog.TabIndex = 9
-        '
-        'sfdgvCandleRangeBreakoutMainDashboard
-        '
-        Me.sfdgvCandleRangeBreakoutMainDashboard.AccessibleName = "Table"
-        Me.sfdgvCandleRangeBreakoutMainDashboard.AllowDraggingColumns = True
-        Me.sfdgvCandleRangeBreakoutMainDashboard.AllowEditing = False
-        Me.sfdgvCandleRangeBreakoutMainDashboard.AllowFiltering = True
-        Me.sfdgvCandleRangeBreakoutMainDashboard.AllowResizingColumns = True
-        Me.sfdgvCandleRangeBreakoutMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
-        Me.sfdgvCandleRangeBreakoutMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
-        Me.sfdgvCandleRangeBreakoutMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.sfdgvCandleRangeBreakoutMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvCandleRangeBreakoutMainDashboard.Margin = New System.Windows.Forms.Padding(4)
-        Me.sfdgvCandleRangeBreakoutMainDashboard.Name = "sfdgvCandleRangeBreakoutMainDashboard"
-        Me.sfdgvCandleRangeBreakoutMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvCandleRangeBreakoutMainDashboard.Size = New System.Drawing.Size(932, 432)
-        Me.sfdgvCandleRangeBreakoutMainDashboard.TabIndex = 6
-        Me.sfdgvCandleRangeBreakoutMainDashboard.Text = "SfDataGrid1"
         '
         'tabPetDGandhi
         '
@@ -2476,9 +2476,9 @@ Partial Class frmMainTabbed
         '
         Me.tmrEMACrossoverTickerStatus.Enabled = True
         '
-        'tmrCandleRangeBreakoutTickerStatus
+        'tmrATMStatus
         '
-        Me.tmrCandleRangeBreakoutTickerStatus.Enabled = True
+        Me.tmrATMStatus.Enabled = True
         '
         'tmrJoyMaaATMTickerStatus
         '
@@ -2504,6 +2504,16 @@ Partial Class frmMainTabbed
         Me.msMainMenuStrip.ResumeLayout(False)
         Me.msMainMenuStrip.PerformLayout()
         Me.tabMain.ResumeLayout(False)
+        Me.tabATM.ResumeLayout(False)
+        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ResumeLayout(False)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ResumeLayout(False)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.PerformLayout()
+        Me.Panel8.ResumeLayout(False)
+        Me.Panel8.PerformLayout()
+        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ResumeLayout(False)
+        CType(Me.PictureBox7, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.TableLayoutPanel6.ResumeLayout(False)
+        CType(Me.sfdgvATMMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabTwoThird.ResumeLayout(False)
         Me.pnlTwoThirdMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlTwoThirdTopHeaderVerticalSplitter.ResumeLayout(False)
@@ -2524,16 +2534,6 @@ Partial Class frmMainTabbed
         CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TableLayoutPanel7.ResumeLayout(False)
         CType(Me.sfdgvJoyMaaATMMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabCandleRangeBreakout.ResumeLayout(False)
-        Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ResumeLayout(False)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ResumeLayout(False)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.PerformLayout()
-        Me.Panel8.ResumeLayout(False)
-        Me.Panel8.PerformLayout()
-        Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ResumeLayout(False)
-        CType(Me.PictureBox7, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.TableLayoutPanel6.ResumeLayout(False)
-        CType(Me.sfdgvCandleRangeBreakoutMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabPetDGandhi.ResumeLayout(False)
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.ResumeLayout(False)
@@ -2722,21 +2722,21 @@ Partial Class frmMainTabbed
     Friend WithEvents TableLayoutPanel5 As TableLayoutPanel
     Friend WithEvents lstEMACrossoverLog As ListBox
     Friend WithEvents sfdgvEMACrossoverMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
-    Friend WithEvents tabCandleRangeBreakout As TabPage
+    Friend WithEvents tabATM As TabPage
     Friend WithEvents pnlCandleRangeBreakoutMainPanelHorizontalSplitter As TableLayoutPanel
     Friend WithEvents pnlCandleRangeBreakoutTopHeaderVerticalSplitter As TableLayoutPanel
-    Friend WithEvents btnCandleRangeBreakoutStop As Button
-    Friend WithEvents btnCandleRangeBreakoutStart As Button
+    Friend WithEvents btnATMStop As Button
+    Friend WithEvents btnATMStart As Button
     Friend WithEvents Panel8 As Panel
-    Friend WithEvents blbCandleRangeBreakoutTickerStatus As Bulb.LedBulb
+    Friend WithEvents blbATMTickerStatus As Bulb.LedBulb
     Friend WithEvents lblCandleRangeBreakoutTickerStatus As Label
-    Friend WithEvents btnCandleRangeBreakoutSettings As Button
-    Friend WithEvents linklblCandleRangeBreakoutTradableInstrument As LinkLabel
+    Friend WithEvents btnATMSettings As Button
+    Friend WithEvents linklblATMTradableInstrument As LinkLabel
     Friend WithEvents pnlCandleRangeBreakoutBodyVerticalSplitter As TableLayoutPanel
     Friend WithEvents TableLayoutPanel6 As TableLayoutPanel
     Friend WithEvents lstCandleRangeBreakoutLog As ListBox
-    Friend WithEvents sfdgvCandleRangeBreakoutMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
-    Friend WithEvents tmrCandleRangeBreakoutTickerStatus As Timer
+    Friend WithEvents sfdgvATMMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
+    Friend WithEvents tmrATMStatus As Timer
     Friend WithEvents tabJoyMaaATM As TabPage
     Friend WithEvents tmrJoyMaaATMTickerStatus As Timer
     Friend WithEvents pnlJoyMaaATMMainPanelHorizontalSplitter As TableLayoutPanel

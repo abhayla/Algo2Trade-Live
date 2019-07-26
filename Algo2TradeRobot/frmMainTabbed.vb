@@ -1926,14 +1926,14 @@ Public Class frmMainTabbed
     Private _ATMDashboadList As BindingList(Of ActivityDashboard) = Nothing
     Private _ATMTradableInstruments As IEnumerable(Of ATMStrategyInstrument) = Nothing
     Private _ATMStrategyToExecute As ATMStrategy = Nothing
-    Private Sub sfdgvCandleRangeBreakoutMainDashboard_FilterPopupShowing(sender As Object, e As FilterPopupShowingEventArgs) Handles sfdgvCandleRangeBreakoutMainDashboard.FilterPopupShowing
+    Private Sub sfdgvATMMainDashboard_FilterPopupShowing(sender As Object, e As FilterPopupShowingEventArgs) Handles sfdgvATMMainDashboard.FilterPopupShowing
         ManipulateGridEx(GridMode.TouchupPopupFilter, e, GetType(ATMStrategy))
     End Sub
-    Private Sub sfdgvCandleRangeBreakoutMainDashboard_AutoGeneratingColumn(sender As Object, e As AutoGeneratingColumnArgs) Handles sfdgvCandleRangeBreakoutMainDashboard.AutoGeneratingColumn
+    Private Sub sfdgvATMMainDashboard_AutoGeneratingColumn(sender As Object, e As AutoGeneratingColumnArgs) Handles sfdgvATMMainDashboard.AutoGeneratingColumn
         ManipulateGridEx(GridMode.TouchupAutogeneratingColumn, e, GetType(ATMStrategy))
     End Sub
     Private Async Function ATMWorkerAsync() As Task
-        If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
+        If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
             MsgBox("Cannot start as another strategy is loggin in")
             Exit Function
         End If
@@ -2067,15 +2067,15 @@ Public Class frmMainTabbed
             _cts.Token.ThrowIfCancellationRequested()
 
             _ATMTradableInstruments = _ATMStrategyToExecute.TradableStrategyInstruments
-            SetObjectText_ThreadSafe(linklblCandleRangeBreakoutTradableInstrument, String.Format("Tradable Instruments: {0}", _ATMTradableInstruments.Count))
-            SetObjectEnableDisable_ThreadSafe(linklblCandleRangeBreakoutTradableInstrument, True)
+            SetObjectText_ThreadSafe(linklblATMTradableInstrument, String.Format("Tradable Instruments: {0}", _ATMTradableInstruments.Count))
+            SetObjectEnableDisable_ThreadSafe(linklblATMTradableInstrument, True)
             _cts.Token.ThrowIfCancellationRequested()
 
             _ATMDashboadList = New BindingList(Of ActivityDashboard)(_ATMStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
                                                                                                                                             Return x.SignalGeneratedTime
                                                                                                                                         End Function).ToList)
-            SetSFGridDataBind_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard, _ATMDashboadList)
-            SetSFGridFreezFirstColumn_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard)
+            SetSFGridDataBind_ThreadSafe(sfdgvATMMainDashboard, _ATMDashboadList)
+            SetSFGridFreezFirstColumn_ThreadSafe(sfdgvATMMainDashboard)
             _cts.Token.ThrowIfCancellationRequested()
 
             Await _ATMStrategyToExecute.MonitorAsync().ConfigureAwait(False)
@@ -2112,7 +2112,7 @@ Public Class frmMainTabbed
         _cts = Nothing
         'End If
     End Function
-    Private Async Sub btnCandleRangeBreakoutStart_Click(sender As Object, e As EventArgs) Handles btnCandleRangeBreakoutStart.Click
+    Private Async Sub btnATMStart_Click(sender As Object, e As EventArgs) Handles btnATMStart.Click
         'Dim authenticationUserId As String = "YH8805"
         'If Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper IsNot Nothing AndAlso
         '    Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper <> "" AndAlso
@@ -2130,30 +2130,30 @@ Public Class frmMainTabbed
                 CType(_lastException, AdapterBusinessException).ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
                 Debug.WriteLine("Restart for permission")
                 logger.Debug("Restarting the application again as there is premission issue")
-                btnCandleRangeBreakoutStart_Click(sender, e)
+                btnATMStart_Click(sender, e)
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
-                btnCandleRangeBreakoutStart_Click(sender, e)
+                btnATMStart_Click(sender, e)
             End If
         End If
     End Sub
-    Private Sub tmrCandleRangeBreakoutTickerStatus_Tick(sender As Object, e As EventArgs) Handles tmrCandleRangeBreakoutTickerStatus.Tick
+    Private Sub tmrATMTickerStatus_Tick(sender As Object, e As EventArgs) Handles tmrATMStatus.Tick
         FlashTickerBulbEx(GetType(ATMStrategy))
     End Sub
-    Private Async Sub btnCandleRangeBreakoutStop_Click(sender As Object, e As EventArgs) Handles btnCandleRangeBreakoutStop.Click
+    Private Async Sub btnATMStop_Click(sender As Object, e As EventArgs) Handles btnATMStop.Click
         OnEndOfTheDay(_ATMStrategyToExecute)
-        SetObjectEnableDisable_ThreadSafe(linklblCandleRangeBreakoutTradableInstrument, False)
+        SetObjectEnableDisable_ThreadSafe(linklblATMTradableInstrument, False)
         If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
         If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
         If _commonController IsNot Nothing Then Await _commonController.CloseCollectorIfConnectedAsync(True).ConfigureAwait(False)
         _cts.Cancel()
     End Sub
-    Private Sub btnCandleRangeBreakoutSettings_Click(sender As Object, e As EventArgs) Handles btnCandleRangeBreakoutSettings.Click
+    Private Sub btnATMSettings_Click(sender As Object, e As EventArgs) Handles btnATMSettings.Click
         Dim newForm As New frmATMSettings(_ATMUserInputs)
         newForm.ShowDialog()
     End Sub
-    Private Sub linklblCandleRangeBreakoutTradableInstrument_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles linklblCandleRangeBreakoutTradableInstrument.LinkClicked
+    Private Sub linklblATMTradableInstrument_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles linklblATMTradableInstrument.LinkClicked
         Dim newForm As New frmATMTradableInstrumentList(_ATMTradableInstruments)
         newForm.ShowDialog()
     End Sub
@@ -2677,9 +2677,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -2714,9 +2714,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -2763,9 +2763,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -2800,9 +2800,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -2849,9 +2849,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -2886,9 +2886,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -2935,9 +2935,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -2972,9 +2972,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3021,9 +3021,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -3058,9 +3058,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3107,9 +3107,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnEMACrossoverStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnEMACrossoverStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -3144,9 +3144,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnEMACrossoverStart, "Start")
                         SetObjectText_ThreadSafe(btnEMACrossoverStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3193,9 +3193,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -3230,9 +3230,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3251,9 +3251,9 @@ Public Class frmMainTabbed
         ElseIf source Is GetType(ATMStrategy) Then
             Select Case mode
                 Case UIMode.Active
-                    SetObjectEnableDisable_ThreadSafe(btnCandleRangeBreakoutStart, False)
-                    SetObjectEnableDisable_ThreadSafe(btnCandleRangeBreakoutSettings, False)
-                    SetObjectEnableDisable_ThreadSafe(btnCandleRangeBreakoutStop, True)
+                    SetObjectEnableDisable_ThreadSafe(btnATMStart, False)
+                    SetObjectEnableDisable_ThreadSafe(btnATMSettings, False)
+                    SetObjectEnableDisable_ThreadSafe(btnATMStop, True)
                 Case UIMode.BlockOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, Common.LOGIN_PENDING)
@@ -3329,10 +3329,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
-                    SetObjectEnableDisable_ThreadSafe(btnCandleRangeBreakoutStart, True)
-                    SetObjectEnableDisable_ThreadSafe(btnCandleRangeBreakoutSettings, True)
-                    SetObjectEnableDisable_ThreadSafe(btnCandleRangeBreakoutStop, False)
-                    SetSFGridDataBind_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard, Nothing)
+                    SetObjectEnableDisable_ThreadSafe(btnATMStart, True)
+                    SetObjectEnableDisable_ThreadSafe(btnATMSettings, True)
+                    SetObjectEnableDisable_ThreadSafe(btnATMStop, False)
+                    SetSFGridDataBind_ThreadSafe(sfdgvATMMainDashboard, Nothing)
             End Select
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             Select Case mode
@@ -3369,9 +3369,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
@@ -3406,9 +3406,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
@@ -3455,9 +3455,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -3492,9 +3492,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnCandleRangeBreakoutStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStart, "Start")
-                        SetObjectText_ThreadSafe(btnCandleRangeBreakoutStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnATMStart, "Start")
+                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3533,8 +3533,8 @@ Public Class frmMainTabbed
             blbTickerStatusCommon = blbEMACrossoverTickerStatus
             tmrTickerStatusCommon = tmrEMACrossoverTickerStatus
         ElseIf source Is GetType(ATMStrategy) Then
-            blbTickerStatusCommon = blbCandleRangeBreakoutTickerStatus
-            tmrTickerStatusCommon = tmrCandleRangeBreakoutTickerStatus
+            blbTickerStatusCommon = blbATMTickerStatus
+            tmrTickerStatusCommon = tmrATMStatus
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             blbTickerStatusCommon = blbJoyMaaATMTickerStatus
             tmrTickerStatusCommon = tmrJoyMaaATMTickerStatus
@@ -3577,7 +3577,7 @@ Public Class frmMainTabbed
         ElseIf source Is GetType(EMACrossoverStrategy) Then
             blbTickerStatusCommon = blbEMACrossoverTickerStatus
         ElseIf source Is GetType(ATMStrategy) Then
-            blbTickerStatusCommon = blbCandleRangeBreakoutTickerStatus
+            blbTickerStatusCommon = blbATMTickerStatus
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             blbTickerStatusCommon = blbJoyMaaATMTickerStatus
         ElseIf source Is GetType(TwoThirdStrategy) Then
@@ -3608,7 +3608,7 @@ Public Class frmMainTabbed
         ElseIf source Is GetType(EMACrossoverStrategy) Then
             sfdgvCommon = sfdgvEMACrossoverMainDashboard
         ElseIf source Is GetType(ATMStrategy) Then
-            sfdgvCommon = sfdgvCandleRangeBreakoutMainDashboard
+            sfdgvCommon = sfdgvATMMainDashboard
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             sfdgvCommon = sfdgvJoyMaaATMMainDashboard
         ElseIf source Is GetType(TwoThirdStrategy) Then
@@ -3780,7 +3780,7 @@ Public Class frmMainTabbed
         'tabMain.TabPages.Remove(tabAmiSignal)
         'tabMain.TabPages.Remove(tabEMA_Supertrend)
         'tabMain.TabPages.Remove(tabNearFarHedging)
-        'tabMain.TabPages.Remove(tabCandleRangeBreakout)
+        'tabMain.TabPages.Remove(tabATM)
         'tabMain.TabPages.Remove(tabPetDGandhi)
         'tabMain.TabPages.Remove(tabEMACrossover)
         'tabMain.TabPages.Remove(tabJoyMaaATM)
@@ -3959,11 +3959,11 @@ Public Class frmMainTabbed
                 SetSFGridDataBind_ThreadSafe(sfdgvEMACrossoverMainDashboard, _EMACrossoverDashboadList)
                 SetSFGridFreezFirstColumn_ThreadSafe(sfdgvEMACrossoverMainDashboard)
             Case GetType(ATMStrategy)
-                SetSFGridDataBind_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard, Nothing)
+                SetSFGridDataBind_ThreadSafe(sfdgvATMMainDashboard, Nothing)
                 _ATMDashboadList = Nothing
                 _ATMDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
-                SetSFGridDataBind_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard, _ATMDashboadList)
-                SetSFGridFreezFirstColumn_ThreadSafe(sfdgvCandleRangeBreakoutMainDashboard)
+                SetSFGridDataBind_ThreadSafe(sfdgvATMMainDashboard, _ATMDashboadList)
+                SetSFGridFreezFirstColumn_ThreadSafe(sfdgvATMMainDashboard)
             Case GetType(JoyMaaATMStrategy)
                 SetSFGridDataBind_ThreadSafe(sfdgvJoyMaaATMMainDashboard, Nothing)
                 _JoyMaaATMDashboadList = Nothing
