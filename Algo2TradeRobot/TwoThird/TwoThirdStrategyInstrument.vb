@@ -109,6 +109,7 @@ Public Class TwoThirdStrategyInstrument
 
         Dim longActiveTrades As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.Buy)
         Dim shortActiveTrades As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.Sell)
+        Dim lastExecutedTrade As IBusinessOrder = GetLastExecutedOrder()
 
         Try
             If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
@@ -126,7 +127,7 @@ Public Class TwoThirdStrategyInstrument
                     _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
                     logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
                     If _signalCandle IsNot Nothing Then
-                        logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Signal Candle Time:{5}, Signal Candle Range:{6}, Signal Candle Source:{7}, {8}, Is Active Instrument:{9}, Reverse Trade:{10}, Number Of Trade:{11}, Stoploss Movement To Breakeven:{12}, Count Trades With Breakeven Movement:{13}, OverAll PL:{14}, Is Target Reached:{15}, Long Active Trades:{16}, Short Active Trades:{17}, Current Time:{18}, Current LTP:{19}, TradingSymbol:{20}",
+                        logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Signal Candle Time:{5}, Signal Candle Range:{6}, Signal Candle Source:{7}, {8}, Is Active Instrument:{9}, Reverse Trade:{10}, Number Of Trade:{11}, Stoploss Movement To Breakeven:{12}, Count Trades With Breakeven Movement:{13}, OverAll PL:{14}, Is Target Reached:{15}, Long Active Trades:{16}, Short Active Trades:{17}, Last Executed Trade Direction:{18}, Current Time:{19}, Current LTP:{20}, TradingSymbol:{21}",
                                     userSettings.TradeStartTime.ToString,
                                     userSettings.LastTradeEntryTime.ToString,
                                     runningCandlePayload.SnapshotDateTime.ToString,
@@ -145,6 +146,7 @@ Public Class TwoThirdStrategyInstrument
                                     IsAnyTradeTargetReached(),
                                     If(longActiveTrades Is Nothing, "Nothing", longActiveTrades.Count),
                                     If(shortActiveTrades Is Nothing, "Nothing", shortActiveTrades.Count),
+                                    If(lastExecutedTrade Is Nothing, "Nothing", lastExecutedTrade.ParentOrder.TransactionType.ToString),
                                     currentTime.ToString,
                                     currentTick.LastPrice,
                                     Me.TradableInstrument.TradingSymbol)
@@ -186,9 +188,9 @@ Public Class TwoThirdStrategyInstrument
             (Not IsActiveInstrument() OrElse userSettings.ReverseTrade) AndAlso GetTotalLogicalExecutedOrders() < userSettings.NumberOfTradePerStock AndAlso
             Not IsAnyTradeTargetReached() AndAlso Me.ParentStrategy.GetTotalPLAfterBrokerage() > Math.Abs(userSettings.MaxLossPerDay) * -1 AndAlso
             Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay Then
-            Dim atr As Decimal = Math.Round(CType(atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value, 2)
 
             If _signalCandle Is Nothing OrElse (_signalCandle IsNot Nothing AndAlso _signalCandle.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick) Then
+                Dim atr As Decimal = Math.Round(CType(atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value, 2)
                 If runningCandlePayload.PreviousPayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick Then
                     If runningCandlePayload.PreviousPayload.CandleRange <> 0 AndAlso
                         runningCandlePayload.PreviousPayload.CandleRangePercentage < 1 AndAlso
@@ -214,7 +216,8 @@ Public Class TwoThirdStrategyInstrument
                 Dim shortEntryBuffer As Decimal = CalculateBuffer(potentialShortEntryPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Floor)
 
                 Dim quantity As Integer = 0
-                If longActiveTrades Is Nothing OrElse longActiveTrades.Count = 0 Then
+                If (longActiveTrades Is Nothing OrElse longActiveTrades.Count = 0) AndAlso
+                    (lastExecutedTrade Is Nothing OrElse lastExecutedTrade.ParentOrder.TransactionType <> IOrder.TypeOfTransaction.Buy) Then
                     Dim triggerPrice As Decimal = potentialLongEntryPrice + longEntryBuffer
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                     Dim stoploss As Decimal = ConvertFloorCeling(_signalCandle.CandleRange, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
@@ -235,7 +238,8 @@ Public Class TwoThirdStrategyInstrument
                                  .Quantity = quantity}
                     End If
                 End If
-                If shortActiveTrades Is Nothing OrElse shortActiveTrades.Count = 0 Then
+                If (shortActiveTrades Is Nothing OrElse shortActiveTrades.Count = 0) AndAlso
+                    (lastExecutedTrade Is Nothing OrElse lastExecutedTrade.ParentOrder.TransactionType <> IOrder.TypeOfTransaction.Sell) Then
                     Dim triggerPrice As Decimal = potentialShortEntryPrice - shortEntryBuffer
                     Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                     Dim stoploss As Decimal = ConvertFloorCeling(_signalCandle.CandleRange, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
@@ -489,7 +493,7 @@ Public Class TwoThirdStrategyInstrument
 
     Private Function IsAnyTradeTargetReached() As Boolean
         Dim ret As Boolean = False
-        If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+        If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 AndAlso _signalCandle IsNot Nothing Then
             For Each parentOrder In OrderDetails.Keys
                 Dim bussinessOrder As IBusinessOrder = OrderDetails(parentOrder)
                 If bussinessOrder.AllOrder IsNot Nothing AndAlso bussinessOrder.AllOrder.Count > 0 Then
@@ -501,7 +505,7 @@ Public Class TwoThirdStrategyInstrument
                             ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                                 target = bussinessOrder.ParentOrder.AveragePrice - order.AveragePrice
                             End If
-                            If target >= 0 Then
+                            If target >= ConvertFloorCeling(_signalCandle.CandleRange * (Me.ParentStrategy.UserSettings.TargetMultiplier - 1), Me.TradableInstrument.TickSize, RoundOfType.Celing) Then
                                 ret = True
                                 Exit For
                             End If
