@@ -367,7 +367,7 @@ Public Class TwoThirdStrategyInstrument
             For Each runningOrderID In OrderDetails.Keys
                 Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
                 Dim targetReachedForBreakevenMovement As Boolean = False
-                If bussinessOrder.TargetOrder IsNot Nothing AndAlso bussinessOrder.TargetOrder.Count > 0 Then
+                If bussinessOrder.TargetOrder IsNot Nothing AndAlso bussinessOrder.TargetOrder.Count > 0 AndAlso userSettings.StoplossMovementToBreakeven Then
                     For Each runningTragetOrder In bussinessOrder.TargetOrder
                         If runningTragetOrder.Status <> IOrder.TypeOfStatus.Rejected Then
                             Dim target As Decimal = 0
