@@ -369,15 +369,15 @@ Public Class TwoThirdStrategyInstrument
                 Dim targetReachedForBreakevenMovement As Boolean = False
                 If bussinessOrder.TargetOrder IsNot Nothing AndAlso bussinessOrder.TargetOrder.Count > 0 AndAlso userSettings.StoplossMovementToBreakeven Then
                     For Each runningTragetOrder In bussinessOrder.TargetOrder
-                        If runningTragetOrder.Status <> IOrder.TypeOfStatus.Rejected Then
+                        If runningTragetOrder.Status = IOrder.TypeOfStatus.Open Then
                             Dim target As Decimal = 0
                             Dim potentialTargetPrice As Decimal = 0
                             If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                target = runningTragetOrder.AveragePrice - bussinessOrder.ParentOrder.AveragePrice
+                                target = runningTragetOrder.Price - bussinessOrder.ParentOrder.AveragePrice
                                 potentialTargetPrice = bussinessOrder.ParentOrder.AveragePrice + ConvertFloorCeling(target * 2 / 3, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                                 If currentTick.LastPrice >= potentialTargetPrice Then targetReachedForBreakevenMovement = True
                             ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                target = bussinessOrder.ParentOrder.AveragePrice - runningTragetOrder.AveragePrice
+                                target = bussinessOrder.ParentOrder.AveragePrice - runningTragetOrder.Price
                                 potentialTargetPrice = bussinessOrder.ParentOrder.AveragePrice - ConvertFloorCeling(target * 2 / 3, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                                 If currentTick.LastPrice <= potentialTargetPrice Then targetReachedForBreakevenMovement = True
                             End If
