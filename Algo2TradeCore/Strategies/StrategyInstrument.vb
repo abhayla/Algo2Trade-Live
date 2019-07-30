@@ -129,6 +129,7 @@ Namespace Strategies
         Public Property RawPayloadDependentConsumers As List(Of IPayloadConsumer)
         Public Property TickPayloadDependentConsumers As List(Of IPayloadConsumer)
         Public Property IsPairInstrument As Boolean
+        Public Property StrategyExitAllTriggerd As Boolean
         Public Property DependendStrategyInstruments As IEnumerable(Of StrategyInstrument) 'Only used if it is a pair instrument
         Public Property ParentStrategyInstruments As IEnumerable(Of StrategyInstrument) 'Only used if it is a pair instrument
         Public Property PairConsumerProtection As Boolean 'Only used if it is a pair instrument
@@ -146,6 +147,7 @@ Namespace Strategies
             OrderDetails = New Concurrent.ConcurrentDictionary(Of String, IBusinessOrder)
             Me.IsPairInstrument = isPairInstrument
             Me.PairConsumerProtection = True
+            Me.StrategyExitAllTriggerd = False
         End Sub
 
 #Region "Required Functions"

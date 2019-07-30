@@ -70,6 +70,7 @@ Public Class frmTwoThirdSettings
             chbAutoSelectStock.Checked = _settings.AutoSelectStock
             chbCash.Checked = _settings.CashInstrument
             chbFuture.Checked = _settings.FutureInstrument
+            chbAllowToIncreaseCapital.Checked = _settings.AllowToIncreaseCapital
             txtFutureMinCapital.Text = _settings.MinCapital
             txtManualStockList.Text = _settings.ManualInstrumentList
             txtMinPrice.Text = _settings.MinPrice
@@ -97,6 +98,7 @@ Public Class frmTwoThirdSettings
         _settings.AutoSelectStock = chbAutoSelectStock.Checked
         _settings.CashInstrument = chbCash.Checked
         _settings.FutureInstrument = chbFuture.Checked
+        _settings.AllowToIncreaseCapital = chbAllowToIncreaseCapital.Checked
         _settings.MinCapital = txtFutureMinCapital.Text
         _settings.ManualInstrumentList = txtManualStockList.Text
         _settings.MinPrice = txtMinPrice.Text

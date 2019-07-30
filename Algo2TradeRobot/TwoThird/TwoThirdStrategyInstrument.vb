@@ -118,8 +118,8 @@ Public Class TwoThirdStrategyInstrument
                     potentialLongEntryPrice += CalculateBuffer(potentialLongEntryPrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     Dim potentialShortEntryPrice As Decimal = runningCandlePayload.PreviousPayload.LowPrice.Value
                     potentialShortEntryPrice -= CalculateBuffer(potentialShortEntryPrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                    Dim potentialLongEntryQuantity As Integer = CalculateQuantityFromInvestment(potentialLongEntryPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, True)
-                    Dim potentialShortEntryQuantity As Integer = CalculateQuantityFromInvestment(potentialShortEntryPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, True)
+                    Dim potentialLongEntryQuantity As Integer = CalculateQuantityFromInvestment(potentialLongEntryPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, userSettings.AllowToIncreaseCapital)
+                    Dim potentialShortEntryQuantity As Integer = CalculateQuantityFromInvestment(potentialShortEntryPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, userSettings.AllowToIncreaseCapital)
                     longBreakevenPoints = GetBreakevenPoint(potentialLongEntryPrice, potentialLongEntryQuantity, IOrder.TypeOfTransaction.Buy)
                     shortBreakevenPoints = GetBreakevenPoint(potentialShortEntryPrice, potentialLongEntryQuantity, IOrder.TypeOfTransaction.Sell)
                 End If
@@ -187,7 +187,7 @@ Public Class TwoThirdStrategyInstrument
             runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso
             (Not IsActiveInstrument() OrElse userSettings.ReverseTrade) AndAlso GetTotalLogicalExecutedOrders() < userSettings.NumberOfTradePerStock AndAlso
             Not IsAnyTradeTargetReached() AndAlso Me.ParentStrategy.GetTotalPLAfterBrokerage() > Math.Abs(userSettings.MaxLossPerDay) * -1 AndAlso
-            Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay Then
+            Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay AndAlso Not Me.StrategyExitAllTriggerd Then
 
             If _signalCandle Is Nothing OrElse (_signalCandle IsNot Nothing AndAlso _signalCandle.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick) Then
                 Dim atr As Decimal = Math.Round(CType(atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value, 2)
@@ -223,7 +223,7 @@ Public Class TwoThirdStrategyInstrument
                     Dim stoploss As Decimal = ConvertFloorCeling(_signalCandle.CandleRange, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                     Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                     If _firstTradeQuantity = Integer.MinValue Then
-                        quantity = CalculateQuantityFromInvestment(triggerPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, True)
+                        quantity = CalculateQuantityFromInvestment(triggerPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, userSettings.AllowToIncreaseCapital)
                         _firstTradeQuantity = quantity
                     Else
                         quantity = _firstTradeQuantity
@@ -245,7 +245,7 @@ Public Class TwoThirdStrategyInstrument
                     Dim stoploss As Decimal = ConvertFloorCeling(_signalCandle.CandleRange, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                     Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                     If _firstTradeQuantity = Integer.MinValue Then
-                        quantity = CalculateQuantityFromInvestment(triggerPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, True)
+                        quantity = CalculateQuantityFromInvestment(triggerPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, userSettings.AllowToIncreaseCapital)
                         _firstTradeQuantity = quantity
                     Else
                         quantity = _firstTradeQuantity
@@ -262,7 +262,7 @@ Public Class TwoThirdStrategyInstrument
                     End If
                 End If
             End If
-            End If
+        End If
 
         'Below portion have to be done in every place order trigger
         If parameters1 IsNot Nothing Then
@@ -433,6 +433,11 @@ Public Class TwoThirdStrategyInstrument
                         End If
                     Next
                 End If
+            Next
+        End If
+        If forcePrint AndAlso ret IsNot Nothing AndAlso ret.Count > 0 Then
+            For Each runningOrder In ret
+                logger.Debug("***** Modify Stoploss ***** Order ID:{0}, Reason:{1}", runningOrder.Item2.OrderIdentifier, runningOrder.Item4)
             Next
         End If
         Return ret

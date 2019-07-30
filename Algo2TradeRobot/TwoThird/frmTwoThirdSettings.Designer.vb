@@ -65,6 +65,7 @@ Partial Class frmTwoThirdSettings
         Me.txtMinPrice = New System.Windows.Forms.TextBox()
         Me.lblMinPrice = New System.Windows.Forms.Label()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
+        Me.chbAllowToIncreaseCapital = New System.Windows.Forms.CheckBox()
         Me.chbAutoSelectStock = New System.Windows.Forms.CheckBox()
         Me.txtManualStockList = New System.Windows.Forms.TextBox()
         Me.lblManualStock = New System.Windows.Forms.Label()
@@ -235,7 +236,7 @@ Partial Class frmTwoThirdSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(477, 367)
+        Me.GroupBox1.Size = New System.Drawing.Size(477, 363)
         Me.GroupBox1.TabIndex = 28
         Me.GroupBox1.TabStop = False
         '
@@ -387,7 +388,7 @@ Partial Class frmTwoThirdSettings
         Me.GroupBox3.Controls.Add(Me.lblMaxPrice)
         Me.GroupBox3.Controls.Add(Me.txtMinPrice)
         Me.GroupBox3.Controls.Add(Me.lblMinPrice)
-        Me.GroupBox3.Location = New System.Drawing.Point(8, 378)
+        Me.GroupBox3.Location = New System.Drawing.Point(8, 369)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Size = New System.Drawing.Size(843, 100)
         Me.GroupBox3.TabIndex = 36
@@ -491,6 +492,7 @@ Partial Class frmTwoThirdSettings
         '
         'GroupBox4
         '
+        Me.GroupBox4.Controls.Add(Me.chbAllowToIncreaseCapital)
         Me.GroupBox4.Controls.Add(Me.chbAutoSelectStock)
         Me.GroupBox4.Controls.Add(Me.txtManualStockList)
         Me.GroupBox4.Controls.Add(Me.lblManualStock)
@@ -500,9 +502,19 @@ Partial Class frmTwoThirdSettings
         Me.GroupBox4.Controls.Add(Me.chbCash)
         Me.GroupBox4.Location = New System.Drawing.Point(493, 130)
         Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Size = New System.Drawing.Size(358, 242)
+        Me.GroupBox4.Size = New System.Drawing.Size(358, 237)
         Me.GroupBox4.TabIndex = 37
         Me.GroupBox4.TabStop = False
+        '
+        'chbAllowToIncreaseCapital
+        '
+        Me.chbAllowToIncreaseCapital.AutoSize = True
+        Me.chbAllowToIncreaseCapital.Location = New System.Drawing.Point(12, 72)
+        Me.chbAllowToIncreaseCapital.Name = "chbAllowToIncreaseCapital"
+        Me.chbAllowToIncreaseCapital.Size = New System.Drawing.Size(188, 21)
+        Me.chbAllowToIncreaseCapital.TabIndex = 41
+        Me.chbAllowToIncreaseCapital.Text = "Allow To Increase Capital"
+        Me.chbAllowToIncreaseCapital.UseVisualStyleBackColor = True
         '
         'chbAutoSelectStock
         '
@@ -516,18 +528,18 @@ Partial Class frmTwoThirdSettings
         '
         'txtManualStockList
         '
-        Me.txtManualStockList.Location = New System.Drawing.Point(146, 111)
+        Me.txtManualStockList.Location = New System.Drawing.Point(146, 137)
         Me.txtManualStockList.Margin = New System.Windows.Forms.Padding(4)
         Me.txtManualStockList.Multiline = True
         Me.txtManualStockList.Name = "txtManualStockList"
-        Me.txtManualStockList.Size = New System.Drawing.Size(201, 117)
+        Me.txtManualStockList.Size = New System.Drawing.Size(201, 91)
         Me.txtManualStockList.TabIndex = 38
         Me.txtManualStockList.Tag = "Signal Time Frame"
         '
         'lblManualStock
         '
         Me.lblManualStock.AutoSize = True
-        Me.lblManualStock.Location = New System.Drawing.Point(6, 114)
+        Me.lblManualStock.Location = New System.Drawing.Point(6, 136)
         Me.lblManualStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblManualStock.Name = "lblManualStock"
         Me.lblManualStock.Size = New System.Drawing.Size(119, 17)
@@ -536,7 +548,7 @@ Partial Class frmTwoThirdSettings
         '
         'txtFutureMinCapital
         '
-        Me.txtFutureMinCapital.Location = New System.Drawing.Point(146, 79)
+        Me.txtFutureMinCapital.Location = New System.Drawing.Point(146, 101)
         Me.txtFutureMinCapital.Margin = New System.Windows.Forms.Padding(4)
         Me.txtFutureMinCapital.Name = "txtFutureMinCapital"
         Me.txtFutureMinCapital.Size = New System.Drawing.Size(201, 22)
@@ -546,7 +558,7 @@ Partial Class frmTwoThirdSettings
         'lblFutureMinCapital
         '
         Me.lblFutureMinCapital.AutoSize = True
-        Me.lblFutureMinCapital.Location = New System.Drawing.Point(6, 82)
+        Me.lblFutureMinCapital.Location = New System.Drawing.Point(6, 104)
         Me.lblFutureMinCapital.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblFutureMinCapital.Name = "lblFutureMinCapital"
         Me.lblFutureMinCapital.Size = New System.Drawing.Size(77, 17)
@@ -577,7 +589,7 @@ Partial Class frmTwoThirdSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(975, 484)
+        Me.ClientSize = New System.Drawing.Size(975, 477)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.GroupBox3)
         Me.Controls.Add(Me.GroupBox2)
@@ -647,4 +659,5 @@ Partial Class frmTwoThirdSettings
     Friend WithEvents lblFutureMinCapital As Label
     Friend WithEvents chbFuture As CheckBox
     Friend WithEvents chbCash As CheckBox
+    Friend WithEvents chbAllowToIncreaseCapital As CheckBox
 End Class

@@ -228,6 +228,7 @@ Namespace Strategies
                             delayCtr = 0
                             Dim exitAllResponse As Boolean = False
                             For Each runningStrategyInstrument In TradableStrategyInstruments
+                                runningStrategyInstrument.StrategyExitAllTriggerd = True
                                 exitAllResponse = exitAllResponse Or Await runningStrategyInstrument.ForceExitAllTradesAsync(triggerResponse.Item2).ConfigureAwait(False)
                             Next
                             If Me.ExitAllTrades AndAlso exitAllResponse Then

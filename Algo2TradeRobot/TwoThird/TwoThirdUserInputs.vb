@@ -17,6 +17,7 @@ Public Class TwoThirdUserInputs
     Public Property AutoSelectStock As Boolean
     Public Property CashInstrument As Boolean
     Public Property FutureInstrument As Boolean
+    Public Property AllowToIncreaseCapital As Boolean
     Public Property MinCapital As Decimal
     Public Property ManualInstrumentList As String
     Public Property InstrumentDetailsFilePath As String
