@@ -28,6 +28,7 @@ Public Class ATMUserInputs
     Public Class InstrumentDetails
         Public Property TradingSymbol As String
         Public Property MarginMultiplier As Decimal
+        Public Property Supporting As Decimal
     End Class
 
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
@@ -40,7 +41,7 @@ Public Class ATMUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "MARGIN MULTIPLIER"}
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "MARGIN MULTIPLIER", "SUPPORTING"}
 
                         For colCtr = 0 To 1
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
@@ -54,6 +55,7 @@ Public Class ATMUserInputs
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim instrumentName As String = Nothing
                             Dim margin As Decimal = Decimal.MinValue
+                            Dim supporting As Decimal = Decimal.MinValue
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
@@ -75,6 +77,17 @@ Public Class ATMUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("Margin Multiplier cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
+                                ElseIf columnCtr = 2 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
+                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
+                                            supporting = instrumentDetails(rowCtr, columnCtr)
+                                        Else
+                                            Throw New ApplicationException(String.Format("Supporting cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                        End If
+                                    Else
+                                        Throw New ApplicationException(String.Format("Supporting cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                    End If
                                 End If
                             Next
                             If instrumentName IsNot Nothing Then
@@ -82,6 +95,7 @@ Public Class ATMUserInputs
                                 With instrumentData
                                     .TradingSymbol = instrumentName.ToUpper
                                     .MarginMultiplier = margin
+                                    .Supporting = supporting
                                 End With
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
                                 If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then

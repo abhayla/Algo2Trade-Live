@@ -1,8 +1,2 @@
-Trading Symbol,Margin Multiplier
-IBULHSGFIN,13
-RBLBANK,13
-JINDALSTEL,13
-M&MFIN,13
-TATAMOTORS,13
-ESCORTS,13
-L&TFH,13
+Trading Symbol,Margin Multiplier,Supporting
+ZEEL,13,-1

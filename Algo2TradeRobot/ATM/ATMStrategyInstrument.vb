@@ -264,7 +264,7 @@ Public Class ATMStrategyInstrument
                     Else
                         quantity = CalculateQuantityFromStoploss(currentTick.LastPrice, currentTick.LastPrice - ConvertFloorCeling(_usableATR * _ATRMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing), userSettings.CashMaxSL)
                     End If
-                    If currentTick.LastPrice >= currentTick.Open Then
+                    If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Supporting < 0 Then
                         Dim triggerPrice = currentTick.LastPrice
                         Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                         Dim stoploss As Decimal = ConvertFloorCeling(_usableATR * _ATRMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
@@ -279,7 +279,7 @@ Public Class ATMStrategyInstrument
                                        .StoplossValue = stoploss,
                                        .OrderType = IOrder.TypeOfOrder.Limit}
                         'End If
-                    ElseIf currentTick.LastPrice < currentTick.Open Then
+                    ElseIf userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Supporting > 0 Then
                         Dim triggerPrice = currentTick.LastPrice
                         Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                         Dim stoploss As Decimal = ConvertFloorCeling(_usableATR * _ATRMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
