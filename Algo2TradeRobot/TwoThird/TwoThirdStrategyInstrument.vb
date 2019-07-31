@@ -228,7 +228,7 @@ Public Class TwoThirdStrategyInstrument
                     Else
                         quantity = _firstTradeQuantity
                     End If
-                    If quantity <> 0 Then
+                    If quantity <> 0 AndAlso currentTick.LastPrice < triggerPrice Then
                         parameters1 = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                 {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                  .TriggerPrice = triggerPrice,
@@ -250,7 +250,7 @@ Public Class TwoThirdStrategyInstrument
                     Else
                         quantity = _firstTradeQuantity
                     End If
-                    If quantity <> 0 Then
+                    If quantity <> 0 AndAlso currentTick.LastPrice > triggerPrice Then
                         parameters2 = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                 {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                                  .TriggerPrice = triggerPrice,
@@ -305,7 +305,7 @@ Public Class TwoThirdStrategyInstrument
                 End If
             Else
                 If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters1, "Condition Satisfied"))
+                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters1, parameters1.ToString))
             End If
         End If
         If parameters2 IsNot Nothing Then
@@ -348,7 +348,7 @@ Public Class TwoThirdStrategyInstrument
                 End If
             Else
                 If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters2, "Condition Satisfied"))
+                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters2, parameters2.ToString))
             End If
         End If
         Return ret
@@ -388,13 +388,13 @@ Public Class TwoThirdStrategyInstrument
                     Dim triggerPrice As Decimal = 0
                     If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
                         If targetReachedForBreakevenMovement Then
-                            triggerPrice = bussinessOrder.ParentOrder.AveragePrice + GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, IOrder.TypeOfTransaction.Buy)
+                            triggerPrice = ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice + GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, IOrder.TypeOfTransaction.Buy), Me.TradableInstrument.TickSize, RoundOfType.Celing)
                         Else
                             triggerPrice = _signalCandle.LowPrice.Value - CalculateBuffer(_signalCandle.LowPrice.Value, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Floor)
                         End If
                     ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                         If targetReachedForBreakevenMovement Then
-                            triggerPrice = bussinessOrder.ParentOrder.AveragePrice - GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, IOrder.TypeOfTransaction.Sell)
+                            triggerPrice = ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice - GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, IOrder.TypeOfTransaction.Sell), Me.TradableInstrument.TickSize, RoundOfType.Celing)
                         Else
                             triggerPrice = _signalCandle.HighPrice.Value + CalculateBuffer(_signalCandle.HighPrice.Value, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Floor)
                         End If
@@ -437,7 +437,7 @@ Public Class TwoThirdStrategyInstrument
         End If
         If forcePrint AndAlso ret IsNot Nothing AndAlso ret.Count > 0 Then
             For Each runningOrder In ret
-                logger.Debug("***** Modify Stoploss ***** Order ID:{0}, Reason:{1}", runningOrder.Item2.OrderIdentifier, runningOrder.Item4)
+                logger.Debug("***** Modify Stoploss ***** Order ID:{0}, Reason:{1}, {2}", runningOrder.Item2.OrderIdentifier, runningOrder.Item4, Me.TradableInstrument.TradingSymbol)
             Next
         End If
         Return ret

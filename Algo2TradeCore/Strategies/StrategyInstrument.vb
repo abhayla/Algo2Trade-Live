@@ -1304,6 +1304,14 @@ Namespace Strategies
                                     Next
                                     If ret Is Nothing Then ret = New List(Of IOrder)
                                     If parentNeedToInsert Then ret.Add(parentBusinessOrder.ParentOrder)
+                                Else
+                                    If parentBusinessOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                                        If (parentBusinessOrder.SLOrder Is Nothing OrElse parentBusinessOrder.SLOrder.Count = 0) AndAlso
+                                            (parentBusinessOrder.AllOrder Is Nothing OrElse parentBusinessOrder.AllOrder.Count = 0) Then
+                                            If ret Is Nothing Then ret = New List(Of IOrder)
+                                            ret.Add(parentBusinessOrder.ParentOrder)
+                                        End If
+                                    End If
                                 End If
                                 If ret Is Nothing Then ret = New List(Of IOrder)
                                 If parentBusinessOrder.ParentOrder.Status = IOrder.TypeOfStatus.Open Then ret.Add(parentBusinessOrder.ParentOrder)
