@@ -312,17 +312,20 @@ Public Class ATMFillInstrumentDetails
                                     allStockData = New DataTable
                                     allStockData.Columns.Add("Trading Symbol")
                                     allStockData.Columns.Add("Margin Multiplier")
+                                    allStockData.Columns.Add("Supporting")
                                     For Each stock In todayStockList
                                         If CType(_parentStrategy.UserSettings, ATMUserInputs).CashInstrument Then
                                             Dim row As DataRow = allStockData.NewRow
                                             row("Trading Symbol") = stock.Remove(stock.Count - 8)
                                             row("Margin Multiplier") = 13
+                                            row("Supporting") = 0
                                             allStockData.Rows.Add(row)
                                         End If
                                         If CType(_parentStrategy.UserSettings, ATMUserInputs).FutureInstrument Then
                                             Dim row As DataRow = allStockData.NewRow
                                             row("Trading Symbol") = stock
                                             row("Margin Multiplier") = 30
+                                            row("Supporting") = 0
                                             allStockData.Rows.Add(row)
                                         End If
                                     Next
@@ -335,6 +338,7 @@ Public Class ATMFillInstrumentDetails
                                             Dim row As DataRow = allStockData.NewRow
                                             row("Trading Symbol") = stockData(0)
                                             row("Margin Multiplier") = stockData(1)
+                                            row("Supporting") = 0
                                             allStockData.Rows.Add(row)
                                         Next
                                     End If
