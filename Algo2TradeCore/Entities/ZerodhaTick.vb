@@ -1,6 +1,7 @@
 ﻿Imports KiteConnect
 
 Namespace Entities
+    <Serializable>
     Public Class ZerodhaTick
         Implements ITick
         Public ReadOnly Property InstrumentToken As String Implements ITick.InstrumentToken
@@ -64,7 +65,17 @@ Namespace Entities
             End Get
         End Property
 
+        <NonSerialized>
+        Private _WrappedTick As Tick
         Public Property WrappedTick As Tick
+            Get
+                Return _WrappedTick
+            End Get
+            Set(value As Tick)
+                _WrappedTick = value
+            End Set
+        End Property
+
         Public ReadOnly Property Broker As APISource Implements ITick.Broker
             Get
                 Return APISource.Zerodha

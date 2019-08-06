@@ -917,8 +917,8 @@ Namespace Controller
                                                                    Return Nothing
                                                                Else
                                                                    Return y.WrappedOrder.ParentOrderId = parentOrder.OrderIdentifier AndAlso
-                                                                 y.WrappedOrder.TriggerPrice <= wrappedParentOrder.WrappedOrder.AveragePrice AndAlso
-                                                                 y.WrappedOrder.TriggerPrice <> 0
+                                                                 (y.WrappedOrder.TriggerPrice <= wrappedParentOrder.WrappedOrder.AveragePrice AndAlso
+                                                                 y.WrappedOrder.TriggerPrice <> 0) OrElse (y.OrderType = IOrder.TypeOfOrder.SL)
                                                                End If
                                                            End Function)
                         _cts.Token.ThrowIfCancellationRequested()
@@ -955,8 +955,8 @@ Namespace Controller
                                                                    Return Nothing
                                                                Else
                                                                    Return y.WrappedOrder.ParentOrderId = parentOrder.OrderIdentifier AndAlso
-                                                                y.WrappedOrder.TriggerPrice >= wrappedParentOrder.WrappedOrder.AveragePrice AndAlso
-                                                                y.WrappedOrder.TriggerPrice <> 0
+                                                                (y.WrappedOrder.TriggerPrice >= wrappedParentOrder.WrappedOrder.AveragePrice AndAlso
+                                                                y.WrappedOrder.TriggerPrice <> 0) OrElse (y.OrderType = IOrder.TypeOfOrder.SL)
                                                                End If
                                                            End Function)
                         _cts.Token.ThrowIfCancellationRequested()
