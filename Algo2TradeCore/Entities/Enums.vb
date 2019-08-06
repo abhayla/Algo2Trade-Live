@@ -29,6 +29,7 @@
             PivotHigh
             PivotLow
             Fractal
+            VWAP
         End Enum
         Enum CrossDirection
             Above = 1

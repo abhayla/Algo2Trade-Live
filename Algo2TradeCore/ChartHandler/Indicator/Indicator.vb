@@ -654,6 +654,54 @@ Namespace ChartHandler.Indicator
                 End If
             End If
         End Sub
+        Public Sub CalculateVWAP(ByVal timeToCalculateFrom As Date, ByVal outputConsumer As VWAPConsumer)
+            If outputConsumer IsNot Nothing AndAlso outputConsumer.ParentConsumer IsNot Nothing AndAlso
+                outputConsumer.ParentConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ParentConsumer.ConsumerPayloads.Count > 0 Then
+                Dim requiredDataSet As IEnumerable(Of Date) =
+                    outputConsumer.ParentConsumer.ConsumerPayloads.Keys.Where(Function(x)
+                                                                                  Return x >= timeToCalculateFrom
+                                                                              End Function)
+
+                For Each runningInputDate In requiredDataSet.OrderBy(Function(x)
+                                                                         Return x
+                                                                     End Function)
+                    If outputConsumer.ConsumerPayloads Is Nothing Then outputConsumer.ConsumerPayloads = New Concurrent.ConcurrentDictionary(Of Date, IPayload)
+
+                    Dim vwapValue As VWAPConsumer.VWAPPayload = Nothing
+                    If Not outputConsumer.ConsumerPayloads.TryGetValue(runningInputDate, vwapValue) Then
+                        vwapValue = New VWAPConsumer.VWAPPayload
+                    End If
+
+                    Dim previousVWAPValues As IEnumerable(Of KeyValuePair(Of Date, IPayload)) = Nothing
+                    Dim previousVWAPValue As KeyValuePair(Of Date, IPayload) = Nothing
+                    If outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
+                        previousVWAPValues = outputConsumer.ConsumerPayloads.Where(Function(x)
+                                                                                       Return x.Key < runningInputDate
+                                                                                   End Function)
+                        If previousVWAPValues IsNot Nothing AndAlso previousVWAPValues.Count > 0 Then
+                            previousVWAPValue = previousVWAPValues.OrderBy(Function(y)
+                                                                               Return y.Key
+                                                                           End Function).LastOrDefault
+                        End If
+                    End If
+
+                    Dim currentPayload As OHLCPayload = outputConsumer.ParentConsumer.ConsumerPayloads(runningInputDate)
+                    Dim avgPrice As Decimal = (currentPayload.HighPrice.Value + currentPayload.LowPrice.Value + currentPayload.ClosePrice.Value) / 3
+                    Dim avgPriceVolume As Decimal = avgPrice * currentPayload.Volume.Value
+
+                    If previousVWAPValue.Key <> Date.MinValue AndAlso previousVWAPValue.Value IsNot Nothing AndAlso
+                        previousVWAPValue.Key.Date = runningInputDate.Date Then
+                        Dim previousPayload As OHLCPayload = outputConsumer.ParentConsumer.ConsumerPayloads(previousVWAPValue.Key)
+                        Dim cumAvgPriceStarVolume As Decimal = CType(previousVWAPValue.Value, VWAPConsumer.VWAPPayload).VWAP.Value * previousPayload.DailyVolume
+                        vwapValue.VWAP.Value = (cumAvgPriceStarVolume + avgPriceVolume) / currentPayload.DailyVolume
+                    Else
+                        vwapValue.VWAP.Value = avgPriceVolume / currentPayload.DailyVolume
+                    End If
+
+                    outputConsumer.ConsumerPayloads.AddOrUpdate(runningInputDate, vwapValue, Function(key, value) vwapValue)
+                Next
+            End If
+        End Sub
 #End Region
 
 #Region "Private Function"
