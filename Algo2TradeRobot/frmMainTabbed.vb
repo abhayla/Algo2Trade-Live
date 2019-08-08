@@ -480,7 +480,7 @@ Public Class frmMainTabbed
         'End If
     End Function
     Private Async Sub btnMomentumReversalStart_Click(sender As Object, e As EventArgs) Handles btnMomentumReversalStart.Click
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf MomentumReversalWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -492,6 +492,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnMomentumReversalStart_Click(sender, e)
             End If
         End If
@@ -701,7 +702,7 @@ Public Class frmMainTabbed
         'End If
     End Function
     Private Async Sub btnOHLStart_Click(sender As Object, e As EventArgs) Handles btnOHLStart.Click
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf OHLStartWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -713,6 +714,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnOHLStart_Click(sender, e)
             End If
         End If
@@ -933,7 +935,7 @@ Public Class frmMainTabbed
             Exit Sub
         End If
 
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf AmiSignalStartWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -945,6 +947,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnAmiSignalStart_Click(sender, e)
             End If
         End If
@@ -1169,7 +1172,7 @@ Public Class frmMainTabbed
             Exit Sub
         End If
 
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf EMA_SupertrendWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -1181,6 +1184,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnEMA_SupertrendStart_Click(sender, e)
             End If
         End If
@@ -1415,7 +1419,7 @@ Public Class frmMainTabbed
         '    Exit Sub
         'End If
 
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf NearFarHedgingWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -1427,6 +1431,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnNearFarHedgingStart_Click(sender, e)
             End If
         End If
@@ -1650,7 +1655,7 @@ Public Class frmMainTabbed
         '    Exit Sub
         'End If
 
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf PetDGandhiWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -1662,6 +1667,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnPetDGandhiStart_Click(sender, e)
             End If
         End If
@@ -1885,7 +1891,7 @@ Public Class frmMainTabbed
             Exit Sub
         End If
 
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf EMACrossoverWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -1897,6 +1903,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnEMACrossoverStart_Click(sender, e)
             End If
         End If
@@ -2122,7 +2129,7 @@ Public Class frmMainTabbed
         '    Exit Sub
         'End If
 
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf ATMWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -2134,6 +2141,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnATMStart_Click(sender, e)
             End If
         End If
@@ -2360,7 +2368,7 @@ Public Class frmMainTabbed
         '    Exit Sub
         'End If
 
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf JoyMaaATMWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -2372,6 +2380,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnJoyMaaATMStart_Click(sender, e)
             End If
         End If
@@ -2598,7 +2607,7 @@ Public Class frmMainTabbed
         '    Exit Sub
         'End If
 
-        PreviousDayCleanup()
+        PreviousDayCleanup(False)
         Await Task.Run(AddressOf TwoThirdWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
@@ -2610,6 +2619,7 @@ Public Class frmMainTabbed
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
+                PreviousDayCleanup(True)
                 btnTwoThirdStart_Click(sender, e)
             End If
         End If
@@ -3725,20 +3735,43 @@ Public Class frmMainTabbed
             End Select
         End If
     End Sub
-    Private Sub PreviousDayCleanup()
+    Private Sub PreviousDayCleanup(ByVal deleteAll As Boolean)
         Try
             Dim todayDate As String = Now.ToString("yy_MM_dd")
             For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "*.Instruments.a2t")
-                If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+                If deleteAll Then
+                    File.Delete(runningFile)
+                Else
+                    If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+                End If
             Next
             For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "*.ActivityDashboard.a2t")
-                If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+                If deleteAll Then
+                    File.Delete(runningFile)
+                Else
+                    If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+                End If
             Next
             For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "*.Margin.a2t")
-                If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+                If deleteAll Then
+                    File.Delete(runningFile)
+                Else
+                    If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+                End If
             Next
             For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "Banned Stock *.csv")
-                If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+                If deleteAll Then
+                    File.Delete(runningFile)
+                Else
+                    If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+                End If
+            Next
+            For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "*.PreMarketTick.a2t")
+                If deleteAll Then
+                    File.Delete(runningFile)
+                Else
+                    If Not runningFile.Contains(todayDate) Then File.Delete(runningFile)
+                End If
             Next
         Catch ex As Exception
             logger.Error(ex)

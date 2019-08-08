@@ -1,8 +1,9 @@
-﻿Imports System.Threading
+﻿Imports NLog
+Imports System.Threading
 Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Controller
-Imports NLog
 Imports Algo2TradeCore.Strategies
+Imports System.IO
 
 Namespace ChartHandler.ChartStyle
     Public Class CandleStickChart
@@ -12,11 +13,16 @@ Namespace ChartHandler.ChartStyle
         Public Shared Shadows logger As Logger = LogManager.GetCurrentClassLogger
 #End Region
 
+        Private _preMarketLastTick As ITick
+        Private ReadOnly _tickFilename As String
+
         Public Sub New(ByVal associatedParentController As APIStrategyController,
                        ByVal assoicatedParentInstrument As IInstrument,
                        ByVal associatedStrategyInstruments As IEnumerable(Of StrategyInstrument),
                        ByVal canceller As CancellationTokenSource)
             MyBase.New(associatedParentController, assoicatedParentInstrument, associatedStrategyInstruments, canceller)
+            _preMarketLastTick = Nothing
+            _tickFilename = Path.Combine(My.Application.Info.DirectoryPath, String.Format("{0}{1}.PreMarketTick.a2t", Me._parentInstrument.TradingSymbol, Now.ToString("yy_MM_dd")))
         End Sub
 
 #Region "Test"
@@ -444,9 +450,11 @@ Namespace ChartHandler.ChartStyle
             End If
             If tickData.Timestamp.Value < Me._parentInstrument.ExchangeDetails.ExchangeStartTime OrElse
                 tickData.Timestamp.Value > Me._parentInstrument.ExchangeDetails.ExchangeEndTime Then
+                _preMarketLastTick = tickData
                 Exit Function
             End If
 
+            Dim volumeOffset As Long = 0
             Try
                 While 1 = Interlocked.Exchange(_tickLock, 1)
                     Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
@@ -482,12 +490,12 @@ Namespace ChartHandler.ChartStyle
                         .ClosePrice.Value = tickData.LastPrice
                         If .PreviousPayload IsNot Nothing Then
                             If .PreviousPayload.SnapshotDateTime.Date = tickData.Timestamp.Value.Date Then
-                                .Volume.Value = tickData.Volume - .PreviousPayload.DailyVolume
+                                .Volume.Value = tickData.Volume - .PreviousPayload.DailyVolume - volumeOffset
                             Else
-                                .Volume.Value = tickData.Volume
+                                .Volume.Value = tickData.Volume - volumeOffset
                             End If
                         Else
-                            .Volume.Value = tickData.Volume
+                            .Volume.Value = tickData.Volume - volumeOffset
                         End If
                         .DailyVolume = tickData.Volume
                         .NumberOfTicks += 1
@@ -519,7 +527,15 @@ Namespace ChartHandler.ChartStyle
                         .HighPrice.Value = tickData.LastPrice
                         .LowPrice.Value = tickData.LastPrice
                         .ClosePrice.Value = tickData.LastPrice
-                        .Volume.Value = tickData.Volume
+                        If previousCandle IsNot Nothing Then
+                            If previousCandle.SnapshotDateTime.Date = tickData.Timestamp.Value.Date Then
+                                .Volume.Value = tickData.Volume - previousCandle.DailyVolume - volumeOffset
+                            Else
+                                .Volume.Value = tickData.Volume - volumeOffset
+                            End If
+                        Else
+                            .Volume.Value = tickData.Volume - volumeOffset
+                        End If
                         .DailyVolume = tickData.Volume
                         .SnapshotDateTime = Utilities.Time.GetDateTimeTillMinutes(tickData.Timestamp.Value)
                         .PreviousPayload = previousCandle
@@ -541,13 +557,13 @@ Namespace ChartHandler.ChartStyle
                     End If
                 End If
 
-                'If freshCandle Then
-                '    For Each payload In _parentInstrument.RawPayloads.OrderBy(Function(x)
-                '                                                                  Return x.Key
-                '                                                              End Function)
-                '        Debug.WriteLine(payload.Value.ToString())
-                '    Next
-                'End If
+                If freshCandle Then
+                    For Each payload In _parentInstrument.RawPayloads.OrderBy(Function(x)
+                                                                                  Return x.Key
+                                                                              End Function)
+                        Debug.WriteLine(payload.Value.ToString())
+                    Next
+                End If
 
                 ''TODO: Below loop is for checking purpose
                 'Try
@@ -1076,6 +1092,33 @@ Namespace ChartHandler.ChartStyle
             Else
                 Return Nothing
             End If
+        End Function
+
+        Private Function GetVolumeOffset() As Long
+            Dim ret As Long = 0
+            If Not File.Exists(_tickFilename) Then
+                If _preMarketLastTick Is Nothing Then
+                    If Me._parentInstrument.InstrumentType = IInstrument.TypeOfInstrument.Cash Then
+                        Me.ParentController.OrphanException = New ApplicationException("Pre market tick data not available")
+                    End If
+                Else
+                    Try
+                        Utilities.Strings.SerializeFromCollection(Of ITick)(_tickFilename, _preMarketLastTick)
+                    Catch ex As Exception
+                        logger.Error(ex.ToString)
+                        Throw ex
+                    End Try
+                    ret = _preMarketLastTick.Volume
+                End If
+            Else
+                If _preMarketLastTick Is Nothing Then
+                    _preMarketLastTick = Utilities.Strings.DeserializeToCollection(Of ITick)(_tickFilename)
+                End If
+                If _preMarketLastTick IsNot Nothing Then
+                    ret = _preMarketLastTick.Volume
+                End If
+            End If
+            Return ret
         End Function
 
         Public Overrides Function ToString() As String
