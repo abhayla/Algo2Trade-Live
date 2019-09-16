@@ -39,6 +39,7 @@ Namespace Adapter
         End Sub
         Public MustOverride Async Function ConnectTickerAsync() As Task
         Public MustOverride Async Function SubscribeAsync(ByVal instrumentIdentifiers As List(Of String)) As Task
+        Public MustOverride Async Function UnSubscribeAsync(ByVal instrumentToken As String) As Task
         Public MustOverride Overrides Function ToString() As String
         Public MustOverride Sub ClearLocalUniqueSubscriptionList()
         Public MustOverride Function IsConnected() As Boolean

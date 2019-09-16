@@ -127,22 +127,6 @@
     <Compile Include="AmiSignal\frmAmiSignalTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="VolumeSpike\VolumeSpikeFillInstrumentDetails.vb" />
-    <Compile Include="VolumeSpike\VolumeSpikeStrategy.vb" />
-    <Compile Include="VolumeSpike\VolumeSpikeStrategyInstrument.vb" />
-    <Compile Include="VolumeSpike\VolumeSpikeUserInputs.vb" />
-    <Compile Include="VolumeSpike\frmVolumeSpikeSettings.Designer.vb">
-      <DependentUpon>frmVolumeSpikeSettings.vb</DependentUpon>
-    </Compile>
-    <Compile Include="VolumeSpike\frmVolumeSpikeSettings.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="VolumeSpike\frmVolumeSpikeTradableInstrumentList.Designer.vb">
-      <DependentUpon>frmVolumeSpikeTradableInstrumentList.vb</DependentUpon>
-    </Compile>
-    <Compile Include="VolumeSpike\frmVolumeSpikeTradableInstrumentList.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Common.vb" />
     <Compile Include="EMACrossover\EMACrossoverStrategy.vb" />
     <Compile Include="EMACrossover\EMACrossoverStrategyInstrument.vb" />
@@ -192,6 +176,12 @@
     <Compile Include="frmMainTabbed.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmUserDetails.Designer.vb">
+      <DependentUpon>frmUserDetails.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmUserDetails.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="JoyMaaATM\frmJoyMaaATMSettings.Designer.vb">
       <DependentUpon>frmJoyMaaATMSettings.vb</DependentUpon>
     </Compile>
@@ -214,12 +204,6 @@
     <Compile Include="MomentumReversal\frmMomentumReversalSettings.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmUserDetails.Designer.vb">
-      <DependentUpon>frmUserDetails.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmUserDetails.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="MomentumReversal\frmMomentumReversalTradableInstrumentList.Designer.vb">
       <DependentUpon>frmMomentumReversalTradableInstrumentList.vb</DependentUpon>
     </Compile>
@@ -229,6 +213,21 @@
     <Compile Include="MomentumReversal\MomentumReversalStrategy.vb" />
     <Compile Include="MomentumReversal\MomentumReversalStrategyInstrument.vb" />
     <Compile Include="MomentumReversal\MomentumReversalUserInputs.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
     <Compile Include="NearFarHedging\frmNearFarHedgingSettings.Designer.vb">
       <DependentUpon>frmNearFarHedgingSettings.vb</DependentUpon>
     </Compile>
@@ -256,23 +255,8 @@
     <Compile Include="OHL\frmOHLTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="OHL\OHLStrategyInstrument.vb" />
-    <Compile Include="My Project\AssemblyInfo.vb" />
-    <Compile Include="My Project\Application.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Application.myapp</DependentUpon>
-    </Compile>
-    <Compile Include="My Project\Resources.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="My Project\Settings.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
     <Compile Include="OHL\OHLStrategy.vb" />
+    <Compile Include="OHL\OHLStrategyInstrument.vb" />
     <Compile Include="OHL\OHLUserInputs.vb" />
     <Compile Include="PetDGandhi\frmPetDGandhiSettings.Designer.vb">
       <DependentUpon>frmPetDGandhiSettings.vb</DependentUpon>
@@ -305,6 +289,22 @@
     <Compile Include="TwoThird\TwoThirdStrategy.vb" />
     <Compile Include="TwoThird\TwoThirdStrategyInstrument.vb" />
     <Compile Include="TwoThird\TwoThirdUserInputs.vb" />
+    <Compile Include="VolumeSpike\frmVolumeSpikeSettings.Designer.vb">
+      <DependentUpon>frmVolumeSpikeSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="VolumeSpike\frmVolumeSpikeSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VolumeSpike\frmVolumeSpikeTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmVolumeSpikeTradableInstrumentList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="VolumeSpike\frmVolumeSpikeTradableInstrumentList.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VolumeSpike\VolumeSpikeFillInstrumentDetails.vb" />
+    <Compile Include="VolumeSpike\VolumeSpikeStrategy.vb" />
+    <Compile Include="VolumeSpike\VolumeSpikeStrategyInstrument.vb" />
+    <Compile Include="VolumeSpike\VolumeSpikeUserInputs.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AmiSignal\frmAmiSignalSettings.resx">
@@ -312,12 +312,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AmiSignal\frmAmiSignalTradableInstrumentList.resx">
       <DependentUpon>frmAmiSignalTradableInstrumentList.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="VolumeSpike\frmVolumeSpikeSettings.resx">
-      <DependentUpon>frmVolumeSpikeSettings.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="VolumeSpike\frmVolumeSpikeTradableInstrumentList.resx">
-      <DependentUpon>frmVolumeSpikeTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EMACrossover\frmEMACrossoverSettings.resx">
       <DependentUpon>frmEMACrossoverSettings.vb</DependentUpon>
@@ -340,6 +334,9 @@
     <EmbeddedResource Include="frmMainTabbed.resx">
       <DependentUpon>frmMainTabbed.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="frmUserDetails.resx">
+      <DependentUpon>frmUserDetails.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="JoyMaaATM\frmJoyMaaATMSettings.resx">
       <DependentUpon>frmJoyMaaATMSettings.vb</DependentUpon>
     </EmbeddedResource>
@@ -348,9 +345,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MomentumReversal\frmMomentumReversalSettings.resx">
       <DependentUpon>frmMomentumReversalSettings.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmUserDetails.resx">
-      <DependentUpon>frmUserDetails.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MomentumReversal\frmMomentumReversalTradableInstrumentList.resx">
       <DependentUpon>frmMomentumReversalTradableInstrumentList.vb</DependentUpon>
@@ -384,6 +378,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TwoThird\frmTwoThirdTradableInstrumentList.resx">
       <DependentUpon>frmTwoThirdTradableInstrumentList.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VolumeSpike\frmVolumeSpikeSettings.resx">
+      <DependentUpon>frmVolumeSpikeSettings.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VolumeSpike\frmVolumeSpikeTradableInstrumentList.resx">
+      <DependentUpon>frmVolumeSpikeTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

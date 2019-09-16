@@ -196,12 +196,15 @@ Namespace Adapter
         Public Overrides Function ToString() As String
             Return Me.GetType.ToString
         End Function
+
         Public Overrides Sub ClearLocalUniqueSubscriptionList()
             _subscribedInstruments = Nothing
         End Sub
+
         Public Overrides Function IsConnected() As Boolean
             Return _isPollRunning
         End Function
+
         Public Overrides Async Function CloseFetcherIfConnectedAsync(ByVal forceClose As Boolean) As Task
             'Intentionally no _cts.Token.ThrowIfCancellationRequested() since we need to close the fetcher when cancellation is done
             While IsConnected()
@@ -209,6 +212,23 @@ Namespace Adapter
                 If forceClose Then Exit While
                 Await Task.Delay(100, _cts.Token).ConfigureAwait(False)
             End While
+        End Function
+
+        Public Overrides Async Function UnSubscribeAsync(instrument As IInstrument) As Task
+            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+            If _subscribedInstruments IsNot Nothing AndAlso _subscribedInstruments.Count > 0 Then
+                Console.WriteLine(String.Format("Before remove, {0}", instrument.TradingSymbol))
+                While Not _subscribedInstruments.IsEmpty
+                    Dim tempInstrument As IInstrument = Nothing
+                    _subscribedInstruments.TryTake(tempInstrument)
+                    If tempInstrument.InstrumentIdentifier.Equals(instrument.InstrumentIdentifier) Then
+                        Console.WriteLine(String.Format("After remove, {0}", tempInstrument.TradingSymbol))
+                        Exit While
+                    Else
+                        _subscribedInstruments.Add(tempInstrument)
+                    End If
+                End While
+            End If
         End Function
 
 #Region "IDisposable Support"

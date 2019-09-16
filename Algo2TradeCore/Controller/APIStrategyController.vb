@@ -408,9 +408,22 @@ Namespace Controller
         Public MustOverride Async Function PrepareToRunStrategyAsync() As Task(Of Boolean)
         Protected MustOverride Async Function FillQuantityMultiplierMapAsync() As Task
         Public MustOverride Async Function SubscribeStrategyAsync(ByVal strategyToRun As Strategy) As Task
+        Public MustOverride Async Function UnSubscribeStrategyAsync(ByVal strategyToRun As Strategy, ByVal istrumentsToUnsubscribe As List(Of IInstrument)) As Task
         Public MustOverride Overloads Async Function GetOrderDetailsAsync() As Task(Of Concurrent.ConcurrentBag(Of IBusinessOrder))
         Public MustOverride Overloads Async Function GetHoldingDetailsAsync() As Task(Of Concurrent.ConcurrentBag(Of IHolding))
         Public MustOverride Overloads Async Function GetPositionDetailsAsync() As Task(Of Concurrent.ConcurrentBag(Of IPosition))
+        Public Async Function UnSubscribeHistorical(ByVal instrument As IInstrument) As Task
+            Await Task.Delay(0).ConfigureAwait(False)
+            If _APIHistoricalDataFetcher IsNot Nothing AndAlso instrument IsNot Nothing Then
+                Await _APIHistoricalDataFetcher.UnSubscribeAsync(instrument).ConfigureAwait(False)
+            End If
+        End Function
+        Public Async Function UnSubscribeTicker(ByVal instrumentToken As String) As Task
+            Await Task.Delay(0).ConfigureAwait(False)
+            If _APITicker IsNot Nothing AndAlso instrumentToken IsNot Nothing Then
+                Await _APITicker.UnSubscribeAsync(instrumentToken).ConfigureAwait(False)
+            End If
+        End Function
         Public Sub FillCandlestickCreator()
             If _AllStrategyUniqueInstruments IsNot Nothing AndAlso _AllStrategyUniqueInstruments.Count > 0 Then
                 For Each runningStrategyUniqueInstruments In _AllStrategyUniqueInstruments
@@ -527,6 +540,33 @@ Namespace Controller
                         mapStartNumber += 1
                     Next
                 End If
+            End If
+            For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "InstrumentMappingFile*.Instruments.a2t")
+                Try
+                    File.Delete(runningFile)
+                Catch ex As Exception
+                    If runningFile.ToUpper.Equals(filePath.ToUpper) Then
+                        Throw New ApplicationException(String.Format("Cannot create instrument mapping file due to:{0}", ex.Message), ex)
+                    End If
+                End Try
+            Next
+            'Serialize collection
+            Utilities.Strings.SerializeFromCollection(Of Concurrent.ConcurrentDictionary(Of String, String))(filePath, InstrumentMappingTable)
+        End Function
+        Protected Async Function RefreshInstrumentMappingTable() As Task
+            Await Task.Delay(0).ConfigureAwait(False)
+            Dim filePath As String = Path.Combine(My.Application.Info.DirectoryPath, String.Format("InstrumentMappingFile_{0}.Instruments.a2t", Now.ToString("yy_MM_dd")))
+            Dim mapStartNumber As Integer = 0
+
+            InstrumentMappingTable = New Concurrent.ConcurrentDictionary(Of String, String)
+            If _AllStrategyUniqueInstruments IsNot Nothing AndAlso _AllStrategyUniqueInstruments.Count > 0 Then
+                For Each runningInstrument In _AllStrategyUniqueInstruments
+                    If mapStartNumber > 999 Then
+                        Throw New ApplicationException("Can not subscribe more than 999 instruments")
+                    End If
+                    InstrumentMappingTable.GetOrAdd(runningInstrument.InstrumentIdentifier, mapStartNumber)
+                    mapStartNumber += 1
+                Next
             End If
             For Each runningFile In Directory.GetFiles(My.Application.Info.DirectoryPath, "InstrumentMappingFile*.Instruments.a2t")
                 Try

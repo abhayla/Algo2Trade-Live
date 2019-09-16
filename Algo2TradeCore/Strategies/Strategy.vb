@@ -326,6 +326,7 @@ Namespace Strategies
 
 #Region "Public MustOverride Functions"
         Public MustOverride Async Function CreateTradableStrategyInstrumentsAsync(ByVal allInstruments As IEnumerable(Of IInstrument), ByVal bannedInstruments As List(Of String)) As Task(Of Boolean)
+        Public MustOverride Async Function RemoveTradableStrategyInstrumentsAsync(ByVal instrumentToRemoved As List(Of IInstrument)) As Task(Of Boolean)
         Public MustOverride Overrides Function ToString() As String
         Public MustOverride Async Function MonitorAsync() As Task
         Protected MustOverride Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)

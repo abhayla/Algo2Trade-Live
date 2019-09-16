@@ -54,6 +54,7 @@ Namespace Adapter
         End Sub
         Public MustOverride Async Function ConnectFetcherAsync() As Task
         Public MustOverride Async Function SubscribeAsync(ByVal instrumentIdentifiers As IEnumerable(Of IInstrument), ByVal maxNumberOfDays As Integer) As Task
+        Public MustOverride Async Function UnSubscribeAsync(ByVal instrument As IInstrument) As Task
         Public MustOverride Overrides Function ToString() As String
         Public MustOverride Sub ClearLocalUniqueSubscriptionList()
         Public MustOverride Function IsConnected() As Boolean

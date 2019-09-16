@@ -55,7 +55,15 @@ Public Class VolumeSpikeStrategy
                     _cts.Token.ThrowIfCancellationRequested()
 
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
-                    If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
+                    If runningTradableInstrument IsNot Nothing Then
+                        retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
+                        If runningTradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Futures Then
+                            Dim cashInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
+                                                                                             Return x.TradingSymbol = runningTradableInstrument.RawInstrumentName
+                                                                                         End Function)
+                            If cashInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(cashInstrument)
+                        End If
+                    End If
                     ret = True
                 Next
                 TradableInstrumentsAsPerStrategy = retTradableInstrumentsAsPerStrategy
@@ -78,6 +86,7 @@ Public Class VolumeSpikeStrategy
                 TradableStrategyInstruments = Nothing
             End If
 
+            Dim cashInstruments As List(Of IInstrument) = Nothing
             'Now create the fresh handlers
             For Each runningTradableInstrument In retTradableInstrumentsAsPerStrategy
                 _cts.Token.ThrowIfCancellationRequested()
@@ -114,6 +123,7 @@ Public Class VolumeSpikeStrategy
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
+            'tasks.Add(Task.Run(AddressOf CompleteProcessAsync, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
         Catch ex As Exception
             lastException = ex
@@ -135,5 +145,9 @@ Public Class VolumeSpikeStrategy
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
         End If
         Return ret
+    End Function
+
+    Private Async Function CompleteProcessAsync() As Task
+
     End Function
 End Class

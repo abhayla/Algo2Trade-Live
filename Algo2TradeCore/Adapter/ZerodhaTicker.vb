@@ -100,5 +100,14 @@ Namespace Adapter
                 _ticker.Close()
             End If
         End Function
+        Public Overrides Async Function UnSubscribeAsync(instrumentToken As String) As Task
+            Await Task.Delay(0).ConfigureAwait(False)
+            If _ticker IsNot Nothing Then
+                Dim token() As UInteger = Nothing
+                ReDim token(0)
+                token(0) = instrumentToken
+                _ticker.UnSubscribe(token)
+            End If
+        End Function
     End Class
 End Namespace

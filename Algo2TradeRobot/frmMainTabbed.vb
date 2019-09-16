@@ -2066,7 +2066,7 @@ Public Class frmMainTabbed
             End If 'Common controller
             EnableDisableUIEx(UIMode.ReleaseOther, GetType(VolumeSpikeStrategy))
 
-            _VolumeSpikeStrategyToExecute = New VolumeSpikeStrategy(_commonController, 5, _VolumeSpikeUserInputs, 5, _cts)
+            _VolumeSpikeStrategyToExecute = New VolumeSpikeStrategy(_commonController, 5, _VolumeSpikeUserInputs, 10, _cts)
             OnHeartbeatEx(String.Format("Running strategy:{0}", _VolumeSpikeStrategyToExecute.ToString), New List(Of Object) From {_VolumeSpikeStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()
