@@ -150,7 +150,7 @@ Public Class VolumeSpikeStrategy
     Private Async Function CompleteProcessAsync() As Task
         Try
             Dim delayCtr As Integer = 0
-            Dim cashStrategyInstrumentList As IEnumerable(Of VolumeSpikeStrategyInstrument) = Nothing
+            Dim cashStrategyInstrumentList As IEnumerable(Of StrategyInstrument) = Nothing
             If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Count > 0 Then
                 cashStrategyInstrumentList = Me.TradableStrategyInstruments.Where(Function(x)
                                                                                       Return x.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Cash
@@ -161,9 +161,32 @@ Public Class VolumeSpikeStrategy
                     Throw Me.ParentController.OrphanException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-                If Now > Me.UserSettings.TradeStartTime.AddSeconds(5) Then
+                If Now > Me.UserSettings.TradeStartTime.AddSeconds(5) AndAlso Me.TradableStrategyInstruments.Where(Function(z)
+                                                                                                                       Return CType(z, VolumeSpikeStrategyInstrument).VolumeChangePercentage = Decimal.MinValue
+                                                                                                                   End Function).Count = 0 Then
                     If cashStrategyInstrumentList IsNot Nothing AndAlso cashStrategyInstrumentList.Count > 0 Then
-
+                        Dim counter As Integer = 0
+                        For Each runningCashInstrument In cashStrategyInstrumentList.OrderByDescending(Function(x)
+                                                                                                           Return CType(x, VolumeSpikeStrategyInstrument).VolumeChangePercentage
+                                                                                                       End Function)
+                            Dim futureIntruments As IEnumerable(Of StrategyInstrument) =
+                                Me.TradableStrategyInstruments.Where(Function(x)
+                                                                         Return x.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
+                                                                        x.TradableInstrument.RawInstrumentName = runningCashInstrument.TradableInstrument.TradingSymbol
+                                                                     End Function)
+                            If futureIntruments IsNot Nothing AndAlso futureIntruments.Count > 0 Then
+                                CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).EligibleToTakeTrade = True
+                                counter += 1
+                                If counter = 5 Then Exit For
+                            End If
+                        Next
+                        For Each runningInstrument In Me.TradableStrategyInstruments
+                            If Not CType(runningInstrument, VolumeSpikeStrategyInstrument).EligibleToTakeTrade Then
+                                runningInstrument.TradableInstrument.FetchHistorical = False
+                                Await Me.ParentController.UnSubscribeTicker(runningInstrument.TradableInstrument.InstrumentIdentifier).ConfigureAwait(False)
+                            End If
+                        Next
+                        Exit While
                     End If
                 End If
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
