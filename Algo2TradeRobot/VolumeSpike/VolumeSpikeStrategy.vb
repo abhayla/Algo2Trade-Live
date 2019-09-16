@@ -123,7 +123,7 @@ Public Class VolumeSpikeStrategy
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
-            'tasks.Add(Task.Run(AddressOf CompleteProcessAsync, _cts.Token))
+            tasks.Add(Task.Run(AddressOf CompleteProcessAsync, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
         Catch ex As Exception
             lastException = ex
@@ -148,6 +148,31 @@ Public Class VolumeSpikeStrategy
     End Function
 
     Private Async Function CompleteProcessAsync() As Task
+        Try
+            Dim delayCtr As Integer = 0
+            Dim cashStrategyInstrumentList As IEnumerable(Of VolumeSpikeStrategyInstrument) = Nothing
+            If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Count > 0 Then
+                cashStrategyInstrumentList = Me.TradableStrategyInstruments.Where(Function(x)
+                                                                                      Return x.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Cash
+                                                                                  End Function)
+            End If
+            While True
+                If Me.ParentController.OrphanException IsNot Nothing Then
+                    Throw Me.ParentController.OrphanException
+                End If
+                _cts.Token.ThrowIfCancellationRequested()
+                If Now > Me.UserSettings.TradeStartTime.AddSeconds(5) Then
+                    If cashStrategyInstrumentList IsNot Nothing AndAlso cashStrategyInstrumentList.Count > 0 Then
 
+                    End If
+                End If
+                Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
+            End While
+        Catch ex As Exception
+            'To log exceptions getting created from this function as the bubble up of the exception
+            'will anyways happen to Strategy.MonitorAsync but it will not be shown until all tasks exit
+            logger.Error("Strategy:{0}, error:{1}", Me.ToString, ex.ToString)
+            Throw ex
+        End Try
     End Function
 End Class

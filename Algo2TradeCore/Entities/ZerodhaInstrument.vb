@@ -12,6 +12,7 @@ Namespace Entities
 
         Public Sub New(ByVal associatedParentController As APIStrategyController, ByVal associatedIdentifer As String)
             InstrumentIdentifier = associatedIdentifer
+            FetchHistorical = True
         End Sub
         Public Property InstrumentIdentifier As String Implements IInstrument.InstrumentIdentifier
         Public ReadOnly Property RawExchange As String Implements IInstrument.RawExchange
@@ -113,6 +114,8 @@ Namespace Entities
         Public Property BrokerageCategory As String Implements IInstrument.BrokerageCategory
 
         Public Property ExchangeDetails As Exchange Implements IInstrument.ExchangeDetails
+
+        Public Property FetchHistorical As Boolean Implements IInstrument.FetchHistorical
 
         Public Overrides Function ToString() As String
             Return String.Format("{0}_{1}", Me.TradingSymbol, Me.InstrumentIdentifier)

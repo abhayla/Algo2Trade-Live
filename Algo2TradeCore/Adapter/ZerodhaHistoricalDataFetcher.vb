@@ -99,22 +99,24 @@ Namespace Adapter
 
                         Dim tasks = _subscribedInstruments.Select(Async Function(x)
                                                                       Try
-                                                                          _cts.Token.ThrowIfCancellationRequested()
-                                                                          Dim individualFetcher As New ZerodhaHistoricalDataFetcher(Me.ParentController,
+                                                                          If x.FetchHistorical Then
+                                                                              _cts.Token.ThrowIfCancellationRequested()
+                                                                              Dim individualFetcher As New ZerodhaHistoricalDataFetcher(Me.ParentController,
                                                                                                               If(x.IsHistoricalCompleted, 1, _daysToGoBack),
                                                                                                               x.InstrumentIdentifier,
                                                                                                               Me._cts)
-                                                                          Dim tempRet = Await individualFetcher.GetHistoricalCandleStickAsync.ConfigureAwait(False)
-                                                                          If tempRet IsNot Nothing AndAlso tempRet.GetType Is GetType(Dictionary(Of String, Object)) Then
-                                                                              Dim errorMessage As String = ParentController.GetErrorResponse(tempRet)
-                                                                              If errorMessage IsNot Nothing Then
-                                                                                  individualFetcher.OnFetcherError(x.InstrumentIdentifier, errorMessage)
+                                                                              Dim tempRet = Await individualFetcher.GetHistoricalCandleStickAsync.ConfigureAwait(False)
+                                                                              If tempRet IsNot Nothing AndAlso tempRet.GetType Is GetType(Dictionary(Of String, Object)) Then
+                                                                                  Dim errorMessage As String = ParentController.GetErrorResponse(tempRet)
+                                                                                  If errorMessage IsNot Nothing Then
+                                                                                      individualFetcher.OnFetcherError(x.InstrumentIdentifier, errorMessage)
+                                                                                  Else
+                                                                                      Await individualFetcher.OnFetcherCandlesAsync(x.InstrumentIdentifier, tempRet).ConfigureAwait(False)
+                                                                                  End If
                                                                               Else
-                                                                                  Await individualFetcher.OnFetcherCandlesAsync(x.InstrumentIdentifier, tempRet).ConfigureAwait(False)
+                                                                                  'TO DO: Uncomment this
+                                                                                  Throw New ApplicationException("Fetching of historical data failed as no return detected")
                                                                               End If
-                                                                          Else
-                                                                              'TO DO: Uncomment this
-                                                                              Throw New ApplicationException("Fetching of historical data failed as no return detected")
                                                                           End If
                                                                       Catch ex As Exception
                                                                           'Neglect error as in the next minute, it will be run again,

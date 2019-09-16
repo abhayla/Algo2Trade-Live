@@ -131,6 +131,9 @@ Public Class VolumeSpikeStrategyInstrument
     Private Async Function GetVolumeSpike() As Task
         Await Task.Delay(0).ConfigureAwait(False)
         If Me.VolumeChangePercentage = Decimal.MinValue AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
+            If Me.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Cash Then
+                Me.TradableInstrument.FetchHistorical = False
+            End If
             Dim userSettings As VolumeSpikeUserInputs = Me.ParentStrategy.UserSettings
             Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
             If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime AndAlso

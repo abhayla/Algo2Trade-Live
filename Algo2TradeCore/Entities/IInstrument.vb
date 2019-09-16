@@ -16,6 +16,7 @@
         Property RawPayloads As Concurrent.ConcurrentDictionary(Of Date, OHLCPayload)
         Property TickPayloads As Concurrent.ConcurrentBag(Of ITick)
         Property IsHistoricalCompleted As Boolean
+        Property FetchHistorical As Boolean
         ReadOnly Property InstrumentType As TypeOfInstrument
         Property ExchangeDetails As Exchange
 
