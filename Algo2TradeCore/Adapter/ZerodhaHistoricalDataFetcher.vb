@@ -214,23 +214,6 @@ Namespace Adapter
             End While
         End Function
 
-        Public Overrides Async Function UnSubscribeAsync(instrument As IInstrument) As Task
-            Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-            If _subscribedInstruments IsNot Nothing AndAlso _subscribedInstruments.Count > 0 Then
-                Console.WriteLine(String.Format("Before remove, {0}", instrument.TradingSymbol))
-                While Not _subscribedInstruments.IsEmpty
-                    Dim tempInstrument As IInstrument = Nothing
-                    _subscribedInstruments.TryTake(tempInstrument)
-                    If tempInstrument.InstrumentIdentifier.Equals(instrument.InstrumentIdentifier) Then
-                        Console.WriteLine(String.Format("After remove, {0}", tempInstrument.TradingSymbol))
-                        Exit While
-                    Else
-                        _subscribedInstruments.Add(tempInstrument)
-                    End If
-                End While
-            End If
-        End Function
-
 #Region "IDisposable Support"
         Private disposedValue As Boolean ' To detect redundant calls
 
