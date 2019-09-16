@@ -1,7 +1,7 @@
-﻿Public Class frmATMTradableInstrumentList
+﻿Public Class frmVolumeSpikeTradableInstrumentList
 
-    Private _TradableInstruments As IEnumerable(Of ATMStrategyInstrument)
-    Public Sub New(ByVal associatedTradableInstruments As IEnumerable(Of ATMStrategyInstrument))
+    Private _TradableInstruments As IEnumerable(Of VolumeSpikeStrategyInstrument)
+    Public Sub New(ByVal associatedTradableInstruments As IEnumerable(Of VolumeSpikeStrategyInstrument))
         InitializeComponent()
         Me._TradableInstruments = associatedTradableInstruments
     End Sub

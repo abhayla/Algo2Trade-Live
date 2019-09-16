@@ -4,14 +4,16 @@ Imports Algo2TradeCore.Entities.UserSettings
 Imports Utilities.DAL
 
 <Serializable>
-Public Class ATMUserInputs
+Public Class VolumeSpikeUserInputs
     Inherits StrategyUserInputs
     Public Property ATRPeriod As Integer
-    Public Property ATRMultiplier As Decimal
+    Public Property NumberOfTradePerStock As Integer
+    Public Property MaxProfitPerDay As Decimal
+    Public Property MaxLossPerDay As Decimal
     Public Property AutoSelectStock As Boolean
     Public Property CashInstrument As Boolean
     Public Property FutureInstrument As Boolean
-    Public Property CashMaxSL As Decimal
+    Public Property CashMinCapital As Decimal
     Public Property FutureMinCapital As Decimal
     Public Property ManualInstrumentList As String
     Public Property InstrumentDetailsFilePath As String
@@ -28,7 +30,6 @@ Public Class ATMUserInputs
     Public Class InstrumentDetails
         Public Property TradingSymbol As String
         Public Property MarginMultiplier As Decimal
-        Public Property Supporting As Decimal
     End Class
 
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
@@ -77,17 +78,6 @@ Public Class ATMUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("Margin Multiplier cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
-                                ElseIf columnCtr = 2 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            supporting = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("Supporting cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Supporting cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                    End If
                                 End If
                             Next
                             If instrumentName IsNot Nothing Then
@@ -95,7 +85,6 @@ Public Class ATMUserInputs
                                 With instrumentData
                                     .TradingSymbol = instrumentName.ToUpper
                                     .MarginMultiplier = margin
-                                    .Supporting = supporting
                                 End With
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
                                 If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then

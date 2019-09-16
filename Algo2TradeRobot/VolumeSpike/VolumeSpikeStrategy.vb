@@ -5,7 +5,7 @@ Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Strategies
 Imports NLog
 
-Public Class ATMStrategy
+Public Class VolumeSpikeStrategy
     Inherits Strategy
 
 #Region "Logging and Status Progress"
@@ -14,7 +14,7 @@ Public Class ATMStrategy
 
     Public Sub New(ByVal associatedParentController As APIStrategyController,
                    ByVal strategyIdentifier As String,
-                   ByVal userSettings As ATMUserInputs,
+                   ByVal userSettings As VolumeSpikeUserInputs,
                    ByVal maxNumberOfDaysForHistoricalFetch As Integer,
                    ByVal canceller As CancellationTokenSource)
         MyBase.New(associatedParentController, strategyIdentifier, True, userSettings, maxNumberOfDaysForHistoricalFetch, canceller)
@@ -36,9 +36,9 @@ Public Class ATMStrategy
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
-            Dim userInputs As ATMUserInputs = CType(Me.UserSettings, ATMUserInputs)
+            Dim userInputs As VolumeSpikeUserInputs = CType(Me.UserSettings, VolumeSpikeUserInputs)
             If userInputs.AutoSelectStock Then
-                Using fillInstrumentDetails As New ATMFillInstrumentDetails(_cts, Me)
+                Using fillInstrumentDetails As New VolumeSpikeFillInstrumentDetails(_cts, Me)
                     Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
                 End Using
                 logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
@@ -65,7 +65,7 @@ Public Class ATMStrategy
         If retTradableInstrumentsAsPerStrategy IsNot Nothing AndAlso retTradableInstrumentsAsPerStrategy.Count > 0 Then
             'tradableInstrumentsAsPerStrategy = tradableInstrumentsAsPerStrategy.Take(5).ToList
             'Now create the strategy tradable instruments
-            Dim retTradableStrategyInstruments As List(Of ATMStrategyInstrument) = Nothing
+            Dim retTradableStrategyInstruments As List(Of VolumeSpikeStrategyInstrument) = Nothing
             logger.Debug("Creating strategy tradable instruments, _tradableInstruments.count:{0}", retTradableInstrumentsAsPerStrategy.Count)
             'Remove the old handlers from the previous strategyinstruments collection
             If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
@@ -81,8 +81,8 @@ Public Class ATMStrategy
             'Now create the fresh handlers
             For Each runningTradableInstrument In retTradableInstrumentsAsPerStrategy
                 _cts.Token.ThrowIfCancellationRequested()
-                If retTradableStrategyInstruments Is Nothing Then retTradableStrategyInstruments = New List(Of ATMStrategyInstrument)
-                Dim runningTradableStrategyInstrument As New ATMStrategyInstrument(runningTradableInstrument, Me, False, _cts)
+                If retTradableStrategyInstruments Is Nothing Then retTradableStrategyInstruments = New List(Of VolumeSpikeStrategyInstrument)
+                Dim runningTradableStrategyInstrument As New VolumeSpikeStrategyInstrument(runningTradableInstrument, Me, False, _cts)
                 AddHandler runningTradableStrategyInstrument.HeartbeatEx, AddressOf OnHeartbeatEx
                 AddHandler runningTradableStrategyInstrument.WaitingForEx, AddressOf OnWaitingForEx
                 AddHandler runningTradableStrategyInstrument.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
@@ -109,7 +109,7 @@ Public Class ATMStrategy
         Try
             _cts.Token.ThrowIfCancellationRequested()
             Dim tasks As New List(Of Task)()
-            For Each tradableStrategyInstrument As ATMStrategyInstrument In TradableStrategyInstruments
+            For Each tradableStrategyInstrument As VolumeSpikeStrategyInstrument In TradableStrategyInstruments
                 _cts.Token.ThrowIfCancellationRequested()
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
@@ -129,7 +129,7 @@ Public Class ATMStrategy
 
     Protected Overrides Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)
         Dim ret As Tuple(Of Boolean, String) = Nothing
-        Dim userSettings As ATMUserInputs = Me.UserSettings
+        Dim userSettings As VolumeSpikeUserInputs = Me.UserSettings
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")

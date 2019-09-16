@@ -1127,11 +1127,11 @@ Namespace Controller
         End Sub
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
             Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-            Try
-                logger.Fatal("Tick Data: {0}", Utilities.Strings.JsonSerialize(tickData))
-            Catch ex As Exception
-                'Do nothing
-            End Try
+            'Try
+            '    logger.Fatal("Tick Data: {0}", Utilities.Strings.JsonSerialize(tickData))
+            'Catch ex As Exception
+            '    'Do nothing
+            'End Try
             Dim runningTick As New ZerodhaTick() With {.WrappedTick = tickData}
             Dim runningInstruments As IEnumerable(Of IInstrument) = _AllStrategyUniqueInstruments.Where(Function(x)
                                                                                                             Return x.InstrumentIdentifier = tickData.InstrumentToken
@@ -1180,11 +1180,11 @@ Namespace Controller
                 orderData.Status = "CANCELLED" OrElse
                 orderData.Status = "OPEN" OrElse
                 orderData.Status = "TRIGGER PENDING" Then
-                Try
-                    logger.Fatal("Order Update: {0}", Utilities.Strings.JsonSerialize(orderData))
-                Catch ex As Exception
-                    'Do nothing
-                End Try
+                'Try
+                '    logger.Fatal("Order Update: {0}", Utilities.Strings.JsonSerialize(orderData))
+                'Catch ex As Exception
+                '    'Do nothing
+                'End Try
                 ProcessTickOrderUpdateAsync(New ZerodhaOrder With {.WrappedOrder = orderData})
             End If
         End Sub

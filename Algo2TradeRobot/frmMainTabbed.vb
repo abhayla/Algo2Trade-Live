@@ -1928,19 +1928,19 @@ Public Class frmMainTabbed
     End Sub
 #End Region
 
-#Region "ATM Strategy"
-    Private _ATMUserInputs As ATMUserInputs = Nothing
-    Private _ATMDashboadList As BindingList(Of ActivityDashboard) = Nothing
-    Private _ATMTradableInstruments As IEnumerable(Of ATMStrategyInstrument) = Nothing
-    Private _ATMStrategyToExecute As ATMStrategy = Nothing
-    Private Sub sfdgvATMMainDashboard_FilterPopupShowing(sender As Object, e As FilterPopupShowingEventArgs) Handles sfdgvATMMainDashboard.FilterPopupShowing
-        ManipulateGridEx(GridMode.TouchupPopupFilter, e, GetType(ATMStrategy))
+#Region "Volume Spike Strategy"
+    Private _VolumeSpikeUserInputs As VolumeSpikeUserInputs = Nothing
+    Private _VolumeSpikeDashboadList As BindingList(Of ActivityDashboard) = Nothing
+    Private _VolumeSpikeTradableInstruments As IEnumerable(Of VolumeSpikeStrategyInstrument) = Nothing
+    Private _VolumeSpikeStrategyToExecute As VolumeSpikeStrategy = Nothing
+    Private Sub sfdgvVolumeSpikeMainDashboard_FilterPopupShowing(sender As Object, e As FilterPopupShowingEventArgs) Handles sfdgvVolumeSpikeMainDashboard.FilterPopupShowing
+        ManipulateGridEx(GridMode.TouchupPopupFilter, e, GetType(VolumeSpikeStrategy))
     End Sub
-    Private Sub sfdgvATMMainDashboard_AutoGeneratingColumn(sender As Object, e As AutoGeneratingColumnArgs) Handles sfdgvATMMainDashboard.AutoGeneratingColumn
-        ManipulateGridEx(GridMode.TouchupAutogeneratingColumn, e, GetType(ATMStrategy))
+    Private Sub sfdgvVolumeSpikeMainDashboard_AutoGeneratingColumn(sender As Object, e As AutoGeneratingColumnArgs) Handles sfdgvVolumeSpikeMainDashboard.AutoGeneratingColumn
+        ManipulateGridEx(GridMode.TouchupAutogeneratingColumn, e, GetType(VolumeSpikeStrategy))
     End Sub
-    Private Async Function ATMWorkerAsync() As Task
-        If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
+    Private Async Function VolumeSpikeWorkerAsync() As Task
+        If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
             MsgBox("Cannot start as another strategy is loggin in")
             Exit Function
         End If
@@ -1950,21 +1950,21 @@ Public Class frmMainTabbed
         _lastException = Nothing
 
         Try
-            EnableDisableUIEx(UIMode.Active, GetType(ATMStrategy))
-            EnableDisableUIEx(UIMode.BlockOther, GetType(ATMStrategy))
+            EnableDisableUIEx(UIMode.Active, GetType(VolumeSpikeStrategy))
+            EnableDisableUIEx(UIMode.BlockOther, GetType(VolumeSpikeStrategy))
 
             OnHeartbeat("Validating Strategy user settings")
-            If File.Exists("ATMSettings.Strategy.a2t") Then
-                Dim fs As Stream = New FileStream("ATMSettings.Strategy.a2t", FileMode.Open)
+            If File.Exists("VolumeSpikeSettings.Strategy.a2t") Then
+                Dim fs As Stream = New FileStream("VolumeSpikeSettings.Strategy.a2t", FileMode.Open)
                 Dim bf As BinaryFormatter = New BinaryFormatter()
-                _ATMUserInputs = CType(bf.Deserialize(fs), ATMUserInputs)
+                _VolumeSpikeUserInputs = CType(bf.Deserialize(fs), VolumeSpikeUserInputs)
                 fs.Close()
-                _ATMUserInputs.InstrumentsData = Nothing
-                _ATMUserInputs.FillInstrumentDetails(_ATMUserInputs.InstrumentDetailsFilePath, _cts)
+                _VolumeSpikeUserInputs.InstrumentsData = Nothing
+                _VolumeSpikeUserInputs.FillInstrumentDetails(_VolumeSpikeUserInputs.InstrumentDetailsFilePath, _cts)
             Else
                 Throw New ApplicationException("Settings file not found. Please complete your settings properly.")
             End If
-            logger.Debug(Utilities.Strings.JsonSerialize(_ATMUserInputs))
+            logger.Debug(Utilities.Strings.JsonSerialize(_VolumeSpikeUserInputs))
 
             If Not Common.IsZerodhaUserDetailsPopulated(_commonControllerUserInput) Then Throw New ApplicationException("Cannot proceed without API user details being entered")
             Dim currentUser As ZerodhaUser = Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput)
@@ -2064,28 +2064,28 @@ Public Class frmMainTabbed
 
                 If Not isPreProcessingDone Then Throw New ApplicationException("PrepareToRunStrategyAsync did not succeed, cannot progress")
             End If 'Common controller
-            EnableDisableUIEx(UIMode.ReleaseOther, GetType(ATMStrategy))
+            EnableDisableUIEx(UIMode.ReleaseOther, GetType(VolumeSpikeStrategy))
 
-            _ATMStrategyToExecute = New ATMStrategy(_commonController, 5, _ATMUserInputs, 5, _cts)
-            OnHeartbeatEx(String.Format("Running strategy:{0}", _ATMStrategyToExecute.ToString), New List(Of Object) From {_ATMStrategyToExecute})
+            _VolumeSpikeStrategyToExecute = New VolumeSpikeStrategy(_commonController, 5, _VolumeSpikeUserInputs, 5, _cts)
+            OnHeartbeatEx(String.Format("Running strategy:{0}", _VolumeSpikeStrategyToExecute.ToString), New List(Of Object) From {_VolumeSpikeStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()
-            Await _commonController.SubscribeStrategyAsync(_ATMStrategyToExecute).ConfigureAwait(False)
+            Await _commonController.SubscribeStrategyAsync(_VolumeSpikeStrategyToExecute).ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
 
-            _ATMTradableInstruments = _ATMStrategyToExecute.TradableStrategyInstruments
-            SetObjectText_ThreadSafe(linklblATMTradableInstrument, String.Format("Tradable Instruments: {0}", _ATMTradableInstruments.Count))
-            SetObjectEnableDisable_ThreadSafe(linklblATMTradableInstrument, True)
+            _VolumeSpikeTradableInstruments = _VolumeSpikeStrategyToExecute.TradableStrategyInstruments
+            SetObjectText_ThreadSafe(linklblVolumeSpikeTradableInstrument, String.Format("Tradable Instruments: {0}", _VolumeSpikeTradableInstruments.Count))
+            SetObjectEnableDisable_ThreadSafe(linklblVolumeSpikeTradableInstrument, True)
             _cts.Token.ThrowIfCancellationRequested()
 
-            _ATMDashboadList = New BindingList(Of ActivityDashboard)(_ATMStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
-                                                                                                                                            Return x.SignalGeneratedTime
-                                                                                                                                        End Function).ToList)
-            SetSFGridDataBind_ThreadSafe(sfdgvATMMainDashboard, _ATMDashboadList)
-            SetSFGridFreezFirstColumn_ThreadSafe(sfdgvATMMainDashboard)
+            _VolumeSpikeDashboadList = New BindingList(Of ActivityDashboard)(_VolumeSpikeStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
+                                                                                                                                                            Return x.SignalGeneratedTime
+                                                                                                                                                        End Function).ToList)
+            SetSFGridDataBind_ThreadSafe(sfdgvVolumeSpikeMainDashboard, _VolumeSpikeDashboadList)
+            SetSFGridFreezFirstColumn_ThreadSafe(sfdgvVolumeSpikeMainDashboard)
             _cts.Token.ThrowIfCancellationRequested()
 
-            Await _ATMStrategyToExecute.MonitorAsync().ConfigureAwait(False)
+            Await _VolumeSpikeStrategyToExecute.MonitorAsync().ConfigureAwait(False)
         Catch aex As AdapterBusinessException
             logger.Error(aex)
             If aex.ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
@@ -2104,8 +2104,8 @@ Public Class frmMainTabbed
             MsgBox(String.Format("The following error occurred: {0}", ex.Message), MsgBoxStyle.Critical)
         Finally
             ProgressStatus("No pending actions")
-            EnableDisableUIEx(UIMode.ReleaseOther, GetType(ATMStrategy))
-            EnableDisableUIEx(UIMode.Idle, GetType(ATMStrategy))
+            EnableDisableUIEx(UIMode.ReleaseOther, GetType(VolumeSpikeStrategy))
+            EnableDisableUIEx(UIMode.Idle, GetType(VolumeSpikeStrategy))
         End Try
         'If _cts Is Nothing OrElse _cts.IsCancellationRequested Then
         'Following portion need to be done for any kind of exception. Otherwise if we start again without closing the form then
@@ -2119,7 +2119,7 @@ Public Class frmMainTabbed
         _cts = Nothing
         'End If
     End Function
-    Private Async Sub btnATMStart_Click(sender As Object, e As EventArgs) Handles btnATMStart.Click
+    Private Async Sub btnVolumeSpikeStart_Click(sender As Object, e As EventArgs) Handles btnVolumeSpikeStart.Click
         'Dim authenticationUserId As String = "YH8805"
         'If Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper IsNot Nothing AndAlso
         '    Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper <> "" AndAlso
@@ -2130,39 +2130,39 @@ Public Class frmMainTabbed
         'End If
 
         PreviousDayCleanup(False)
-        Await Task.Run(AddressOf ATMWorkerAsync).ConfigureAwait(False)
+        Await Task.Run(AddressOf VolumeSpikeWorkerAsync).ConfigureAwait(False)
 
         If _lastException IsNot Nothing Then
             If _lastException.GetType.BaseType Is GetType(AdapterBusinessException) AndAlso
                 CType(_lastException, AdapterBusinessException).ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
                 Debug.WriteLine("Restart for permission")
                 logger.Debug("Restarting the application again as there is premission issue")
-                btnATMStart_Click(sender, e)
+                btnVolumeSpikeStart_Click(sender, e)
             ElseIf _lastException.GetType Is GetType(ForceExitException) Then
                 Debug.WriteLine("Restart for daily refresh")
                 logger.Debug("Restarting the application again for daily refresh")
                 PreviousDayCleanup(True)
-                btnATMStart_Click(sender, e)
+                btnVolumeSpikeStart_Click(sender, e)
             End If
         End If
     End Sub
-    Private Sub tmrATMTickerStatus_Tick(sender As Object, e As EventArgs) Handles tmrATMStatus.Tick
-        FlashTickerBulbEx(GetType(ATMStrategy))
+    Private Sub tmrVolumeSpikeTickerStatus_Tick(sender As Object, e As EventArgs) Handles tmrVolumeSpikeStatus.Tick
+        FlashTickerBulbEx(GetType(VolumeSpikeStrategy))
     End Sub
-    Private Async Sub btnATMStop_Click(sender As Object, e As EventArgs) Handles btnATMStop.Click
-        OnEndOfTheDay(_ATMStrategyToExecute)
-        SetObjectEnableDisable_ThreadSafe(linklblATMTradableInstrument, False)
+    Private Async Sub btnVolumeSpikeStop_Click(sender As Object, e As EventArgs) Handles btnVolumeSpikeStop.Click
+        OnEndOfTheDay(_VolumeSpikeStrategyToExecute)
+        SetObjectEnableDisable_ThreadSafe(linklblVolumeSpikeTradableInstrument, False)
         If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
         If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
         If _commonController IsNot Nothing Then Await _commonController.CloseCollectorIfConnectedAsync(True).ConfigureAwait(False)
         _cts.Cancel()
     End Sub
-    Private Sub btnATMSettings_Click(sender As Object, e As EventArgs) Handles btnATMSettings.Click
-        Dim newForm As New frmATMSettings(_ATMUserInputs)
+    Private Sub btnVolumeSpikeSettings_Click(sender As Object, e As EventArgs) Handles btnVolumeSpikeSettings.Click
+        Dim newForm As New frmVolumeSpikeSettings(_VolumeSpikeUserInputs)
         newForm.ShowDialog()
     End Sub
-    Private Sub linklblATMTradableInstrument_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles linklblATMTradableInstrument.LinkClicked
-        Dim newForm As New frmATMTradableInstrumentList(_ATMTradableInstruments)
+    Private Sub linklblVolumeSpikeTradableInstrument_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles linklblVolumeSpikeTradableInstrument.LinkClicked
+        Dim newForm As New frmVolumeSpikeTradableInstrumentList(_VolumeSpikeTradableInstruments)
         newForm.ShowDialog()
     End Sub
 #End Region
@@ -2687,9 +2687,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -2724,9 +2724,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnATMStart, "Start")
-                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, "Start")
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -2773,9 +2773,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -2810,9 +2810,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnATMStart, "Start")
-                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, "Start")
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -2859,9 +2859,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -2896,9 +2896,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnATMStart, "Start")
-                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, "Start")
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -2945,9 +2945,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -2982,9 +2982,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnATMStart, "Start")
-                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, "Start")
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3031,9 +3031,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -3068,9 +3068,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnATMStart, "Start")
-                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, "Start")
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3117,9 +3117,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnEMACrossoverStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnEMACrossoverStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -3154,9 +3154,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnEMACrossoverStart, "Start")
                         SetObjectText_ThreadSafe(btnEMACrossoverStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnATMStart, "Start")
-                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, "Start")
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3203,9 +3203,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -3240,9 +3240,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnATMStart, "Start")
-                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, "Start")
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3258,12 +3258,12 @@ Public Class frmMainTabbed
                     SetObjectEnableDisable_ThreadSafe(btnEMACrossoverStop, False)
                     SetSFGridDataBind_ThreadSafe(sfdgvEMACrossoverMainDashboard, Nothing)
             End Select
-        ElseIf source Is GetType(ATMStrategy) Then
+        ElseIf source Is GetType(VolumeSpikeStrategy) Then
             Select Case mode
                 Case UIMode.Active
-                    SetObjectEnableDisable_ThreadSafe(btnATMStart, False)
-                    SetObjectEnableDisable_ThreadSafe(btnATMSettings, False)
-                    SetObjectEnableDisable_ThreadSafe(btnATMStop, True)
+                    SetObjectEnableDisable_ThreadSafe(btnVolumeSpikeStart, False)
+                    SetObjectEnableDisable_ThreadSafe(btnVolumeSpikeSettings, False)
+                    SetObjectEnableDisable_ThreadSafe(btnVolumeSpikeStop, True)
                 Case UIMode.BlockOther
                     If GetObjectText_ThreadSafe(btnAmiSignalStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnAmiSignalStart, Common.LOGIN_PENDING)
@@ -3339,10 +3339,10 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnTwoThirdStop, "Stop")
                     End If
                 Case UIMode.Idle
-                    SetObjectEnableDisable_ThreadSafe(btnATMStart, True)
-                    SetObjectEnableDisable_ThreadSafe(btnATMSettings, True)
-                    SetObjectEnableDisable_ThreadSafe(btnATMStop, False)
-                    SetSFGridDataBind_ThreadSafe(sfdgvATMMainDashboard, Nothing)
+                    SetObjectEnableDisable_ThreadSafe(btnVolumeSpikeStart, True)
+                    SetObjectEnableDisable_ThreadSafe(btnVolumeSpikeSettings, True)
+                    SetObjectEnableDisable_ThreadSafe(btnVolumeSpikeStop, False)
+                    SetSFGridDataBind_ThreadSafe(sfdgvVolumeSpikeMainDashboard, Nothing)
             End Select
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             Select Case mode
@@ -3379,9 +3379,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnTwoThirdStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnTwoThirdStart, Common.LOGIN_PENDING)
@@ -3416,9 +3416,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnATMStart, "Start")
-                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, "Start")
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnTwoThirdStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnTwoThirdStart, "Start")
@@ -3465,9 +3465,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, Common.LOGIN_PENDING)
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, Common.LOGIN_PENDING)
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = "Start" Then
-                        SetObjectText_ThreadSafe(btnATMStart, Common.LOGIN_PENDING)
-                        SetObjectText_ThreadSafe(btnATMStop, Common.LOGIN_PENDING)
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = "Start" Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, Common.LOGIN_PENDING)
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, Common.LOGIN_PENDING)
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = "Start" Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, Common.LOGIN_PENDING)
@@ -3502,9 +3502,9 @@ Public Class frmMainTabbed
                         SetObjectText_ThreadSafe(btnPetDGandhiStart, "Start")
                         SetObjectText_ThreadSafe(btnPetDGandhiStop, "Stop")
                     End If
-                    If GetObjectText_ThreadSafe(btnATMStart) = Common.LOGIN_PENDING Then
-                        SetObjectText_ThreadSafe(btnATMStart, "Start")
-                        SetObjectText_ThreadSafe(btnATMStop, "Stop")
+                    If GetObjectText_ThreadSafe(btnVolumeSpikeStart) = Common.LOGIN_PENDING Then
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStart, "Start")
+                        SetObjectText_ThreadSafe(btnVolumeSpikeStop, "Stop")
                     End If
                     If GetObjectText_ThreadSafe(btnJoyMaaATMStart) = Common.LOGIN_PENDING Then
                         SetObjectText_ThreadSafe(btnJoyMaaATMStart, "Start")
@@ -3542,9 +3542,9 @@ Public Class frmMainTabbed
         ElseIf source Is GetType(EMACrossoverStrategy) Then
             blbTickerStatusCommon = blbEMACrossoverTickerStatus
             tmrTickerStatusCommon = tmrEMACrossoverTickerStatus
-        ElseIf source Is GetType(ATMStrategy) Then
-            blbTickerStatusCommon = blbATMTickerStatus
-            tmrTickerStatusCommon = tmrATMStatus
+        ElseIf source Is GetType(VolumeSpikeStrategy) Then
+            blbTickerStatusCommon = blbVolumeSpikeTickerStatus
+            tmrTickerStatusCommon = tmrVolumeSpikeStatus
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             blbTickerStatusCommon = blbJoyMaaATMTickerStatus
             tmrTickerStatusCommon = tmrJoyMaaATMTickerStatus
@@ -3586,8 +3586,8 @@ Public Class frmMainTabbed
             blbTickerStatusCommon = blbPetDGandhiTickerStatus
         ElseIf source Is GetType(EMACrossoverStrategy) Then
             blbTickerStatusCommon = blbEMACrossoverTickerStatus
-        ElseIf source Is GetType(ATMStrategy) Then
-            blbTickerStatusCommon = blbATMTickerStatus
+        ElseIf source Is GetType(VolumeSpikeStrategy) Then
+            blbTickerStatusCommon = blbVolumeSpikeTickerStatus
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             blbTickerStatusCommon = blbJoyMaaATMTickerStatus
         ElseIf source Is GetType(TwoThirdStrategy) Then
@@ -3617,8 +3617,8 @@ Public Class frmMainTabbed
             sfdgvCommon = sfdgvPetDGandhiMainDashboard
         ElseIf source Is GetType(EMACrossoverStrategy) Then
             sfdgvCommon = sfdgvEMACrossoverMainDashboard
-        ElseIf source Is GetType(ATMStrategy) Then
-            sfdgvCommon = sfdgvATMMainDashboard
+        ElseIf source Is GetType(VolumeSpikeStrategy) Then
+            sfdgvCommon = sfdgvVolumeSpikeMainDashboard
         ElseIf source Is GetType(JoyMaaATMStrategy) Then
             sfdgvCommon = sfdgvJoyMaaATMMainDashboard
         ElseIf source Is GetType(TwoThirdStrategy) Then
@@ -3704,10 +3704,10 @@ Public Class frmMainTabbed
                 Case LogMode.One
                     SetListAddItem_ThreadSafe(lstEMACrossoverLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
             End Select
-        ElseIf source IsNot Nothing AndAlso source.GetType Is GetType(ATMStrategy) Then
+        ElseIf source IsNot Nothing AndAlso source.GetType Is GetType(VolumeSpikeStrategy) Then
             Select Case mode
                 Case LogMode.One
-                    SetListAddItem_ThreadSafe(lstCandleRangeBreakoutLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
+                    SetListAddItem_ThreadSafe(lstVolumeSpikeLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
             End Select
         ElseIf source IsNot Nothing AndAlso source.GetType Is GetType(JoyMaaATMStrategy) Then
             Select Case mode
@@ -3729,7 +3729,7 @@ Public Class frmMainTabbed
                     SetListAddItem_ThreadSafe(lstNearFarHedgingLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
                     SetListAddItem_ThreadSafe(lstPetDGandhiLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
                     SetListAddItem_ThreadSafe(lstEMACrossoverLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
-                    SetListAddItem_ThreadSafe(lstCandleRangeBreakoutLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
+                    SetListAddItem_ThreadSafe(lstVolumeSpikeLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
                     SetListAddItem_ThreadSafe(lstJoyMaaATMLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
                     SetListAddItem_ThreadSafe(lstTwoThirdLog, String.Format("{0}-{1}", Format(ISTNow, "yyyy-MM-dd HH:mm:ss"), msg))
             End Select
@@ -3805,7 +3805,7 @@ Public Class frmMainTabbed
         EnableDisableUIEx(UIMode.Idle, GetType(NearFarHedgingStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(PetDGandhiStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(EMACrossoverStrategy))
-        EnableDisableUIEx(UIMode.Idle, GetType(ATMStrategy))
+        EnableDisableUIEx(UIMode.Idle, GetType(VolumeSpikeStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(JoyMaaATMStrategy))
         EnableDisableUIEx(UIMode.Idle, GetType(TwoThirdStrategy))
         'tabMain.TabPages.Remove(tabOHL)
@@ -3827,7 +3827,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Pink)
-        ColorTickerBulbEx(GetType(ATMStrategy), Color.Pink)
+        ColorTickerBulbEx(GetType(VolumeSpikeStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Pink)
         ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Pink)
         OnHeartbeat("Ticker:Closed")
@@ -3840,7 +3840,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Lime)
-        ColorTickerBulbEx(GetType(ATMStrategy), Color.Lime)
+        ColorTickerBulbEx(GetType(VolumeSpikeStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Lime)
         ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Lime)
         OnHeartbeat("Ticker:Connected")
@@ -3854,7 +3854,7 @@ Public Class frmMainTabbed
             ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Pink)
-            ColorTickerBulbEx(GetType(ATMStrategy), Color.Pink)
+            ColorTickerBulbEx(GetType(VolumeSpikeStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Pink)
             ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Pink)
         End If
@@ -3873,7 +3873,7 @@ Public Class frmMainTabbed
         ColorTickerBulbEx(GetType(NearFarHedgingStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(PetDGandhiStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(EMACrossoverStrategy), Color.Yellow)
-        ColorTickerBulbEx(GetType(ATMStrategy), Color.Yellow)
+        ColorTickerBulbEx(GetType(VolumeSpikeStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(JoyMaaATMStrategy), Color.Yellow)
         ColorTickerBulbEx(GetType(TwoThirdStrategy), Color.Yellow)
         OnHeartbeat("Ticker:Reconnecting")
@@ -3936,8 +3936,8 @@ Public Class frmMainTabbed
                     BindingListAdd_ThreadSafe(_PetDGandhiDashboadList, item)
                 Case GetType(EMACrossoverStrategy)
                     BindingListAdd_ThreadSafe(_EMACrossoverDashboadList, item)
-                Case GetType(ATMStrategy)
-                    BindingListAdd_ThreadSafe(_ATMDashboadList, item)
+                Case GetType(VolumeSpikeStrategy)
+                    BindingListAdd_ThreadSafe(_VolumeSpikeDashboadList, item)
                 Case GetType(JoyMaaATMStrategy)
                     BindingListAdd_ThreadSafe(_JoyMaaATMDashboadList, item)
                 Case GetType(TwoThirdStrategy)
@@ -3991,12 +3991,12 @@ Public Class frmMainTabbed
                 _EMACrossoverDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
                 SetSFGridDataBind_ThreadSafe(sfdgvEMACrossoverMainDashboard, _EMACrossoverDashboadList)
                 SetSFGridFreezFirstColumn_ThreadSafe(sfdgvEMACrossoverMainDashboard)
-            Case GetType(ATMStrategy)
-                SetSFGridDataBind_ThreadSafe(sfdgvATMMainDashboard, Nothing)
-                _ATMDashboadList = Nothing
-                _ATMDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
-                SetSFGridDataBind_ThreadSafe(sfdgvATMMainDashboard, _ATMDashboadList)
-                SetSFGridFreezFirstColumn_ThreadSafe(sfdgvATMMainDashboard)
+            Case GetType(VolumeSpikeStrategy)
+                SetSFGridDataBind_ThreadSafe(sfdgvVolumeSpikeMainDashboard, Nothing)
+                _VolumeSpikeDashboadList = Nothing
+                _VolumeSpikeDashboadList = New BindingList(Of ActivityDashboard)(runningStrategy.SignalManager.ActivityDetails.Values.ToList)
+                SetSFGridDataBind_ThreadSafe(sfdgvVolumeSpikeMainDashboard, _VolumeSpikeDashboadList)
+                SetSFGridFreezFirstColumn_ThreadSafe(sfdgvVolumeSpikeMainDashboard)
             Case GetType(JoyMaaATMStrategy)
                 SetSFGridDataBind_ThreadSafe(sfdgvJoyMaaATMMainDashboard, Nothing)
                 _JoyMaaATMDashboadList = Nothing
@@ -4030,8 +4030,8 @@ Public Class frmMainTabbed
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("PetD Gandhi Order Book.csv")))
                 Case GetType(EMACrossoverStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("EMA Crossover Order Book.csv")))
-                Case GetType(ATMStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("ATM Order Book.csv")))
+                Case GetType(VolumeSpikeStrategy)
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Volume Spike Order Book.csv")))
                 Case GetType(JoyMaaATMStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Joy Maa ATM Order Book.csv")))
                 Case GetType(TwoThirdStrategy)

@@ -30,21 +30,21 @@ Partial Class frmMainTabbed
         Me.miAdvancedOptions = New System.Windows.Forms.ToolStripMenuItem()
         Me.miAbout = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabMain = New System.Windows.Forms.TabControl()
-        Me.tabATM = New System.Windows.Forms.TabPage()
+        Me.tabVolumeSpike = New System.Windows.Forms.TabPage()
         Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.btnATMStop = New System.Windows.Forms.Button()
-        Me.btnATMStart = New System.Windows.Forms.Button()
+        Me.btnVolumeSpikeStop = New System.Windows.Forms.Button()
+        Me.btnVolumeSpikeStart = New System.Windows.Forms.Button()
         Me.Panel8 = New System.Windows.Forms.Panel()
-        Me.blbATMTickerStatus = New Bulb.LedBulb()
+        Me.blbVolumeSpikeTickerStatus = New Bulb.LedBulb()
         Me.lblCandleRangeBreakoutTickerStatus = New System.Windows.Forms.Label()
-        Me.btnATMSettings = New System.Windows.Forms.Button()
-        Me.linklblATMTradableInstrument = New System.Windows.Forms.LinkLabel()
+        Me.btnVolumeSpikeSettings = New System.Windows.Forms.Button()
+        Me.linklblVolumeSpikeTradableInstrument = New System.Windows.Forms.LinkLabel()
         Me.pnlCandleRangeBreakoutBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.PictureBox7 = New System.Windows.Forms.PictureBox()
         Me.TableLayoutPanel6 = New System.Windows.Forms.TableLayoutPanel()
-        Me.lstCandleRangeBreakoutLog = New System.Windows.Forms.ListBox()
-        Me.sfdgvATMMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
+        Me.lstVolumeSpikeLog = New System.Windows.Forms.ListBox()
+        Me.sfdgvVolumeSpikeMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
         Me.tabTwoThird = New System.Windows.Forms.TabPage()
         Me.pnlTwoThirdMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlTwoThirdTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
@@ -187,19 +187,19 @@ Partial Class frmMainTabbed
         Me.tmrNearFarHedgingTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrPetDGandhiTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrEMACrossoverTickerStatus = New System.Windows.Forms.Timer(Me.components)
-        Me.tmrATMStatus = New System.Windows.Forms.Timer(Me.components)
+        Me.tmrVolumeSpikeStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrJoyMaaATMTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrTwoThirdTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.msMainMenuStrip.SuspendLayout()
         Me.tabMain.SuspendLayout()
-        Me.tabATM.SuspendLayout()
+        Me.tabVolumeSpike.SuspendLayout()
         Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.SuspendLayout()
         Me.Panel8.SuspendLayout()
         Me.pnlCandleRangeBreakoutBodyVerticalSplitter.SuspendLayout()
         CType(Me.PictureBox7, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TableLayoutPanel6.SuspendLayout()
-        CType(Me.sfdgvATMMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.sfdgvVolumeSpikeMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabTwoThird.SuspendLayout()
         Me.pnlTwoThirdMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlTwoThirdTopHeaderVerticalSplitter.SuspendLayout()
@@ -313,7 +313,7 @@ Partial Class frmMainTabbed
         '
         'tabMain
         '
-        Me.tabMain.Controls.Add(Me.tabATM)
+        Me.tabMain.Controls.Add(Me.tabVolumeSpike)
         Me.tabMain.Controls.Add(Me.tabTwoThird)
         Me.tabMain.Controls.Add(Me.tabJoyMaaATM)
         Me.tabMain.Controls.Add(Me.tabPetDGandhi)
@@ -331,15 +331,15 @@ Partial Class frmMainTabbed
         Me.tabMain.Size = New System.Drawing.Size(1371, 722)
         Me.tabMain.TabIndex = 1
         '
-        'tabATM
+        'tabVolumeSpike
         '
-        Me.tabATM.Controls.Add(Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter)
-        Me.tabATM.Location = New System.Drawing.Point(4, 25)
-        Me.tabATM.Name = "tabATM"
-        Me.tabATM.Size = New System.Drawing.Size(1363, 693)
-        Me.tabATM.TabIndex = 7
-        Me.tabATM.Text = "ATM"
-        Me.tabATM.UseVisualStyleBackColor = True
+        Me.tabVolumeSpike.Controls.Add(Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter)
+        Me.tabVolumeSpike.Location = New System.Drawing.Point(4, 25)
+        Me.tabVolumeSpike.Name = "tabVolumeSpike"
+        Me.tabVolumeSpike.Size = New System.Drawing.Size(1363, 693)
+        Me.tabVolumeSpike.TabIndex = 7
+        Me.tabVolumeSpike.Text = "Volume Spike"
+        Me.tabVolumeSpike.UseVisualStyleBackColor = True
         '
         'pnlCandleRangeBreakoutMainPanelHorizontalSplitter
         '
@@ -375,11 +375,11 @@ Partial Class frmMainTabbed
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnATMStop, 0, 0)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnATMStart, 0, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnVolumeSpikeStop, 0, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnVolumeSpikeStart, 0, 0)
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.Panel8, 14, 0)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnATMSettings, 9, 0)
-        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.linklblATMTradableInstrument, 10, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.btnVolumeSpikeSettings, 9, 0)
+        Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Controls.Add(Me.linklblVolumeSpikeTradableInstrument, 10, 0)
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
@@ -389,31 +389,31 @@ Partial Class frmMainTabbed
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.TabIndex = 0
         '
-        'btnATMStop
+        'btnVolumeSpikeStop
         '
-        Me.btnATMStop.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnATMStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnATMStop.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnATMStop.Name = "btnATMStop"
-        Me.btnATMStop.Size = New System.Drawing.Size(82, 32)
-        Me.btnATMStop.TabIndex = 10
-        Me.btnATMStop.Text = "Stop"
-        Me.btnATMStop.UseVisualStyleBackColor = True
+        Me.btnVolumeSpikeStop.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnVolumeSpikeStop.Location = New System.Drawing.Point(94, 4)
+        Me.btnVolumeSpikeStop.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnVolumeSpikeStop.Name = "btnVolumeSpikeStop"
+        Me.btnVolumeSpikeStop.Size = New System.Drawing.Size(82, 32)
+        Me.btnVolumeSpikeStop.TabIndex = 10
+        Me.btnVolumeSpikeStop.Text = "Stop"
+        Me.btnVolumeSpikeStop.UseVisualStyleBackColor = True
         '
-        'btnATMStart
+        'btnVolumeSpikeStart
         '
-        Me.btnATMStart.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnATMStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnATMStart.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnATMStart.Name = "btnATMStart"
-        Me.btnATMStart.Size = New System.Drawing.Size(82, 32)
-        Me.btnATMStart.TabIndex = 2
-        Me.btnATMStart.Text = "Start"
-        Me.btnATMStart.UseVisualStyleBackColor = True
+        Me.btnVolumeSpikeStart.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnVolumeSpikeStart.Location = New System.Drawing.Point(4, 4)
+        Me.btnVolumeSpikeStart.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnVolumeSpikeStart.Name = "btnVolumeSpikeStart"
+        Me.btnVolumeSpikeStart.Size = New System.Drawing.Size(82, 32)
+        Me.btnVolumeSpikeStart.TabIndex = 2
+        Me.btnVolumeSpikeStart.Text = "Start"
+        Me.btnVolumeSpikeStart.UseVisualStyleBackColor = True
         '
         'Panel8
         '
-        Me.Panel8.Controls.Add(Me.blbATMTickerStatus)
+        Me.Panel8.Controls.Add(Me.blbVolumeSpikeTickerStatus)
         Me.Panel8.Controls.Add(Me.lblCandleRangeBreakoutTickerStatus)
         Me.Panel8.Location = New System.Drawing.Point(1201, 4)
         Me.Panel8.Margin = New System.Windows.Forms.Padding(4)
@@ -421,17 +421,17 @@ Partial Class frmMainTabbed
         Me.Panel8.Size = New System.Drawing.Size(147, 31)
         Me.Panel8.TabIndex = 9
         '
-        'blbATMTickerStatus
+        'blbVolumeSpikeTickerStatus
         '
-        Me.blbATMTickerStatus.Color = System.Drawing.Color.Pink
-        Me.blbATMTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
-        Me.blbATMTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbATMTickerStatus.Margin = New System.Windows.Forms.Padding(4)
-        Me.blbATMTickerStatus.Name = "blbATMTickerStatus"
-        Me.blbATMTickerStatus.On = True
-        Me.blbATMTickerStatus.Size = New System.Drawing.Size(47, 31)
-        Me.blbATMTickerStatus.TabIndex = 7
-        Me.blbATMTickerStatus.Text = "LedBulb1"
+        Me.blbVolumeSpikeTickerStatus.Color = System.Drawing.Color.Pink
+        Me.blbVolumeSpikeTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
+        Me.blbVolumeSpikeTickerStatus.Location = New System.Drawing.Point(100, 0)
+        Me.blbVolumeSpikeTickerStatus.Margin = New System.Windows.Forms.Padding(4)
+        Me.blbVolumeSpikeTickerStatus.Name = "blbVolumeSpikeTickerStatus"
+        Me.blbVolumeSpikeTickerStatus.On = True
+        Me.blbVolumeSpikeTickerStatus.Size = New System.Drawing.Size(47, 31)
+        Me.blbVolumeSpikeTickerStatus.TabIndex = 7
+        Me.blbVolumeSpikeTickerStatus.Text = "LedBulb1"
         '
         'lblCandleRangeBreakoutTickerStatus
         '
@@ -443,29 +443,29 @@ Partial Class frmMainTabbed
         Me.lblCandleRangeBreakoutTickerStatus.TabIndex = 9
         Me.lblCandleRangeBreakoutTickerStatus.Text = "Ticker Status"
         '
-        'btnATMSettings
+        'btnVolumeSpikeSettings
         '
-        Me.btnATMSettings.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnATMSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnATMSettings.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnATMSettings.Name = "btnATMSettings"
-        Me.btnATMSettings.Size = New System.Drawing.Size(82, 32)
-        Me.btnATMSettings.TabIndex = 11
-        Me.btnATMSettings.Text = "Settings"
-        Me.btnATMSettings.UseVisualStyleBackColor = True
+        Me.btnVolumeSpikeSettings.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnVolumeSpikeSettings.Location = New System.Drawing.Point(814, 4)
+        Me.btnVolumeSpikeSettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnVolumeSpikeSettings.Name = "btnVolumeSpikeSettings"
+        Me.btnVolumeSpikeSettings.Size = New System.Drawing.Size(82, 32)
+        Me.btnVolumeSpikeSettings.TabIndex = 11
+        Me.btnVolumeSpikeSettings.Text = "Settings"
+        Me.btnVolumeSpikeSettings.UseVisualStyleBackColor = True
         '
-        'linklblATMTradableInstrument
+        'linklblVolumeSpikeTradableInstrument
         '
-        Me.linklblATMTradableInstrument.AutoSize = True
-        Me.linklblATMTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.linklblATMTradableInstrument.Enabled = False
-        Me.linklblATMTradableInstrument.Location = New System.Drawing.Point(903, 0)
-        Me.linklblATMTradableInstrument.Name = "linklblATMTradableInstrument"
-        Me.linklblATMTradableInstrument.Size = New System.Drawing.Size(220, 40)
-        Me.linklblATMTradableInstrument.TabIndex = 12
-        Me.linklblATMTradableInstrument.TabStop = True
-        Me.linklblATMTradableInstrument.Text = "Tradable Instruments: 0"
-        Me.linklblATMTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.linklblVolumeSpikeTradableInstrument.AutoSize = True
+        Me.linklblVolumeSpikeTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.linklblVolumeSpikeTradableInstrument.Enabled = False
+        Me.linklblVolumeSpikeTradableInstrument.Location = New System.Drawing.Point(903, 0)
+        Me.linklblVolumeSpikeTradableInstrument.Name = "linklblVolumeSpikeTradableInstrument"
+        Me.linklblVolumeSpikeTradableInstrument.Size = New System.Drawing.Size(220, 40)
+        Me.linklblVolumeSpikeTradableInstrument.TabIndex = 12
+        Me.linklblVolumeSpikeTradableInstrument.TabStop = True
+        Me.linklblVolumeSpikeTradableInstrument.Text = "Tradable Instruments: 0"
+        Me.linklblVolumeSpikeTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'pnlCandleRangeBreakoutBodyVerticalSplitter
         '
@@ -500,8 +500,8 @@ Partial Class frmMainTabbed
         '
         Me.TableLayoutPanel6.ColumnCount = 1
         Me.TableLayoutPanel6.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.TableLayoutPanel6.Controls.Add(Me.lstCandleRangeBreakoutLog, 0, 1)
-        Me.TableLayoutPanel6.Controls.Add(Me.sfdgvATMMainDashboard, 0, 0)
+        Me.TableLayoutPanel6.Controls.Add(Me.lstVolumeSpikeLog, 0, 1)
+        Me.TableLayoutPanel6.Controls.Add(Me.sfdgvVolumeSpikeMainDashboard, 0, 0)
         Me.TableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TableLayoutPanel6.Location = New System.Drawing.Point(4, 4)
         Me.TableLayoutPanel6.Margin = New System.Windows.Forms.Padding(4)
@@ -512,35 +512,35 @@ Partial Class frmMainTabbed
         Me.TableLayoutPanel6.Size = New System.Drawing.Size(940, 629)
         Me.TableLayoutPanel6.TabIndex = 0
         '
-        'lstCandleRangeBreakoutLog
+        'lstVolumeSpikeLog
         '
-        Me.lstCandleRangeBreakoutLog.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.lstCandleRangeBreakoutLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
-        Me.lstCandleRangeBreakoutLog.FormattingEnabled = True
-        Me.lstCandleRangeBreakoutLog.ItemHeight = 16
-        Me.lstCandleRangeBreakoutLog.Location = New System.Drawing.Point(4, 444)
-        Me.lstCandleRangeBreakoutLog.Margin = New System.Windows.Forms.Padding(4)
-        Me.lstCandleRangeBreakoutLog.Name = "lstCandleRangeBreakoutLog"
-        Me.lstCandleRangeBreakoutLog.Size = New System.Drawing.Size(932, 181)
-        Me.lstCandleRangeBreakoutLog.TabIndex = 9
+        Me.lstVolumeSpikeLog.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstVolumeSpikeLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
+        Me.lstVolumeSpikeLog.FormattingEnabled = True
+        Me.lstVolumeSpikeLog.ItemHeight = 16
+        Me.lstVolumeSpikeLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstVolumeSpikeLog.Margin = New System.Windows.Forms.Padding(4)
+        Me.lstVolumeSpikeLog.Name = "lstVolumeSpikeLog"
+        Me.lstVolumeSpikeLog.Size = New System.Drawing.Size(932, 181)
+        Me.lstVolumeSpikeLog.TabIndex = 9
         '
-        'sfdgvATMMainDashboard
+        'sfdgvVolumeSpikeMainDashboard
         '
-        Me.sfdgvATMMainDashboard.AccessibleName = "Table"
-        Me.sfdgvATMMainDashboard.AllowDraggingColumns = True
-        Me.sfdgvATMMainDashboard.AllowEditing = False
-        Me.sfdgvATMMainDashboard.AllowFiltering = True
-        Me.sfdgvATMMainDashboard.AllowResizingColumns = True
-        Me.sfdgvATMMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
-        Me.sfdgvATMMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
-        Me.sfdgvATMMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.sfdgvATMMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvATMMainDashboard.Margin = New System.Windows.Forms.Padding(4)
-        Me.sfdgvATMMainDashboard.Name = "sfdgvATMMainDashboard"
-        Me.sfdgvATMMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvATMMainDashboard.Size = New System.Drawing.Size(932, 432)
-        Me.sfdgvATMMainDashboard.TabIndex = 6
-        Me.sfdgvATMMainDashboard.Text = "SfDataGrid1"
+        Me.sfdgvVolumeSpikeMainDashboard.AccessibleName = "Table"
+        Me.sfdgvVolumeSpikeMainDashboard.AllowDraggingColumns = True
+        Me.sfdgvVolumeSpikeMainDashboard.AllowEditing = False
+        Me.sfdgvVolumeSpikeMainDashboard.AllowFiltering = True
+        Me.sfdgvVolumeSpikeMainDashboard.AllowResizingColumns = True
+        Me.sfdgvVolumeSpikeMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
+        Me.sfdgvVolumeSpikeMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
+        Me.sfdgvVolumeSpikeMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.sfdgvVolumeSpikeMainDashboard.Location = New System.Drawing.Point(4, 4)
+        Me.sfdgvVolumeSpikeMainDashboard.Margin = New System.Windows.Forms.Padding(4)
+        Me.sfdgvVolumeSpikeMainDashboard.Name = "sfdgvVolumeSpikeMainDashboard"
+        Me.sfdgvVolumeSpikeMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
+        Me.sfdgvVolumeSpikeMainDashboard.Size = New System.Drawing.Size(932, 432)
+        Me.sfdgvVolumeSpikeMainDashboard.TabIndex = 6
+        Me.sfdgvVolumeSpikeMainDashboard.Text = "SfDataGrid1"
         '
         'tabTwoThird
         '
@@ -2476,9 +2476,9 @@ Partial Class frmMainTabbed
         '
         Me.tmrEMACrossoverTickerStatus.Enabled = True
         '
-        'tmrATMStatus
+        'tmrVolumeSpikeStatus
         '
-        Me.tmrATMStatus.Enabled = True
+        Me.tmrVolumeSpikeStatus.Enabled = True
         '
         'tmrJoyMaaATMTickerStatus
         '
@@ -2504,7 +2504,7 @@ Partial Class frmMainTabbed
         Me.msMainMenuStrip.ResumeLayout(False)
         Me.msMainMenuStrip.PerformLayout()
         Me.tabMain.ResumeLayout(False)
-        Me.tabATM.ResumeLayout(False)
+        Me.tabVolumeSpike.ResumeLayout(False)
         Me.pnlCandleRangeBreakoutMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.ResumeLayout(False)
         Me.pnlCandleRangeBreakoutTopHeaderVerticalSplitter.PerformLayout()
@@ -2513,7 +2513,7 @@ Partial Class frmMainTabbed
         Me.pnlCandleRangeBreakoutBodyVerticalSplitter.ResumeLayout(False)
         CType(Me.PictureBox7, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TableLayoutPanel6.ResumeLayout(False)
-        CType(Me.sfdgvATMMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.sfdgvVolumeSpikeMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabTwoThird.ResumeLayout(False)
         Me.pnlTwoThirdMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlTwoThirdTopHeaderVerticalSplitter.ResumeLayout(False)
@@ -2722,21 +2722,21 @@ Partial Class frmMainTabbed
     Friend WithEvents TableLayoutPanel5 As TableLayoutPanel
     Friend WithEvents lstEMACrossoverLog As ListBox
     Friend WithEvents sfdgvEMACrossoverMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
-    Friend WithEvents tabATM As TabPage
+    Friend WithEvents tabVolumeSpike As TabPage
     Friend WithEvents pnlCandleRangeBreakoutMainPanelHorizontalSplitter As TableLayoutPanel
     Friend WithEvents pnlCandleRangeBreakoutTopHeaderVerticalSplitter As TableLayoutPanel
-    Friend WithEvents btnATMStop As Button
-    Friend WithEvents btnATMStart As Button
+    Friend WithEvents btnVolumeSpikeStop As Button
+    Friend WithEvents btnVolumeSpikeStart As Button
     Friend WithEvents Panel8 As Panel
-    Friend WithEvents blbATMTickerStatus As Bulb.LedBulb
+    Friend WithEvents blbVolumeSpikeTickerStatus As Bulb.LedBulb
     Friend WithEvents lblCandleRangeBreakoutTickerStatus As Label
-    Friend WithEvents btnATMSettings As Button
-    Friend WithEvents linklblATMTradableInstrument As LinkLabel
+    Friend WithEvents btnVolumeSpikeSettings As Button
+    Friend WithEvents linklblVolumeSpikeTradableInstrument As LinkLabel
     Friend WithEvents pnlCandleRangeBreakoutBodyVerticalSplitter As TableLayoutPanel
     Friend WithEvents TableLayoutPanel6 As TableLayoutPanel
-    Friend WithEvents lstCandleRangeBreakoutLog As ListBox
-    Friend WithEvents sfdgvATMMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
-    Friend WithEvents tmrATMStatus As Timer
+    Friend WithEvents lstVolumeSpikeLog As ListBox
+    Friend WithEvents sfdgvVolumeSpikeMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
+    Friend WithEvents tmrVolumeSpikeStatus As Timer
     Friend WithEvents tabJoyMaaATM As TabPage
     Friend WithEvents tmrJoyMaaATMTickerStatus As Timer
     Friend WithEvents pnlJoyMaaATMMainPanelHorizontalSplitter As TableLayoutPanel

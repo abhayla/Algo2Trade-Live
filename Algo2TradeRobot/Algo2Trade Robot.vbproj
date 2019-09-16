@@ -127,20 +127,20 @@
     <Compile Include="AmiSignal\frmAmiSignalTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ATM\ATMFillInstrumentDetails.vb" />
-    <Compile Include="ATM\ATMStrategy.vb" />
-    <Compile Include="ATM\ATMStrategyInstrument.vb" />
-    <Compile Include="ATM\ATMUserInputs.vb" />
-    <Compile Include="ATM\frmATMSettings.Designer.vb">
-      <DependentUpon>frmATMSettings.vb</DependentUpon>
+    <Compile Include="VolumeSpike\VolumeSpikeFillInstrumentDetails.vb" />
+    <Compile Include="VolumeSpike\VolumeSpikeStrategy.vb" />
+    <Compile Include="VolumeSpike\VolumeSpikeStrategyInstrument.vb" />
+    <Compile Include="VolumeSpike\VolumeSpikeUserInputs.vb" />
+    <Compile Include="VolumeSpike\frmVolumeSpikeSettings.Designer.vb">
+      <DependentUpon>frmVolumeSpikeSettings.vb</DependentUpon>
     </Compile>
-    <Compile Include="ATM\frmATMSettings.vb">
+    <Compile Include="VolumeSpike\frmVolumeSpikeSettings.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ATM\frmATMTradableInstrumentList.Designer.vb">
-      <DependentUpon>frmATMTradableInstrumentList.vb</DependentUpon>
+    <Compile Include="VolumeSpike\frmVolumeSpikeTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmVolumeSpikeTradableInstrumentList.vb</DependentUpon>
     </Compile>
-    <Compile Include="ATM\frmATMTradableInstrumentList.vb">
+    <Compile Include="VolumeSpike\frmVolumeSpikeTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Common.vb" />
@@ -313,11 +313,11 @@
     <EmbeddedResource Include="AmiSignal\frmAmiSignalTradableInstrumentList.resx">
       <DependentUpon>frmAmiSignalTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ATM\frmATMSettings.resx">
-      <DependentUpon>frmATMSettings.vb</DependentUpon>
+    <EmbeddedResource Include="VolumeSpike\frmVolumeSpikeSettings.resx">
+      <DependentUpon>frmVolumeSpikeSettings.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ATM\frmATMTradableInstrumentList.resx">
-      <DependentUpon>frmATMTradableInstrumentList.vb</DependentUpon>
+    <EmbeddedResource Include="VolumeSpike\frmVolumeSpikeTradableInstrumentList.resx">
+      <DependentUpon>frmVolumeSpikeTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EMACrossover\frmEMACrossoverSettings.resx">
       <DependentUpon>frmEMACrossoverSettings.vb</DependentUpon>

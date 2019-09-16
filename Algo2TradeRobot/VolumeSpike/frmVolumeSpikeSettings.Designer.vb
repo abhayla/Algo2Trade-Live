@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class frmATMSettings
+Partial Class frmVolumeSpikeSettings
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -23,8 +23,14 @@ Partial Class frmATMSettings
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmATMSettings))
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmVolumeSpikeSettings))
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.txtMaxProfitPerDay = New System.Windows.Forms.TextBox()
+        Me.lblMaxProfitPerDay = New System.Windows.Forms.Label()
+        Me.txtMaxLossPerDay = New System.Windows.Forms.TextBox()
+        Me.lblMaxLossPerDay = New System.Windows.Forms.Label()
+        Me.txtNumberOfTradePerStock = New System.Windows.Forms.TextBox()
+        Me.lblNumberOfTradePerStock = New System.Windows.Forms.Label()
         Me.txtATRPeriod = New System.Windows.Forms.TextBox()
         Me.lblATRPeriod = New System.Windows.Forms.Label()
         Me.txtTargetMultiplier = New System.Windows.Forms.TextBox()
@@ -46,11 +52,11 @@ Partial Class frmATMSettings
         Me.lblManualStock = New System.Windows.Forms.Label()
         Me.txtFutureMinCapital = New System.Windows.Forms.TextBox()
         Me.lblFutureMinCapital = New System.Windows.Forms.Label()
-        Me.txtCashMaxSL = New System.Windows.Forms.TextBox()
-        Me.lblCashMaxStoplossAmount = New System.Windows.Forms.Label()
+        Me.txtCashMinCapital = New System.Windows.Forms.TextBox()
+        Me.lblCashMinCapital = New System.Windows.Forms.Label()
         Me.chbFuture = New System.Windows.Forms.CheckBox()
         Me.chbCash = New System.Windows.Forms.CheckBox()
-        Me.btnATMStrategySettings = New System.Windows.Forms.Button()
+        Me.btnVolumeSpikeStrategySettings = New System.Windows.Forms.Button()
         Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
         Me.opnFileSettings = New System.Windows.Forms.OpenFileDialog()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
@@ -64,8 +70,6 @@ Partial Class frmATMSettings
         Me.lblMaxPrice = New System.Windows.Forms.Label()
         Me.txtMinPrice = New System.Windows.Forms.TextBox()
         Me.lblMinPrice = New System.Windows.Forms.Label()
-        Me.txtATRMultiplier = New System.Windows.Forms.TextBox()
-        Me.lblATRMultiplier = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -73,8 +77,12 @@ Partial Class frmATMSettings
         '
         'GroupBox1
         '
-        Me.GroupBox1.Controls.Add(Me.txtATRMultiplier)
-        Me.GroupBox1.Controls.Add(Me.lblATRMultiplier)
+        Me.GroupBox1.Controls.Add(Me.txtMaxProfitPerDay)
+        Me.GroupBox1.Controls.Add(Me.lblMaxProfitPerDay)
+        Me.GroupBox1.Controls.Add(Me.txtMaxLossPerDay)
+        Me.GroupBox1.Controls.Add(Me.lblMaxLossPerDay)
+        Me.GroupBox1.Controls.Add(Me.txtNumberOfTradePerStock)
+        Me.GroupBox1.Controls.Add(Me.lblNumberOfTradePerStock)
         Me.GroupBox1.Controls.Add(Me.txtATRPeriod)
         Me.GroupBox1.Controls.Add(Me.lblATRPeriod)
         Me.GroupBox1.Controls.Add(Me.txtTargetMultiplier)
@@ -94,9 +102,64 @@ Partial Class frmATMSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(477, 293)
+        Me.GroupBox1.Size = New System.Drawing.Size(477, 376)
         Me.GroupBox1.TabIndex = 32
         Me.GroupBox1.TabStop = False
+        '
+        'txtMaxProfitPerDay
+        '
+        Me.txtMaxProfitPerDay.Location = New System.Drawing.Point(198, 302)
+        Me.txtMaxProfitPerDay.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxProfitPerDay.Name = "txtMaxProfitPerDay"
+        Me.txtMaxProfitPerDay.Size = New System.Drawing.Size(255, 22)
+        Me.txtMaxProfitPerDay.TabIndex = 9
+        '
+        'lblMaxProfitPerDay
+        '
+        Me.lblMaxProfitPerDay.AutoSize = True
+        Me.lblMaxProfitPerDay.Location = New System.Drawing.Point(9, 305)
+        Me.lblMaxProfitPerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxProfitPerDay.Name = "lblMaxProfitPerDay"
+        Me.lblMaxProfitPerDay.Size = New System.Drawing.Size(125, 17)
+        Me.lblMaxProfitPerDay.TabIndex = 43
+        Me.lblMaxProfitPerDay.Text = "Max Profit Per Day"
+        '
+        'txtMaxLossPerDay
+        '
+        Me.txtMaxLossPerDay.Location = New System.Drawing.Point(198, 267)
+        Me.txtMaxLossPerDay.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxLossPerDay.Name = "txtMaxLossPerDay"
+        Me.txtMaxLossPerDay.Size = New System.Drawing.Size(255, 22)
+        Me.txtMaxLossPerDay.TabIndex = 8
+        '
+        'lblMaxLossPerDay
+        '
+        Me.lblMaxLossPerDay.AutoSize = True
+        Me.lblMaxLossPerDay.Location = New System.Drawing.Point(9, 271)
+        Me.lblMaxLossPerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxLossPerDay.Name = "lblMaxLossPerDay"
+        Me.lblMaxLossPerDay.Size = New System.Drawing.Size(122, 17)
+        Me.lblMaxLossPerDay.TabIndex = 42
+        Me.lblMaxLossPerDay.Text = "Max Loss Per Day"
+        '
+        'txtNumberOfTradePerStock
+        '
+        Me.txtNumberOfTradePerStock.Location = New System.Drawing.Point(198, 231)
+        Me.txtNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtNumberOfTradePerStock.Name = "txtNumberOfTradePerStock"
+        Me.txtNumberOfTradePerStock.Size = New System.Drawing.Size(255, 22)
+        Me.txtNumberOfTradePerStock.TabIndex = 7
+        Me.txtNumberOfTradePerStock.Tag = "Max Loss Per Day"
+        '
+        'lblNumberOfTradePerStock
+        '
+        Me.lblNumberOfTradePerStock.AutoSize = True
+        Me.lblNumberOfTradePerStock.Location = New System.Drawing.Point(8, 235)
+        Me.lblNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblNumberOfTradePerStock.Name = "lblNumberOfTradePerStock"
+        Me.lblNumberOfTradePerStock.Size = New System.Drawing.Size(184, 17)
+        Me.lblNumberOfTradePerStock.TabIndex = 39
+        Me.lblNumberOfTradePerStock.Text = "Number Of Trade Per Stock"
         '
         'txtATRPeriod
         '
@@ -119,7 +182,7 @@ Partial Class frmATMSettings
         '
         'txtTargetMultiplier
         '
-        Me.txtTargetMultiplier.Location = New System.Drawing.Point(199, 226)
+        Me.txtTargetMultiplier.Location = New System.Drawing.Point(199, 195)
         Me.txtTargetMultiplier.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTargetMultiplier.Name = "txtTargetMultiplier"
         Me.txtTargetMultiplier.Size = New System.Drawing.Size(255, 22)
@@ -129,7 +192,7 @@ Partial Class frmATMSettings
         'lblTargetMultiplier
         '
         Me.lblTargetMultiplier.AutoSize = True
-        Me.lblTargetMultiplier.Location = New System.Drawing.Point(9, 230)
+        Me.lblTargetMultiplier.Location = New System.Drawing.Point(9, 199)
         Me.lblTargetMultiplier.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblTargetMultiplier.Name = "lblTargetMultiplier"
         Me.lblTargetMultiplier.Size = New System.Drawing.Size(110, 17)
@@ -199,17 +262,17 @@ Partial Class frmATMSettings
         'btnBrowse
         '
         Me.btnBrowse.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnBrowse.Location = New System.Drawing.Point(428, 259)
+        Me.btnBrowse.Location = New System.Drawing.Point(428, 338)
         Me.btnBrowse.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(40, 23)
-        Me.btnBrowse.TabIndex = 8
+        Me.btnBrowse.TabIndex = 10
         Me.btnBrowse.Text = "..."
         Me.btnBrowse.UseVisualStyleBackColor = True
         '
         'txtInstrumentDetalis
         '
-        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(198, 260)
+        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(198, 339)
         Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
         Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
         Me.txtInstrumentDetalis.ReadOnly = True
@@ -219,7 +282,7 @@ Partial Class frmATMSettings
         'lblInstrumentDetails
         '
         Me.lblInstrumentDetails.AutoSize = True
-        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 263)
+        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 342)
         Me.lblInstrumentDetails.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblInstrumentDetails.Name = "lblInstrumentDetails"
         Me.lblInstrumentDetails.Size = New System.Drawing.Size(121, 17)
@@ -252,13 +315,13 @@ Partial Class frmATMSettings
         Me.GroupBox2.Controls.Add(Me.lblManualStock)
         Me.GroupBox2.Controls.Add(Me.txtFutureMinCapital)
         Me.GroupBox2.Controls.Add(Me.lblFutureMinCapital)
-        Me.GroupBox2.Controls.Add(Me.txtCashMaxSL)
-        Me.GroupBox2.Controls.Add(Me.lblCashMaxStoplossAmount)
+        Me.GroupBox2.Controls.Add(Me.txtCashMinCapital)
+        Me.GroupBox2.Controls.Add(Me.lblCashMinCapital)
         Me.GroupBox2.Controls.Add(Me.chbFuture)
         Me.GroupBox2.Controls.Add(Me.chbCash)
         Me.GroupBox2.Location = New System.Drawing.Point(490, -2)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(358, 292)
+        Me.GroupBox2.Size = New System.Drawing.Size(358, 375)
         Me.GroupBox2.TabIndex = 34
         Me.GroupBox2.TabStop = False
         '
@@ -268,18 +331,18 @@ Partial Class frmATMSettings
         Me.chbAutoSelectStock.Location = New System.Drawing.Point(12, 14)
         Me.chbAutoSelectStock.Name = "chbAutoSelectStock"
         Me.chbAutoSelectStock.Size = New System.Drawing.Size(141, 21)
-        Me.chbAutoSelectStock.TabIndex = 40
+        Me.chbAutoSelectStock.TabIndex = 10
         Me.chbAutoSelectStock.Text = "Auto Select Stock"
         Me.chbAutoSelectStock.UseVisualStyleBackColor = True
         '
         'txtManualStockList
         '
-        Me.txtManualStockList.Location = New System.Drawing.Point(146, 132)
+        Me.txtManualStockList.Location = New System.Drawing.Point(146, 135)
         Me.txtManualStockList.Margin = New System.Windows.Forms.Padding(4)
         Me.txtManualStockList.Multiline = True
         Me.txtManualStockList.Name = "txtManualStockList"
-        Me.txtManualStockList.Size = New System.Drawing.Size(201, 149)
-        Me.txtManualStockList.TabIndex = 38
+        Me.txtManualStockList.Size = New System.Drawing.Size(201, 225)
+        Me.txtManualStockList.TabIndex = 16
         Me.txtManualStockList.Tag = "Signal Time Frame"
         '
         'lblManualStock
@@ -298,7 +361,7 @@ Partial Class frmATMSettings
         Me.txtFutureMinCapital.Margin = New System.Windows.Forms.Padding(4)
         Me.txtFutureMinCapital.Name = "txtFutureMinCapital"
         Me.txtFutureMinCapital.Size = New System.Drawing.Size(201, 22)
-        Me.txtFutureMinCapital.TabIndex = 36
+        Me.txtFutureMinCapital.TabIndex = 15
         Me.txtFutureMinCapital.Tag = "Signal Time Frame"
         '
         'lblFutureMinCapital
@@ -311,24 +374,24 @@ Partial Class frmATMSettings
         Me.lblFutureMinCapital.TabIndex = 37
         Me.lblFutureMinCapital.Text = "Future Min Capital"
         '
-        'txtCashMaxSL
+        'txtCashMinCapital
         '
-        Me.txtCashMaxSL.Location = New System.Drawing.Point(146, 73)
-        Me.txtCashMaxSL.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtCashMaxSL.Name = "txtCashMaxSL"
-        Me.txtCashMaxSL.Size = New System.Drawing.Size(201, 22)
-        Me.txtCashMaxSL.TabIndex = 34
-        Me.txtCashMaxSL.Tag = "Signal Time Frame"
+        Me.txtCashMinCapital.Location = New System.Drawing.Point(146, 73)
+        Me.txtCashMinCapital.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtCashMinCapital.Name = "txtCashMinCapital"
+        Me.txtCashMinCapital.Size = New System.Drawing.Size(201, 22)
+        Me.txtCashMinCapital.TabIndex = 14
+        Me.txtCashMinCapital.Tag = "Signal Time Frame"
         '
-        'lblCashMaxStoplossAmount
+        'lblCashMinCapital
         '
-        Me.lblCashMaxStoplossAmount.AutoSize = True
-        Me.lblCashMaxStoplossAmount.Location = New System.Drawing.Point(6, 76)
-        Me.lblCashMaxStoplossAmount.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblCashMaxStoplossAmount.Name = "lblCashMaxStoplossAmount"
-        Me.lblCashMaxStoplossAmount.Size = New System.Drawing.Size(90, 17)
-        Me.lblCashMaxStoplossAmount.TabIndex = 35
-        Me.lblCashMaxStoplossAmount.Text = "Cash Max SL"
+        Me.lblCashMinCapital.AutoSize = True
+        Me.lblCashMinCapital.Location = New System.Drawing.Point(6, 76)
+        Me.lblCashMinCapital.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblCashMinCapital.Name = "lblCashMinCapital"
+        Me.lblCashMinCapital.Size = New System.Drawing.Size(113, 17)
+        Me.lblCashMinCapital.TabIndex = 35
+        Me.lblCashMinCapital.Text = "Cash Min Capital"
         '
         'chbFuture
         '
@@ -336,7 +399,7 @@ Partial Class frmATMSettings
         Me.chbFuture.Location = New System.Drawing.Point(84, 43)
         Me.chbFuture.Name = "chbFuture"
         Me.chbFuture.Size = New System.Drawing.Size(71, 21)
-        Me.chbFuture.TabIndex = 1
+        Me.chbFuture.TabIndex = 13
         Me.chbFuture.Text = "Future"
         Me.chbFuture.UseVisualStyleBackColor = True
         '
@@ -346,23 +409,23 @@ Partial Class frmATMSettings
         Me.chbCash.Location = New System.Drawing.Point(12, 42)
         Me.chbCash.Name = "chbCash"
         Me.chbCash.Size = New System.Drawing.Size(62, 21)
-        Me.chbCash.TabIndex = 0
+        Me.chbCash.TabIndex = 12
         Me.chbCash.Text = "Cash"
         Me.chbCash.UseVisualStyleBackColor = True
         '
-        'btnATMStrategySettings
+        'btnVolumeSpikeStrategySettings
         '
-        Me.btnATMStrategySettings.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.btnATMStrategySettings.ImageKey = "save-icon-36533.png"
-        Me.btnATMStrategySettings.ImageList = Me.ImageList1
-        Me.btnATMStrategySettings.Location = New System.Drawing.Point(856, 6)
-        Me.btnATMStrategySettings.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnATMStrategySettings.Name = "btnATMStrategySettings"
-        Me.btnATMStrategySettings.Size = New System.Drawing.Size(112, 58)
-        Me.btnATMStrategySettings.TabIndex = 31
-        Me.btnATMStrategySettings.Text = "&Save"
-        Me.btnATMStrategySettings.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.btnATMStrategySettings.UseVisualStyleBackColor = True
+        Me.btnVolumeSpikeStrategySettings.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
+        Me.btnVolumeSpikeStrategySettings.ImageKey = "save-icon-36533.png"
+        Me.btnVolumeSpikeStrategySettings.ImageList = Me.ImageList1
+        Me.btnVolumeSpikeStrategySettings.Location = New System.Drawing.Point(856, 6)
+        Me.btnVolumeSpikeStrategySettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnVolumeSpikeStrategySettings.Name = "btnVolumeSpikeStrategySettings"
+        Me.btnVolumeSpikeStrategySettings.Size = New System.Drawing.Size(112, 58)
+        Me.btnVolumeSpikeStrategySettings.TabIndex = 31
+        Me.btnVolumeSpikeStrategySettings.Text = "&Save"
+        Me.btnVolumeSpikeStrategySettings.TextAlign = System.Drawing.ContentAlignment.MiddleRight
+        Me.btnVolumeSpikeStrategySettings.UseVisualStyleBackColor = True
         '
         'ImageList1
         '
@@ -385,7 +448,7 @@ Partial Class frmATMSettings
         Me.GroupBox3.Controls.Add(Me.lblMaxPrice)
         Me.GroupBox3.Controls.Add(Me.txtMinPrice)
         Me.GroupBox3.Controls.Add(Me.lblMinPrice)
-        Me.GroupBox3.Location = New System.Drawing.Point(5, 297)
+        Me.GroupBox3.Location = New System.Drawing.Point(5, 375)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Size = New System.Drawing.Size(843, 100)
         Me.GroupBox3.TabIndex = 35
@@ -398,7 +461,7 @@ Partial Class frmATMSettings
         Me.txtNumberOfStock.Margin = New System.Windows.Forms.Padding(4)
         Me.txtNumberOfStock.Name = "txtNumberOfStock"
         Me.txtNumberOfStock.Size = New System.Drawing.Size(122, 22)
-        Me.txtNumberOfStock.TabIndex = 42
+        Me.txtNumberOfStock.TabIndex = 21
         Me.txtNumberOfStock.Tag = "Number Of Stock"
         '
         'lblNumberOfStock
@@ -417,7 +480,7 @@ Partial Class frmATMSettings
         Me.txtMinVolume.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMinVolume.Name = "txtMinVolume"
         Me.txtMinVolume.Size = New System.Drawing.Size(122, 22)
-        Me.txtMinVolume.TabIndex = 40
+        Me.txtMinVolume.TabIndex = 20
         Me.txtMinVolume.Tag = "Min Volume"
         '
         'lblMinVolume
@@ -436,7 +499,7 @@ Partial Class frmATMSettings
         Me.txtATRPercentage.Margin = New System.Windows.Forms.Padding(4)
         Me.txtATRPercentage.Name = "txtATRPercentage"
         Me.txtATRPercentage.Size = New System.Drawing.Size(114, 22)
-        Me.txtATRPercentage.TabIndex = 38
+        Me.txtATRPercentage.TabIndex = 19
         Me.txtATRPercentage.Tag = "ATR %"
         '
         'lblATR
@@ -455,7 +518,7 @@ Partial Class frmATMSettings
         Me.txtMaxPrice.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMaxPrice.Name = "txtMaxPrice"
         Me.txtMaxPrice.Size = New System.Drawing.Size(114, 22)
-        Me.txtMaxPrice.TabIndex = 36
+        Me.txtMaxPrice.TabIndex = 18
         Me.txtMaxPrice.Tag = "Max Price"
         '
         'lblMaxPrice
@@ -474,7 +537,7 @@ Partial Class frmATMSettings
         Me.txtMinPrice.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMinPrice.Name = "txtMinPrice"
         Me.txtMinPrice.Size = New System.Drawing.Size(114, 22)
-        Me.txtMinPrice.TabIndex = 34
+        Me.txtMinPrice.TabIndex = 17
         Me.txtMinPrice.Tag = "Min Price"
         '
         'lblMinPrice
@@ -487,40 +550,21 @@ Partial Class frmATMSettings
         Me.lblMinPrice.TabIndex = 35
         Me.lblMinPrice.Text = "Min Price"
         '
-        'txtATRMultiplier
-        '
-        Me.txtATRMultiplier.Location = New System.Drawing.Point(199, 193)
-        Me.txtATRMultiplier.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtATRMultiplier.Name = "txtATRMultiplier"
-        Me.txtATRMultiplier.Size = New System.Drawing.Size(255, 22)
-        Me.txtATRMultiplier.TabIndex = 34
-        Me.txtATRMultiplier.Tag = "ATR Multiplier"
-        '
-        'lblATRMultiplier
-        '
-        Me.lblATRMultiplier.AutoSize = True
-        Me.lblATRMultiplier.Location = New System.Drawing.Point(9, 197)
-        Me.lblATRMultiplier.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblATRMultiplier.Name = "lblATRMultiplier"
-        Me.lblATRMultiplier.Size = New System.Drawing.Size(96, 17)
-        Me.lblATRMultiplier.TabIndex = 35
-        Me.lblATRMultiplier.Text = "ATR Multiplier"
-        '
-        'frmATMSettings
+        'frmVolumeSpikeSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(974, 408)
+        Me.ClientSize = New System.Drawing.Size(974, 485)
         Me.Controls.Add(Me.GroupBox3)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.GroupBox2)
-        Me.Controls.Add(Me.btnATMStrategySettings)
+        Me.Controls.Add(Me.btnVolumeSpikeStrategySettings)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.Name = "frmATMSettings"
+        Me.Name = "frmVolumeSpikeSettings"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "ATM Strategy - Settings"
+        Me.Text = "Volume Spike Strategy - Settings"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox2.ResumeLayout(False)
@@ -550,15 +594,15 @@ Partial Class frmATMSettings
     Friend WithEvents GroupBox2 As GroupBox
     Friend WithEvents chbFuture As CheckBox
     Friend WithEvents chbCash As CheckBox
-    Friend WithEvents btnATMStrategySettings As Button
+    Friend WithEvents btnVolumeSpikeStrategySettings As Button
     Friend WithEvents ImageList1 As ImageList
     Friend WithEvents opnFileSettings As OpenFileDialog
     Friend WithEvents txtManualStockList As TextBox
     Friend WithEvents lblManualStock As Label
     Friend WithEvents txtFutureMinCapital As TextBox
     Friend WithEvents lblFutureMinCapital As Label
-    Friend WithEvents txtCashMaxSL As TextBox
-    Friend WithEvents lblCashMaxStoplossAmount As Label
+    Friend WithEvents txtCashMinCapital As TextBox
+    Friend WithEvents lblCashMinCapital As Label
     Friend WithEvents GroupBox3 As GroupBox
     Friend WithEvents txtMaxPrice As TextBox
     Friend WithEvents lblMaxPrice As Label
@@ -571,6 +615,10 @@ Partial Class frmATMSettings
     Friend WithEvents txtNumberOfStock As TextBox
     Friend WithEvents lblNumberOfStock As Label
     Friend WithEvents chbAutoSelectStock As CheckBox
-    Friend WithEvents txtATRMultiplier As TextBox
-    Friend WithEvents lblATRMultiplier As Label
+    Friend WithEvents txtMaxProfitPerDay As TextBox
+    Friend WithEvents lblMaxProfitPerDay As Label
+    Friend WithEvents txtMaxLossPerDay As TextBox
+    Friend WithEvents lblMaxLossPerDay As Label
+    Friend WithEvents txtNumberOfTradePerStock As TextBox
+    Friend WithEvents lblNumberOfTradePerStock As Label
 End Class
