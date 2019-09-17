@@ -1098,9 +1098,9 @@ Namespace ChartHandler.ChartStyle
             Dim ret As Long = 0
             If Not File.Exists(_tickFilename) Then
                 If _preMarketLastTickVolume = Long.MinValue Then
-                    'If Me._parentInstrument.InstrumentType = IInstrument.TypeOfInstrument.Cash Then
-                    '    Me.ParentController.OrphanException = New ApplicationException(String.Format("Pre market tick data not available. Filename: {0}", _tickFilename))
-                    'End If
+                    If Me._parentInstrument.InstrumentType = IInstrument.TypeOfInstrument.Cash Then
+                        Me.ParentController.OrphanException = New ApplicationException(String.Format("Pre market tick data not available. Filename: {0}", _tickFilename))
+                    End If
                 Else
                     Utilities.Strings.SerializeFromCollection(Of Long)(_tickFilename, _preMarketLastTickVolume)
                     ret = _preMarketLastTickVolume

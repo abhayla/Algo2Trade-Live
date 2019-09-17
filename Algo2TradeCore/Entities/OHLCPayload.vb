@@ -48,6 +48,14 @@ Namespace Entities
             End Get
         End Property
 
+        Private _CandleBody As Double
+        Public ReadOnly Property CandleBody As Double
+            Get
+                _CandleBody = Math.Abs(Me.OpenPrice.Value - Me.ClosePrice.Value)
+                Return _CandleBody
+            End Get
+        End Property
+
         Private _CandleRange As Decimal
         Public ReadOnly Property CandleRange As Decimal 'Implements IPayload.CandleRange
             Get
@@ -85,6 +93,18 @@ Namespace Entities
                     End With
                 End If
                 Return _CandleWicks
+            End Get
+        End Property
+
+        Private _DeadCandle As Double
+        Public ReadOnly Property DeadCandle As Boolean
+            Get
+                If Me.CandleBody = 0 AndAlso Me.HighPrice.Value = Me.LowPrice.Value Then
+                    _DeadCandle = True
+                Else
+                    _DeadCandle = False
+                End If
+                Return _DeadCandle
             End Get
         End Property
 

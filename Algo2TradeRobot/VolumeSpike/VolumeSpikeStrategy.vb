@@ -161,9 +161,9 @@ Public Class VolumeSpikeStrategy
                     Throw Me.ParentController.OrphanException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-                If Now > Me.UserSettings.TradeStartTime.AddSeconds(5) AndAlso Me.TradableStrategyInstruments.Where(Function(z)
-                                                                                                                       Return CType(z, VolumeSpikeStrategyInstrument).VolumeChangePercentage = Decimal.MinValue
-                                                                                                                   End Function).Count = 0 Then
+                If Now > Me.UserSettings.TradeStartTime.AddSeconds(5) AndAlso cashStrategyInstrumentList.Where(Function(z)
+                                                                                                                   Return CType(z, VolumeSpikeStrategyInstrument).VolumeChangePercentage = Decimal.MinValue
+                                                                                                               End Function).Count = 0 Then
                     If cashStrategyInstrumentList IsNot Nothing AndAlso cashStrategyInstrumentList.Count > 0 Then
                         Dim counter As Integer = 0
                         For Each runningCashInstrument In cashStrategyInstrumentList.OrderByDescending(Function(x)
@@ -175,7 +175,15 @@ Public Class VolumeSpikeStrategy
                                                                         x.TradableInstrument.RawInstrumentName = runningCashInstrument.TradableInstrument.TradingSymbol
                                                                      End Function)
                             If futureIntruments IsNot Nothing AndAlso futureIntruments.Count > 0 Then
+                                CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).VolumeChangePercentage = CType(runningCashInstrument, VolumeSpikeStrategyInstrument).VolumeChangePercentage
                                 CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).EligibleToTakeTrade = True
+                                counter += 1
+                                Console.WriteLine(String.Format("{0} : {1}",
+                                                                futureIntruments.FirstOrDefault.TradableInstrument.TradingSymbol,
+                                                                CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).VolumeChangePercentage))
+                                If counter = 5 Then Exit For
+                            Else
+                                CType(runningCashInstrument, VolumeSpikeStrategyInstrument).EligibleToTakeTrade = True
                                 counter += 1
                                 If counter = 5 Then Exit For
                             End If

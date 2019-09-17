@@ -15,6 +15,7 @@
             dt.Columns.Add("Expiry")
             dt.Columns.Add("Lot Size")
             dt.Columns.Add("Tick Size")
+            dt.Columns.Add("Eligible To Take Trade")
             For Each instrument In _TradableInstruments
                 Dim row As DataRow = dt.NewRow
                 row("Instrument Name") = instrument.TradableInstrument.TradingSymbol
@@ -23,6 +24,7 @@
                 row("Expiry") = instrument.TradableInstrument.Expiry
                 row("Lot Size") = instrument.TradableInstrument.LotSize
                 row("Tick Size") = instrument.TradableInstrument.TickSize
+                row("Eligible To Take Trade") = instrument.EligibleToTakeTrade
                 dt.Rows.Add(row)
             Next
             dgvTradableInstruments.DataSource = dt
