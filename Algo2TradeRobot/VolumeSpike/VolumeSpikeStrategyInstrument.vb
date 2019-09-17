@@ -14,6 +14,7 @@ Public Class VolumeSpikeStrategyInstrument
     Public StopStrategyInstrument As Boolean
     Public VolumeChangePercentage As Decimal
 
+    Private _lastPrevPayloadPlaceOrder As String = ""
     Private _potentialHighEntryPrice As Decimal = Decimal.MinValue
     Private _potentialLowEntryPrice As Decimal = Decimal.MinValue
     Private _signalCandle As OHLCPayload = Nothing
@@ -165,6 +166,51 @@ Public Class VolumeSpikeStrategyInstrument
             End If
         End If
 
+        If Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder Then
+            _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
+            logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
+            If _signalCandle IsNot Nothing Then
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Signal Candle Time:{5}, Signal Candle Range:{6}, Signal Candle Source:{7}, {8}, Is Active Instrument:{9}, Number Of Trade:{10}, OverAll PL:{11}, Is Target Reached:{12}, Buy Entry:{13}, Sell Entry:{14}, Signal Type:{15}, Current Time:{16}, Current LTP:{17}, TradingSymbol:{18}",
+                            userSettings.TradeStartTime.ToString,
+                            userSettings.LastTradeEntryTime.ToString,
+                            runningCandlePayload.SnapshotDateTime.ToString,
+                            runningCandlePayload.PayloadGeneratedBy.ToString,
+                            Me.TradableInstrument.IsHistoricalCompleted,
+                            _signalCandle.SnapshotDateTime.ToShortTimeString,
+                            _signalCandle.CandleRange,
+                            _signalCandle.PayloadGeneratedBy.ToString,
+                            atrConsumer.ConsumerPayloads(_signalCandle.SnapshotDateTime).ToString,
+                            IsActiveInstrument(),
+                            Me.GetTotalExecutedOrders(),
+                            Me.ParentStrategy.GetTotalPLAfterBrokerage(),
+                            IsAnyTradeTargetReached(),
+                            _potentialHighEntryPrice,
+                            _potentialLowEntryPrice,
+                            _signalCandle.ToString,
+                            currentTime.ToString,
+                            currentTick.LastPrice,
+                            Me.TradableInstrument.TradingSymbol)
+            Else
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Current Candle Time:{5}, Current Candle Range:{6}, Current Candle Source:{7}, {8}, Is Active Instrument:{9}, Number Of Trade:{10}, OverAll PL:{11}, Is Target Reached:{12}, Current Time:{13}, Current LTP:{14}, TradingSymbol:{15}",
+                            userSettings.TradeStartTime.ToString,
+                            userSettings.LastTradeEntryTime.ToString,
+                            runningCandlePayload.SnapshotDateTime.ToString,
+                            runningCandlePayload.PayloadGeneratedBy.ToString,
+                            Me.TradableInstrument.IsHistoricalCompleted,
+                            runningCandlePayload.PreviousPayload.SnapshotDateTime.ToShortTimeString,
+                            runningCandlePayload.PreviousPayload.CandleRange,
+                            runningCandlePayload.PreviousPayload.PayloadGeneratedBy.ToString,
+                            atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                            IsActiveInstrument(),
+                            Me.GetTotalExecutedOrders(),
+                            Me.ParentStrategy.GetTotalPLAfterBrokerage(),
+                            IsAnyTradeTargetReached(),
+                            currentTime.ToString,
+                            currentTick.LastPrice,
+                            Me.TradableInstrument.TradingSymbol)
+            End If
+        End If
+
         Dim parameters As PlaceOrderParameters = Nothing
         If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
             runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime AndAlso
@@ -183,7 +229,7 @@ Public Class VolumeSpikeStrategyInstrument
                     Dim stoplossPrice As Decimal = signal.Item3
                     If _signalType = TypeOfSignal.CandleHalf Then stoplossPrice = stoplossPrice - buffer
                     Dim stoploss As Decimal = ConvertFloorCeling(triggerPrice - stoplossPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                    Dim target As Decimal = ConvertFloorCeling(stoploss * _targetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                     If _firstTradeQuantity = Integer.MinValue Then
                         quantity = CalculateQuantityFromInvestment(triggerPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, True)
                         _firstTradeQuantity = quantity
@@ -205,7 +251,7 @@ Public Class VolumeSpikeStrategyInstrument
                     Dim stoplossPrice As Decimal = signal.Item3
                     If _signalType = TypeOfSignal.CandleHalf Then stoplossPrice = stoplossPrice + buffer
                     Dim stoploss As Decimal = ConvertFloorCeling(stoplossPrice - triggerPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    Dim target As Decimal = ConvertFloorCeling(stoploss * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                    Dim target As Decimal = ConvertFloorCeling(stoploss * _targetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                     If _firstTradeQuantity = Integer.MinValue Then
                         quantity = CalculateQuantityFromInvestment(triggerPrice, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, True)
                         _firstTradeQuantity = quantity
