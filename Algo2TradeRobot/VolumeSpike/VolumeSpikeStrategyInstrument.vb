@@ -96,18 +96,26 @@ Public Class VolumeSpikeStrategyInstrument
                     'Place Order block start
                     Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
                     If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
-                        'Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                        Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
                     End If
                     'Place Order block end
-                    '_cts.Token.ThrowIfCancellationRequested()
+                    _cts.Token.ThrowIfCancellationRequested()
                     ''Modify Order block start
                     'Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
                     'If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
                     '    Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
                     'End If
                     ''Modify Order block end
+                    _cts.Token.ThrowIfCancellationRequested()
+                    'Exit Order block start
+                    Dim exitOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Await IsTriggerReceivedForExitOrderAsync(False).ConfigureAwait(False)
+                    If exitOrderTrigger IsNot Nothing AndAlso exitOrderTrigger.Count > 0 Then
+                        Await ExecuteCommandAsync(ExecuteCommands.CancelBOOrder, Nothing).ConfigureAwait(False)
+                    End If
+                    'Exit Order block end
+                    _cts.Token.ThrowIfCancellationRequested()
                 End If
-                '_cts.Token.ThrowIfCancellationRequested()
+                _cts.Token.ThrowIfCancellationRequested()
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While
         Catch ex As Exception
@@ -131,7 +139,31 @@ Public Class VolumeSpikeStrategyInstrument
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
         Dim currentTime As Date = Now()
 
-        Dim lastExecutedTrade As IBusinessOrder = GetLastExecutedOrder()
+        If Not _entryChanged AndAlso GetSignalCandleATR() <> Decimal.MinValue AndAlso _signalCandle IsNot Nothing Then
+            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+                Dim firstOrder As IBusinessOrder = OrderDetails.OrderBy(Function(x)
+                                                                            Return x.Value.ParentOrder.TimeStamp
+                                                                        End Function).FirstOrDefault.Value
+                If firstOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                    If firstOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        Select Case _signalType
+                            Case TypeOfSignal.CandleHalf
+                                _potentialLowEntryPrice = _potentialHighEntryPrice - 2 * ConvertFloorCeling(_signalCandle.CandleRange, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                            Case TypeOfSignal.PinBar, TypeOfSignal.TweezerPattern
+                                _potentialLowEntryPrice = _potentialHighEntryPrice - 2 * ConvertFloorCeling(GetSignalCandleATR(), Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                        End Select
+                    ElseIf firstOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        Select Case _signalType
+                            Case TypeOfSignal.CandleHalf
+                                _potentialHighEntryPrice = _potentialLowEntryPrice + 2 * ConvertFloorCeling(_signalCandle.CandleRange, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                            Case TypeOfSignal.PinBar, TypeOfSignal.TweezerPattern
+                                _potentialHighEntryPrice = _potentialLowEntryPrice + 2 * ConvertFloorCeling(GetSignalCandleATR(), Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                        End Select
+                    End If
+                    _entryChanged = True
+                End If
+            End If
+        End If
 
         Dim parameters As PlaceOrderParameters = Nothing
         If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
@@ -141,31 +173,6 @@ Public Class VolumeSpikeStrategyInstrument
             Not IsActiveInstrument() AndAlso GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock AndAlso
             Not IsAnyTradeTargetReached() AndAlso Me.ParentStrategy.GetTotalPLAfterBrokerage() > Math.Abs(userSettings.MaxLossPerDay) * -1 AndAlso
             Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay AndAlso Not Me.StrategyExitAllTriggerd Then
-            If Not _entryChanged AndAlso GetSignalCandleATR() <> Decimal.MinValue Then
-                If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
-                    Dim firstOrder As IBusinessOrder = OrderDetails.OrderBy(Function(x)
-                                                                                Return x.Value.ParentOrder.TimeStamp
-                                                                            End Function).FirstOrDefault.Value
-                    If firstOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
-                        If firstOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                            Select Case _signalType
-                                Case TypeOfSignal.CandleHalf
-                                    _potentialLowEntryPrice = _potentialHighEntryPrice - 2 * ConvertFloorCeling(_signalCandle.CandleRange, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                                Case TypeOfSignal.PinBar, TypeOfSignal.TweezerPattern
-                                    _potentialLowEntryPrice = _potentialHighEntryPrice - 2 * ConvertFloorCeling(GetSignalCandleATR(), Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                            End Select
-                        ElseIf firstOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                            Select Case _signalType
-                                Case TypeOfSignal.CandleHalf
-                                    _potentialHighEntryPrice = _potentialLowEntryPrice + 2 * ConvertFloorCeling(_signalCandle.CandleRange, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                                Case TypeOfSignal.PinBar, TypeOfSignal.TweezerPattern
-                                    _potentialHighEntryPrice = _potentialLowEntryPrice + 2 * ConvertFloorCeling(GetSignalCandleATR(), Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                            End Select
-                        End If
-                        _entryChanged = True
-                    End If
-                End If
-            End If
             Dim signal As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick)
             If signal IsNot Nothing AndAlso signal.Item1 Then
                 Dim buffer As Decimal = CalculateBuffer(signal.Item2, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Floor)
@@ -310,7 +317,7 @@ Public Class VolumeSpikeStrategyInstrument
                                 _signalCandle = Nothing
                                 _potentialHighEntryPrice = Decimal.MinValue
                                 _potentialLowEntryPrice = Decimal.MinValue
-                                _signalType = TypeOfSignal.None
+                                '_signalType = TypeOfSignal.None
                             End If
                         End If
                         If Not orderCancelled AndAlso _signalCandle IsNot Nothing Then
@@ -472,22 +479,22 @@ Public Class VolumeSpikeStrategyInstrument
                 If _entryChanged Then
                     Dim middlePoint As Decimal = (_potentialHighEntryPrice + _potentialLowEntryPrice) / 2
                     Dim range As Decimal = _potentialHighEntryPrice - middlePoint
-                    If currentTick.High >= middlePoint + range * 60 / 100 Then
+                    If currentTick.LastPrice >= middlePoint + range * 60 / 100 Then
                         ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialHighEntryPrice, middlePoint, IOrder.TypeOfTransaction.Buy)
-                    ElseIf currentTick.Open <= middlePoint - range * 60 / 100 Then
+                    ElseIf currentTick.LastPrice <= middlePoint - range * 60 / 100 Then
                         ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialLowEntryPrice, middlePoint, IOrder.TypeOfTransaction.Sell)
                     End If
                 Else
                     Dim tradeDirection As IOrder.TypeOfTransaction = IOrder.TypeOfTransaction.None
                     Dim middlePoint As Decimal = (_potentialHighEntryPrice + _potentialLowEntryPrice) / 2
                     Dim range As Decimal = _potentialHighEntryPrice - middlePoint
-                    If currentTick.Open >= middlePoint + range * 30 / 100 Then
+                    If currentTick.LastPrice >= middlePoint + range * 30 / 100 Then
                         tradeDirection = IOrder.TypeOfTransaction.Buy
-                    ElseIf currentTick.Open <= middlePoint - range * 30 / 100 Then
+                    ElseIf currentTick.LastPrice <= middlePoint - range * 30 / 100 Then
                         tradeDirection = IOrder.TypeOfTransaction.Sell
                     End If
                     Select Case _signalType
-                        Case TypeOfSignal.TweezerPattern
+                        Case TypeOfSignal.TweezerPattern, TypeOfSignal.PinBar
                             If _signalType = TypeOfSignal.PinBar Then tradeDirection = GetPinBarEntryDirection(_signalCandle)
                             If tradeDirection = IOrder.TypeOfTransaction.Buy Then
                                 ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialHighEntryPrice, _potentialHighEntryPrice - ConvertFloorCeling(GetSignalCandleATR(), Me.TradableInstrument.TickSize, RoundOfType.Celing), IOrder.TypeOfTransaction.Buy)
@@ -626,20 +633,10 @@ Public Class VolumeSpikeStrategyInstrument
         If _signalCandle IsNot Nothing Then
             Dim candleHighBuffer As Decimal = CalculateBuffer(candle.HighPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
             Dim candleLowBuffer As Decimal = CalculateBuffer(candle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-            If candle.CandleWicks.Bottom >= ConvertFloorCeling(candle.CandleRange * 50 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing) AndAlso
-                candle.Volume.Value >= candle.PreviousPayload.Volume.Value AndAlso
-                candle.LowPrice.Value < candle.PreviousPayload.LowPrice.Value Then
-                Dim dayLow As Decimal = GetDayLow(candle)
-                If dayLow <> Decimal.MinValue AndAlso candle.LowPrice.Value <= dayLow + CalculateBuffer(dayLow, Me.TradableInstrument.TickSize, RoundOfType.Floor) Then
-                    ret = IOrder.TypeOfTransaction.Buy
-                End If
-            ElseIf candle.CandleWicks.Top >= ConvertFloorCeling(candle.CandleRange * 50 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing) AndAlso
-                candle.Volume.Value >= candle.PreviousPayload.Volume.Value AndAlso
-                candle.HighPrice.Value > candle.PreviousPayload.HighPrice.Value Then
-                Dim dayHigh As Decimal = GetDayHigh(candle)
-                If dayHigh <> Decimal.MinValue AndAlso candle.HighPrice.Value >= dayHigh - CalculateBuffer(dayHigh, Me.TradableInstrument.TickSize, RoundOfType.Floor) Then
-                    ret = IOrder.TypeOfTransaction.Sell
-                End If
+            If candle.CandleWicks.Bottom >= ConvertFloorCeling(candle.CandleRange * 50 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing) Then
+                ret = IOrder.TypeOfTransaction.Buy
+            ElseIf candle.CandleWicks.Top >= ConvertFloorCeling(candle.CandleRange * 50 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing) Then
+                ret = IOrder.TypeOfTransaction.Sell
             End If
         End If
         Return ret
