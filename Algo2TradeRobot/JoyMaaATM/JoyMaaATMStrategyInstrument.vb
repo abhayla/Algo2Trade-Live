@@ -112,7 +112,7 @@ Public Class JoyMaaATMStrategyInstrument
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)))
         Dim ret As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim userSettings As VolumeSpikeUserInputs = Me.ParentStrategy.UserSettings
+        Dim userSettings As JoyMaaATMUserInputs = Me.ParentStrategy.UserSettings
         Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
         Dim atrConsumer As ATRConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyATRConsumer)
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
@@ -226,7 +226,7 @@ Public Class JoyMaaATMStrategyInstrument
                 If Me.TradableInstrument.TradingSymbol.Contains("FUT") Then
                     quantity = CalculateQuantityFromInvestment(_currentDayOpen, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.FutureMinCapital, True)
                 Else
-                    quantity = CalculateQuantityFromStoploss(longEntryPrice, _currentDayOpen, userSettings.CashMinCapital)
+                    quantity = CalculateQuantityFromStoploss(longEntryPrice, _currentDayOpen, userSettings.CashMaxSL)
                 End If
                 If GetTotalExecutedOrders() = 0 Then
                     If _longEntryAllowed AndAlso (longActiveTrades Is Nothing OrElse longActiveTrades.Count = 0) Then

@@ -1,9 +1,11 @@
-﻿Imports System.Text.RegularExpressions
+﻿Imports System.IO
+Imports System.Text.RegularExpressions
 Imports System.Threading
 Imports Algo2TradeCore.Controller
 Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Strategies
 Imports NLog
+Imports Utilities.DAL
 
 Public Class VolumeSpikeStrategy
     Inherits Strategy
@@ -57,7 +59,7 @@ Public Class VolumeSpikeStrategy
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
                     If runningTradableInstrument IsNot Nothing Then
                         retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
-                        If runningTradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Futures Then
+                        If userInputs.AutoSelectStock AndAlso runningTradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Futures Then
                             Dim cashInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
                                                                                              Return x.TradingSymbol = runningTradableInstrument.RawInstrumentName
                                                                                          End Function)
@@ -123,7 +125,7 @@ Public Class VolumeSpikeStrategy
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
-            tasks.Add(Task.Run(AddressOf CompleteProcessAsync, _cts.Token))
+            If CType(Me.UserSettings, VolumeSpikeUserInputs).AutoSelectStock Then tasks.Add(Task.Run(AddressOf CompleteProcessAsync, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
         Catch ex As Exception
             lastException = ex
@@ -169,29 +171,40 @@ Public Class VolumeSpikeStrategy
                         For Each runningCashInstrument In cashStrategyInstrumentList.OrderByDescending(Function(x)
                                                                                                            Return CType(x, VolumeSpikeStrategyInstrument).VolumeChangePercentage
                                                                                                        End Function)
-                            Dim futureIntruments As IEnumerable(Of StrategyInstrument) =
+                            If CType(runningCashInstrument, VolumeSpikeStrategyInstrument).VolumeChangePercentage > 0 Then
+                                Dim futureIntruments As IEnumerable(Of StrategyInstrument) =
                                 Me.TradableStrategyInstruments.Where(Function(x)
                                                                          Return x.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
                                                                         x.TradableInstrument.RawInstrumentName = runningCashInstrument.TradableInstrument.TradingSymbol
                                                                      End Function)
-                            If futureIntruments IsNot Nothing AndAlso futureIntruments.Count > 0 Then
-                                CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).VolumeChangePercentage = CType(runningCashInstrument, VolumeSpikeStrategyInstrument).VolumeChangePercentage
-                                CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).EligibleToTakeTrade = True
-                                counter += 1
-                                Console.WriteLine(String.Format("{0} : {1}",
-                                                                futureIntruments.FirstOrDefault.TradableInstrument.TradingSymbol,
-                                                                CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).VolumeChangePercentage))
-                                If counter = 5 Then Exit For
-                            Else
-                                CType(runningCashInstrument, VolumeSpikeStrategyInstrument).EligibleToTakeTrade = True
-                                counter += 1
-                                If counter = 5 Then Exit For
+                                If futureIntruments IsNot Nothing AndAlso futureIntruments.Count > 0 Then
+                                    CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).VolumeChangePercentage = CType(runningCashInstrument, VolumeSpikeStrategyInstrument).VolumeChangePercentage
+                                    CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).EligibleToTakeTrade = True
+                                    futureIntruments.FirstOrDefault.TradableInstrument.FetchHistorical = True
+                                    counter += 1
+                                    Console.WriteLine(String.Format("{0} : {1}",
+                                                                    futureIntruments.FirstOrDefault.TradableInstrument.TradingSymbol,
+                                                                    CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).VolumeChangePercentage))
+                                    If counter = 5 Then
+                                        WriteCSV()
+                                        Exit For
+                                    End If
+                                Else
+                                    CType(runningCashInstrument, VolumeSpikeStrategyInstrument).EligibleToTakeTrade = True
+                                    runningCashInstrument.TradableInstrument.FetchHistorical = True
+                                    counter += 1
+                                    If counter = 5 Then
+                                        WriteCSV()
+                                        Exit For
+                                    End If
+                                End If
                             End If
                         Next
                         For Each runningInstrument In Me.TradableStrategyInstruments
                             If Not CType(runningInstrument, VolumeSpikeStrategyInstrument).EligibleToTakeTrade Then
                                 runningInstrument.TradableInstrument.FetchHistorical = False
                                 Await Me.ParentController.UnSubscribeTicker(runningInstrument.TradableInstrument.InstrumentIdentifier).ConfigureAwait(False)
+                                CType(runningInstrument, VolumeSpikeStrategyInstrument).StopStrategyInstrument = True
                             End If
                         Next
                         Exit While
@@ -204,6 +217,36 @@ Public Class VolumeSpikeStrategy
             'will anyways happen to Strategy.MonitorAsync but it will not be shown until all tasks exit
             logger.Error("Strategy:{0}, error:{1}", Me.ToString, ex.ToString)
             Throw ex
+        End Try
+    End Function
+
+    Private Async Function WriteCSV() As Task
+        Await Task.Delay(0).ConfigureAwait(False)
+        Try
+            If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Count > 0 Then
+                Dim allStockData As DataTable = Nothing
+                If CType(Me.UserSettings, VolumeSpikeUserInputs).InstrumentDetailsFilePath IsNot Nothing AndAlso
+                    File.Exists(CType(Me.UserSettings, VolumeSpikeUserInputs).InstrumentDetailsFilePath) Then
+                    File.Delete(CType(Me.UserSettings, VolumeSpikeUserInputs).InstrumentDetailsFilePath)
+                    Using csv As New CSVHelper(CType(Me.UserSettings, VolumeSpikeUserInputs).InstrumentDetailsFilePath, ",", _cts)
+                        _cts.Token.ThrowIfCancellationRequested()
+                        allStockData = New DataTable
+                        allStockData.Columns.Add("Trading Symbol")
+                        allStockData.Columns.Add("Margin Multiplier")
+                        For Each runningInstrument In Me.TradableStrategyInstruments
+                            If CType(runningInstrument, VolumeSpikeStrategyInstrument).EligibleToTakeTrade Then
+                                Dim row As DataRow = allStockData.NewRow
+                                row("Trading Symbol") = runningInstrument.TradableInstrument.TradingSymbol
+                                row("Margin Multiplier") = If(runningInstrument.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Cash, 13, 30)
+                                allStockData.Rows.Add(row)
+                            End If
+                        Next
+                        csv.GetCSVFromDataTable(allStockData)
+                    End Using
+                End If
+            End If
+        Catch ex As Exception
+            logger.Error(ex.ToString)
         End Try
     End Function
 End Class

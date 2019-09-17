@@ -13,8 +13,7 @@ Public Class VolumeSpikeUserInputs
     Public Property AutoSelectStock As Boolean
     Public Property CashInstrument As Boolean
     Public Property FutureInstrument As Boolean
-    Public Property CashMinCapital As Decimal
-    Public Property FutureMinCapital As Decimal
+    Public Property MinCapital As Decimal
     Public Property ManualInstrumentList As String
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)

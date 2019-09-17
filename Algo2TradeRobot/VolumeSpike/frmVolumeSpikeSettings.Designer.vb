@@ -50,12 +50,8 @@ Partial Class frmVolumeSpikeSettings
         Me.chbAutoSelectStock = New System.Windows.Forms.CheckBox()
         Me.txtManualStockList = New System.Windows.Forms.TextBox()
         Me.lblManualStock = New System.Windows.Forms.Label()
-        Me.txtFutureMinCapital = New System.Windows.Forms.TextBox()
-        Me.lblFutureMinCapital = New System.Windows.Forms.Label()
-        Me.txtCashMinCapital = New System.Windows.Forms.TextBox()
-        Me.lblCashMinCapital = New System.Windows.Forms.Label()
-        Me.chbFuture = New System.Windows.Forms.CheckBox()
-        Me.chbCash = New System.Windows.Forms.CheckBox()
+        Me.txtMinCapital = New System.Windows.Forms.TextBox()
+        Me.lblMinCapital = New System.Windows.Forms.Label()
         Me.btnVolumeSpikeStrategySettings = New System.Windows.Forms.Button()
         Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
         Me.opnFileSettings = New System.Windows.Forms.OpenFileDialog()
@@ -70,9 +66,13 @@ Partial Class frmVolumeSpikeSettings
         Me.lblMaxPrice = New System.Windows.Forms.Label()
         Me.txtMinPrice = New System.Windows.Forms.TextBox()
         Me.lblMinPrice = New System.Windows.Forms.Label()
+        Me.grbInstrumentType = New System.Windows.Forms.GroupBox()
+        Me.rdbCash = New System.Windows.Forms.RadioButton()
+        Me.rdbFuture = New System.Windows.Forms.RadioButton()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
+        Me.grbInstrumentType.SuspendLayout()
         Me.SuspendLayout()
         '
         'GroupBox1
@@ -310,15 +310,12 @@ Partial Class frmVolumeSpikeSettings
         '
         'GroupBox2
         '
+        Me.GroupBox2.Controls.Add(Me.grbInstrumentType)
         Me.GroupBox2.Controls.Add(Me.chbAutoSelectStock)
         Me.GroupBox2.Controls.Add(Me.txtManualStockList)
         Me.GroupBox2.Controls.Add(Me.lblManualStock)
-        Me.GroupBox2.Controls.Add(Me.txtFutureMinCapital)
-        Me.GroupBox2.Controls.Add(Me.lblFutureMinCapital)
-        Me.GroupBox2.Controls.Add(Me.txtCashMinCapital)
-        Me.GroupBox2.Controls.Add(Me.lblCashMinCapital)
-        Me.GroupBox2.Controls.Add(Me.chbFuture)
-        Me.GroupBox2.Controls.Add(Me.chbCash)
+        Me.GroupBox2.Controls.Add(Me.txtMinCapital)
+        Me.GroupBox2.Controls.Add(Me.lblMinCapital)
         Me.GroupBox2.Location = New System.Drawing.Point(490, -2)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(358, 375)
@@ -355,63 +352,24 @@ Partial Class frmVolumeSpikeSettings
         Me.lblManualStock.TabIndex = 39
         Me.lblManualStock.Text = "Manual Stock List"
         '
-        'txtFutureMinCapital
+        'txtMinCapital
         '
-        Me.txtFutureMinCapital.Location = New System.Drawing.Point(146, 102)
-        Me.txtFutureMinCapital.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtFutureMinCapital.Name = "txtFutureMinCapital"
-        Me.txtFutureMinCapital.Size = New System.Drawing.Size(201, 22)
-        Me.txtFutureMinCapital.TabIndex = 15
-        Me.txtFutureMinCapital.Tag = "Signal Time Frame"
+        Me.txtMinCapital.Location = New System.Drawing.Point(146, 102)
+        Me.txtMinCapital.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMinCapital.Name = "txtMinCapital"
+        Me.txtMinCapital.Size = New System.Drawing.Size(201, 22)
+        Me.txtMinCapital.TabIndex = 14
+        Me.txtMinCapital.Tag = "Signal Time Frame"
         '
-        'lblFutureMinCapital
+        'lblMinCapital
         '
-        Me.lblFutureMinCapital.AutoSize = True
-        Me.lblFutureMinCapital.Location = New System.Drawing.Point(6, 105)
-        Me.lblFutureMinCapital.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblFutureMinCapital.Name = "lblFutureMinCapital"
-        Me.lblFutureMinCapital.Size = New System.Drawing.Size(122, 17)
-        Me.lblFutureMinCapital.TabIndex = 37
-        Me.lblFutureMinCapital.Text = "Future Min Capital"
-        '
-        'txtCashMinCapital
-        '
-        Me.txtCashMinCapital.Location = New System.Drawing.Point(146, 73)
-        Me.txtCashMinCapital.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtCashMinCapital.Name = "txtCashMinCapital"
-        Me.txtCashMinCapital.Size = New System.Drawing.Size(201, 22)
-        Me.txtCashMinCapital.TabIndex = 14
-        Me.txtCashMinCapital.Tag = "Signal Time Frame"
-        '
-        'lblCashMinCapital
-        '
-        Me.lblCashMinCapital.AutoSize = True
-        Me.lblCashMinCapital.Location = New System.Drawing.Point(6, 76)
-        Me.lblCashMinCapital.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblCashMinCapital.Name = "lblCashMinCapital"
-        Me.lblCashMinCapital.Size = New System.Drawing.Size(113, 17)
-        Me.lblCashMinCapital.TabIndex = 35
-        Me.lblCashMinCapital.Text = "Cash Min Capital"
-        '
-        'chbFuture
-        '
-        Me.chbFuture.AutoSize = True
-        Me.chbFuture.Location = New System.Drawing.Point(84, 43)
-        Me.chbFuture.Name = "chbFuture"
-        Me.chbFuture.Size = New System.Drawing.Size(71, 21)
-        Me.chbFuture.TabIndex = 13
-        Me.chbFuture.Text = "Future"
-        Me.chbFuture.UseVisualStyleBackColor = True
-        '
-        'chbCash
-        '
-        Me.chbCash.AutoSize = True
-        Me.chbCash.Location = New System.Drawing.Point(12, 42)
-        Me.chbCash.Name = "chbCash"
-        Me.chbCash.Size = New System.Drawing.Size(62, 21)
-        Me.chbCash.TabIndex = 12
-        Me.chbCash.Text = "Cash"
-        Me.chbCash.UseVisualStyleBackColor = True
+        Me.lblMinCapital.AutoSize = True
+        Me.lblMinCapital.Location = New System.Drawing.Point(6, 105)
+        Me.lblMinCapital.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMinCapital.Name = "lblMinCapital"
+        Me.lblMinCapital.Size = New System.Drawing.Size(77, 17)
+        Me.lblMinCapital.TabIndex = 35
+        Me.lblMinCapital.Text = "Min Capital"
         '
         'btnVolumeSpikeStrategySettings
         '
@@ -550,6 +508,39 @@ Partial Class frmVolumeSpikeSettings
         Me.lblMinPrice.TabIndex = 35
         Me.lblMinPrice.Text = "Min Price"
         '
+        'grbInstrumentType
+        '
+        Me.grbInstrumentType.Controls.Add(Me.rdbFuture)
+        Me.grbInstrumentType.Controls.Add(Me.rdbCash)
+        Me.grbInstrumentType.Location = New System.Drawing.Point(9, 33)
+        Me.grbInstrumentType.Name = "grbInstrumentType"
+        Me.grbInstrumentType.Size = New System.Drawing.Size(338, 62)
+        Me.grbInstrumentType.TabIndex = 40
+        Me.grbInstrumentType.TabStop = False
+        Me.grbInstrumentType.Text = "Instrument Type"
+        '
+        'rdbCash
+        '
+        Me.rdbCash.AutoSize = True
+        Me.rdbCash.Location = New System.Drawing.Point(14, 26)
+        Me.rdbCash.Name = "rdbCash"
+        Me.rdbCash.Size = New System.Drawing.Size(61, 21)
+        Me.rdbCash.TabIndex = 0
+        Me.rdbCash.TabStop = True
+        Me.rdbCash.Text = "Cash"
+        Me.rdbCash.UseVisualStyleBackColor = True
+        '
+        'rdbFuture
+        '
+        Me.rdbFuture.AutoSize = True
+        Me.rdbFuture.Location = New System.Drawing.Point(85, 26)
+        Me.rdbFuture.Name = "rdbFuture"
+        Me.rdbFuture.Size = New System.Drawing.Size(70, 21)
+        Me.rdbFuture.TabIndex = 1
+        Me.rdbFuture.TabStop = True
+        Me.rdbFuture.Text = "Future"
+        Me.rdbFuture.UseVisualStyleBackColor = True
+        '
         'frmVolumeSpikeSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
@@ -571,6 +562,8 @@ Partial Class frmVolumeSpikeSettings
         Me.GroupBox2.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
         Me.GroupBox3.PerformLayout()
+        Me.grbInstrumentType.ResumeLayout(False)
+        Me.grbInstrumentType.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -592,17 +585,13 @@ Partial Class frmVolumeSpikeSettings
     Friend WithEvents txtSignalTimeFrame As TextBox
     Friend WithEvents lblSignalTimeFrame As Label
     Friend WithEvents GroupBox2 As GroupBox
-    Friend WithEvents chbFuture As CheckBox
-    Friend WithEvents chbCash As CheckBox
     Friend WithEvents btnVolumeSpikeStrategySettings As Button
     Friend WithEvents ImageList1 As ImageList
     Friend WithEvents opnFileSettings As OpenFileDialog
     Friend WithEvents txtManualStockList As TextBox
     Friend WithEvents lblManualStock As Label
-    Friend WithEvents txtFutureMinCapital As TextBox
-    Friend WithEvents lblFutureMinCapital As Label
-    Friend WithEvents txtCashMinCapital As TextBox
-    Friend WithEvents lblCashMinCapital As Label
+    Friend WithEvents txtMinCapital As TextBox
+    Friend WithEvents lblMinCapital As Label
     Friend WithEvents GroupBox3 As GroupBox
     Friend WithEvents txtMaxPrice As TextBox
     Friend WithEvents lblMaxPrice As Label
@@ -621,4 +610,7 @@ Partial Class frmVolumeSpikeSettings
     Friend WithEvents lblMaxLossPerDay As Label
     Friend WithEvents txtNumberOfTradePerStock As TextBox
     Friend WithEvents lblNumberOfTradePerStock As Label
+    Friend WithEvents grbInstrumentType As GroupBox
+    Friend WithEvents rdbFuture As RadioButton
+    Friend WithEvents rdbCash As RadioButton
 End Class

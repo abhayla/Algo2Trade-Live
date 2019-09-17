@@ -56,10 +56,9 @@ Public Class frmVolumeSpikeSettings
             txtMaxProfitPerDay.Text = _VolumeSpikeSettings.MaxProfitPerDay
             txtInstrumentDetalis.Text = _VolumeSpikeSettings.InstrumentDetailsFilePath
             chbAutoSelectStock.Checked = _VolumeSpikeSettings.AutoSelectStock
-            chbCash.Checked = _VolumeSpikeSettings.CashInstrument
-            chbFuture.Checked = _VolumeSpikeSettings.FutureInstrument
-            txtCashMinCapital.Text = _VolumeSpikeSettings.CashMinCapital
-            txtFutureMinCapital.Text = _VolumeSpikeSettings.FutureMinCapital
+            rdbCash.Checked = _VolumeSpikeSettings.CashInstrument
+            rdbFuture.Checked = _VolumeSpikeSettings.FutureInstrument
+            txtMinCapital.Text = _VolumeSpikeSettings.MinCapital
             txtManualStockList.Text = _VolumeSpikeSettings.ManualInstrumentList
             txtMinPrice.Text = _VolumeSpikeSettings.MinPrice
             txtMaxPrice.Text = _VolumeSpikeSettings.MaxPrice
@@ -81,10 +80,9 @@ Public Class frmVolumeSpikeSettings
         _VolumeSpikeSettings.MaxProfitPerDay = txtMaxProfitPerDay.Text
         _VolumeSpikeSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
         _VolumeSpikeSettings.AutoSelectStock = chbAutoSelectStock.Checked
-        _VolumeSpikeSettings.CashInstrument = chbCash.Checked
-        _VolumeSpikeSettings.FutureInstrument = chbFuture.Checked
-        _VolumeSpikeSettings.CashMinCapital = txtCashMinCapital.Text
-        _VolumeSpikeSettings.FutureMinCapital = txtFutureMinCapital.Text
+        _VolumeSpikeSettings.CashInstrument = rdbCash.Checked
+        _VolumeSpikeSettings.FutureInstrument = rdbFuture.Checked
+        _VolumeSpikeSettings.MinCapital = txtMinCapital.Text
         _VolumeSpikeSettings.ManualInstrumentList = txtManualStockList.Text
         _VolumeSpikeSettings.MinPrice = txtMinPrice.Text
         _VolumeSpikeSettings.MaxPrice = txtMaxPrice.Text
@@ -114,8 +112,7 @@ Public Class frmVolumeSpikeSettings
         ValidateNumbers(1, 60, txtSignalTimeFrame)
         ValidateNumbers(1, 100, txtATRPeriod)
         ValidateNumbers(1, 100, txtTargetMultiplier)
-        ValidateNumbers(0, Decimal.MaxValue, txtCashMinCapital)
-        ValidateNumbers(0, Decimal.MaxValue, txtFutureMinCapital)
+        ValidateNumbers(0, Decimal.MaxValue, txtMinCapital)
         ValidateFile()
     End Sub
 
