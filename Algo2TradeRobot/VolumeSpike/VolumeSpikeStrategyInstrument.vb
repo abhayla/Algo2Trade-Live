@@ -142,10 +142,16 @@ Public Class VolumeSpikeStrategyInstrument
 
         If Not _entryChanged AndAlso GetSignalCandleATR() <> Decimal.MinValue AndAlso _signalCandle IsNot Nothing Then
             If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
-                Dim firstOrder As IBusinessOrder = OrderDetails.OrderBy(Function(x)
-                                                                            Return x.Value.ParentOrder.TimeStamp
-                                                                        End Function).FirstOrDefault.Value
-                If firstOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                Dim firstOrder As IBusinessOrder = Nothing
+                For Each runningOrder In OrderDetails.OrderBy(Function(x)
+                                                                  Return x.Value.ParentOrder.TimeStamp
+                                                              End Function)
+                    If runningOrder.Value.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                        firstOrder = runningOrder.Value
+                        Exit For
+                    End If
+                Next
+                If firstOrder IsNot Nothing AndAlso firstOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
                     If firstOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
                         Select Case _signalType
                             Case TypeOfSignal.CandleHalf
@@ -166,11 +172,13 @@ Public Class VolumeSpikeStrategyInstrument
             End If
         End If
 
-        If Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder Then
-            _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
-            logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
-            If _signalCandle IsNot Nothing Then
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Signal Candle Time:{5}, Signal Candle Range:{6}, Signal Candle Source:{7}, {8}, Is Active Instrument:{9}, Number Of Trade:{10}, OverAll PL:{11}, Is Target Reached:{12}, Buy Entry:{13}, Sell Entry:{14}, Signal Type:{15}, Current Time:{16}, Current LTP:{17}, TradingSymbol:{18}",
+        Try
+            If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
+                Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder OrElse forcePrint Then
+                _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
+                logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
+                If _signalCandle IsNot Nothing Then
+                    logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Signal Candle Time:{5}, Signal Candle Range:{6}, Signal Candle Source:{7}, {8}, Is Active Instrument:{9}, Number Of Trade:{10}, OverAll PL:{11}, Is Target Reached:{12}, Buy Entry:{13}, Sell Entry:{14}, Signal Type:{15}, Current Time:{16}, Current LTP:{17}, TradingSymbol:{18}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             runningCandlePayload.SnapshotDateTime.ToString,
@@ -186,12 +194,12 @@ Public Class VolumeSpikeStrategyInstrument
                             IsAnyTradeTargetReached(),
                             _potentialHighEntryPrice,
                             _potentialLowEntryPrice,
-                            _signalCandle.ToString,
+                            _signalType.ToString,
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
-            Else
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Current Candle Time:{5}, Current Candle Range:{6}, Current Candle Source:{7}, {8}, Is Active Instrument:{9}, Number Of Trade:{10}, OverAll PL:{11}, Is Target Reached:{12}, Current Time:{13}, Current LTP:{14}, TradingSymbol:{15}",
+                Else
+                    logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Current Candle Time:{5}, Current Candle Range:{6}, Current Candle Source:{7}, {8}, Is Active Instrument:{9}, Number Of Trade:{10}, OverAll PL:{11}, Is Target Reached:{12}, Current Time:{13}, Current LTP:{14}, TradingSymbol:{15}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             runningCandlePayload.SnapshotDateTime.ToString,
@@ -208,8 +216,11 @@ Public Class VolumeSpikeStrategyInstrument
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
+                End If
             End If
-        End If
+        Catch ex As Exception
+            logger.Error(ex.ToString)
+        End Try
 
         Dim parameters As PlaceOrderParameters = Nothing
         If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
@@ -506,6 +517,9 @@ Public Class VolumeSpikeStrategyInstrument
                     _signalCandle = candle
                     _signalType = TypeOfSignal.CandleHalf
                     _targetMultiplier = userSettings.TargetMultiplier
+                    If GetSignalCandleATR() <> Decimal.MinValue AndAlso _signalCandle.CandleRange > GetSignalCandleATR() Then
+                        _targetMultiplier = Math.Floor(userSettings.TargetMultiplier - userSettings.TargetMultiplier * 25 / 100)
+                    End If
                 ElseIf IsPinBar(candle) Then
                     _potentialHighEntryPrice = candle.HighPrice.Value
                     _potentialLowEntryPrice = candle.LowPrice.Value
