@@ -272,15 +272,12 @@ Public Class VolumeSpikeFillInstrumentDetails
                                                                   x.Value.BlankCandlePercentage <= 15
                                                         End Function)
                         If stocksLessThanMaxBlankCandlePercentage IsNot Nothing AndAlso stocksLessThanMaxBlankCandlePercentage.Count > 0 Then
-                            Dim stockCounter As Integer = 0
                             For Each stockData In stocksLessThanMaxBlankCandlePercentage.OrderByDescending(Function(x)
                                                                                                                Return x.Value.ATR
                                                                                                            End Function)
                                 _cts.Token.ThrowIfCancellationRequested()
                                 If todayStockList Is Nothing Then todayStockList = New List(Of String)
                                 todayStockList.Add(stockData.Key)
-                                stockCounter += 1
-                                If stockCounter = _userInputs.NumberOfStock Then Exit For
                             Next
                             'If stockCounter < _userInputs.NumberOfStock Then
                             '    Dim stocksLessThanHigherLimitOfMaxBlankCandlePercentage As IEnumerable(Of KeyValuePair(Of String, InstrumentDetails)) =

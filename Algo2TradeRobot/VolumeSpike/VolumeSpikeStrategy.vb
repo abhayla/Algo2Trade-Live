@@ -185,18 +185,14 @@ Public Class VolumeSpikeStrategy
                                     Console.WriteLine(String.Format("{0} : {1}",
                                                                     futureIntruments.FirstOrDefault.TradableInstrument.TradingSymbol,
                                                                     CType(futureIntruments.FirstOrDefault, VolumeSpikeStrategyInstrument).VolumeChangePercentage))
-                                    If counter = 5 Then
-                                        WriteCSV()
-                                        Exit For
-                                    End If
                                 Else
                                     CType(runningCashInstrument, VolumeSpikeStrategyInstrument).EligibleToTakeTrade = True
                                     runningCashInstrument.TradableInstrument.FetchHistorical = True
                                     counter += 1
-                                    If counter = 5 Then
-                                        WriteCSV()
-                                        Exit For
-                                    End If
+                                End If
+                                If counter = CType(Me.UserSettings, VolumeSpikeUserInputs).NumberOfStock Then
+                                    WriteCSV()
+                                    Exit For
                                 End If
                             End If
                         Next
