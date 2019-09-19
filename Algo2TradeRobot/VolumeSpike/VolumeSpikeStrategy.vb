@@ -189,6 +189,9 @@ Public Class VolumeSpikeStrategy
                                     CType(runningCashInstrument, VolumeSpikeStrategyInstrument).EligibleToTakeTrade = True
                                     runningCashInstrument.TradableInstrument.FetchHistorical = True
                                     counter += 1
+                                    Console.WriteLine(String.Format("{0} : {1}",
+                                                                    runningCashInstrument.TradableInstrument.TradingSymbol,
+                                                                    CType(runningCashInstrument, VolumeSpikeStrategyInstrument).VolumeChangePercentage))
                                 End If
                                 If counter = CType(Me.UserSettings, VolumeSpikeUserInputs).NumberOfStock Then
                                     WriteCSV()
