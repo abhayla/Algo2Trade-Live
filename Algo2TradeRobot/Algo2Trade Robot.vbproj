@@ -182,22 +182,22 @@
     <Compile Include="frmUserDetails.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="JoyMaaATM\frmLowSLSettings.Designer.vb">
+    <Compile Include="Low SL\frmLowSLSettings.Designer.vb">
       <DependentUpon>frmLowSLSettings.vb</DependentUpon>
     </Compile>
-    <Compile Include="JoyMaaATM\frmLowSLSettings.vb">
+    <Compile Include="Low SL\frmLowSLSettings.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="JoyMaaATM\frmLowSLTradableInstrumentList.Designer.vb">
+    <Compile Include="Low SL\frmLowSLTradableInstrumentList.Designer.vb">
       <DependentUpon>frmLowSLTradableInstrumentList.vb</DependentUpon>
     </Compile>
-    <Compile Include="JoyMaaATM\frmLowSLTradableInstrumentList.vb">
+    <Compile Include="Low SL\frmLowSLTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="JoyMaaATM\LowSLFillInstrumentDetails.vb" />
-    <Compile Include="JoyMaaATM\LowSLStrategy.vb" />
-    <Compile Include="JoyMaaATM\LowSLStrategyInstrument.vb" />
-    <Compile Include="JoyMaaATM\LowSLUserInputs.vb" />
+    <Compile Include="Low SL\LowSLFillInstrumentDetails.vb" />
+    <Compile Include="Low SL\LowSLStrategy.vb" />
+    <Compile Include="Low SL\LowSLStrategyInstrument.vb" />
+    <Compile Include="Low SL\LowSLUserInputs.vb" />
     <Compile Include="MomentumReversal\frmMomentumReversalSettings.Designer.vb">
       <DependentUpon>frmMomentumReversalSettings.vb</DependentUpon>
     </Compile>
@@ -337,10 +337,10 @@
     <EmbeddedResource Include="frmUserDetails.resx">
       <DependentUpon>frmUserDetails.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="JoyMaaATM\frmLowSLSettings.resx">
+    <EmbeddedResource Include="Low SL\frmLowSLSettings.resx">
       <DependentUpon>frmLowSLSettings.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="JoyMaaATM\frmLowSLTradableInstrumentList.resx">
+    <EmbeddedResource Include="Low SL\frmLowSLTradableInstrumentList.resx">
       <DependentUpon>frmLowSLTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MomentumReversal\frmMomentumReversalSettings.resx">

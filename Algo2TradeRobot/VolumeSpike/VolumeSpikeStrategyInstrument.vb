@@ -10,6 +10,10 @@ Public Class VolumeSpikeStrategyInstrument
     Inherits StrategyInstrument
     Implements IDisposable
 
+#Region "Logging and Status Progress"
+    Public Shared Shadows logger As Logger = LogManager.GetCurrentClassLogger
+#End Region
+
     Public EligibleToTakeTrade As Boolean
     Public StopStrategyInstrument As Boolean
     Public VolumeChangePercentage As Decimal

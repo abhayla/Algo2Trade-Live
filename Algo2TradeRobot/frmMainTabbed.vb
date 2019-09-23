@@ -2305,7 +2305,7 @@ Public Class frmMainTabbed
             End If 'Common controller
             EnableDisableUIEx(UIMode.ReleaseOther, GetType(LowSLStrategy))
 
-            _LowSLStrategyToExecute = New LowSLStrategy(_commonController, 6, _LowSLUserInputs, 5, _cts)
+            _LowSLStrategyToExecute = New LowSLStrategy(_commonController, 6, _LowSLUserInputs, 10, _cts)
             OnHeartbeatEx(String.Format("Running strategy:{0}", _LowSLStrategyToExecute.ToString), New List(Of Object) From {_LowSLStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()
@@ -2313,7 +2313,7 @@ Public Class frmMainTabbed
             _cts.Token.ThrowIfCancellationRequested()
 
             _LowSLTradableInstruments = _LowSLStrategyToExecute.TradableStrategyInstruments
-            SetObjectText_ThreadSafe(linklblLowSLTradableInstrument, String.Format("Tradable Instruments: {0}", _LowSLTradableInstruments.Count))
+            SetObjectText_ThreadSafe(linklblLowSLTradableInstrument, String.Format("Tradable Instruments"))
             SetObjectEnableDisable_ThreadSafe(linklblLowSLTradableInstrument, True)
             _cts.Token.ThrowIfCancellationRequested()
 
