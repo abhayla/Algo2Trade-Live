@@ -1,12 +1,12 @@
 ﻿Imports System.Threading
 Imports System.IO
 
-Public Class frmJoyMaaATMSettings
+Public Class frmLowSLSettings
     Private _cts As CancellationTokenSource = Nothing
-    Private _JoyMaaATMSettings As JoyMaaATMUserInputs = Nothing
-    Private _JoyMaaATMSettingsFilename As String = Path.Combine(My.Application.Info.DirectoryPath, "JoyMaaATMSettings.Strategy.a2t")
+    Private _JoyMaaATMSettings As LowSLUserInputs = Nothing
+    Private _JoyMaaATMSettingsFilename As String = Path.Combine(My.Application.Info.DirectoryPath, "LowSLSettings.Strategy.a2t")
 
-    Public Sub New(ByRef userInputs As JoyMaaATMUserInputs)
+    Public Sub New(ByRef userInputs As LowSLUserInputs)
         InitializeComponent()
         _JoyMaaATMSettings = userInputs
     End Sub
@@ -18,7 +18,7 @@ Public Class frmJoyMaaATMSettings
     Private Sub btnJoyMaaATMSettings_Click(sender As Object, e As EventArgs) Handles btnJoyMaaATMStrategySettings.Click
         Try
             _cts = New CancellationTokenSource
-            If _JoyMaaATMSettings Is Nothing Then _JoyMaaATMSettings = New JoyMaaATMUserInputs
+            If _JoyMaaATMSettings Is Nothing Then _JoyMaaATMSettings = New LowSLUserInputs
             _JoyMaaATMSettings.InstrumentsData = Nothing
             ValidateInputs()
             SaveSettings()
@@ -44,7 +44,7 @@ Public Class frmJoyMaaATMSettings
 
     Private Sub LoadSettings()
         If File.Exists(_JoyMaaATMSettingsFilename) Then
-            _JoyMaaATMSettings = Utilities.Strings.DeserializeToCollection(Of JoyMaaATMUserInputs)(_JoyMaaATMSettingsFilename)
+            _JoyMaaATMSettings = Utilities.Strings.DeserializeToCollection(Of LowSLUserInputs)(_JoyMaaATMSettingsFilename)
             txtATRPeriod.Text = _JoyMaaATMSettings.ATRPeriod
             txtSignalTimeFrame.Text = _JoyMaaATMSettings.SignalTimeFrame
             dtpckrTradeStartTime.Value = _JoyMaaATMSettings.TradeStartTime
@@ -92,7 +92,7 @@ Public Class frmJoyMaaATMSettings
         _JoyMaaATMSettings.TelegramChatID = txtTelegramChatID.Text
         _JoyMaaATMSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
 
-        Utilities.Strings.SerializeFromCollection(Of JoyMaaATMUserInputs)(_JoyMaaATMSettingsFilename, _JoyMaaATMSettings)
+        Utilities.Strings.SerializeFromCollection(Of LowSLUserInputs)(_JoyMaaATMSettingsFilename, _JoyMaaATMSettings)
     End Sub
 
     Private Function ValidateNumbers(ByVal startNumber As Decimal, ByVal endNumber As Decimal, ByVal inputTB As TextBox) As Boolean

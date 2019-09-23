@@ -4,7 +4,7 @@ Imports Algo2TradeCore.Entities.UserSettings
 Imports Utilities.DAL
 
 <Serializable>
-Public Class JoyMaaATMUserInputs
+Public Class LowSLUserInputs
     Inherits StrategyUserInputs
     Public Property ATRPeriod As Integer
     Public Property AutoSelectStock As Boolean

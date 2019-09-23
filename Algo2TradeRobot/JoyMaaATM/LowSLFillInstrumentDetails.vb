@@ -5,7 +5,7 @@ Imports Algo2TradeCore.Entities
 Imports Utilities.Network
 Imports System.Net.Http
 
-Public Class JoyMaaATMFillInstrumentDetails
+Public Class LowSLFillInstrumentDetails
     Implements IDisposable
 
 #Region "Events/Event handlers"
@@ -29,12 +29,12 @@ Public Class JoyMaaATMFillInstrumentDetails
 #End Region
 
     Private _cts As CancellationTokenSource
-    Private ReadOnly _parentStrategy As JoyMaaATMStrategy
-    Private ReadOnly _userInputs As JoyMaaATMUserInputs
+    Private ReadOnly _parentStrategy As LowSLStrategy
+    Private ReadOnly _userInputs As LowSLUserInputs
     Private ReadOnly ZerodhaEODHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/day?api_key=kitefront&access_token=K&from={1}&to={2}"
     Private ReadOnly ZerodhaIntradayHistoricalURL = "https://kitecharts-aws.zerodha.com/api/chart/{0}/minute?api_key=kitefront&access_token=K&from={1}&to={2}"
     Private ReadOnly tradingDay As Date = Date.MinValue
-    Public Sub New(ByVal canceller As CancellationTokenSource, ByVal parentStrategy As JoyMaaATMStrategy)
+    Public Sub New(ByVal canceller As CancellationTokenSource, ByVal parentStrategy As LowSLStrategy)
         _cts = canceller
         _parentStrategy = parentStrategy
         _userInputs = _parentStrategy.UserSettings
@@ -268,31 +268,31 @@ Public Class JoyMaaATMFillInstrumentDetails
                         _cts.Token.ThrowIfCancellationRequested()
                         If todayStockList IsNot Nothing AndAlso todayStockList.Count > 0 Then
                             Dim allStockData As DataTable = Nothing
-                            If CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).InstrumentDetailsFilePath IsNot Nothing AndAlso
-                                File.Exists(CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).InstrumentDetailsFilePath) Then
-                                File.Delete(CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).InstrumentDetailsFilePath)
-                                Using csv As New CSVHelper(CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).InstrumentDetailsFilePath, ",", _cts)
+                            If CType(_parentStrategy.UserSettings, LowSLUserInputs).InstrumentDetailsFilePath IsNot Nothing AndAlso
+                                File.Exists(CType(_parentStrategy.UserSettings, LowSLUserInputs).InstrumentDetailsFilePath) Then
+                                File.Delete(CType(_parentStrategy.UserSettings, LowSLUserInputs).InstrumentDetailsFilePath)
+                                Using csv As New CSVHelper(CType(_parentStrategy.UserSettings, LowSLUserInputs).InstrumentDetailsFilePath, ",", _cts)
                                     _cts.Token.ThrowIfCancellationRequested()
                                     allStockData = New DataTable
                                     allStockData.Columns.Add("Trading Symbol")
                                     allStockData.Columns.Add("Margin Multiplier")
                                     For Each stock In todayStockList
-                                        If CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).CashInstrument Then
+                                        If CType(_parentStrategy.UserSettings, LowSLUserInputs).CashInstrument Then
                                             Dim row As DataRow = allStockData.NewRow
                                             row("Trading Symbol") = stock.Remove(stock.Count - 8)
                                             row("Margin Multiplier") = 13
                                             allStockData.Rows.Add(row)
                                         End If
-                                        If CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).FutureInstrument Then
+                                        If CType(_parentStrategy.UserSettings, LowSLUserInputs).FutureInstrument Then
                                             Dim row As DataRow = allStockData.NewRow
                                             row("Trading Symbol") = stock
                                             row("Margin Multiplier") = 30
                                             allStockData.Rows.Add(row)
                                         End If
                                     Next
-                                    If CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).ManualInstrumentList IsNot Nothing AndAlso
-                                        CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).ManualInstrumentList <> "" Then
-                                        Dim manualStockData As String() = CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).ManualInstrumentList.Trim.Split(vbNewLine)
+                                    If CType(_parentStrategy.UserSettings, LowSLUserInputs).ManualInstrumentList IsNot Nothing AndAlso
+                                        CType(_parentStrategy.UserSettings, LowSLUserInputs).ManualInstrumentList <> "" Then
+                                        Dim manualStockData As String() = CType(_parentStrategy.UserSettings, LowSLUserInputs).ManualInstrumentList.Trim.Split(vbNewLine)
                                         For Each manualStock In manualStockData
                                             _cts.Token.ThrowIfCancellationRequested()
                                             Dim stockData As String() = manualStock.Trim.Split(",")
@@ -304,10 +304,10 @@ Public Class JoyMaaATMFillInstrumentDetails
                                     End If
                                     csv.GetCSVFromDataTable(allStockData)
                                 End Using
-                                If CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).InstrumentsData IsNot Nothing Then
-                                    CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).InstrumentsData.Clear()
-                                    CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).InstrumentsData = Nothing
-                                    CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).FillInstrumentDetails(CType(_parentStrategy.UserSettings, JoyMaaATMUserInputs).InstrumentDetailsFilePath, _cts)
+                                If CType(_parentStrategy.UserSettings, LowSLUserInputs).InstrumentsData IsNot Nothing Then
+                                    CType(_parentStrategy.UserSettings, LowSLUserInputs).InstrumentsData.Clear()
+                                    CType(_parentStrategy.UserSettings, LowSLUserInputs).InstrumentsData = Nothing
+                                    CType(_parentStrategy.UserSettings, LowSLUserInputs).FillInstrumentDetails(CType(_parentStrategy.UserSettings, LowSLUserInputs).InstrumentDetailsFilePath, _cts)
                                 End If
                             End If
                         End If

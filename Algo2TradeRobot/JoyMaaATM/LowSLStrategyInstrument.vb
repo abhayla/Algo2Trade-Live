@@ -8,7 +8,7 @@ Imports Algo2TradeCore.Entities.Indicators
 Imports Utilities.Network
 Imports System.Net.Http
 
-Public Class JoyMaaATMStrategyInstrument
+Public Class LowSLStrategyInstrument
     Inherits StrategyInstrument
     Implements IDisposable
 
@@ -112,7 +112,7 @@ Public Class JoyMaaATMStrategyInstrument
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)))
         Dim ret As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim userSettings As JoyMaaATMUserInputs = Me.ParentStrategy.UserSettings
+        Dim userSettings As LowSLUserInputs = Me.ParentStrategy.UserSettings
         Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
         Dim atrConsumer As ATRConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyATRConsumer)
         Dim currentTick As ITick = Me.TradableInstrument.LastTick

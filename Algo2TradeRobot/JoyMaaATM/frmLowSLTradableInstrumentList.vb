@@ -1,7 +1,7 @@
-﻿Public Class frmJoyMaaATMTradableInstrumentList
+﻿Public Class frmLowSLTradableInstrumentList
 
-    Private _TradableInstruments As IEnumerable(Of JoyMaaATMStrategyInstrument)
-    Public Sub New(ByVal associatedTradableInstruments As IEnumerable(Of JoyMaaATMStrategyInstrument))
+    Private _TradableInstruments As IEnumerable(Of LowSLStrategyInstrument)
+    Public Sub New(ByVal associatedTradableInstruments As IEnumerable(Of LowSLStrategyInstrument))
         InitializeComponent()
         Me._TradableInstruments = associatedTradableInstruments
     End Sub

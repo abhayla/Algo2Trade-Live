@@ -60,21 +60,21 @@ Partial Class frmMainTabbed
         Me.pnlTwoThirdBodyHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.lstTwoThirdLog = New System.Windows.Forms.ListBox()
         Me.sfdgvTwoThirdMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
-        Me.tabJoyMaaATM = New System.Windows.Forms.TabPage()
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.tabLowSL = New System.Windows.Forms.TabPage()
+        Me.pnlLowSLMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.btnJoyMaaATMStop = New System.Windows.Forms.Button()
-        Me.btnJoyMaaATMStart = New System.Windows.Forms.Button()
+        Me.btnLowSLStop = New System.Windows.Forms.Button()
+        Me.btnLowSLStart = New System.Windows.Forms.Button()
         Me.Panel9 = New System.Windows.Forms.Panel()
-        Me.blbJoyMaaATMTickerStatus = New Bulb.LedBulb()
-        Me.lblJoyMaaATMTickerStatus = New System.Windows.Forms.Label()
-        Me.btnJoyMaaATMSettings = New System.Windows.Forms.Button()
-        Me.linklblJoyMaaATMTradableInstrument = New System.Windows.Forms.LinkLabel()
+        Me.blbLowSLTickerStatus = New Bulb.LedBulb()
+        Me.lblLowSLTickerStatus = New System.Windows.Forms.Label()
+        Me.btnLowSLSettings = New System.Windows.Forms.Button()
+        Me.linklblLowSLTradableInstrument = New System.Windows.Forms.LinkLabel()
         Me.pnlJoyMaaATMBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.PictureBox8 = New System.Windows.Forms.PictureBox()
         Me.TableLayoutPanel7 = New System.Windows.Forms.TableLayoutPanel()
-        Me.lstJoyMaaATMLog = New System.Windows.Forms.ListBox()
-        Me.sfdgvJoyMaaATMMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
+        Me.lstLowSLLog = New System.Windows.Forms.ListBox()
+        Me.sfdgvLowSLMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
         Me.tabPetDGandhi = New System.Windows.Forms.TabPage()
         Me.pnlPetDGandhiMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlPetDGandhiTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
@@ -188,7 +188,7 @@ Partial Class frmMainTabbed
         Me.tmrPetDGandhiTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrEMACrossoverTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrVolumeSpikeStatus = New System.Windows.Forms.Timer(Me.components)
-        Me.tmrJoyMaaATMTickerStatus = New System.Windows.Forms.Timer(Me.components)
+        Me.tmrLowSLTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.tmrTwoThirdTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.msMainMenuStrip.SuspendLayout()
         Me.tabMain.SuspendLayout()
@@ -208,14 +208,14 @@ Partial Class frmMainTabbed
         CType(Me.PictureBox9, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pnlTwoThirdBodyHorizontalSplitter.SuspendLayout()
         CType(Me.sfdgvTwoThirdMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabJoyMaaATM.SuspendLayout()
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.SuspendLayout()
+        Me.tabLowSL.SuspendLayout()
+        Me.pnlLowSLMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.SuspendLayout()
         Me.Panel9.SuspendLayout()
         Me.pnlJoyMaaATMBodyVerticalSplitter.SuspendLayout()
         CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TableLayoutPanel7.SuspendLayout()
-        CType(Me.sfdgvJoyMaaATMMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.sfdgvLowSLMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabPetDGandhi.SuspendLayout()
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.SuspendLayout()
@@ -313,9 +313,9 @@ Partial Class frmMainTabbed
         '
         'tabMain
         '
+        Me.tabMain.Controls.Add(Me.tabLowSL)
         Me.tabMain.Controls.Add(Me.tabVolumeSpike)
         Me.tabMain.Controls.Add(Me.tabTwoThird)
-        Me.tabMain.Controls.Add(Me.tabJoyMaaATM)
         Me.tabMain.Controls.Add(Me.tabPetDGandhi)
         Me.tabMain.Controls.Add(Me.tabEMACrossover)
         Me.tabMain.Controls.Add(Me.tabNearFarHedging)
@@ -753,31 +753,31 @@ Partial Class frmMainTabbed
         Me.sfdgvTwoThirdMainDashboard.TabIndex = 6
         Me.sfdgvTwoThirdMainDashboard.Text = "SfDataGrid1"
         '
-        'tabJoyMaaATM
+        'tabLowSL
         '
-        Me.tabJoyMaaATM.Controls.Add(Me.pnlJoyMaaATMMainPanelHorizontalSplitter)
-        Me.tabJoyMaaATM.Location = New System.Drawing.Point(4, 25)
-        Me.tabJoyMaaATM.Name = "tabJoyMaaATM"
-        Me.tabJoyMaaATM.Size = New System.Drawing.Size(1363, 693)
-        Me.tabJoyMaaATM.TabIndex = 8
-        Me.tabJoyMaaATM.Text = "Joy Maa ATM"
-        Me.tabJoyMaaATM.UseVisualStyleBackColor = True
+        Me.tabLowSL.Controls.Add(Me.pnlLowSLMainPanelHorizontalSplitter)
+        Me.tabLowSL.Location = New System.Drawing.Point(4, 25)
+        Me.tabLowSL.Name = "tabLowSL"
+        Me.tabLowSL.Size = New System.Drawing.Size(1363, 693)
+        Me.tabLowSL.TabIndex = 8
+        Me.tabLowSL.Text = "Low SL"
+        Me.tabLowSL.UseVisualStyleBackColor = True
         '
-        'pnlJoyMaaATMMainPanelHorizontalSplitter
+        'pnlLowSLMainPanelHorizontalSplitter
         '
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.ColumnCount = 1
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Controls.Add(Me.pnlJoyMaaATMTopHeaderVerticalSplitter, 0, 0)
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Controls.Add(Me.pnlJoyMaaATMBodyVerticalSplitter, 0, 1)
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Name = "pnlJoyMaaATMMainPanelHorizontalSplitter"
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.RowCount = 2
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.TabIndex = 6
+        Me.pnlLowSLMainPanelHorizontalSplitter.ColumnCount = 1
+        Me.pnlLowSLMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlLowSLMainPanelHorizontalSplitter.Controls.Add(Me.pnlJoyMaaATMTopHeaderVerticalSplitter, 0, 0)
+        Me.pnlLowSLMainPanelHorizontalSplitter.Controls.Add(Me.pnlJoyMaaATMBodyVerticalSplitter, 0, 1)
+        Me.pnlLowSLMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlLowSLMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
+        Me.pnlLowSLMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlLowSLMainPanelHorizontalSplitter.Name = "pnlLowSLMainPanelHorizontalSplitter"
+        Me.pnlLowSLMainPanelHorizontalSplitter.RowCount = 2
+        Me.pnlLowSLMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
+        Me.pnlLowSLMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
+        Me.pnlLowSLMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
+        Me.pnlLowSLMainPanelHorizontalSplitter.TabIndex = 6
         '
         'pnlJoyMaaATMTopHeaderVerticalSplitter
         '
@@ -797,11 +797,11 @@ Partial Class frmMainTabbed
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
-        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.btnJoyMaaATMStop, 0, 0)
-        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.btnJoyMaaATMStart, 0, 0)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.btnLowSLStop, 0, 0)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.btnLowSLStart, 0, 0)
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.Panel9, 14, 0)
-        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.btnJoyMaaATMSettings, 9, 0)
-        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.linklblJoyMaaATMTradableInstrument, 10, 0)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.btnLowSLSettings, 9, 0)
+        Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Controls.Add(Me.linklblLowSLTradableInstrument, 10, 0)
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
@@ -811,83 +811,83 @@ Partial Class frmMainTabbed
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.TabIndex = 0
         '
-        'btnJoyMaaATMStop
+        'btnLowSLStop
         '
-        Me.btnJoyMaaATMStop.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnJoyMaaATMStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnJoyMaaATMStop.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnJoyMaaATMStop.Name = "btnJoyMaaATMStop"
-        Me.btnJoyMaaATMStop.Size = New System.Drawing.Size(82, 32)
-        Me.btnJoyMaaATMStop.TabIndex = 10
-        Me.btnJoyMaaATMStop.Text = "Stop"
-        Me.btnJoyMaaATMStop.UseVisualStyleBackColor = True
+        Me.btnLowSLStop.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnLowSLStop.Location = New System.Drawing.Point(94, 4)
+        Me.btnLowSLStop.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnLowSLStop.Name = "btnLowSLStop"
+        Me.btnLowSLStop.Size = New System.Drawing.Size(82, 32)
+        Me.btnLowSLStop.TabIndex = 10
+        Me.btnLowSLStop.Text = "Stop"
+        Me.btnLowSLStop.UseVisualStyleBackColor = True
         '
-        'btnJoyMaaATMStart
+        'btnLowSLStart
         '
-        Me.btnJoyMaaATMStart.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnJoyMaaATMStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnJoyMaaATMStart.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnJoyMaaATMStart.Name = "btnJoyMaaATMStart"
-        Me.btnJoyMaaATMStart.Size = New System.Drawing.Size(82, 32)
-        Me.btnJoyMaaATMStart.TabIndex = 2
-        Me.btnJoyMaaATMStart.Text = "Start"
-        Me.btnJoyMaaATMStart.UseVisualStyleBackColor = True
+        Me.btnLowSLStart.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnLowSLStart.Location = New System.Drawing.Point(4, 4)
+        Me.btnLowSLStart.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnLowSLStart.Name = "btnLowSLStart"
+        Me.btnLowSLStart.Size = New System.Drawing.Size(82, 32)
+        Me.btnLowSLStart.TabIndex = 2
+        Me.btnLowSLStart.Text = "Start"
+        Me.btnLowSLStart.UseVisualStyleBackColor = True
         '
         'Panel9
         '
-        Me.Panel9.Controls.Add(Me.blbJoyMaaATMTickerStatus)
-        Me.Panel9.Controls.Add(Me.lblJoyMaaATMTickerStatus)
+        Me.Panel9.Controls.Add(Me.blbLowSLTickerStatus)
+        Me.Panel9.Controls.Add(Me.lblLowSLTickerStatus)
         Me.Panel9.Location = New System.Drawing.Point(1201, 4)
         Me.Panel9.Margin = New System.Windows.Forms.Padding(4)
         Me.Panel9.Name = "Panel9"
         Me.Panel9.Size = New System.Drawing.Size(147, 31)
         Me.Panel9.TabIndex = 9
         '
-        'blbJoyMaaATMTickerStatus
+        'blbLowSLTickerStatus
         '
-        Me.blbJoyMaaATMTickerStatus.Color = System.Drawing.Color.Pink
-        Me.blbJoyMaaATMTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
-        Me.blbJoyMaaATMTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbJoyMaaATMTickerStatus.Margin = New System.Windows.Forms.Padding(4)
-        Me.blbJoyMaaATMTickerStatus.Name = "blbJoyMaaATMTickerStatus"
-        Me.blbJoyMaaATMTickerStatus.On = True
-        Me.blbJoyMaaATMTickerStatus.Size = New System.Drawing.Size(47, 31)
-        Me.blbJoyMaaATMTickerStatus.TabIndex = 7
-        Me.blbJoyMaaATMTickerStatus.Text = "LedBulb1"
+        Me.blbLowSLTickerStatus.Color = System.Drawing.Color.Pink
+        Me.blbLowSLTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
+        Me.blbLowSLTickerStatus.Location = New System.Drawing.Point(100, 0)
+        Me.blbLowSLTickerStatus.Margin = New System.Windows.Forms.Padding(4)
+        Me.blbLowSLTickerStatus.Name = "blbLowSLTickerStatus"
+        Me.blbLowSLTickerStatus.On = True
+        Me.blbLowSLTickerStatus.Size = New System.Drawing.Size(47, 31)
+        Me.blbLowSLTickerStatus.TabIndex = 7
+        Me.blbLowSLTickerStatus.Text = "LedBulb1"
         '
-        'lblJoyMaaATMTickerStatus
+        'lblLowSLTickerStatus
         '
-        Me.lblJoyMaaATMTickerStatus.AutoSize = True
-        Me.lblJoyMaaATMTickerStatus.Location = New System.Drawing.Point(9, 9)
-        Me.lblJoyMaaATMTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblJoyMaaATMTickerStatus.Name = "lblJoyMaaATMTickerStatus"
-        Me.lblJoyMaaATMTickerStatus.Size = New System.Drawing.Size(91, 17)
-        Me.lblJoyMaaATMTickerStatus.TabIndex = 9
-        Me.lblJoyMaaATMTickerStatus.Text = "Ticker Status"
+        Me.lblLowSLTickerStatus.AutoSize = True
+        Me.lblLowSLTickerStatus.Location = New System.Drawing.Point(9, 9)
+        Me.lblLowSLTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblLowSLTickerStatus.Name = "lblLowSLTickerStatus"
+        Me.lblLowSLTickerStatus.Size = New System.Drawing.Size(91, 17)
+        Me.lblLowSLTickerStatus.TabIndex = 9
+        Me.lblLowSLTickerStatus.Text = "Ticker Status"
         '
-        'btnJoyMaaATMSettings
+        'btnLowSLSettings
         '
-        Me.btnJoyMaaATMSettings.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnJoyMaaATMSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnJoyMaaATMSettings.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnJoyMaaATMSettings.Name = "btnJoyMaaATMSettings"
-        Me.btnJoyMaaATMSettings.Size = New System.Drawing.Size(82, 32)
-        Me.btnJoyMaaATMSettings.TabIndex = 11
-        Me.btnJoyMaaATMSettings.Text = "Settings"
-        Me.btnJoyMaaATMSettings.UseVisualStyleBackColor = True
+        Me.btnLowSLSettings.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnLowSLSettings.Location = New System.Drawing.Point(814, 4)
+        Me.btnLowSLSettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnLowSLSettings.Name = "btnLowSLSettings"
+        Me.btnLowSLSettings.Size = New System.Drawing.Size(82, 32)
+        Me.btnLowSLSettings.TabIndex = 11
+        Me.btnLowSLSettings.Text = "Settings"
+        Me.btnLowSLSettings.UseVisualStyleBackColor = True
         '
-        'linklblJoyMaaATMTradableInstrument
+        'linklblLowSLTradableInstrument
         '
-        Me.linklblJoyMaaATMTradableInstrument.AutoSize = True
-        Me.linklblJoyMaaATMTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.linklblJoyMaaATMTradableInstrument.Enabled = False
-        Me.linklblJoyMaaATMTradableInstrument.Location = New System.Drawing.Point(903, 0)
-        Me.linklblJoyMaaATMTradableInstrument.Name = "linklblJoyMaaATMTradableInstrument"
-        Me.linklblJoyMaaATMTradableInstrument.Size = New System.Drawing.Size(220, 40)
-        Me.linklblJoyMaaATMTradableInstrument.TabIndex = 12
-        Me.linklblJoyMaaATMTradableInstrument.TabStop = True
-        Me.linklblJoyMaaATMTradableInstrument.Text = "Tradable Instruments: 0"
-        Me.linklblJoyMaaATMTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.linklblLowSLTradableInstrument.AutoSize = True
+        Me.linklblLowSLTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.linklblLowSLTradableInstrument.Enabled = False
+        Me.linklblLowSLTradableInstrument.Location = New System.Drawing.Point(903, 0)
+        Me.linklblLowSLTradableInstrument.Name = "linklblLowSLTradableInstrument"
+        Me.linklblLowSLTradableInstrument.Size = New System.Drawing.Size(220, 40)
+        Me.linklblLowSLTradableInstrument.TabIndex = 12
+        Me.linklblLowSLTradableInstrument.TabStop = True
+        Me.linklblLowSLTradableInstrument.Text = "Tradable Instruments: 0"
+        Me.linklblLowSLTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'pnlJoyMaaATMBodyVerticalSplitter
         '
@@ -922,8 +922,8 @@ Partial Class frmMainTabbed
         '
         Me.TableLayoutPanel7.ColumnCount = 1
         Me.TableLayoutPanel7.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.TableLayoutPanel7.Controls.Add(Me.lstJoyMaaATMLog, 0, 1)
-        Me.TableLayoutPanel7.Controls.Add(Me.sfdgvJoyMaaATMMainDashboard, 0, 0)
+        Me.TableLayoutPanel7.Controls.Add(Me.lstLowSLLog, 0, 1)
+        Me.TableLayoutPanel7.Controls.Add(Me.sfdgvLowSLMainDashboard, 0, 0)
         Me.TableLayoutPanel7.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TableLayoutPanel7.Location = New System.Drawing.Point(4, 4)
         Me.TableLayoutPanel7.Margin = New System.Windows.Forms.Padding(4)
@@ -934,35 +934,35 @@ Partial Class frmMainTabbed
         Me.TableLayoutPanel7.Size = New System.Drawing.Size(940, 629)
         Me.TableLayoutPanel7.TabIndex = 0
         '
-        'lstJoyMaaATMLog
+        'lstLowSLLog
         '
-        Me.lstJoyMaaATMLog.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.lstJoyMaaATMLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
-        Me.lstJoyMaaATMLog.FormattingEnabled = True
-        Me.lstJoyMaaATMLog.ItemHeight = 16
-        Me.lstJoyMaaATMLog.Location = New System.Drawing.Point(4, 444)
-        Me.lstJoyMaaATMLog.Margin = New System.Windows.Forms.Padding(4)
-        Me.lstJoyMaaATMLog.Name = "lstJoyMaaATMLog"
-        Me.lstJoyMaaATMLog.Size = New System.Drawing.Size(932, 181)
-        Me.lstJoyMaaATMLog.TabIndex = 9
+        Me.lstLowSLLog.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstLowSLLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
+        Me.lstLowSLLog.FormattingEnabled = True
+        Me.lstLowSLLog.ItemHeight = 16
+        Me.lstLowSLLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstLowSLLog.Margin = New System.Windows.Forms.Padding(4)
+        Me.lstLowSLLog.Name = "lstLowSLLog"
+        Me.lstLowSLLog.Size = New System.Drawing.Size(932, 181)
+        Me.lstLowSLLog.TabIndex = 9
         '
-        'sfdgvJoyMaaATMMainDashboard
+        'sfdgvLowSLMainDashboard
         '
-        Me.sfdgvJoyMaaATMMainDashboard.AccessibleName = "Table"
-        Me.sfdgvJoyMaaATMMainDashboard.AllowDraggingColumns = True
-        Me.sfdgvJoyMaaATMMainDashboard.AllowEditing = False
-        Me.sfdgvJoyMaaATMMainDashboard.AllowFiltering = True
-        Me.sfdgvJoyMaaATMMainDashboard.AllowResizingColumns = True
-        Me.sfdgvJoyMaaATMMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
-        Me.sfdgvJoyMaaATMMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
-        Me.sfdgvJoyMaaATMMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.sfdgvJoyMaaATMMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvJoyMaaATMMainDashboard.Margin = New System.Windows.Forms.Padding(4)
-        Me.sfdgvJoyMaaATMMainDashboard.Name = "sfdgvJoyMaaATMMainDashboard"
-        Me.sfdgvJoyMaaATMMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvJoyMaaATMMainDashboard.Size = New System.Drawing.Size(932, 432)
-        Me.sfdgvJoyMaaATMMainDashboard.TabIndex = 6
-        Me.sfdgvJoyMaaATMMainDashboard.Text = "SfDataGrid1"
+        Me.sfdgvLowSLMainDashboard.AccessibleName = "Table"
+        Me.sfdgvLowSLMainDashboard.AllowDraggingColumns = True
+        Me.sfdgvLowSLMainDashboard.AllowEditing = False
+        Me.sfdgvLowSLMainDashboard.AllowFiltering = True
+        Me.sfdgvLowSLMainDashboard.AllowResizingColumns = True
+        Me.sfdgvLowSLMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
+        Me.sfdgvLowSLMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
+        Me.sfdgvLowSLMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.sfdgvLowSLMainDashboard.Location = New System.Drawing.Point(4, 4)
+        Me.sfdgvLowSLMainDashboard.Margin = New System.Windows.Forms.Padding(4)
+        Me.sfdgvLowSLMainDashboard.Name = "sfdgvLowSLMainDashboard"
+        Me.sfdgvLowSLMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
+        Me.sfdgvLowSLMainDashboard.Size = New System.Drawing.Size(932, 432)
+        Me.sfdgvLowSLMainDashboard.TabIndex = 6
+        Me.sfdgvLowSLMainDashboard.Text = "SfDataGrid1"
         '
         'tabPetDGandhi
         '
@@ -2480,9 +2480,9 @@ Partial Class frmMainTabbed
         '
         Me.tmrVolumeSpikeStatus.Enabled = True
         '
-        'tmrJoyMaaATMTickerStatus
+        'tmrLowSLTickerStatus
         '
-        Me.tmrJoyMaaATMTickerStatus.Enabled = True
+        Me.tmrLowSLTickerStatus.Enabled = True
         '
         'tmrTwoThirdTickerStatus
         '
@@ -2524,8 +2524,8 @@ Partial Class frmMainTabbed
         CType(Me.PictureBox9, System.ComponentModel.ISupportInitialize).EndInit()
         Me.pnlTwoThirdBodyHorizontalSplitter.ResumeLayout(False)
         CType(Me.sfdgvTwoThirdMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabJoyMaaATM.ResumeLayout(False)
-        Me.pnlJoyMaaATMMainPanelHorizontalSplitter.ResumeLayout(False)
+        Me.tabLowSL.ResumeLayout(False)
+        Me.pnlLowSLMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ResumeLayout(False)
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.PerformLayout()
         Me.Panel9.ResumeLayout(False)
@@ -2533,7 +2533,7 @@ Partial Class frmMainTabbed
         Me.pnlJoyMaaATMBodyVerticalSplitter.ResumeLayout(False)
         CType(Me.PictureBox8, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TableLayoutPanel7.ResumeLayout(False)
-        CType(Me.sfdgvJoyMaaATMMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.sfdgvLowSLMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabPetDGandhi.ResumeLayout(False)
         Me.pnlPetDGandhiMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlPetDGandhiTopHeaderVerticalSplitter.ResumeLayout(False)
@@ -2737,21 +2737,21 @@ Partial Class frmMainTabbed
     Friend WithEvents lstVolumeSpikeLog As ListBox
     Friend WithEvents sfdgvVolumeSpikeMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
     Friend WithEvents tmrVolumeSpikeStatus As Timer
-    Friend WithEvents tabJoyMaaATM As TabPage
-    Friend WithEvents tmrJoyMaaATMTickerStatus As Timer
-    Friend WithEvents pnlJoyMaaATMMainPanelHorizontalSplitter As TableLayoutPanel
+    Friend WithEvents tabLowSL As TabPage
+    Friend WithEvents tmrLowSLTickerStatus As Timer
+    Friend WithEvents pnlLowSLMainPanelHorizontalSplitter As TableLayoutPanel
     Friend WithEvents pnlJoyMaaATMTopHeaderVerticalSplitter As TableLayoutPanel
-    Friend WithEvents btnJoyMaaATMStop As Button
-    Friend WithEvents btnJoyMaaATMStart As Button
+    Friend WithEvents btnLowSLStop As Button
+    Friend WithEvents btnLowSLStart As Button
     Friend WithEvents Panel9 As Panel
-    Friend WithEvents blbJoyMaaATMTickerStatus As Bulb.LedBulb
-    Friend WithEvents lblJoyMaaATMTickerStatus As Label
-    Friend WithEvents btnJoyMaaATMSettings As Button
-    Friend WithEvents linklblJoyMaaATMTradableInstrument As LinkLabel
+    Friend WithEvents blbLowSLTickerStatus As Bulb.LedBulb
+    Friend WithEvents lblLowSLTickerStatus As Label
+    Friend WithEvents btnLowSLSettings As Button
+    Friend WithEvents linklblLowSLTradableInstrument As LinkLabel
     Friend WithEvents pnlJoyMaaATMBodyVerticalSplitter As TableLayoutPanel
     Friend WithEvents TableLayoutPanel7 As TableLayoutPanel
-    Friend WithEvents lstJoyMaaATMLog As ListBox
-    Friend WithEvents sfdgvJoyMaaATMMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
+    Friend WithEvents lstLowSLLog As ListBox
+    Friend WithEvents sfdgvLowSLMainDashboard As Syncfusion.WinForms.DataGrid.SfDataGrid
     Friend WithEvents PictureBox7 As PictureBox
     Friend WithEvents PictureBox6 As PictureBox
     Friend WithEvents PictureBox5 As PictureBox

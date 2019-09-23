@@ -182,22 +182,22 @@
     <Compile Include="frmUserDetails.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="JoyMaaATM\frmJoyMaaATMSettings.Designer.vb">
-      <DependentUpon>frmJoyMaaATMSettings.vb</DependentUpon>
+    <Compile Include="JoyMaaATM\frmLowSLSettings.Designer.vb">
+      <DependentUpon>frmLowSLSettings.vb</DependentUpon>
     </Compile>
-    <Compile Include="JoyMaaATM\frmJoyMaaATMSettings.vb">
+    <Compile Include="JoyMaaATM\frmLowSLSettings.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="JoyMaaATM\frmJoyMaaATMTradableInstrumentList.Designer.vb">
-      <DependentUpon>frmJoyMaaATMTradableInstrumentList.vb</DependentUpon>
+    <Compile Include="JoyMaaATM\frmLowSLTradableInstrumentList.Designer.vb">
+      <DependentUpon>frmLowSLTradableInstrumentList.vb</DependentUpon>
     </Compile>
-    <Compile Include="JoyMaaATM\frmJoyMaaATMTradableInstrumentList.vb">
+    <Compile Include="JoyMaaATM\frmLowSLTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="JoyMaaATM\JoyMaaATMFillInstrumentDetails.vb" />
-    <Compile Include="JoyMaaATM\JoyMaaATMStrategy.vb" />
-    <Compile Include="JoyMaaATM\JoyMaaATMStrategyInstrument.vb" />
-    <Compile Include="JoyMaaATM\JoyMaaATMUserInputs.vb" />
+    <Compile Include="JoyMaaATM\LowSLFillInstrumentDetails.vb" />
+    <Compile Include="JoyMaaATM\LowSLStrategy.vb" />
+    <Compile Include="JoyMaaATM\LowSLStrategyInstrument.vb" />
+    <Compile Include="JoyMaaATM\LowSLUserInputs.vb" />
     <Compile Include="MomentumReversal\frmMomentumReversalSettings.Designer.vb">
       <DependentUpon>frmMomentumReversalSettings.vb</DependentUpon>
     </Compile>
@@ -337,11 +337,11 @@
     <EmbeddedResource Include="frmUserDetails.resx">
       <DependentUpon>frmUserDetails.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="JoyMaaATM\frmJoyMaaATMSettings.resx">
-      <DependentUpon>frmJoyMaaATMSettings.vb</DependentUpon>
+    <EmbeddedResource Include="JoyMaaATM\frmLowSLSettings.resx">
+      <DependentUpon>frmLowSLSettings.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="JoyMaaATM\frmJoyMaaATMTradableInstrumentList.resx">
-      <DependentUpon>frmJoyMaaATMTradableInstrumentList.vb</DependentUpon>
+    <EmbeddedResource Include="JoyMaaATM\frmLowSLTradableInstrumentList.resx">
+      <DependentUpon>frmLowSLTradableInstrumentList.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MomentumReversal\frmMomentumReversalSettings.resx">
       <DependentUpon>frmMomentumReversalSettings.vb</DependentUpon>

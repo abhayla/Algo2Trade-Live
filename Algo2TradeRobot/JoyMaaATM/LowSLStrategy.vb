@@ -5,7 +5,7 @@ Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Strategies
 Imports NLog
 
-Public Class JoyMaaATMStrategy
+Public Class LowSLStrategy
     Inherits Strategy
 
 #Region "Logging and Status Progress"
@@ -14,7 +14,7 @@ Public Class JoyMaaATMStrategy
 
     Public Sub New(ByVal associatedParentController As APIStrategyController,
                    ByVal strategyIdentifier As String,
-                   ByVal userSettings As JoyMaaATMUserInputs,
+                   ByVal userSettings As LowSLUserInputs,
                    ByVal maxNumberOfDaysForHistoricalFetch As Integer,
                    ByVal canceller As CancellationTokenSource)
         MyBase.New(associatedParentController, strategyIdentifier, True, userSettings, maxNumberOfDaysForHistoricalFetch, canceller)
@@ -37,9 +37,9 @@ Public Class JoyMaaATMStrategy
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
-            Dim userInputs As JoyMaaATMUserInputs = CType(Me.UserSettings, JoyMaaATMUserInputs)
+            Dim userInputs As LowSLUserInputs = CType(Me.UserSettings, LowSLUserInputs)
             If userInputs.AutoSelectStock Then
-                Using fillInstrumentDetails As New JoyMaaATMFillInstrumentDetails(_cts, Me)
+                Using fillInstrumentDetails As New LowSLFillInstrumentDetails(_cts, Me)
                     Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
                 End Using
                 logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
@@ -64,7 +64,7 @@ Public Class JoyMaaATMStrategy
         End If
         If retTradableInstrumentsAsPerStrategy IsNot Nothing AndAlso retTradableInstrumentsAsPerStrategy.Count > 0 Then
             'Now create the strategy tradable instruments
-            Dim retTradableStrategyInstruments As List(Of JoyMaaATMStrategyInstrument) = Nothing
+            Dim retTradableStrategyInstruments As List(Of LowSLStrategyInstrument) = Nothing
             logger.Debug("Creating strategy tradable instruments, _tradableInstruments.count:{0}", retTradableInstrumentsAsPerStrategy.Count)
             'Remove the old handlers from the previous strategyinstruments collection
             If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
@@ -80,8 +80,8 @@ Public Class JoyMaaATMStrategy
             'Now create the fresh handlers
             For Each runningTradableInstrument In retTradableInstrumentsAsPerStrategy
                 _cts.Token.ThrowIfCancellationRequested()
-                If retTradableStrategyInstruments Is Nothing Then retTradableStrategyInstruments = New List(Of JoyMaaATMStrategyInstrument)
-                Dim runningTradableStrategyInstrument As New JoyMaaATMStrategyInstrument(runningTradableInstrument, Me, False, _cts)
+                If retTradableStrategyInstruments Is Nothing Then retTradableStrategyInstruments = New List(Of LowSLStrategyInstrument)
+                Dim runningTradableStrategyInstrument As New LowSLStrategyInstrument(runningTradableInstrument, Me, False, _cts)
                 AddHandler runningTradableStrategyInstrument.HeartbeatEx, AddressOf OnHeartbeatEx
                 AddHandler runningTradableStrategyInstrument.WaitingForEx, AddressOf OnWaitingForEx
                 AddHandler runningTradableStrategyInstrument.DocumentRetryStatusEx, AddressOf OnDocumentRetryStatusEx
@@ -108,7 +108,7 @@ Public Class JoyMaaATMStrategy
         Try
             _cts.Token.ThrowIfCancellationRequested()
             Dim tasks As New List(Of Task)()
-            For Each tradableStrategyInstrument As JoyMaaATMStrategyInstrument In TradableStrategyInstruments
+            For Each tradableStrategyInstrument As LowSLStrategyInstrument In TradableStrategyInstruments
                 _cts.Token.ThrowIfCancellationRequested()
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
@@ -129,7 +129,7 @@ Public Class JoyMaaATMStrategy
 
     Protected Overrides Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)
         Dim ret As Tuple(Of Boolean, String) = Nothing
-        Dim userSettings As JoyMaaATMUserInputs = Me.UserSettings
+        Dim userSettings As LowSLUserInputs = Me.UserSettings
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
@@ -164,7 +164,7 @@ Public Class JoyMaaATMStrategy
                         message = message.Replace("&", "_")
                     End If
 
-                    Dim userInputs As JoyMaaATMUserInputs = Me.UserSettings
+                    Dim userInputs As LowSLUserInputs = Me.UserSettings
                     If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
                         userInputs.TelegramChatID IsNot Nothing AndAlso Not userInputs.TelegramPLChatID.Trim = "" Then
                         Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramPLChatID, _cts)
