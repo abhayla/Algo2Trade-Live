@@ -154,6 +154,35 @@ Public Class LowSLStrategyInstrument
         Throw New NotImplementedException()
     End Function
 
+    Public Overrides Function HandleTickTriggerToUIETCAsync() As Task
+        Return MyBase.HandleTickTriggerToUIETCAsync()
+        TickTrigger()
+    End Function
+
+    Public Async Function TickTrigger() As Task
+        Dim userSettings As LowSLUserInputs = Me.ParentStrategy.UserSettings
+        If Me.ParentStrategy.GetTotalPLAfterBrokerage < Math.Abs(userSettings.MaxLossPerDay) * -1 Then
+            Await ForceExitAllTradesAsync("Max Loss reached").ConfigureAwait(False)
+            Me.StrategyExitAllTriggerd = True
+        End If
+        If Me.ParentStrategy.GetTotalPLAfterBrokerage > userSettings.MaxProfitPerDay Then
+            Await ForceExitAllTradesAsync("Max Profit reached").ConfigureAwait(False)
+            Me.StrategyExitAllTriggerd = True
+        End If
+        If Me.GetOverallPLAfterBrokerage < Math.Abs(userSettings.StockMaxLossPerDay) * -1 Then
+            Await ForceExitAllTradesAsync("Stock Max Loss reached").ConfigureAwait(False)
+        End If
+        If Me.GetOverallPLAfterBrokerage > UserSettings.StockMaxProfitPerDay Then
+            Await ForceExitAllTradesAsync("Stock Max Profit reached").ConfigureAwait(False)
+        End If
+        'Modify Order block start
+        Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
+        If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
+            Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
+        End If
+        'Modify Order block end
+    End Function
+
     Protected Overrides Async Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)))
         Dim ret As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Nothing
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
@@ -335,8 +364,61 @@ Public Class LowSLStrategyInstrument
         Throw New NotImplementedException()
     End Function
 
-    Protected Overrides Function IsTriggerReceivedForModifyStoplossOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
-        Throw New NotImplementedException()
+    Protected Overrides Async Function IsTriggerReceivedForModifyStoplossOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
+        Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Nothing
+        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+        Dim userSettings As LowSLUserInputs = Me.ParentStrategy.UserSettings
+        Dim currentTick As ITick = Me.TradableInstrument.LastTick
+        If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+            For Each runningOrderID In OrderDetails.Keys
+                Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
+                If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
+                    Dim orderPL As Decimal = GetTotalPLOfAnOrderAfterBrokerage(runningOrderID)
+                    Dim stockPrice As Decimal = bussinessOrder.ParentOrder.AveragePrice
+                    Dim expectedLossFromOneOrder As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, stockPrice, stockPrice - Me.SLPoint, Me.Quantity)
+                    Dim expectedTargetPL As Decimal = Math.Abs(expectedLossFromOneOrder) * (userSettings.TargetMultiplier + 1)
+                    Dim requiredPL As Decimal = Math.Abs(expectedLossFromOneOrder) * userSettings.TargetMultiplier
+                    Dim target As Decimal = CalculateTargetFromPL(stockPrice, bussinessOrder.ParentOrder.Quantity, requiredPL)
+                    Dim targetPoint As Decimal = target - stockPrice
+
+                    For Each slOrder In bussinessOrder.SLOrder
+                        If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
+                            Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
+                            Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
+                            Dim triggerPrice As Decimal = Decimal.MinValue
+                            If orderPL >= expectedTargetPL Then
+                                If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                    triggerPrice = bussinessOrder.ParentOrder.AveragePrice + targetPoint
+                                ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                    triggerPrice = bussinessOrder.ParentOrder.AveragePrice - targetPoint
+                                End If
+                            End If
+                            If triggerPrice <> Decimal.MinValue AndAlso slOrder.TriggerPrice <> triggerPrice Then
+                                'Below portion have to be done in every modify stoploss order trigger
+                                Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(slOrder.Tag)
+                                If currentSignalActivities IsNot Nothing Then
+                                    If currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
+                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                        If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
+                                            Continue For
+                                        End If
+                                    End If
+                                End If
+                                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, "Target Protection"))
+                            End If
+                        End If
+                    Next
+                End If
+            Next
+        End If
+        If forcePrint AndAlso ret IsNot Nothing AndAlso ret.Count > 0 Then
+            For Each runningOrder In ret
+                logger.Debug("***** Modify Stoploss ***** Order ID:{0}, Reason:{1}, {2}", runningOrder.Item2.OrderIdentifier, runningOrder.Item4, Me.TradableInstrument.TradingSymbol)
+            Next
+        End If
+        Return ret
     End Function
 
     Protected Overrides Function IsTriggerReceivedForModifyTargetOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
@@ -454,7 +536,8 @@ Public Class LowSLStrategyInstrument
                 Dim bussinessOrder As IBusinessOrder = OrderDetails(parentOrder)
                 If bussinessOrder.AllOrder IsNot Nothing AndAlso bussinessOrder.AllOrder.Count > 0 Then
                     For Each order In bussinessOrder.AllOrder
-                        If order.LogicalOrderType = IOrder.LogicalTypeOfOrder.Target AndAlso order.Status = IOrder.TypeOfStatus.Complete Then
+                        'If order.LogicalOrderType = IOrder.LogicalTypeOfOrder.Target AndAlso order.Status = IOrder.TypeOfStatus.Complete Then
+                        If order.Status = IOrder.TypeOfStatus.Complete Then
                             Dim target As Decimal = 0
                             If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
                                 target = order.AveragePrice - bussinessOrder.ParentOrder.AveragePrice
@@ -481,8 +564,10 @@ Public Class LowSLStrategyInstrument
             Dim userSettings As LowSLUserInputs = Me.ParentStrategy.UserSettings
             If Not _entryChanged Then
                 If IsDipInATR(candle) Then
-                    _potentialHighEntryPrice = candle.HighPrice.Value + CalculateBuffer(candle.HighPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                    _potentialLowEntryPrice = candle.LowPrice.Value - CalculateBuffer(candle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    '_potentialHighEntryPrice = candle.HighPrice.Value + CalculateBuffer(candle.HighPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    _potentialHighEntryPrice = candle.HighPrice.Value
+                    '_potentialLowEntryPrice = candle.LowPrice.Value - CalculateBuffer(candle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    _potentialLowEntryPrice = candle.LowPrice.Value
                     _signalCandle = candle
 
                     Dim atr As Decimal = GetSignalCandleATR()
@@ -567,14 +652,16 @@ Public Class LowSLStrategyInstrument
         If GetTotalExecutedOrders() <> 0 Then
             Dim totalExpectedLoss As Decimal = expectedLossFromOneOrder * GetTotalExecutedOrders()
             Dim totalLoss As Decimal = GetOverallPLAfterBrokerage()
-            Dim extraLoss As Decimal = totalLoss - totalExpectedLoss
-            Dim targetForExtraLossMakeup As Decimal = CalculateTargetFromPL(stockPrice, Me.Quantity, Math.Abs(extraLoss))
-            Dim targetPointForExtraLossMakeup As Decimal = targetForExtraLossMakeup - stockPrice
-            If _targetPoint + targetPointForExtraLossMakeup < (_targetPoint / 4) * 5 Then
-                ret = targetPointForExtraLossMakeup
+            Dim extraLoss As Decimal = Math.Abs(totalLoss - totalExpectedLoss)
+            If extraLoss <> 0 Then
+                Dim targetForExtraLossMakeup As Decimal = CalculateTargetFromPL(stockPrice, Me.Quantity, Math.Abs(extraLoss))
+                Dim targetPointForExtraLossMakeup As Decimal = targetForExtraLossMakeup - stockPrice
+                If _targetPoint + targetPointForExtraLossMakeup < (_targetPoint / 4) * 5 Then
+                    ret = targetPointForExtraLossMakeup
+                End If
             End If
         End If
-        Return ret
+            Return ret
     End Function
 
 #Region "IDisposable Support"

@@ -136,16 +136,20 @@ Public Class LowSLStrategy
         End If
     End Function
 
+    Private _startExitChecking As Boolean = False
     Protected Overrides Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)
         Dim ret As Tuple(Of Boolean, String) = Nothing
         Dim userSettings As LowSLUserInputs = Me.UserSettings
+        If Not userSettings.AutoSelectStock Then _startExitChecking = True
         Dim currentTime As Date = Now
-        If currentTime >= Me.UserSettings.EODExitTime Then
-            ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf Me.GetTotalPL <= Math.Abs(userSettings.MaxLossPerDay) * -1 Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
-        ElseIf Me.GetTotalPL >= Math.Abs(userSettings.MaxProfitPerDay) Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
+        If _startExitChecking Then
+            If currentTime >= Me.UserSettings.EODExitTime Then
+                ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
+            ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(userSettings.MaxLossPerDay) * -1 Then
+                ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
+            ElseIf Me.GetTotalPLAfterBrokerage >= Math.Abs(userSettings.MaxProfitPerDay) Then
+                ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
+            End If
         End If
         Return ret
     End Function
@@ -174,6 +178,16 @@ Public Class LowSLStrategy
                                                                                                            Return CType(x, LowSLStrategyInstrument).VolumeChangePercentage
                                                                                                        End Function)
                             If CType(runningCashInstrument, LowSLStrategyInstrument).VolumeChangePercentage > CType(Me.UserSettings, LowSLUserInputs).MinVolumeSpikePercentage Then
+                                If runningCashInstrument.TradableInstrument.TradingSymbol = "ZEEL" OrElse
+                                    runningCashInstrument.TradableInstrument.TradingSymbol = "SUNPHARMA" OrElse
+                                    runningCashInstrument.TradableInstrument.TradingSymbol = "ESCORTS" OrElse
+                                    runningCashInstrument.TradableInstrument.TradingSymbol = "JINDALSTEL" OrElse
+                                    runningCashInstrument.TradableInstrument.TradingSymbol = "SUNTV" OrElse
+                                    runningCashInstrument.TradableInstrument.TradingSymbol = "CANBK" OrElse
+                                    runningCashInstrument.TradableInstrument.TradingSymbol = "PFC" OrElse
+                                    runningCashInstrument.TradableInstrument.TradingSymbol = "UPL" Then
+                                    Continue For
+                                End If
                                 Dim futureIntruments As IEnumerable(Of StrategyInstrument) =
                                 Me.TradableStrategyInstruments.Where(Function(x)
                                                                          Return x.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
@@ -219,6 +233,7 @@ Public Class LowSLStrategy
                                 End If
                                 If counter = CType(Me.UserSettings, LowSLUserInputs).NumberOfStock Then
                                     WriteCSV()
+                                    _startExitChecking = True
                                     Exit For
                                 End If
                             End If
