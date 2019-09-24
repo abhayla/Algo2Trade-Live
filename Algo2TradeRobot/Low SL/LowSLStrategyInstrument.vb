@@ -212,7 +212,7 @@ Public Class LowSLStrategyInstrument
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
                 Else
-                    logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Current Candle Time:{5}, Current Candle Range:{6}, Current Candle Source:{7}, {8}, Is Active Instrument:{9}, Number Of Trade:{10}, OverAll PL:{11}, Stock PL:{12}, Is Target Reached:{13}, Current Time:{14}, Current LTP:{15}, TradingSymbol:{16}",
+                    logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Current Candle Time:{5}, Current Candle Range:{6}, Current Candle Source:{7}, {8}, {9}, Is Active Instrument:{10}, Number Of Trade:{11}, OverAll PL:{12}, Stock PL:{13}, Is Target Reached:{14}, Current Time:{15}, Current LTP:{16}, TradingSymbol:{17}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             runningCandlePayload.SnapshotDateTime.ToString,
@@ -221,6 +221,7 @@ Public Class LowSLStrategyInstrument
                             runningCandlePayload.PreviousPayload.SnapshotDateTime.ToShortTimeString,
                             runningCandlePayload.PreviousPayload.CandleRange,
                             runningCandlePayload.PreviousPayload.PayloadGeneratedBy.ToString,
+                            atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.PreviousPayload.SnapshotDateTime).ToString,
                             atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
                             IsActiveInstrument(),
                             Me.GetTotalExecutedOrders(),
@@ -252,7 +253,7 @@ Public Class LowSLStrategyInstrument
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                     Dim stoplossPrice As Decimal = signal.Item3
                     Dim stoploss As Decimal = ConvertFloorCeling(triggerPrice - stoplossPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    Dim target As Decimal = ConvertFloorCeling(_targetPoint, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                    Dim target As Decimal = ConvertFloorCeling(_targetPoint + GetExtraAdjustableTargetPoint(), Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
 
                     If currentTick.LastPrice < triggerPrice Then
                         parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
@@ -268,7 +269,7 @@ Public Class LowSLStrategyInstrument
                     Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                     Dim stoplossPrice As Decimal = signal.Item3
                     Dim stoploss As Decimal = ConvertFloorCeling(stoplossPrice - triggerPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    Dim target As Decimal = ConvertFloorCeling(_targetPoint, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                    Dim target As Decimal = ConvertFloorCeling(_targetPoint + GetExtraAdjustableTargetPoint(), Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
 
                     If currentTick.LastPrice > triggerPrice Then
                         parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
@@ -278,7 +279,6 @@ Public Class LowSLStrategyInstrument
                                      .StoplossValue = stoploss,
                                      .SquareOffValue = target,
                                      .Quantity = Me.Quantity}
-
                     End If
                 End If
             End If
@@ -426,14 +426,13 @@ Public Class LowSLStrategyInstrument
                     For Each runningPayload In XMinutePayloadConsumer.ConsumerPayloads.Keys.OrderByDescending(Function(x)
                                                                                                                   Return x
                                                                                                               End Function)
-                        Dim firstCandle As Date = New Date(runningPayload.Year, runningPayload.Month, runningPayload.Day, 9, 15, 0)
-                        Dim secondCandle As Date = New Date(runningPayload.Year, runningPayload.Month, runningPayload.Day, 9, 16, 0)
+                        Dim lastCandle As Date = New Date(runningPayload.Year, runningPayload.Month, runningPayload.Day, userSettings.TradeStartTime.Hour, userSettings.TradeStartTime.Minute - 1, 0)
                         If runningPayload.Date = Now.Date Then
-                            If runningPayload = firstCandle OrElse runningPayload = secondCandle Then
+                            If runningPayload <= lastCandle Then
                                 currentDayVolumeSum += CType(XMinutePayloadConsumer.ConsumerPayloads(runningPayload), OHLCPayload).Volume.Value
                             End If
                         ElseIf runningPayload.Date < Now.Date Then
-                            If runningPayload = firstCandle OrElse runningPayload = secondCandle Then
+                            If runningPayload <= lastCandle Then
                                 previousDaysVolumeSum += CType(XMinutePayloadConsumer.ConsumerPayloads(runningPayload), OHLCPayload).Volume.Value
                                 counter += 1
                                 If counter = 10 Then Exit For
@@ -556,6 +555,23 @@ Public Class LowSLStrategyInstrument
             If atrConsumer IsNot Nothing AndAlso atrConsumer.ConsumerPayloads IsNot Nothing AndAlso atrConsumer.ConsumerPayloads.Count > 0 AndAlso
                 atrConsumer.ConsumerPayloads.ContainsKey(candle.SnapshotDateTime) Then
                 ret = CType(atrConsumer.ConsumerPayloads(candle.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Function GetExtraAdjustableTargetPoint() As Decimal
+        Dim ret As Decimal = 0
+        Dim stockPrice As Decimal = Me.TradableInstrument.LastTick.LastPrice
+        Dim expectedLossFromOneOrder As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, stockPrice, stockPrice - Me.SLPoint, Me.Quantity)
+        If GetTotalExecutedOrders() <> 0 Then
+            Dim totalExpectedLoss As Decimal = expectedLossFromOneOrder * GetTotalExecutedOrders()
+            Dim totalLoss As Decimal = GetOverallPLAfterBrokerage()
+            Dim extraLoss As Decimal = totalLoss - totalExpectedLoss
+            Dim targetForExtraLossMakeup As Decimal = CalculateTargetFromPL(stockPrice, Me.Quantity, Math.Abs(extraLoss))
+            Dim targetPointForExtraLossMakeup As Decimal = targetForExtraLossMakeup - stockPrice
+            If _targetPoint + targetPointForExtraLossMakeup < (_targetPoint / 4) * 5 Then
+                ret = targetPointForExtraLossMakeup
             End If
         End If
         Return ret

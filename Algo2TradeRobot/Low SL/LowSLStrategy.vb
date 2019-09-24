@@ -142,7 +142,7 @@ Public Class LowSLStrategy
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf Me.GetTotalPL <= Math.Abs(userSettings.MaxLossPerDay) Then
+        ElseIf Me.GetTotalPL <= Math.Abs(userSettings.MaxLossPerDay) * -1 Then
             ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
         ElseIf Me.GetTotalPL >= Math.Abs(userSettings.MaxProfitPerDay) Then
             ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
