@@ -564,10 +564,8 @@ Public Class LowSLStrategyInstrument
             Dim userSettings As LowSLUserInputs = Me.ParentStrategy.UserSettings
             If Not _entryChanged Then
                 If IsDipInATR(candle) Then
-                    '_potentialHighEntryPrice = candle.HighPrice.Value + CalculateBuffer(candle.HighPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                    _potentialHighEntryPrice = candle.HighPrice.Value
-                    '_potentialLowEntryPrice = candle.LowPrice.Value - CalculateBuffer(candle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                    _potentialLowEntryPrice = candle.LowPrice.Value
+                    _potentialHighEntryPrice = candle.HighPrice.Value + CalculateBuffer(candle.HighPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    _potentialLowEntryPrice = candle.LowPrice.Value - CalculateBuffer(candle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     _signalCandle = candle
 
                     Dim atr As Decimal = GetSignalCandleATR()
