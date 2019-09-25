@@ -588,9 +588,9 @@ Public Class LowSLStrategyInstrument
                 If _entryChanged Then
                     Dim middlePoint As Decimal = (_potentialHighEntryPrice + _potentialLowEntryPrice) / 2
                     Dim range As Decimal = _potentialHighEntryPrice - middlePoint
-                    If currentTick.LastPrice >= middlePoint + range * 60 / 100 Then
+                    If currentTick.LastPrice >= middlePoint + range * 40 / 100 Then
                         ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialHighEntryPrice, _potentialHighEntryPrice - Me.SLPoint, IOrder.TypeOfTransaction.Buy)
-                    ElseIf currentTick.LastPrice <= middlePoint - range * 60 / 100 Then
+                    ElseIf currentTick.LastPrice <= middlePoint - range * 40 / 100 Then
                         ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialLowEntryPrice, _potentialLowEntryPrice + Me.SLPoint, IOrder.TypeOfTransaction.Sell)
                     End If
                 Else
