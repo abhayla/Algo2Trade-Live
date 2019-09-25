@@ -145,10 +145,10 @@ Public Class LowSLStrategy
         If _startExitChecking Then
             If currentTime >= Me.UserSettings.EODExitTime Then
                 ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-            ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(userSettings.MaxLossPerDay) * -1 Then
-                ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
-            ElseIf Me.GetTotalPLAfterBrokerage >= Math.Abs(userSettings.MaxProfitPerDay) Then
-                ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
+                'ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(userSettings.MaxLossPerDay) * -1 Then
+                '    ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
+                'ElseIf Me.GetTotalPLAfterBrokerage >= Math.Abs(userSettings.MaxProfitPerDay) Then
+                '    ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
             End If
         End If
         Return ret
@@ -178,16 +178,6 @@ Public Class LowSLStrategy
                                                                                                            Return CType(x, LowSLStrategyInstrument).VolumeChangePercentage
                                                                                                        End Function)
                             If CType(runningCashInstrument, LowSLStrategyInstrument).VolumeChangePercentage > CType(Me.UserSettings, LowSLUserInputs).MinVolumeSpikePercentage Then
-                                If runningCashInstrument.TradableInstrument.TradingSymbol = "ZEEL" OrElse
-                                    runningCashInstrument.TradableInstrument.TradingSymbol = "SUNPHARMA" OrElse
-                                    runningCashInstrument.TradableInstrument.TradingSymbol = "ESCORTS" OrElse
-                                    runningCashInstrument.TradableInstrument.TradingSymbol = "JINDALSTEL" OrElse
-                                    runningCashInstrument.TradableInstrument.TradingSymbol = "SUNTV" OrElse
-                                    runningCashInstrument.TradableInstrument.TradingSymbol = "CANBK" OrElse
-                                    runningCashInstrument.TradableInstrument.TradingSymbol = "PFC" OrElse
-                                    runningCashInstrument.TradableInstrument.TradingSymbol = "UPL" Then
-                                    Continue For
-                                End If
                                 Dim futureIntruments As IEnumerable(Of StrategyInstrument) =
                                 Me.TradableStrategyInstruments.Where(Function(x)
                                                                          Return x.TradableInstrument.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso

@@ -5,8 +5,6 @@ Imports Algo2TradeCore.Adapter
 Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Strategies
 Imports Algo2TradeCore.Entities.Indicators
-Imports Utilities.Network
-Imports System.Net.Http
 
 Public Class LowSLStrategyInstrument
     Inherits StrategyInstrument
@@ -29,7 +27,12 @@ Public Class LowSLStrategyInstrument
     Private _signalCandle As OHLCPayload = Nothing
     Private _entryChanged As Boolean = False
     Private _targetPoint As Decimal = Decimal.MinValue
-    Private _firstTradeQuantity As Integer = Integer.MinValue
+
+    Private _mpLock As Integer
+    Private _mlLock As Integer
+    Private _smpLock As Integer
+    Private _smlLock As Integer
+    Private _mdfyLock As Integer
 
     Private ReadOnly _dummyATRConsumer As ATRConsumer
     Public Sub New(ByVal associatedInstrument As IInstrument,
@@ -105,17 +108,6 @@ Public Class LowSLStrategyInstrument
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
                 If Me.EligibleToTakeTrade Then
-                    'Force Cancel block strat
-                    If IsAnyTradeTargetReached() Then
-                        Await ForceExitAllTradesAsync("Target reached").ConfigureAwait(False)
-                    End If
-                    If Me.GetOverallPLAfterBrokerage < Math.Abs(userSettings.StockMaxLossPerDay) * -1 Then
-                        Await ForceExitAllTradesAsync("Stock Max Loss reached").ConfigureAwait(False)
-                    End If
-                    If Me.GetOverallPLAfterBrokerage > userSettings.StockMaxProfitPerDay Then
-                        Await ForceExitAllTradesAsync("Stock Max Profit reached").ConfigureAwait(False)
-                    End If
-                    'Force Cancel block end
                     _cts.Token.ThrowIfCancellationRequested()
                     'Place Order block start
                     Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
@@ -155,30 +147,90 @@ Public Class LowSLStrategyInstrument
     End Function
 
     Public Overrides Function HandleTickTriggerToUIETCAsync() As Task
-        Return MyBase.HandleTickTriggerToUIETCAsync()
         TickTrigger()
+        Return MyBase.HandleTickTriggerToUIETCAsync()
     End Function
 
     Public Async Function TickTrigger() As Task
         Dim userSettings As LowSLUserInputs = Me.ParentStrategy.UserSettings
         If Me.ParentStrategy.GetTotalPLAfterBrokerage < Math.Abs(userSettings.MaxLossPerDay) * -1 Then
-            Await ForceExitAllTradesAsync("Max Loss reached").ConfigureAwait(False)
-            Me.StrategyExitAllTriggerd = True
+            Try
+                While 1 = Interlocked.Exchange(_mlLock, 1)
+                    Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                    logger.Warn("Unable to take action for lock. Max loss reached.")
+                End While
+                Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+
+                Await ForceExitAllTradesAsync("Max Loss reached").ConfigureAwait(False)
+                Me.StrategyExitAllTriggerd = True
+            Catch ex As Exception
+                logger.Error("TickTrigger:{0}, error:{1}", Me.ToString, ex.ToString)
+            Finally
+                Interlocked.Exchange(_mlLock, 0)
+            End Try
         End If
         If Me.ParentStrategy.GetTotalPLAfterBrokerage > userSettings.MaxProfitPerDay Then
-            Await ForceExitAllTradesAsync("Max Profit reached").ConfigureAwait(False)
-            Me.StrategyExitAllTriggerd = True
+            Try
+                While 1 = Interlocked.Exchange(_mpLock, 1)
+                    Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                    logger.Warn("Unable to take action for lock. Max profit reached.")
+                End While
+                Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+
+                Await ForceExitAllTradesAsync("Max Profit reached").ConfigureAwait(False)
+                Me.StrategyExitAllTriggerd = True
+            Catch ex As Exception
+                logger.Error("TickTrigger:{0}, error:{1}", Me.ToString, ex.ToString)
+            Finally
+                Interlocked.Exchange(_mpLock, 0)
+            End Try
         End If
         If Me.GetOverallPLAfterBrokerage < Math.Abs(userSettings.StockMaxLossPerDay) * -1 Then
-            Await ForceExitAllTradesAsync("Stock Max Loss reached").ConfigureAwait(False)
+            Try
+                While 1 = Interlocked.Exchange(_smlLock, 1)
+                    Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                    logger.Warn("Unable to take action for lock. Stock max loss reached.")
+                End While
+                Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+
+                Await ForceExitAllTradesAsync("Stock Max Loss reached").ConfigureAwait(False)
+            Catch ex As Exception
+                logger.Error("TickTrigger:{0}, error:{1}", Me.ToString, ex.ToString)
+            Finally
+                Interlocked.Exchange(_smlLock, 0)
+            End Try
         End If
         If Me.GetOverallPLAfterBrokerage > userSettings.StockMaxProfitPerDay Then
-            Await ForceExitAllTradesAsync("Stock Max Profit reached").ConfigureAwait(False)
+            Try
+                While 1 = Interlocked.Exchange(_smpLock, 1)
+                    Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                    logger.Warn("Unable to take action for lock. Stock max profit reached.")
+                End While
+                Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+
+                Await ForceExitAllTradesAsync("Stock Max Profit reached").ConfigureAwait(False)
+            Catch ex As Exception
+                logger.Error("TickTrigger:{0}, error:{1}", Me.ToString, ex.ToString)
+            Finally
+                Interlocked.Exchange(_smpLock, 0)
+            End Try
         End If
         'Modify Order block start
         Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
         If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
-            Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
+            Try
+                While 1 = Interlocked.Exchange(_mdfyLock, 1)
+                    Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
+                    logger.Warn("Unable to take action for lock. Target protection movement.")
+                End While
+                Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+
+                Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
+            Catch ex As Exception
+                logger.Error("TickTrigger:{0}, error:{1}", Me.ToString, ex.ToString)
+            Finally
+                Interlocked.Exchange(_mdfyLock, 0)
+            End Try
         End If
         'Modify Order block end
     End Function
