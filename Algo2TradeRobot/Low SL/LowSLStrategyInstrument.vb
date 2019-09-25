@@ -172,7 +172,7 @@ Public Class LowSLStrategyInstrument
         If Me.GetOverallPLAfterBrokerage < Math.Abs(userSettings.StockMaxLossPerDay) * -1 Then
             Await ForceExitAllTradesAsync("Stock Max Loss reached").ConfigureAwait(False)
         End If
-        If Me.GetOverallPLAfterBrokerage > UserSettings.StockMaxProfitPerDay Then
+        If Me.GetOverallPLAfterBrokerage > userSettings.StockMaxProfitPerDay Then
             Await ForceExitAllTradesAsync("Stock Max Profit reached").ConfigureAwait(False)
         End If
         'Modify Order block start
@@ -650,8 +650,8 @@ Public Class LowSLStrategyInstrument
         If GetTotalExecutedOrders() <> 0 Then
             Dim totalExpectedLoss As Decimal = expectedLossFromOneOrder * GetTotalExecutedOrders()
             Dim totalLoss As Decimal = GetOverallPLAfterBrokerage()
-            Dim extraLoss As Decimal = Math.Abs(totalLoss - totalExpectedLoss)
-            If extraLoss <> 0 Then
+            Dim extraLoss As Decimal = Math.Round(totalLoss, 2) - Math.Round(totalExpectedLoss, 2)
+            If Math.Round(extraLoss, 2) <> 0 Then
                 Dim targetForExtraLossMakeup As Decimal = CalculateTargetFromPL(stockPrice, Me.Quantity, Math.Abs(extraLoss))
                 Dim targetPointForExtraLossMakeup As Decimal = targetForExtraLossMakeup - stockPrice
                 If _targetPoint + targetPointForExtraLossMakeup < (_targetPoint / 4) * 5 Then
@@ -659,7 +659,7 @@ Public Class LowSLStrategyInstrument
                 End If
             End If
         End If
-            Return ret
+        Return ret
     End Function
 
 #Region "IDisposable Support"
