@@ -3832,10 +3832,10 @@ Public Class frmMainTabbed
         'tabMain.TabPages.Remove(tabAmiSignal)
         'tabMain.TabPages.Remove(tabEMA_Supertrend)
         'tabMain.TabPages.Remove(tabNearFarHedging)
-        'tabMain.TabPages.Remove(tabATM)
+        'tabMain.TabPages.Remove(tabVolumeSpike)
         'tabMain.TabPages.Remove(tabPetDGandhi)
         'tabMain.TabPages.Remove(tabEMACrossover)
-        'tabMain.TabPages.Remove(tabJoyMaaATM)
+        'tabMain.TabPages.Remove(tabLowSL)
         'tabMain.TabPages.Remove(tabTwoThird)
     End Sub
     Private Sub OnTickerClose()
