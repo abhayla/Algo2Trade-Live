@@ -8,6 +8,8 @@ Namespace Entities.UserSettings
         Public Property GetInformationDelay As Integer
         Public Property BackToBackOrderCoolOffDelay As Integer
         Public Property FormRemarks As String
+        Public Property TelegramAPIKey As String
+        Public Property TelegramChatID As String
         Public Property ExchangeDetails As Dictionary(Of String, Exchange)
 
         Private _ForceRestartTime As Date

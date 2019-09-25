@@ -2330,6 +2330,7 @@ Public Class frmMainTabbed
             If aex.ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
                 _lastException = aex
             Else
+                GenerateTelegramMessageAsync(aex.Message)
                 MsgBox(String.Format("The following error occurred: {0}", aex.Message), MsgBoxStyle.Critical)
             End If
         Catch fex As ForceExitException
@@ -2337,9 +2338,11 @@ Public Class frmMainTabbed
             _lastException = fex
         Catch cx As OperationCanceledException
             logger.Error(cx)
+            GenerateTelegramMessageAsync(cx.Message)
             MsgBox(String.Format("The following error occurred: {0}", cx.Message), MsgBoxStyle.Critical)
         Catch ex As Exception
             logger.Error(ex)
+            GenerateTelegramMessageAsync(ex.Message)
             MsgBox(String.Format("The following error occurred: {0}", ex.Message), MsgBoxStyle.Critical)
         Finally
             ProgressStatus("No pending actions")
@@ -3778,6 +3781,22 @@ Public Class frmMainTabbed
             MsgBox(String.Format("The following error occurred: {0}", ex.Message), MsgBoxStyle.Critical)
         End Try
     End Sub
+    Private Async Function GenerateTelegramMessageAsync(ByVal message As String) As Task
+        logger.Debug("Telegram Message:{0}", message)
+        If message.Contains("&") Then
+            message = message.Replace("&", "_")
+        End If
+        Dim cts As CancellationTokenSource = New CancellationTokenSource
+        Await Task.Delay(1, cts.Token).ConfigureAwait(False)
+        If _commonControllerUserInput IsNot Nothing AndAlso _commonControllerUserInput.TelegramAPIKey IsNot Nothing AndAlso
+            Not _commonControllerUserInput.TelegramAPIKey.Trim = "" AndAlso _commonControllerUserInput.TelegramChatID IsNot Nothing AndAlso
+            Not _commonControllerUserInput.TelegramChatID.Trim = "" Then
+            Using tSender As New Utilities.Notification.Telegram(_commonControllerUserInput.TelegramAPIKey.Trim, _commonControllerUserInput.TelegramChatID, cts)
+                Dim encodedString As String = Utilities.Strings.EncodeString(message)
+                Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
+            End Using
+        End If
+    End Function
 #End Region
 
 #Region "EX Users"

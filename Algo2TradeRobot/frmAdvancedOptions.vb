@@ -43,6 +43,8 @@ Public Class frmAdvancedOptions
                 dtpckrCDSContractRolloverTime.Value = _UserInputs.ExchangeDetails("CDS").ContractRolloverTime
             End If
             txtRemarks.Text = _UserInputs.FormRemarks
+            txtTelegramAPI.Text = _UserInputs.TelegramAPIKey
+            txtTelegramChatID.Text = _UserInputs.TelegramChatID
         End If
     End Sub
 
@@ -62,6 +64,8 @@ Public Class frmAdvancedOptions
             {.ExchangeStartTime = dtpckrCDSExchangeStartTime.Value, .ExchangeEndTime = dtpckrCDSExchangeEndTime.Value, .ContractRolloverTime = dtpckrCDSContractRolloverTime.Value}}
         }
         _UserInputs.FormRemarks = txtRemarks.Text
+        _UserInputs.TelegramAPIKey = txtTelegramAPI.Text
+        _UserInputs.TelegramChatID = txtTelegramChatID.Text
         Utilities.Strings.SerializeFromCollection(Of ControllerUserInputs)(ControllerUserInputs.Filename, _UserInputs)
     End Sub
 
