@@ -244,21 +244,15 @@ Public Class LowSLStrategyInstrument
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
         Dim currentTime As Date = Now()
 
-        If Not _entryChanged AndAlso _signalCandle IsNot Nothing Then
+        If _signalCandle IsNot Nothing Then
             If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
-                Dim firstOrder As IBusinessOrder = Nothing
-                For Each runningOrder In OrderDetails.OrderBy(Function(x)
-                                                                  Return x.Value.ParentOrder.TimeStamp
-                                                              End Function)
-                    If runningOrder.Value.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
-                        firstOrder = runningOrder.Value
-                        Exit For
-                    End If
-                Next
-                If firstOrder IsNot Nothing AndAlso firstOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
-                    If firstOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                Dim lastExecutedOrder As IBusinessOrder = GetLastExecutedOrder()
+                If lastExecutedOrder IsNot Nothing AndAlso lastExecutedOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                    If lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        _potentialHighEntryPrice = ConvertFloorCeling(lastExecutedOrder.ParentOrder.AveragePrice, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                         _potentialLowEntryPrice = _potentialHighEntryPrice - 2 * Me.SLPoint
-                    ElseIf firstOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                    ElseIf lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        _potentialLowEntryPrice = ConvertFloorCeling(lastExecutedOrder.ParentOrder.AveragePrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                         _potentialHighEntryPrice = _potentialLowEntryPrice + 2 * Me.SLPoint
                     End If
                     _entryChanged = True
