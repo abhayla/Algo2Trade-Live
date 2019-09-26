@@ -3783,15 +3783,15 @@ Public Class frmMainTabbed
     End Sub
     Private Async Function GenerateTelegramMessageAsync(ByVal message As String) As Task
         logger.Debug("Telegram Message:{0}", message)
+        _cts.Token.ThrowIfCancellationRequested()
         If message.Contains("&") Then
             message = message.Replace("&", "_")
         End If
-        Dim cts As CancellationTokenSource = New CancellationTokenSource
-        Await Task.Delay(1, cts.Token).ConfigureAwait(False)
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         If _commonControllerUserInput IsNot Nothing AndAlso _commonControllerUserInput.TelegramAPIKey IsNot Nothing AndAlso
             Not _commonControllerUserInput.TelegramAPIKey.Trim = "" AndAlso _commonControllerUserInput.TelegramChatID IsNot Nothing AndAlso
             Not _commonControllerUserInput.TelegramChatID.Trim = "" Then
-            Using tSender As New Utilities.Notification.Telegram(_commonControllerUserInput.TelegramAPIKey.Trim, _commonControllerUserInput.TelegramChatID, cts)
+            Using tSender As New Utilities.Notification.Telegram(_commonControllerUserInput.TelegramAPIKey.Trim, _commonControllerUserInput.TelegramChatID, _cts)
                 Dim encodedString As String = Utilities.Strings.EncodeString(message)
                 Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
             End Using
