@@ -328,10 +328,42 @@ Public Class LowSLStrategyInstrument
             Me.GetOverallPLAfterBrokerage() > Math.Abs(userSettings.StockMaxLossPerDay) * -1 AndAlso Me.GetOverallPLAfterBrokerage < userSettings.StockMaxProfitPerDay Then
             Dim signal As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick)
             If signal IsNot Nothing AndAlso signal.Item1 Then
-                If lastExecutedOrder Is Nothing OrElse
-                    (Utilities.Time.IsDateTimeEqualTillMinutes(lastExecutedOrder.ParentOrder.TimeStamp, runningCandlePayload.SnapshotDateTime) AndAlso
-                    lastExecutedOrder.ParentOrder.TransactionType <> signal.Item4) OrElse
-                    Not Utilities.Time.IsDateTimeEqualTillMinutes(lastExecutedOrder.ParentOrder.TimeStamp, runningCandlePayload.SnapshotDateTime) Then
+                Dim takeTrade As Boolean = True
+                If lastExecutedOrder IsNot Nothing Then
+                    Dim lastTradeExitTime As Date = Date.MinValue
+                    If lastExecutedOrder.AllOrder IsNot Nothing AndAlso lastExecutedOrder.AllOrder.Count > 0 Then
+                        For Each order In lastExecutedOrder.AllOrder
+                            If order.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss Then
+                                lastTradeExitTime = If(order.TimeStamp > lastTradeExitTime, order.TimeStamp, lastTradeExitTime)
+                            End If
+                        Next
+                    End If
+                    If lastTradeExitTime <> Date.MinValue AndAlso Utilities.Time.IsDateTimeEqualTillMinutes(lastTradeExitTime, runningCandlePayload.SnapshotDateTime) AndAlso
+                        lastExecutedOrder.ParentOrder.TransactionType = signal.Item4 Then
+                        If signal.Item4 = IOrder.TypeOfTransaction.Buy Then
+                            If runningCandlePayload.HighPrice.Value > signal.Item2 Then
+                                takeTrade = False
+                                Try
+                                    logger.Debug("Trade neglected. Same candle same direction trade. Last trade direction:{0}, Last trade exit time:{1}, Current Signal:{2}, LTP:{3}, LTP Time:{4}",
+                                             lastExecutedOrder.ParentOrder.TransactionType, lastTradeExitTime, signal.Item4, currentTick.LastPrice, currentTick.Timestamp.Value)
+                                Catch ex As Exception
+                                    logger.Error(ex.ToString)
+                                End Try
+                            End If
+                        ElseIf signal.Item4 = IOrder.TypeOfTransaction.Sell Then
+                            If runningCandlePayload.LowPrice.Value < signal.Item2 Then
+                                takeTrade = False
+                                Try
+                                    logger.Debug("Trade neglected. Same candle same direction trade. Last trade direction:{0}, Last trade exit time:{1}, Current Signal:{2}, LTP:{3}, LTP Time:{4}",
+                                             lastExecutedOrder.ParentOrder.TransactionType, lastTradeExitTime, signal.Item4, currentTick.LastPrice, currentTick.Timestamp.Value)
+                                Catch ex As Exception
+                                    logger.Error(ex.ToString)
+                                End Try
+                            End If
+                        End If
+                    End If
+                End If
+                If takeTrade Then
                     If signal.Item4 = IOrder.TypeOfTransaction.Buy Then
                         Dim triggerPrice As Decimal = signal.Item2
                         Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
