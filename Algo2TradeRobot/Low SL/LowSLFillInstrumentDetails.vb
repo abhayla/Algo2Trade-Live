@@ -106,7 +106,7 @@ Public Class LowSLFillInstrumentDetails
                                                                                                     Return x.RawInstrumentName = runningInstrument.RawInstrumentName
                                                                                                 End Function)
                     Dim minExpiry As Date = runningIntruments.Min(Function(x)
-                                                                      If x.Expiry.Value.Date = Now.Date Then
+                                                                      If x.Expiry.Value.Date <= Now.Date Then
                                                                           Return Date.MaxValue
                                                                       Else
                                                                           Return x.Expiry
@@ -236,6 +236,20 @@ Public Class LowSLFillInstrumentDetails
                                                                                      Return Date.MaxValue
                                                                                  End If
                                                                              End Function)
+                                tradingStock = futureStocks.Find(Function(z)
+                                                                     Return z.Expiry = nextMinExpiry
+                                                                 End Function)
+                            ElseIf minexpiry.Date < Now.Date Then
+                                Dim nextMinExpiry As Date = futureStocks.Min(Function(y)
+                                                                                 If Not y.Expiry.Value.Date <= Now.Date Then
+                                                                                     Return y.Expiry.Value
+                                                                                 Else
+                                                                                     Return Date.MaxValue
+                                                                                 End If
+                                                                             End Function)
+                                volumeCheckingStock = futureStocks.Find(Function(x)
+                                                                            Return x.Expiry = nextMinExpiry
+                                                                        End Function)
                                 tradingStock = futureStocks.Find(Function(z)
                                                                      Return z.Expiry = nextMinExpiry
                                                                  End Function)
