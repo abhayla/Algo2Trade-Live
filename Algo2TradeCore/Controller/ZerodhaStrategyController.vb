@@ -1127,11 +1127,18 @@ Namespace Controller
         End Sub
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
             Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-            'Try
-            '    logger.Fatal("Tick Data: {0}", Utilities.Strings.JsonSerialize(tickData))
-            'Catch ex As Exception
-            '    'Do nothing
-            'End Try
+            Try
+                logger.Fatal("TickData, Token,{0},Date,{1},Time,{2},LastPrice,{3},Buy Quantity,{4},Sell Quantity,{5},Percentage,{6}",
+                             tickData.InstrumentToken,
+                             tickData.Timestamp.Value.ToShortDateString,
+                             tickData.Timestamp.Value.ToShortTimeString,
+                             tickData.LastPrice,
+                             tickData.BuyQuantity,
+                             tickData.SellQuantity,
+                             If(tickData.BuyQuantity > tickData.SellQuantity, ((tickData.BuyQuantity / tickData.SellQuantity) - 1) * 100, ((tickData.SellQuantity / tickData.BuyQuantity) - 1) * -100))
+            Catch ex As Exception
+                logger.Error("Tick log error:{0}", ex.ToString)
+            End Try
             Dim runningTick As New ZerodhaTick() With {.WrappedTick = tickData}
             Dim runningInstruments As IEnumerable(Of IInstrument) = _AllStrategyUniqueInstruments.Where(Function(x)
                                                                                                             Return x.InstrumentIdentifier = tickData.InstrumentToken
