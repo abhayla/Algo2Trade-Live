@@ -54,6 +54,16 @@ Namespace Entities
                 Return WrappedTick.OI
             End Get
         End Property
+        Public ReadOnly Property BuyQuantity As UInteger Implements ITick.BuyQuantity
+            Get
+                Return WrappedTick.BuyQuantity
+            End Get
+        End Property
+        Public ReadOnly Property SellQuantity As UInteger Implements ITick.SellQuantity
+            Get
+                Return WrappedTick.SellQuantity
+            End Get
+        End Property
         Public ReadOnly Property Timestamp As Date? Implements ITick.Timestamp
             Get
                 Return WrappedTick.Timestamp

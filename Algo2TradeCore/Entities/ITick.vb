@@ -10,6 +10,8 @@
         ReadOnly Property AveragePrice As Decimal
         ReadOnly Property LastPrice As Decimal
         ReadOnly Property OI As UInteger
+        ReadOnly Property SellQuantity As UInteger
+        ReadOnly Property BuyQuantity As UInteger
         ReadOnly Property Timestamp As Date?
         ReadOnly Property LastTradeTime As Date?
 
