@@ -73,7 +73,7 @@ Public Class OHLStrategy
                                                                                                      End Function)
 
                     Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date = Now.Date Then
+                                                                           If Not x.Expiry.Value.Date <= Now.Date Then
                                                                                Return x.Expiry.Value
                                                                            Else
                                                                                Return Date.MaxValue
