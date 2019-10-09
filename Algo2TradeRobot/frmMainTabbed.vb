@@ -1617,6 +1617,7 @@ Public Class frmMainTabbed
             If aex.ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
                 _lastException = aex
             Else
+                GenerateTelegramMessageAsync(aex.Message)
                 MsgBox(String.Format("The following error occurred: {0}", aex.Message), MsgBoxStyle.Critical)
             End If
         Catch fex As ForceExitException
@@ -1624,9 +1625,11 @@ Public Class frmMainTabbed
             _lastException = fex
         Catch cx As OperationCanceledException
             logger.Error(cx)
+            GenerateTelegramMessageAsync(cx.Message)
             MsgBox(String.Format("The following error occurred: {0}", cx.Message), MsgBoxStyle.Critical)
         Catch ex As Exception
             logger.Error(ex)
+            GenerateTelegramMessageAsync(ex.Message)
             MsgBox(String.Format("The following error occurred: {0}", ex.Message), MsgBoxStyle.Critical)
         Finally
             ProgressStatus("No pending actions")
@@ -1646,15 +1649,6 @@ Public Class frmMainTabbed
         'End If
     End Function
     Private Async Sub btnPetDGandhiStart_Click(sender As Object, e As EventArgs) Handles btnPetDGandhiStart.Click
-        'Dim authenticationUserId As String = "YH8805"
-        'If Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper IsNot Nothing AndAlso
-        '    Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper <> "" AndAlso
-        '    (authenticationUserId <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper AndAlso
-        '    "DK4056" <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper) Then
-        '    MsgBox("You are not an authentic user. Kindly contact Algo2Trade", MsgBoxStyle.Critical)
-        '    Exit Sub
-        'End If
-
         PreviousDayCleanup(False)
         Await Task.Run(AddressOf PetDGandhiWorkerAsync).ConfigureAwait(False)
 
@@ -1676,6 +1670,7 @@ Public Class frmMainTabbed
         FlashTickerBulbEx(GetType(PetDGandhiStrategy))
     End Sub
     Private Async Sub btnPetDGandhiStop_Click(sender As Object, e As EventArgs) Handles btnPetDGandhiStop.Click
+        OnEndOfTheDay(_PetDGandhiStrategyToExecute)
         SetObjectEnableDisable_ThreadSafe(linklblPetDGandhiTradableInstrument, False)
         If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
         If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)

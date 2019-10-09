@@ -51,12 +51,14 @@ Public Class frmPetDGandhiSettings
             dtpckrEODExitTime.Value = _PetDGandhiSettings.EODExitTime
             txtMaxLossPerDay.Text = _PetDGandhiSettings.MaxLossPerDay
             txtMaxProfitPerDay.Text = _PetDGandhiSettings.MaxProfitPerDay
-            txtEMAPeriod.Text = _PetDGandhiSettings.EMAPeriod
-            chkboxPivotHighLowStrict.Checked = _PetDGandhiSettings.PivotHighLowStrict
+            txtATRPeriod.Text = _PetDGandhiSettings.ATRPeriod
+            txtNumberOfTradePerStock.Text = _PetDGandhiSettings.NumberOfTradePerStock
+            txtTargetMultiplier.Text = _PetDGandhiSettings.TargetMultiplier
+            txtInstrumentDetalis.Text = _PetDGandhiSettings.InstrumentDetailsFilePath
+
             txtTelegramAPI.Text = _PetDGandhiSettings.TelegramAPIKey
             txtTelegramChatID.Text = _PetDGandhiSettings.TelegramChatID
             txtTelegramChatIDForPL.Text = _PetDGandhiSettings.TelegramPLChatID
-            txtInstrumentDetalis.Text = _PetDGandhiSettings.InstrumentDetailsFilePath
         End If
     End Sub
     Private Sub SaveSettings()
@@ -66,12 +68,14 @@ Public Class frmPetDGandhiSettings
         _PetDGandhiSettings.EODExitTime = dtpckrEODExitTime.Value
         _PetDGandhiSettings.MaxLossPerDay = txtMaxLossPerDay.Text
         _PetDGandhiSettings.MaxProfitPerDay = txtMaxProfitPerDay.Text
-        _PetDGandhiSettings.EMAPeriod = txtEMAPeriod.Text
-        _PetDGandhiSettings.PivotHighLowStrict = chkboxPivotHighLowStrict.Checked
+        _PetDGandhiSettings.ATRPeriod = txtATRPeriod.Text
+        _PetDGandhiSettings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
+        _PetDGandhiSettings.TargetMultiplier = txtTargetMultiplier.Text
+        _PetDGandhiSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+
         _PetDGandhiSettings.TelegramAPIKey = txtTelegramAPI.Text
         _PetDGandhiSettings.TelegramChatID = txtTelegramChatID.Text
         _PetDGandhiSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
-        _PetDGandhiSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         Utilities.Strings.SerializeFromCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename, _PetDGandhiSettings)
     End Sub
@@ -92,7 +96,7 @@ Public Class frmPetDGandhiSettings
         ValidateNumbers(1, 60, txtSignalTimeFrame)
         ValidateNumbers(Decimal.MinValue, Decimal.MaxValue, txtMaxLossPerDay)
         ValidateNumbers(0, Decimal.MaxValue, txtMaxProfitPerDay)
-        ValidateNumbers(1, Integer.MaxValue, txtEMAPeriod)
+        ValidateNumbers(1, Integer.MaxValue, txtATRPeriod)
         ValidateFile()
     End Sub
 

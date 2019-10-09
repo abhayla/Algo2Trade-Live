@@ -2283,6 +2283,7 @@ Namespace Strategies
                                     Dim parentBusinessOrder As IBusinessOrder = GetParentFromChildOrder(runningExitOrdersTrigger.Item3)
                                     Await Me.ParentStrategy.SignalManager.HandleCancelActivity(runningExitOrdersTrigger.Item3.Tag, Me, Nothing, Now, runningExitOrdersTrigger.Item4).ConfigureAwait(False)
                                     CType(runningExitOrdersTrigger.Item3, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                    CType(runningExitOrdersTrigger.Item3, PaperOrder).TimeStamp = Now
                                     CType(runningExitOrdersTrigger.Item3, PaperOrder).AveragePrice = Me.TradableInstrument.LastTick.LastPrice
                                     Await Me.ParentStrategy.SignalManager.ActivateCancelActivity(runningExitOrdersTrigger.Item3.Tag, Me, Nothing, Now).ConfigureAwait(False)
                                     Await ProcessOrderAsync(parentBusinessOrder).ConfigureAwait(False)
@@ -2352,26 +2353,33 @@ Namespace Strategies
 
                                 If runningExitOrder.Item3.ToUpper = "STOPLOSS REACHED" Then
                                     CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Complete
+                                    CType(slOrder, PaperOrder).TimeStamp = Now
                                     CType(slOrder, PaperOrder).AveragePrice = exitPrice
                                     If targetOrder IsNot Nothing Then
                                         CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                        CType(targetOrder, PaperOrder).TimeStamp = Now
                                         CType(targetOrder, PaperOrder).Quantity = 0
                                     End If
                                 ElseIf runningExitOrder.Item3.ToUpper = "TARGET REACHED" Then
                                     If targetOrder IsNot Nothing Then
                                         CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                        CType(slOrder, PaperOrder).TimeStamp = Now
                                         CType(slOrder, PaperOrder).Quantity = 0
                                         CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Complete
+                                        CType(targetOrder, PaperOrder).TimeStamp = Now
                                         CType(targetOrder, PaperOrder).AveragePrice = exitPrice
                                     Else
                                         CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                        CType(slOrder, PaperOrder).TimeStamp = Now
                                         CType(slOrder, PaperOrder).AveragePrice = exitPrice
                                     End If
                                 Else
                                     CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Complete
+                                    CType(slOrder, PaperOrder).TimeStamp = Now
                                     CType(slOrder, PaperOrder).AveragePrice = exitPrice
                                     If targetOrder IsNot Nothing Then
                                         CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
+                                        CType(targetOrder, PaperOrder).TimeStamp = Now
                                         CType(targetOrder, PaperOrder).Quantity = 0
                                     End If
                                 End If

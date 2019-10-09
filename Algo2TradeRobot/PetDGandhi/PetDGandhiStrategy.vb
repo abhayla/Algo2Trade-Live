@@ -38,27 +38,7 @@ Public Class PetDGandhiStrategy
             Dim petDGandhiUserInputs As PetDGandhiUserInputs = CType(Me.UserSettings, PetDGandhiUserInputs)
             If petDGandhiUserInputs.InstrumentsData IsNot Nothing AndAlso petDGandhiUserInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
-                Dim cashInstrumentList As IEnumerable(Of KeyValuePair(Of String, PetDGandhiUserInputs.InstrumentDetails)) =
-                    petDGandhiUserInputs.InstrumentsData.Where(Function(x)
-                                                                   Return x.Value.MarketType = IInstrument.TypeOfInstrument.Cash OrElse
-                                                           x.Value.MarketType = IInstrument.TypeOfInstrument.None
-                                                               End Function)
-                Dim futureInstrumentList As IEnumerable(Of KeyValuePair(Of String, PetDGandhiUserInputs.InstrumentDetails)) =
-                    petDGandhiUserInputs.InstrumentsData.Where(Function(x)
-                                                                   Return x.Value.MarketType = IInstrument.TypeOfInstrument.Futures OrElse
-                                                           x.Value.MarketType = IInstrument.TypeOfInstrument.None
-                                                               End Function)
-                For Each instrument In cashInstrumentList.ToList
-                    _cts.Token.ThrowIfCancellationRequested()
-                    Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
-                                                                                                Return x.TradingSymbol = instrument.Key
-                                                                                            End Function)
-                    _cts.Token.ThrowIfCancellationRequested()
-                    ret = True
-                    If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
-                    If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
-                Next
-                For Each instrument In futureInstrumentList.ToList
+                For Each instrument In petDGandhiUserInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = Nothing
                     Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
@@ -67,7 +47,7 @@ Public Class PetDGandhiStrategy
                                                                                                      End Function)
 
                     Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date = Now.Date Then
+                                                                           If Not x.Expiry.Value.Date <= Now.Date Then
                                                                                Return x.Expiry.Value
                                                                            Else
                                                                                Return Date.MaxValue
@@ -129,7 +109,6 @@ Public Class PetDGandhiStrategy
 
     Public Overrides Async Function MonitorAsync() As Task
         Dim lastException As Exception = Nothing
-
         Try
             _cts.Token.ThrowIfCancellationRequested()
             Dim tasks As New List(Of Task)()
@@ -157,9 +136,9 @@ Public Class PetDGandhiStrategy
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
         ElseIf Me.GetTotalPL <= Math.Abs(CType(Me.UserSettings, PetDGandhiUserInputs).MaxLossPerDay) * -1 Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Loss % Per Day Reached")
+            ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
         ElseIf Me.GetTotalPL >= CType(Me.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Profit % Per Day Reached")
+            ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
     End Function
