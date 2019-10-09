@@ -2180,10 +2180,13 @@ Namespace Strategies
                                 Await Me.ParentStrategy.SignalManager.HandleEntryActivity(activityTag, Me, Nothing, runningPlaceOrderTrigger.Item3.SignalCandle.SnapshotDateTime, runningPlaceOrderTrigger.Item3.EntryDirection, Now, runningPlaceOrderTrigger.Item4).ConfigureAwait(False)
 
                                 Dim entryPrice As Decimal = Decimal.MinValue
+                                Dim entryTime As Date = Date.MinValue
                                 If currentTick IsNot Nothing Then
                                     entryPrice = currentTick.LastPrice
+                                    entryTime = currentTick.Timestamp.Value
                                 Else
                                     entryPrice = Me.TradableInstrument.LastTick.LastPrice
+                                    entryTime = Me.TradableInstrument.LastTick.Timestamp.Value
                                 End If
 
                                 Dim parentOrder As PaperOrder = New PaperOrder
@@ -2195,7 +2198,7 @@ Namespace Strategies
                                 parentOrder.ParentOrderIdentifier = Nothing
                                 parentOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
                                 parentOrder.TransactionType = runningPlaceOrderTrigger.Item3.EntryDirection
-                                parentOrder.TimeStamp = Now
+                                parentOrder.TimeStamp = entryTime
                                 parentOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Parent
                                 parentOrder.Tag = activityTag
 
@@ -2212,7 +2215,7 @@ Namespace Strategies
                                 slOrder.OrderIdentifier = Utilities.Numbers.GetUniqueNumber()
                                 slOrder.ParentOrderIdentifier = parentOrder.OrderIdentifier
                                 slOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
-                                slOrder.TimeStamp = Now
+                                slOrder.TimeStamp = entryTime
                                 slOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss
                                 slOrder.Tag = activityTag
 
@@ -2229,7 +2232,7 @@ Namespace Strategies
                                 targetOrder.OrderIdentifier = Utilities.Numbers.GetUniqueNumber()
                                 targetOrder.ParentOrderIdentifier = parentOrder.OrderIdentifier
                                 targetOrder.Tradingsymbol = Me.TradableInstrument.TradingSymbol
-                                targetOrder.TimeStamp = Now
+                                targetOrder.TimeStamp = entryTime
                                 targetOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Target
                                 targetOrder.Tag = activityTag
 
@@ -2345,41 +2348,44 @@ Namespace Strategies
                                 End If
 
                                 Dim exitPrice As Decimal = Decimal.MinValue
+                                Dim exitTime As Date = Date.MinValue
                                 If currentTick IsNot Nothing Then
                                     exitPrice = currentTick.LastPrice
+                                    exitTime = currentTick.Timestamp.Value
                                 Else
                                     exitPrice = Me.TradableInstrument.LastTick.LastPrice
+                                    exitTime = Me.TradableInstrument.LastTick.Timestamp.Value
                                 End If
 
                                 If runningExitOrder.Item3.ToUpper = "STOPLOSS REACHED" Then
                                     CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Complete
-                                    CType(slOrder, PaperOrder).TimeStamp = Now
+                                    CType(slOrder, PaperOrder).TimeStamp = exitTime
                                     CType(slOrder, PaperOrder).AveragePrice = exitPrice
                                     If targetOrder IsNot Nothing Then
                                         CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
-                                        CType(targetOrder, PaperOrder).TimeStamp = Now
+                                        CType(targetOrder, PaperOrder).TimeStamp = exitTime
                                         CType(targetOrder, PaperOrder).Quantity = 0
                                     End If
                                 ElseIf runningExitOrder.Item3.ToUpper = "TARGET REACHED" Then
                                     If targetOrder IsNot Nothing Then
                                         CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
-                                        CType(slOrder, PaperOrder).TimeStamp = Now
+                                        CType(slOrder, PaperOrder).TimeStamp = exitTime
                                         CType(slOrder, PaperOrder).Quantity = 0
                                         CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Complete
-                                        CType(targetOrder, PaperOrder).TimeStamp = Now
+                                        CType(targetOrder, PaperOrder).TimeStamp = exitTime
                                         CType(targetOrder, PaperOrder).AveragePrice = exitPrice
                                     Else
                                         CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
-                                        CType(slOrder, PaperOrder).TimeStamp = Now
+                                        CType(slOrder, PaperOrder).TimeStamp = exitTime
                                         CType(slOrder, PaperOrder).AveragePrice = exitPrice
                                     End If
                                 Else
                                     CType(slOrder, PaperOrder).Status = IOrder.TypeOfStatus.Complete
-                                    CType(slOrder, PaperOrder).TimeStamp = Now
+                                    CType(slOrder, PaperOrder).TimeStamp = exitTime
                                     CType(slOrder, PaperOrder).AveragePrice = exitPrice
                                     If targetOrder IsNot Nothing Then
                                         CType(targetOrder, PaperOrder).Status = IOrder.TypeOfStatus.Cancelled
-                                        CType(targetOrder, PaperOrder).TimeStamp = Now
+                                        CType(targetOrder, PaperOrder).TimeStamp = exitTime
                                         CType(targetOrder, PaperOrder).Quantity = 0
                                     End If
                                 End If
