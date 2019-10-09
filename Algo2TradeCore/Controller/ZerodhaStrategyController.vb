@@ -1128,14 +1128,19 @@ Namespace Controller
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
             Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
             Try
-                logger.Fatal("TickData, Token,{0},Date,{1},Time,{2},LastPrice,{3},Buy Quantity,{4},Sell Quantity,{5},Percentage,{6}",
+                logger.Fatal("TickData, Tkn,{0},Dt,{1},Tm,{2},LTP,{3},BQn,{4},SQn,{5},%,{6},Bid,{7},Off,{8},OIH,{9},OIL,{10},OI,{11}",
                              tickData.InstrumentToken,
                              tickData.Timestamp.Value.ToShortDateString,
                              tickData.Timestamp.Value.ToShortTimeString,
                              tickData.LastPrice,
                              tickData.BuyQuantity,
                              tickData.SellQuantity,
-                             If(tickData.BuyQuantity > tickData.SellQuantity, ((tickData.BuyQuantity / tickData.SellQuantity) - 1) * 100, ((tickData.SellQuantity / tickData.BuyQuantity) - 1) * -100))
+                             If(tickData.BuyQuantity > tickData.SellQuantity, ((tickData.BuyQuantity / tickData.SellQuantity) - 1) * 100, ((tickData.SellQuantity / tickData.BuyQuantity) - 1) * -100),
+                             Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Bids), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "Qty"), "Price", "Prc"), "Orders", "Ord"),
+                             Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Offers), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "Qty"), "Price", "Prc"), "Orders", "Ord"),
+                             tickData.OIDayHigh,
+                             tickData.OIDayLow,
+                             tickData.OI)
             Catch ex As Exception
                 logger.Error("Tick log error:{0}", ex.ToString)
             End Try
