@@ -422,7 +422,7 @@ Public Class PetDGandhiStrategyInstrument
                             modifyAfterEntryTrigger = True
                         End If
                     ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                        triggerPrice = ConvertFloorCeling(_signalCandle.HighPrice.Value - _signalCandle.CandleRange * _initialSLPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                        triggerPrice = ConvertFloorCeling(_signalCandle.HighPrice.Value - _signalCandle.CandleRange * _initialSLPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                         If runningCandlePayload.PreviousPayload.HighPrice.Value > middlePoint AndAlso runningCandlePayload.PreviousPayload.HighPrice.Value < triggerPrice Then
                             modifyAfterEntryTrigger = True
                         End If
@@ -442,6 +442,8 @@ Public Class PetDGandhiStrategyInstrument
                                     '    If triggerPrice < slOrder.TriggerPrice Then
                                     '        triggerPrice = Decimal.MinValue
                                     '    End If
+                                Else
+                                    modifyAfterEntryTrigger = False
                                 End If
                             ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                                 If modifyAfterEntryTrigger AndAlso slOrder.TriggerPrice = triggerPrice AndAlso
@@ -452,6 +454,8 @@ Public Class PetDGandhiStrategyInstrument
                                     '    If triggerPrice > slOrder.TriggerPrice Then
                                     '        triggerPrice = Decimal.MinValue
                                     '    End If
+                                Else
+                                    modifyAfterEntryTrigger = False
                                 End If
                             End If
 
@@ -649,7 +653,7 @@ Public Class PetDGandhiStrategyInstrument
                     Dim sl As Decimal = ConvertFloorCeling(_signalCandle.LowPrice.Value + _signalCandle.CandleRange * _initialSLPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                     ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialHighEntryPrice, sl, IOrder.TypeOfTransaction.Buy)
                 ElseIf tradeDirection = IOrder.TypeOfTransaction.Sell Then
-                    Dim sl As Decimal = ConvertFloorCeling(_signalCandle.HighPrice.Value - _signalCandle.CandleRange * _initialSLPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                    Dim sl As Decimal = ConvertFloorCeling(_signalCandle.HighPrice.Value - _signalCandle.CandleRange * _initialSLPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialLowEntryPrice, sl, IOrder.TypeOfTransaction.Sell)
                 End If
             End If
