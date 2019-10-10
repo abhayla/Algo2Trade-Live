@@ -233,49 +233,12 @@ Public Class PetDGandhiStrategyInstrument
         Dim currentTime As Date = Now()
         Dim lastExecutedOrder As IBusinessOrder = GetLastExecutedOrder()
 
-        'If lastExecutedOrder IsNot Nothing AndAlso lastExecutedOrder.AllOrder IsNot Nothing AndAlso lastExecutedOrder.AllOrder.Count > 0 Then
-        '    Dim lastTradeExitTime As Date = Date.MinValue
-        '    For Each order In lastExecutedOrder.AllOrder
-        '        If order.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss Then
-        '            lastTradeExitTime = If(order.TimeStamp > lastTradeExitTime, order.TimeStamp, lastTradeExitTime)
-        '        End If
-        '    Next
-        '    If lastTradeExitTime <> Date.MinValue AndAlso lastTradeExitTime < runningCandlePayload.SnapshotDateTime Then
-        '        Dim lastPreviousExecutedOrder As IBusinessOrder = Nothing
-        '        If Me.OrderDetails IsNot Nothing AndAlso Me.OrderDetails.Count > 0 Then
-        '            Dim potentialOrders As IEnumerable(Of IBusinessOrder) = OrderDetails.Values.Where(Function(x)
-        '                                                                                                  Return x.ParentOrder IsNot Nothing AndAlso
-        '                                                                                                x.ParentOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
-        '                                                                                                x.ParentOrder.TimeStamp < lastExecutedOrder.ParentOrder.TimeStamp
-        '                                                                                              End Function)
-        '            If potentialOrders IsNot Nothing AndAlso potentialOrders.Count > 0 Then
-        '                lastPreviousExecutedOrder = potentialOrders.OrderBy(Function(y)
-        '                                                                        Return y.ParentOrder.TimeStamp
-        '                                                                    End Function).LastOrDefault
-        '            End If
-        '        End If
-        '        If lastPreviousExecutedOrder IsNot Nothing AndAlso lastPreviousExecutedOrder.AllOrder IsNot Nothing AndAlso lastPreviousExecutedOrder.AllOrder.Count > 0 Then
-        '            Dim lastPreviousTradeExitTime As Date = Date.MinValue
-        '            For Each order In lastPreviousExecutedOrder.AllOrder
-        '                If order.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss Then
-        '                    lastPreviousTradeExitTime = If(order.TimeStamp > lastPreviousTradeExitTime, order.TimeStamp, lastPreviousTradeExitTime)
-        '                End If
-        '            Next
-        '            If lastTradeExitTime <> Date.MinValue AndAlso lastPreviousTradeExitTime <> Date.MinValue AndAlso
-        '            Utilities.Time.IsDateTimeEqualTillMinutes(lastTradeExitTime, lastPreviousTradeExitTime) Then
-        '                If runningCandlePayload.OpenPrice.Value > _potentialHighEntryPrice OrElse
-        '                runningCandlePayload.OpenPrice.Value < _potentialLowEntryPrice Then
-        '                    _eligibleToTakeTrade = False
-        '                End If
-        '            End If
-        '        End If
-        '    End If
-        'End If
         If Not _eligibleToTakeTrade Then
             Dim middlePoint As Decimal = (_potentialHighEntryPrice + _potentialLowEntryPrice) / 2
             If currentTick.LastPrice < middlePoint + userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Buffer OrElse
                 currentTick.LastPrice > middlePoint - userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Buffer Then
                 _eligibleToTakeTrade = True
+                logger.Debug("LTP is inside entry range. {0}", Me.TradableInstrument.TradingSymbol)
             End If
         End If
 
