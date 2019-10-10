@@ -21,6 +21,7 @@
         ReadOnly Property OrderType As TypeOfOrder
         ReadOnly Property Broker As APISource
         Property LogicalOrderType As LogicalTypeOfOrder
+        Property SupportingFlag As Boolean
 
         Enum TypeOfOrder
             Market = 1

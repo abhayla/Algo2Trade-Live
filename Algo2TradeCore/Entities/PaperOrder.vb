@@ -40,6 +40,8 @@
 
         Public Property OrderType As IOrder.TypeOfOrder Implements IOrder.OrderType
 
+        Public Property SupportingFlag As Boolean Implements IOrder.SupportingFlag
+
         Public ReadOnly Property Broker As APISource Implements IOrder.Broker
             Get
                 Return APISource.Zerodha
@@ -47,6 +49,5 @@
         End Property
 
         Public Property LogicalOrderType As IOrder.LogicalTypeOfOrder Implements IOrder.LogicalOrderType
-
     End Class
 End Namespace

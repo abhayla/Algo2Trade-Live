@@ -159,5 +159,7 @@ Namespace Entities
 
         Public Property LogicalOrderType As IOrder.LogicalTypeOfOrder Implements IOrder.LogicalOrderType
 
+        Public Property SupportingFlag As Boolean Implements IOrder.SupportingFlag
+
     End Class
 End Namespace

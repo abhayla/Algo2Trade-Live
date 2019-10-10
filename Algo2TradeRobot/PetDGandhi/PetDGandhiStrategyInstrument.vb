@@ -22,7 +22,7 @@ Public Class PetDGandhiStrategyInstrument
     Private _lastTick As ITick = Nothing
     Private _eligibleToTakeTrade As Boolean = True
 
-    Private ReadOnly _initialSLPercentage As Decimal = -50
+    Private ReadOnly _initialSLPercentage As Decimal = 10
     Private ReadOnly _dummyATRConsumer As ATRConsumer
 
     Public Sub New(ByVal associatedInstrument As IInstrument,
@@ -467,25 +467,28 @@ Public Class PetDGandhiStrategyInstrument
                     For Each slOrder In bussinessOrder.SLOrder
                         If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
                             Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
-                            Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
+                            Not slOrder.Status = IOrder.TypeOfStatus.Rejected AndAlso
+                            Not slOrder.SupportingFlag Then
 
                             If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
                                 If modifyAfterEntryTrigger AndAlso slOrder.TriggerPrice = triggerPrice AndAlso
                                     runningCandlePayload.SnapshotDateTime > bussinessOrder.ParentOrder.TimeStamp Then
                                     triggerPrice = runningCandlePayload.PreviousPayload.LowPrice.Value
-                                Else
-                                    If triggerPrice < slOrder.TriggerPrice Then
-                                        triggerPrice = Decimal.MinValue
-                                    End If
+                                    slOrder.SupportingFlag = True
+                                    'Else
+                                    '    If triggerPrice < slOrder.TriggerPrice Then
+                                    '        triggerPrice = Decimal.MinValue
+                                    '    End If
                                 End If
                             ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                                 If modifyAfterEntryTrigger AndAlso slOrder.TriggerPrice = triggerPrice AndAlso
                                     runningCandlePayload.SnapshotDateTime > bussinessOrder.ParentOrder.TimeStamp Then
                                     triggerPrice = runningCandlePayload.PreviousPayload.HighPrice.Value
-                                Else
-                                    If triggerPrice > slOrder.TriggerPrice Then
-                                        triggerPrice = Decimal.MinValue
-                                    End If
+                                    slOrder.SupportingFlag = True
+                                    'Else
+                                    '    If triggerPrice > slOrder.TriggerPrice Then
+                                    '        triggerPrice = Decimal.MinValue
+                                    '    End If
                                 End If
                             End If
 
@@ -502,7 +505,7 @@ Public Class PetDGandhiStrategyInstrument
                                     End If
                                 End If
                                 If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
-                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, "SL movement to signal candle high/low"))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, If(modifyAfterEntryTrigger, "Aggressive Modify", "Normal Modify")))
                             End If
                         End If
                     Next
@@ -516,11 +519,8 @@ Public Class PetDGandhiStrategyInstrument
         Throw New NotImplementedException()
     End Function
 
-    Protected Overrides Async Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
-        Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Nothing
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-
-        Return ret
+    Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
+        Throw New NotImplementedException()
     End Function
 
     Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
