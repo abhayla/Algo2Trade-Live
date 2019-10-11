@@ -681,27 +681,23 @@ Public Class MomentumReversalStrategyInstrument
     Private Function GetFirstOIOfTheMinute(ByVal currentTime As Date) As UInteger
         Dim ret As UInteger = UInteger.MinValue
         If Me.TradableInstrument.TickPayloads IsNot Nothing AndAlso Me.TradableInstrument.TickPayloads.Count > 0 Then
-            Try
-                Dim currentMinuteTicks As IEnumerable(Of ITick) =
-                Me.TradableInstrument.TickPayloads.Where(Function(x)
-                                                             If x Is Nothing OrElse x.Timestamp Is Nothing OrElse
-                                                                x.Timestamp.Value = Date.MinValue OrElse
-                                                                x.Timestamp.Value = New Date(1970, 1, 1, 5, 30, 0) Then
-                                                                 Return False
-                                                             ElseIf Utilities.Time.IsDateTimeEqualTillMinutes(x.Timestamp.Value, currentTime) Then
-                                                                 Return True
-                                                             Else
-                                                                 Return False
-                                                             End If
-                                                         End Function)
-                If currentMinuteTicks IsNot Nothing AndAlso currentMinuteTicks.Count > 0 Then
-                    ret = currentMinuteTicks.OrderBy(Function(x)
-                                                         Return x.Timestamp.Value
-                                                     End Function).FirstOrDefault.OI
-                End If
-            Catch ex As Exception
-                Throw ex
-            End Try
+            Dim currentMinuteTicks As IEnumerable(Of ITick) =
+            Me.TradableInstrument.TickPayloads.Where(Function(x)
+                                                         If x Is Nothing OrElse x.Timestamp Is Nothing OrElse
+                                                            x.Timestamp.Value = Date.MinValue OrElse
+                                                            x.Timestamp.Value = New Date(1970, 1, 1, 5, 30, 0) Then
+                                                             Return False
+                                                         ElseIf Utilities.Time.IsDateTimeEqualTillMinutes(x.Timestamp.Value, currentTime) Then
+                                                             Return True
+                                                         Else
+                                                             Return False
+                                                         End If
+                                                     End Function)
+            If currentMinuteTicks IsNot Nothing AndAlso currentMinuteTicks.Count > 0 Then
+                ret = currentMinuteTicks.OrderBy(Function(x)
+                                                     Return x.Timestamp.Value
+                                                 End Function).FirstOrDefault.OI
+            End If
         End If
         Return ret
     End Function
