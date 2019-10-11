@@ -91,7 +91,7 @@ Public Class PetDGandhiStrategyInstrument
                             potentialEntry = _potentialLowEntryPrice
                             slipage = placeOrderResponse.ParentOrder.AveragePrice - potentialEntry
                         End If
-                        Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Potential Entry:{8}, Entry Price:{9}({10}), {11}Stoploss Price:{12}, Potential Stoploss PL:{13}, {14}Target Price:{15}, Potential Target PL:{16}, {17}LTP:{18}, Tick Timestamp:{19}, {20}Timestamp:{21}",
+                        Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Potential Entry:{8}, Entry Price:{9}({10}), {11}Stoploss Price:{12}, Potential Stoploss PL:₹{13}, {14}Target Price:{15}, Potential Target PL:₹{16}, {17}LTP:{18}, Tick Timestamp:{19}, {20}Timestamp:{21}",
                                                                 Me.TradableInstrument.TradingSymbol,
                                                                 _signalCandle.SnapshotDateTime.ToShortTimeString,
                                                                 _signalCandle.CandleRange,
@@ -138,7 +138,7 @@ Public Class PetDGandhiStrategyInstrument
                             potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
                             potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
                         End If
-                        Dim message As String = String.Format("Order Modified. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}, {8}Entry Price:{9}, {10}Stoploss Price:{11}, Potential Stoploss PL:{12}, {13}Target Price:{14}, Potential Target PL:{15}, {16}Reason:{17}, Timestamp:{18}",
+                        Dim message As String = String.Format("Order Modified. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}, {8}Entry Price:{9}, {10}Stoploss Price:{11}, Potential Stoploss PL:₹{12}, {13}Target Price:{14}, Potential Target PL:₹{15}, {16}Reason:{17}, Timestamp:{18}",
                                                                 Me.TradableInstrument.TradingSymbol,
                                                                 _signalCandle.SnapshotDateTime.ToShortTimeString,
                                                                 _signalCandle.CandleRange,
@@ -566,7 +566,7 @@ Public Class PetDGandhiStrategyInstrument
                     slipage = potentialExitPrice - exitPrice
                     plSlipage = orderPL - potentialExitPL
                 End If
-                Dim message As String = String.Format("{0}. Trading Symbol:{1}, Signal Candle Time:{2}, Candle Range:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, {8}Entry Price:{9}, {10}Potential Exit Price:{11}, Exit Price:{12}({13}), {14}Potential Exit PL:{15}, Exit PL:{16}({17}), {18}Total Stock PL:{19}, Number Of Trade:{20}, {21}LTP:{22}, Tick Timestamp:{23}, {24}Timestamp:{25}",
+                Dim message As String = String.Format("{0}. Trading Symbol:{1}, Signal Candle Time:{2}, Candle Range:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, {8}Entry Price:{9}, {10}Potential Exit Price:{11}, Exit Price:{12}({13}), {14}Potential Exit PL:₹{15}, Exit PL:₹{16}(₹{17}), {18}Total Stock PL:₹{19}, Number Of Trade:{20}, {21}LTP:{22}, Tick Timestamp:{23}, {24}Timestamp:{25}",
                                                         reason,
                                                         Me.TradableInstrument.TradingSymbol,
                                                         _signalCandle.SnapshotDateTime.ToShortTimeString,
