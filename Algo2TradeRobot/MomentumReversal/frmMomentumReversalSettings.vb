@@ -34,13 +34,16 @@ Public Class frmMomentumReversalSettings
             dtpckrTradeStartTime.Value = _MRSettings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _MRSettings.LastTradeEntryTime
             dtpckrEODExitTime.Value = _MRSettings.EODExitTime
+            txtMaxLossPerDay.Text = _MRSettings.MaxLossPerDay
+            txtMaxProfitPerDay.Text = _MRSettings.MaxProfitPerDay
+            txtATRPeriod.Text = _MRSettings.ATRPeriod
+            txtNumberOfTradePerStock.Text = _MRSettings.NumberOfTradePerStock
             txtTargetMultiplier.Text = _MRSettings.TargetMultiplier
-            txtMaxLossPercentagePerDay.Text = _MRSettings.MaxLossPercentagePerDay
-            txtMaxProfitPercentagePerDay.Text = _MRSettings.MaxProfitPercentagePerDay
-            txtCandleWickSizePercentage.Text = _MRSettings.CandleWickSizePercentage
-            txtMinCandleRangePercentage.Text = _MRSettings.MinCandleRangePercentage
-            txtCapitalProtectionPercentage.Text = _MRSettings.MaxCapitalProtectionPercentage
             txtInstrumentDetalis.Text = _MRSettings.InstrumentDetailsFilePath
+
+            txtTelegramAPI.Text = _MRSettings.TelegramAPIKey
+            txtTelegramChatID.Text = _MRSettings.TelegramChatID
+            txtTelegramChatIDForPL.Text = _MRSettings.TelegramPLChatID
         End If
     End Sub
     Private Sub SaveSettings()
@@ -48,13 +51,16 @@ Public Class frmMomentumReversalSettings
         _MRSettings.TradeStartTime = dtpckrTradeStartTime.Value
         _MRSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
         _MRSettings.EODExitTime = dtpckrEODExitTime.Value
+        _MRSettings.MaxLossPerDay = txtMaxLossPerDay.Text
+        _MRSettings.MaxProfitPerDay = txtMaxProfitPerDay.Text
+        _MRSettings.ATRPeriod = txtATRPeriod.Text
+        _MRSettings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
         _MRSettings.TargetMultiplier = txtTargetMultiplier.Text
-        _MRSettings.MaxLossPercentagePerDay = txtMaxLossPercentagePerDay.Text
-        _MRSettings.MaxProfitPercentagePerDay = txtMaxProfitPercentagePerDay.Text
-        _MRSettings.CandleWickSizePercentage = txtCandleWickSizePercentage.Text
-        _MRSettings.MinCandleRangePercentage = txtMinCandleRangePercentage.Text
-        _MRSettings.MaxCapitalProtectionPercentage = txtCapitalProtectionPercentage.Text
         _MRSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+
+        _MRSettings.TelegramAPIKey = txtTelegramAPI.Text
+        _MRSettings.TelegramChatID = txtTelegramChatID.Text
+        _MRSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
 
         Utilities.Strings.SerializeFromCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename, _MRSettings)
     End Sub
@@ -72,17 +78,13 @@ Public Class frmMomentumReversalSettings
         _MRSettings.FillInstrumentDetails(txtInstrumentDetalis.Text, _cts)
     End Sub
     Private Sub ValidateInputs()
-        ValidateNumbers(0, 100, txtCandleWickSizePercentage)
-        ValidateNumbers(0, 100, txtMinCandleRangePercentage)
-        ValidateNumbers(0, 100, txtCapitalProtectionPercentage)
         ValidateNumbers(0, 999, txtTargetMultiplier)
         ValidateNumbers(1, 60, txtSignalTimeFrame)
-        ValidateNumbers(0, 100, txtMaxLossPercentagePerDay)
-        ValidateNumbers(0, 100, txtMaxProfitPercentagePerDay)
         ValidateFile()
     End Sub
 
     Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
+        opnFileSettings.Filter = "|*.csv"
         opnFileSettings.ShowDialog()
     End Sub
 

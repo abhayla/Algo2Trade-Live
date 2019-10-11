@@ -16,7 +16,7 @@ Public Class MomentumReversalStrategy
                    ByVal userSettings As MomentumReversalUserInputs,
                    ByVal maxNumberOfDaysForHistoricalFetch As Integer,
                    ByVal canceller As CancellationTokenSource)
-        MyBase.New(associatedParentController, strategyIdentifier, True, userSettings, maxNumberOfDaysForHistoricalFetch, canceller)
+        MyBase.New(associatedParentController, strategyIdentifier, True, userSettings, maxNumberOfDaysForHistoricalFetch, canceller, True)
         'Though the TradableStrategyInstruments is being populated from inside by newing it,
         'lets also initiatilize here so that after creation of the strategy and before populating strategy instruments,
         'the fron end grid can bind to this created TradableStrategyInstruments which will be empty
@@ -39,32 +39,10 @@ Public Class MomentumReversalStrategy
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
-
-            'Get MR Strategy Instruments
-            Dim mrUserInputs As MomentumReversalUserInputs = CType(Me.UserSettings, MomentumReversalUserInputs)
+            Dim mrUserInputs As MomentumReversalUserInputs = Me.UserSettings
             If mrUserInputs.InstrumentsData IsNot Nothing AndAlso mrUserInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
-                Dim cashInstrumentList As IEnumerable(Of KeyValuePair(Of String, MomentumReversalUserInputs.InstrumentDetails)) =
-                    mrUserInputs.InstrumentsData.Where(Function(x)
-                                                           Return x.Value.MarketType = IInstrument.TypeOfInstrument.Cash OrElse
-                                                           x.Value.MarketType = IInstrument.TypeOfInstrument.None
-                                                       End Function)
-                Dim futureInstrumentList As IEnumerable(Of KeyValuePair(Of String, MomentumReversalUserInputs.InstrumentDetails)) =
-                    mrUserInputs.InstrumentsData.Where(Function(x)
-                                                           Return x.Value.MarketType = IInstrument.TypeOfInstrument.Futures OrElse
-                                                           x.Value.MarketType = IInstrument.TypeOfInstrument.None
-                                                       End Function)
-                For Each instrument In cashInstrumentList.ToList
-                    _cts.Token.ThrowIfCancellationRequested()
-                    Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
-                                                                                                Return x.TradingSymbol = instrument.Key
-                                                                                            End Function)
-                    _cts.Token.ThrowIfCancellationRequested()
-                    ret = True
-                    If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
-                    If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
-                Next
-                For Each instrument In futureInstrumentList.ToList
+                For Each instrument In mrUserInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = Nothing
                     Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
@@ -73,7 +51,7 @@ Public Class MomentumReversalStrategy
                                                                                                      End Function)
 
                     Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date = Now.Date Then
+                                                                           If Not x.Expiry.Value.Date <= Now.Date Then
                                                                                Return x.Expiry.Value
                                                                            Else
                                                                                Return Date.MaxValue
@@ -157,16 +135,13 @@ Public Class MomentumReversalStrategy
     End Function
     Protected Overrides Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)
         Dim ret As Tuple(Of Boolean, String) = Nothing
-        Dim capitalAtDayStart As Decimal = Me.ParentController.GetUserMargin(Me.TradableInstrumentsAsPerStrategy.FirstOrDefault.ExchangeDetails.ExchangeType)
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf Me.GetTotalPL <= capitalAtDayStart * Math.Abs(Me.UserSettings.MaxLossPercentagePerDay) * -1 / 100 Then
-            logger.Warn("MTM Reached")
-            ret = New Tuple(Of Boolean, String)(True, "Max Loss % Per Day Reached Exit")
-        ElseIf Me.GetTotalPL >= capitalAtDayStart * Math.Abs(Me.UserSettings.MaxProfitPercentagePerDay) / 100 Then
-            logger.Warn("MTM Reached")
-            ret = New Tuple(Of Boolean, String)(True, "Max Profit % Per Day Reached Exit")
+        ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(CType(Me.UserSettings, MomentumReversalUserInputs).MaxLossPerDay) * -1 Then
+            ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
+        ElseIf Me.GetTotalPLAfterBrokerage >= CType(Me.UserSettings, MomentumReversalUserInputs).MaxProfitPerDay Then
+            ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
     End Function
