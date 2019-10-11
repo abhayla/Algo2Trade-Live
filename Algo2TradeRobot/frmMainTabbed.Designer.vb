@@ -30,6 +30,21 @@ Partial Class frmMainTabbed
         Me.miAdvancedOptions = New System.Windows.Forms.ToolStripMenuItem()
         Me.miAbout = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabMain = New System.Windows.Forms.TabControl()
+        Me.tabPetDGandhi = New System.Windows.Forms.TabPage()
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.btnPetDGandhiStop = New System.Windows.Forms.Button()
+        Me.btnPetDGandhiStart = New System.Windows.Forms.Button()
+        Me.Panel6 = New System.Windows.Forms.Panel()
+        Me.blbPetDGandhiTickerStatus = New Bulb.LedBulb()
+        Me.lblPetDGandhiTickerStatus = New System.Windows.Forms.Label()
+        Me.btnPetDGandhiSettings = New System.Windows.Forms.Button()
+        Me.linklblPetDGandhiTradableInstrument = New System.Windows.Forms.LinkLabel()
+        Me.pnlPetDGandhiBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
+        Me.PictureBox6 = New System.Windows.Forms.PictureBox()
+        Me.TableLayoutPanel4 = New System.Windows.Forms.TableLayoutPanel()
+        Me.lstPetDGandhiLog = New System.Windows.Forms.ListBox()
+        Me.sfdgvPetDGandhiMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
         Me.tabLowSL = New System.Windows.Forms.TabPage()
         Me.pnlLowSLMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
@@ -75,21 +90,6 @@ Partial Class frmMainTabbed
         Me.pnlTwoThirdBodyHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.lstTwoThirdLog = New System.Windows.Forms.ListBox()
         Me.sfdgvTwoThirdMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
-        Me.tabPetDGandhi = New System.Windows.Forms.TabPage()
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.btnPetDGandhiStop = New System.Windows.Forms.Button()
-        Me.btnPetDGandhiStart = New System.Windows.Forms.Button()
-        Me.Panel6 = New System.Windows.Forms.Panel()
-        Me.blbPetDGandhiTickerStatus = New Bulb.LedBulb()
-        Me.lblPetDGandhiTickerStatus = New System.Windows.Forms.Label()
-        Me.btnPetDGandhiSettings = New System.Windows.Forms.Button()
-        Me.linklblPetDGandhiTradableInstrument = New System.Windows.Forms.LinkLabel()
-        Me.pnlPetDGandhiBodyVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
-        Me.PictureBox6 = New System.Windows.Forms.PictureBox()
-        Me.TableLayoutPanel4 = New System.Windows.Forms.TableLayoutPanel()
-        Me.lstPetDGandhiLog = New System.Windows.Forms.ListBox()
-        Me.sfdgvPetDGandhiMainDashboard = New Syncfusion.WinForms.DataGrid.SfDataGrid()
         Me.tabEMACrossover = New System.Windows.Forms.TabPage()
         Me.pnlEMACrossoverMainPanelHorizontalSplitter = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlEMACrossoverTopHeaderVerticalSplitter = New System.Windows.Forms.TableLayoutPanel()
@@ -192,6 +192,14 @@ Partial Class frmMainTabbed
         Me.tmrTwoThirdTickerStatus = New System.Windows.Forms.Timer(Me.components)
         Me.msMainMenuStrip.SuspendLayout()
         Me.tabMain.SuspendLayout()
+        Me.tabPetDGandhi.SuspendLayout()
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.SuspendLayout()
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.SuspendLayout()
+        Me.Panel6.SuspendLayout()
+        Me.pnlPetDGandhiBodyVerticalSplitter.SuspendLayout()
+        CType(Me.PictureBox6, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.TableLayoutPanel4.SuspendLayout()
+        CType(Me.sfdgvPetDGandhiMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabLowSL.SuspendLayout()
         Me.pnlLowSLMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.SuspendLayout()
@@ -216,14 +224,6 @@ Partial Class frmMainTabbed
         CType(Me.PictureBox9, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pnlTwoThirdBodyHorizontalSplitter.SuspendLayout()
         CType(Me.sfdgvTwoThirdMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.tabPetDGandhi.SuspendLayout()
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.SuspendLayout()
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.SuspendLayout()
-        Me.Panel6.SuspendLayout()
-        Me.pnlPetDGandhiBodyVerticalSplitter.SuspendLayout()
-        CType(Me.PictureBox6, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.TableLayoutPanel4.SuspendLayout()
-        CType(Me.sfdgvPetDGandhiMainDashboard, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.tabEMACrossover.SuspendLayout()
         Me.pnlEMACrossoverMainPanelHorizontalSplitter.SuspendLayout()
         Me.pnlEMACrossoverTopHeaderVerticalSplitter.SuspendLayout()
@@ -313,6 +313,7 @@ Partial Class frmMainTabbed
         '
         'tabMain
         '
+        Me.tabMain.Controls.Add(Me.tabMomentumReversal)
         Me.tabMain.Controls.Add(Me.tabPetDGandhi)
         Me.tabMain.Controls.Add(Me.tabLowSL)
         Me.tabMain.Controls.Add(Me.tabVolumeSpike)
@@ -320,7 +321,6 @@ Partial Class frmMainTabbed
         Me.tabMain.Controls.Add(Me.tabEMACrossover)
         Me.tabMain.Controls.Add(Me.tabNearFarHedging)
         Me.tabMain.Controls.Add(Me.tabEMA_Supertrend)
-        Me.tabMain.Controls.Add(Me.tabMomentumReversal)
         Me.tabMain.Controls.Add(Me.tabOHL)
         Me.tabMain.Controls.Add(Me.tabAmiSignal)
         Me.tabMain.Dock = System.Windows.Forms.DockStyle.Fill
@@ -330,6 +330,218 @@ Partial Class frmMainTabbed
         Me.tabMain.SelectedIndex = 0
         Me.tabMain.Size = New System.Drawing.Size(1371, 722)
         Me.tabMain.TabIndex = 1
+        '
+        'tabPetDGandhi
+        '
+        Me.tabPetDGandhi.Controls.Add(Me.pnlPetDGandhiMainPanelHorizontalSplitter)
+        Me.tabPetDGandhi.Location = New System.Drawing.Point(4, 25)
+        Me.tabPetDGandhi.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.tabPetDGandhi.Name = "tabPetDGandhi"
+        Me.tabPetDGandhi.Size = New System.Drawing.Size(1363, 693)
+        Me.tabPetDGandhi.TabIndex = 5
+        Me.tabPetDGandhi.Text = "Pet-D Gandhi"
+        Me.tabPetDGandhi.UseVisualStyleBackColor = True
+        '
+        'pnlPetDGandhiMainPanelHorizontalSplitter
+        '
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.ColumnCount = 1
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Controls.Add(Me.pnlPetDGandhiTopHeaderVerticalSplitter, 0, 0)
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Controls.Add(Me.pnlPetDGandhiBodyVerticalSplitter, 0, 1)
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Name = "pnlPetDGandhiMainPanelHorizontalSplitter"
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.RowCount = 2
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.TabIndex = 3
+        '
+        'pnlPetDGandhiTopHeaderVerticalSplitter
+        '
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnCount = 15
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.btnPetDGandhiStop, 0, 0)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.btnPetDGandhiStart, 0, 0)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.Panel6, 14, 0)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.btnPetDGandhiSettings, 9, 0)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.linklblPetDGandhiTradableInstrument, 10, 0)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Name = "pnlPetDGandhiTopHeaderVerticalSplitter"
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.RowCount = 1
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.TabIndex = 0
+        '
+        'btnPetDGandhiStop
+        '
+        Me.btnPetDGandhiStop.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnPetDGandhiStop.Location = New System.Drawing.Point(94, 4)
+        Me.btnPetDGandhiStop.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnPetDGandhiStop.Name = "btnPetDGandhiStop"
+        Me.btnPetDGandhiStop.Size = New System.Drawing.Size(82, 32)
+        Me.btnPetDGandhiStop.TabIndex = 10
+        Me.btnPetDGandhiStop.Text = "Stop"
+        Me.btnPetDGandhiStop.UseVisualStyleBackColor = True
+        '
+        'btnPetDGandhiStart
+        '
+        Me.btnPetDGandhiStart.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnPetDGandhiStart.Location = New System.Drawing.Point(4, 4)
+        Me.btnPetDGandhiStart.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnPetDGandhiStart.Name = "btnPetDGandhiStart"
+        Me.btnPetDGandhiStart.Size = New System.Drawing.Size(82, 32)
+        Me.btnPetDGandhiStart.TabIndex = 2
+        Me.btnPetDGandhiStart.Text = "Start"
+        Me.btnPetDGandhiStart.UseVisualStyleBackColor = True
+        '
+        'Panel6
+        '
+        Me.Panel6.Controls.Add(Me.blbPetDGandhiTickerStatus)
+        Me.Panel6.Controls.Add(Me.lblPetDGandhiTickerStatus)
+        Me.Panel6.Location = New System.Drawing.Point(1201, 4)
+        Me.Panel6.Margin = New System.Windows.Forms.Padding(4)
+        Me.Panel6.Name = "Panel6"
+        Me.Panel6.Size = New System.Drawing.Size(147, 31)
+        Me.Panel6.TabIndex = 9
+        '
+        'blbPetDGandhiTickerStatus
+        '
+        Me.blbPetDGandhiTickerStatus.Color = System.Drawing.Color.Pink
+        Me.blbPetDGandhiTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
+        Me.blbPetDGandhiTickerStatus.Location = New System.Drawing.Point(100, 0)
+        Me.blbPetDGandhiTickerStatus.Margin = New System.Windows.Forms.Padding(4)
+        Me.blbPetDGandhiTickerStatus.Name = "blbPetDGandhiTickerStatus"
+        Me.blbPetDGandhiTickerStatus.On = True
+        Me.blbPetDGandhiTickerStatus.Size = New System.Drawing.Size(47, 31)
+        Me.blbPetDGandhiTickerStatus.TabIndex = 7
+        Me.blbPetDGandhiTickerStatus.Text = "LedBulb1"
+        '
+        'lblPetDGandhiTickerStatus
+        '
+        Me.lblPetDGandhiTickerStatus.AutoSize = True
+        Me.lblPetDGandhiTickerStatus.Location = New System.Drawing.Point(9, 9)
+        Me.lblPetDGandhiTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblPetDGandhiTickerStatus.Name = "lblPetDGandhiTickerStatus"
+        Me.lblPetDGandhiTickerStatus.Size = New System.Drawing.Size(91, 17)
+        Me.lblPetDGandhiTickerStatus.TabIndex = 9
+        Me.lblPetDGandhiTickerStatus.Text = "Ticker Status"
+        '
+        'btnPetDGandhiSettings
+        '
+        Me.btnPetDGandhiSettings.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.btnPetDGandhiSettings.Location = New System.Drawing.Point(814, 4)
+        Me.btnPetDGandhiSettings.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnPetDGandhiSettings.Name = "btnPetDGandhiSettings"
+        Me.btnPetDGandhiSettings.Size = New System.Drawing.Size(82, 32)
+        Me.btnPetDGandhiSettings.TabIndex = 11
+        Me.btnPetDGandhiSettings.Text = "Settings"
+        Me.btnPetDGandhiSettings.UseVisualStyleBackColor = True
+        '
+        'linklblPetDGandhiTradableInstrument
+        '
+        Me.linklblPetDGandhiTradableInstrument.AutoSize = True
+        Me.linklblPetDGandhiTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.linklblPetDGandhiTradableInstrument.Enabled = False
+        Me.linklblPetDGandhiTradableInstrument.Location = New System.Drawing.Point(903, 0)
+        Me.linklblPetDGandhiTradableInstrument.Name = "linklblPetDGandhiTradableInstrument"
+        Me.linklblPetDGandhiTradableInstrument.Size = New System.Drawing.Size(220, 40)
+        Me.linklblPetDGandhiTradableInstrument.TabIndex = 12
+        Me.linklblPetDGandhiTradableInstrument.TabStop = True
+        Me.linklblPetDGandhiTradableInstrument.Text = "Tradable Instruments: 0"
+        Me.linklblPetDGandhiTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'pnlPetDGandhiBodyVerticalSplitter
+        '
+        Me.pnlPetDGandhiBodyVerticalSplitter.ColumnCount = 2
+        Me.pnlPetDGandhiBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.pnlPetDGandhiBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.pnlPetDGandhiBodyVerticalSplitter.Controls.Add(Me.PictureBox6, 0, 0)
+        Me.pnlPetDGandhiBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel4, 0, 0)
+        Me.pnlPetDGandhiBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlPetDGandhiBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
+        Me.pnlPetDGandhiBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
+        Me.pnlPetDGandhiBodyVerticalSplitter.Name = "pnlPetDGandhiBodyVerticalSplitter"
+        Me.pnlPetDGandhiBodyVerticalSplitter.RowCount = 1
+        Me.pnlPetDGandhiBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.pnlPetDGandhiBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
+        Me.pnlPetDGandhiBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
+        Me.pnlPetDGandhiBodyVerticalSplitter.TabIndex = 1
+        '
+        'PictureBox6
+        '
+        Me.PictureBox6.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox6.Image = CType(resources.GetObject("PictureBox6.Image"), System.Drawing.Image)
+        Me.PictureBox6.Location = New System.Drawing.Point(951, 2)
+        Me.PictureBox6.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.PictureBox6.Name = "PictureBox6"
+        Me.PictureBox6.Size = New System.Drawing.Size(401, 633)
+        Me.PictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox6.TabIndex = 2
+        Me.PictureBox6.TabStop = False
+        '
+        'TableLayoutPanel4
+        '
+        Me.TableLayoutPanel4.ColumnCount = 1
+        Me.TableLayoutPanel4.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.TableLayoutPanel4.Controls.Add(Me.lstPetDGandhiLog, 0, 1)
+        Me.TableLayoutPanel4.Controls.Add(Me.sfdgvPetDGandhiMainDashboard, 0, 0)
+        Me.TableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.TableLayoutPanel4.Location = New System.Drawing.Point(4, 4)
+        Me.TableLayoutPanel4.Margin = New System.Windows.Forms.Padding(4)
+        Me.TableLayoutPanel4.Name = "TableLayoutPanel4"
+        Me.TableLayoutPanel4.RowCount = 2
+        Me.TableLayoutPanel4.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
+        Me.TableLayoutPanel4.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
+        Me.TableLayoutPanel4.Size = New System.Drawing.Size(940, 629)
+        Me.TableLayoutPanel4.TabIndex = 0
+        '
+        'lstPetDGandhiLog
+        '
+        Me.lstPetDGandhiLog.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lstPetDGandhiLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
+        Me.lstPetDGandhiLog.FormattingEnabled = True
+        Me.lstPetDGandhiLog.ItemHeight = 16
+        Me.lstPetDGandhiLog.Location = New System.Drawing.Point(4, 444)
+        Me.lstPetDGandhiLog.Margin = New System.Windows.Forms.Padding(4)
+        Me.lstPetDGandhiLog.Name = "lstPetDGandhiLog"
+        Me.lstPetDGandhiLog.Size = New System.Drawing.Size(932, 181)
+        Me.lstPetDGandhiLog.TabIndex = 9
+        '
+        'sfdgvPetDGandhiMainDashboard
+        '
+        Me.sfdgvPetDGandhiMainDashboard.AccessibleName = "Table"
+        Me.sfdgvPetDGandhiMainDashboard.AllowDraggingColumns = True
+        Me.sfdgvPetDGandhiMainDashboard.AllowEditing = False
+        Me.sfdgvPetDGandhiMainDashboard.AllowFiltering = True
+        Me.sfdgvPetDGandhiMainDashboard.AllowResizingColumns = True
+        Me.sfdgvPetDGandhiMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
+        Me.sfdgvPetDGandhiMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
+        Me.sfdgvPetDGandhiMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.sfdgvPetDGandhiMainDashboard.Location = New System.Drawing.Point(4, 4)
+        Me.sfdgvPetDGandhiMainDashboard.Margin = New System.Windows.Forms.Padding(4)
+        Me.sfdgvPetDGandhiMainDashboard.Name = "sfdgvPetDGandhiMainDashboard"
+        Me.sfdgvPetDGandhiMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
+        Me.sfdgvPetDGandhiMainDashboard.Size = New System.Drawing.Size(932, 432)
+        Me.sfdgvPetDGandhiMainDashboard.TabIndex = 6
+        Me.sfdgvPetDGandhiMainDashboard.Text = "SfDataGrid1"
         '
         'tabLowSL
         '
@@ -963,218 +1175,6 @@ Partial Class frmMainTabbed
         Me.sfdgvTwoThirdMainDashboard.Size = New System.Drawing.Size(932, 432)
         Me.sfdgvTwoThirdMainDashboard.TabIndex = 6
         Me.sfdgvTwoThirdMainDashboard.Text = "SfDataGrid1"
-        '
-        'tabPetDGandhi
-        '
-        Me.tabPetDGandhi.Controls.Add(Me.pnlPetDGandhiMainPanelHorizontalSplitter)
-        Me.tabPetDGandhi.Location = New System.Drawing.Point(4, 25)
-        Me.tabPetDGandhi.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.tabPetDGandhi.Name = "tabPetDGandhi"
-        Me.tabPetDGandhi.Size = New System.Drawing.Size(1363, 693)
-        Me.tabPetDGandhi.TabIndex = 5
-        Me.tabPetDGandhi.Text = "Pet-D Gandhi"
-        Me.tabPetDGandhi.UseVisualStyleBackColor = True
-        '
-        'pnlPetDGandhiMainPanelHorizontalSplitter
-        '
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.ColumnCount = 1
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Controls.Add(Me.pnlPetDGandhiTopHeaderVerticalSplitter, 0, 0)
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Controls.Add(Me.pnlPetDGandhiBodyVerticalSplitter, 0, 1)
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Location = New System.Drawing.Point(0, 0)
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Name = "pnlPetDGandhiMainPanelHorizontalSplitter"
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.RowCount = 2
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 7.0!))
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 93.0!))
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.Size = New System.Drawing.Size(1363, 693)
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.TabIndex = 3
-        '
-        'pnlPetDGandhiTopHeaderVerticalSplitter
-        '
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnCount = 15
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 6.666668!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.70379!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 0.8166295!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 1.707498!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.741935!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.29032!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.btnPetDGandhiStop, 0, 0)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.btnPetDGandhiStart, 0, 0)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.Panel6, 14, 0)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.btnPetDGandhiSettings, 9, 0)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Controls.Add(Me.linklblPetDGandhiTradableInstrument, 10, 0)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Location = New System.Drawing.Point(4, 4)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Name = "pnlPetDGandhiTopHeaderVerticalSplitter"
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.RowCount = 1
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.Size = New System.Drawing.Size(1355, 40)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.TabIndex = 0
-        '
-        'btnPetDGandhiStop
-        '
-        Me.btnPetDGandhiStop.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnPetDGandhiStop.Location = New System.Drawing.Point(94, 4)
-        Me.btnPetDGandhiStop.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnPetDGandhiStop.Name = "btnPetDGandhiStop"
-        Me.btnPetDGandhiStop.Size = New System.Drawing.Size(82, 32)
-        Me.btnPetDGandhiStop.TabIndex = 10
-        Me.btnPetDGandhiStop.Text = "Stop"
-        Me.btnPetDGandhiStop.UseVisualStyleBackColor = True
-        '
-        'btnPetDGandhiStart
-        '
-        Me.btnPetDGandhiStart.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnPetDGandhiStart.Location = New System.Drawing.Point(4, 4)
-        Me.btnPetDGandhiStart.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnPetDGandhiStart.Name = "btnPetDGandhiStart"
-        Me.btnPetDGandhiStart.Size = New System.Drawing.Size(82, 32)
-        Me.btnPetDGandhiStart.TabIndex = 2
-        Me.btnPetDGandhiStart.Text = "Start"
-        Me.btnPetDGandhiStart.UseVisualStyleBackColor = True
-        '
-        'Panel6
-        '
-        Me.Panel6.Controls.Add(Me.blbPetDGandhiTickerStatus)
-        Me.Panel6.Controls.Add(Me.lblPetDGandhiTickerStatus)
-        Me.Panel6.Location = New System.Drawing.Point(1201, 4)
-        Me.Panel6.Margin = New System.Windows.Forms.Padding(4)
-        Me.Panel6.Name = "Panel6"
-        Me.Panel6.Size = New System.Drawing.Size(147, 31)
-        Me.Panel6.TabIndex = 9
-        '
-        'blbPetDGandhiTickerStatus
-        '
-        Me.blbPetDGandhiTickerStatus.Color = System.Drawing.Color.Pink
-        Me.blbPetDGandhiTickerStatus.Dock = System.Windows.Forms.DockStyle.Right
-        Me.blbPetDGandhiTickerStatus.Location = New System.Drawing.Point(100, 0)
-        Me.blbPetDGandhiTickerStatus.Margin = New System.Windows.Forms.Padding(4)
-        Me.blbPetDGandhiTickerStatus.Name = "blbPetDGandhiTickerStatus"
-        Me.blbPetDGandhiTickerStatus.On = True
-        Me.blbPetDGandhiTickerStatus.Size = New System.Drawing.Size(47, 31)
-        Me.blbPetDGandhiTickerStatus.TabIndex = 7
-        Me.blbPetDGandhiTickerStatus.Text = "LedBulb1"
-        '
-        'lblPetDGandhiTickerStatus
-        '
-        Me.lblPetDGandhiTickerStatus.AutoSize = True
-        Me.lblPetDGandhiTickerStatus.Location = New System.Drawing.Point(9, 9)
-        Me.lblPetDGandhiTickerStatus.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblPetDGandhiTickerStatus.Name = "lblPetDGandhiTickerStatus"
-        Me.lblPetDGandhiTickerStatus.Size = New System.Drawing.Size(91, 17)
-        Me.lblPetDGandhiTickerStatus.TabIndex = 9
-        Me.lblPetDGandhiTickerStatus.Text = "Ticker Status"
-        '
-        'btnPetDGandhiSettings
-        '
-        Me.btnPetDGandhiSettings.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.btnPetDGandhiSettings.Location = New System.Drawing.Point(814, 4)
-        Me.btnPetDGandhiSettings.Margin = New System.Windows.Forms.Padding(4)
-        Me.btnPetDGandhiSettings.Name = "btnPetDGandhiSettings"
-        Me.btnPetDGandhiSettings.Size = New System.Drawing.Size(82, 32)
-        Me.btnPetDGandhiSettings.TabIndex = 11
-        Me.btnPetDGandhiSettings.Text = "Settings"
-        Me.btnPetDGandhiSettings.UseVisualStyleBackColor = True
-        '
-        'linklblPetDGandhiTradableInstrument
-        '
-        Me.linklblPetDGandhiTradableInstrument.AutoSize = True
-        Me.linklblPetDGandhiTradableInstrument.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.linklblPetDGandhiTradableInstrument.Enabled = False
-        Me.linklblPetDGandhiTradableInstrument.Location = New System.Drawing.Point(903, 0)
-        Me.linklblPetDGandhiTradableInstrument.Name = "linklblPetDGandhiTradableInstrument"
-        Me.linklblPetDGandhiTradableInstrument.Size = New System.Drawing.Size(220, 40)
-        Me.linklblPetDGandhiTradableInstrument.TabIndex = 12
-        Me.linklblPetDGandhiTradableInstrument.TabStop = True
-        Me.linklblPetDGandhiTradableInstrument.Text = "Tradable Instruments: 0"
-        Me.linklblPetDGandhiTradableInstrument.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        '
-        'pnlPetDGandhiBodyVerticalSplitter
-        '
-        Me.pnlPetDGandhiBodyVerticalSplitter.ColumnCount = 2
-        Me.pnlPetDGandhiBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
-        Me.pnlPetDGandhiBodyVerticalSplitter.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.pnlPetDGandhiBodyVerticalSplitter.Controls.Add(Me.PictureBox6, 0, 0)
-        Me.pnlPetDGandhiBodyVerticalSplitter.Controls.Add(Me.TableLayoutPanel4, 0, 0)
-        Me.pnlPetDGandhiBodyVerticalSplitter.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.pnlPetDGandhiBodyVerticalSplitter.Location = New System.Drawing.Point(4, 52)
-        Me.pnlPetDGandhiBodyVerticalSplitter.Margin = New System.Windows.Forms.Padding(4)
-        Me.pnlPetDGandhiBodyVerticalSplitter.Name = "pnlPetDGandhiBodyVerticalSplitter"
-        Me.pnlPetDGandhiBodyVerticalSplitter.RowCount = 1
-        Me.pnlPetDGandhiBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.pnlPetDGandhiBodyVerticalSplitter.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 637.0!))
-        Me.pnlPetDGandhiBodyVerticalSplitter.Size = New System.Drawing.Size(1355, 637)
-        Me.pnlPetDGandhiBodyVerticalSplitter.TabIndex = 1
-        '
-        'PictureBox6
-        '
-        Me.PictureBox6.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.PictureBox6.Image = CType(resources.GetObject("PictureBox6.Image"), System.Drawing.Image)
-        Me.PictureBox6.Location = New System.Drawing.Point(951, 2)
-        Me.PictureBox6.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.PictureBox6.Name = "PictureBox6"
-        Me.PictureBox6.Size = New System.Drawing.Size(401, 633)
-        Me.PictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox6.TabIndex = 2
-        Me.PictureBox6.TabStop = False
-        '
-        'TableLayoutPanel4
-        '
-        Me.TableLayoutPanel4.ColumnCount = 1
-        Me.TableLayoutPanel4.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.TableLayoutPanel4.Controls.Add(Me.lstPetDGandhiLog, 0, 1)
-        Me.TableLayoutPanel4.Controls.Add(Me.sfdgvPetDGandhiMainDashboard, 0, 0)
-        Me.TableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.TableLayoutPanel4.Location = New System.Drawing.Point(4, 4)
-        Me.TableLayoutPanel4.Margin = New System.Windows.Forms.Padding(4)
-        Me.TableLayoutPanel4.Name = "TableLayoutPanel4"
-        Me.TableLayoutPanel4.RowCount = 2
-        Me.TableLayoutPanel4.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70.0!))
-        Me.TableLayoutPanel4.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.0!))
-        Me.TableLayoutPanel4.Size = New System.Drawing.Size(940, 629)
-        Me.TableLayoutPanel4.TabIndex = 0
-        '
-        'lstPetDGandhiLog
-        '
-        Me.lstPetDGandhiLog.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.lstPetDGandhiLog.ForeColor = System.Drawing.Color.FromArgb(CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer), CType(CType(29, Byte), Integer))
-        Me.lstPetDGandhiLog.FormattingEnabled = True
-        Me.lstPetDGandhiLog.ItemHeight = 16
-        Me.lstPetDGandhiLog.Location = New System.Drawing.Point(4, 444)
-        Me.lstPetDGandhiLog.Margin = New System.Windows.Forms.Padding(4)
-        Me.lstPetDGandhiLog.Name = "lstPetDGandhiLog"
-        Me.lstPetDGandhiLog.Size = New System.Drawing.Size(932, 181)
-        Me.lstPetDGandhiLog.TabIndex = 9
-        '
-        'sfdgvPetDGandhiMainDashboard
-        '
-        Me.sfdgvPetDGandhiMainDashboard.AccessibleName = "Table"
-        Me.sfdgvPetDGandhiMainDashboard.AllowDraggingColumns = True
-        Me.sfdgvPetDGandhiMainDashboard.AllowEditing = False
-        Me.sfdgvPetDGandhiMainDashboard.AllowFiltering = True
-        Me.sfdgvPetDGandhiMainDashboard.AllowResizingColumns = True
-        Me.sfdgvPetDGandhiMainDashboard.AutoGenerateColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoGenerateColumnsMode.SmartReset
-        Me.sfdgvPetDGandhiMainDashboard.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.AllCells
-        Me.sfdgvPetDGandhiMainDashboard.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.sfdgvPetDGandhiMainDashboard.Location = New System.Drawing.Point(4, 4)
-        Me.sfdgvPetDGandhiMainDashboard.Margin = New System.Windows.Forms.Padding(4)
-        Me.sfdgvPetDGandhiMainDashboard.Name = "sfdgvPetDGandhiMainDashboard"
-        Me.sfdgvPetDGandhiMainDashboard.PasteOption = Syncfusion.WinForms.DataGrid.Enums.PasteOptions.None
-        Me.sfdgvPetDGandhiMainDashboard.Size = New System.Drawing.Size(932, 432)
-        Me.sfdgvPetDGandhiMainDashboard.TabIndex = 6
-        Me.sfdgvPetDGandhiMainDashboard.Text = "SfDataGrid1"
         '
         'tabEMACrossover
         '
@@ -2504,6 +2504,16 @@ Partial Class frmMainTabbed
         Me.msMainMenuStrip.ResumeLayout(False)
         Me.msMainMenuStrip.PerformLayout()
         Me.tabMain.ResumeLayout(False)
+        Me.tabPetDGandhi.ResumeLayout(False)
+        Me.pnlPetDGandhiMainPanelHorizontalSplitter.ResumeLayout(False)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ResumeLayout(False)
+        Me.pnlPetDGandhiTopHeaderVerticalSplitter.PerformLayout()
+        Me.Panel6.ResumeLayout(False)
+        Me.Panel6.PerformLayout()
+        Me.pnlPetDGandhiBodyVerticalSplitter.ResumeLayout(False)
+        CType(Me.PictureBox6, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.TableLayoutPanel4.ResumeLayout(False)
+        CType(Me.sfdgvPetDGandhiMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabLowSL.ResumeLayout(False)
         Me.pnlLowSLMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlJoyMaaATMTopHeaderVerticalSplitter.ResumeLayout(False)
@@ -2534,16 +2544,6 @@ Partial Class frmMainTabbed
         CType(Me.PictureBox9, System.ComponentModel.ISupportInitialize).EndInit()
         Me.pnlTwoThirdBodyHorizontalSplitter.ResumeLayout(False)
         CType(Me.sfdgvTwoThirdMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.tabPetDGandhi.ResumeLayout(False)
-        Me.pnlPetDGandhiMainPanelHorizontalSplitter.ResumeLayout(False)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.ResumeLayout(False)
-        Me.pnlPetDGandhiTopHeaderVerticalSplitter.PerformLayout()
-        Me.Panel6.ResumeLayout(False)
-        Me.Panel6.PerformLayout()
-        Me.pnlPetDGandhiBodyVerticalSplitter.ResumeLayout(False)
-        CType(Me.PictureBox6, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.TableLayoutPanel4.ResumeLayout(False)
-        CType(Me.sfdgvPetDGandhiMainDashboard, System.ComponentModel.ISupportInitialize).EndInit()
         Me.tabEMACrossover.ResumeLayout(False)
         Me.pnlEMACrossoverMainPanelHorizontalSplitter.ResumeLayout(False)
         Me.pnlEMACrossoverTopHeaderVerticalSplitter.ResumeLayout(False)
