@@ -15,6 +15,7 @@ Public Class MomentumReversalStrategyInstrument
 #End Region
 
     Private _lastPrevPayloadPlaceOrder As String = ""
+    Private _entryChanged As Boolean = False
     Private _potentialHighEntryPrice As Decimal = Decimal.MinValue
     Private _potentialLowEntryPrice As Decimal = Decimal.MinValue
     Private _candleRange As Decimal = Decimal.MinValue
@@ -24,7 +25,6 @@ Public Class MomentumReversalStrategyInstrument
     Private _lastTick As ITick = Nothing
     Private _eligibleToTakeTrade As Boolean = True
 
-    Private ReadOnly _initialSLPercentage As Decimal = 10
     Private ReadOnly _dummyATRConsumer As ATRConsumer
 
     Public Sub New(ByVal associatedInstrument As IInstrument,
@@ -128,51 +128,51 @@ Public Class MomentumReversalStrategyInstrument
                 End If
                 'Place Order block end
 
-                _cts.Token.ThrowIfCancellationRequested()
-                'Modify Order block start
-                Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
-                If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
-                    Dim modifyOrderResponses As List(Of IBusinessOrder) = Await ModifySLPaperTradeAsync(modifyStoplossOrderTrigger).ConfigureAwait(False)
-                    Dim modifyOrderResponse As IBusinessOrder = Nothing
-                    If modifyOrderResponses IsNot Nothing AndAlso modifyOrderResponses.Count > 0 Then
-                        modifyOrderResponse = modifyOrderResponses.FirstOrDefault
-                    End If
-                    If modifyOrderResponse IsNot Nothing Then
-                        Dim potentialTargetPL As Decimal = 0
-                        Dim potentialStoplossPL As Decimal = 0
-                        If modifyOrderResponse.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                            potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
-                            potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, modifyOrderResponse.ParentOrder.Quantity)
-                        ElseIf modifyOrderResponse.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                            potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
-                            potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
-                        End If
-                        Dim message As String = String.Format("Order Modified. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, SL Point:{7}, {8}Entry Price:{9}, {10}Stoploss Price:{11}, Potential Stoploss PL:₹{12}, {13}Target Price:{14}, Potential Target PL:₹{15}, {16}Reason:{17}, {18}Total Stock PL:₹{19}, Timestamp:{20}",
-                                                                Me.TradableInstrument.TradingSymbol,
-                                                                _signalCandle.SnapshotDateTime.ToShortTimeString,
-                                                                _candleRange,
-                                                                GetHighestATROfTheDay(_signalCandle),
-                                                                modifyOrderResponse.ParentOrder.Quantity,
-                                                                vbNewLine,
-                                                                modifyOrderResponse.ParentOrder.TransactionType.ToString,
-                                                                _slPoint,
-                                                                vbNewLine,
-                                                                modifyOrderResponse.ParentOrder.AveragePrice,
-                                                                vbNewLine,
-                                                                modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice,
-                                                                Math.Round(potentialStoplossPL, 2),
-                                                                vbNewLine,
-                                                                modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice,
-                                                                Math.Round(potentialTargetPL, 2),
-                                                                vbNewLine,
-                                                                modifyStoplossOrderTrigger.LastOrDefault.Item4,
-                                                                vbNewLine,
-                                                                Math.Round(Me.GetOverallPLAfterBrokerage(), 2),
-                                                                Now)
-                        GenerateTelegramMessageAsync(message)
-                    End If
-                End If
-                'Modify Order block end
+                '_cts.Token.ThrowIfCancellationRequested()
+                ''Modify Order block start
+                'Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
+                'If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
+                '    Dim modifyOrderResponses As List(Of IBusinessOrder) = Await ModifySLPaperTradeAsync(modifyStoplossOrderTrigger).ConfigureAwait(False)
+                '    Dim modifyOrderResponse As IBusinessOrder = Nothing
+                '    If modifyOrderResponses IsNot Nothing AndAlso modifyOrderResponses.Count > 0 Then
+                '        modifyOrderResponse = modifyOrderResponses.FirstOrDefault
+                '    End If
+                '    If modifyOrderResponse IsNot Nothing Then
+                '        Dim potentialTargetPL As Decimal = 0
+                '        Dim potentialStoplossPL As Decimal = 0
+                '        If modifyOrderResponse.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                '            potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
+                '            potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, modifyOrderResponse.ParentOrder.Quantity)
+                '        ElseIf modifyOrderResponse.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                '            potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
+                '            potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
+                '        End If
+                '        Dim message As String = String.Format("Order Modified. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, SL Point:{7}, {8}Entry Price:{9}, {10}Stoploss Price:{11}, Potential Stoploss PL:₹{12}, {13}Target Price:{14}, Potential Target PL:₹{15}, {16}Reason:{17}, {18}Total Stock PL:₹{19}, Timestamp:{20}",
+                '                                                Me.TradableInstrument.TradingSymbol,
+                '                                                _signalCandle.SnapshotDateTime.ToShortTimeString,
+                '                                                _candleRange,
+                '                                                GetHighestATROfTheDay(_signalCandle),
+                '                                                modifyOrderResponse.ParentOrder.Quantity,
+                '                                                vbNewLine,
+                '                                                modifyOrderResponse.ParentOrder.TransactionType.ToString,
+                '                                                _slPoint,
+                '                                                vbNewLine,
+                '                                                modifyOrderResponse.ParentOrder.AveragePrice,
+                '                                                vbNewLine,
+                '                                                modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice,
+                '                                                Math.Round(potentialStoplossPL, 2),
+                '                                                vbNewLine,
+                '                                                modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice,
+                '                                                Math.Round(potentialTargetPL, 2),
+                '                                                vbNewLine,
+                '                                                modifyStoplossOrderTrigger.LastOrDefault.Item4,
+                '                                                vbNewLine,
+                '                                                Math.Round(Me.GetOverallPLAfterBrokerage(), 2),
+                '                                                Now)
+                '        GenerateTelegramMessageAsync(message)
+                '    End If
+                'End If
+                ''Modify Order block end
 
                 _cts.Token.ThrowIfCancellationRequested()
                 Dim activeOrder As IBusinessOrder = Me.GetActiveOrder(IOrder.TypeOfTransaction.None)
@@ -245,6 +245,28 @@ Public Class MomentumReversalStrategyInstrument
                 currentTick.LastPrice > middlePoint - userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Buffer Then
                 _eligibleToTakeTrade = True
                 logger.Debug("LTP is inside entry range. {0}", Me.TradableInstrument.TradingSymbol)
+            End If
+        End If
+
+        If Not _entryChanged Then
+            If Me.OrderDetails IsNot Nothing AndAlso Me.OrderDetails.Count > 0 Then
+                Dim firstOrder As IBusinessOrder = Nothing
+                For Each runningOrder In OrderDetails.OrderBy(Function(x)
+                                                                  Return x.Value.ParentOrder.TimeStamp
+                                                              End Function)
+                    If runningOrder.Value.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                        firstOrder = runningOrder.Value
+                        Exit For
+                    End If
+                Next
+                If firstOrder IsNot Nothing Then
+                    If firstOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        _potentialLowEntryPrice = _potentialHighEntryPrice - _slPoint - 2 * userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Buffer
+                    ElseIf firstOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        _potentialHighEntryPrice = _potentialLowEntryPrice + _slPoint + 2 * userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Buffer
+                    End If
+                    _entryChanged = True
+                End If
             End If
         End If
 
@@ -405,78 +427,79 @@ Public Class MomentumReversalStrategyInstrument
 
         Return ret
     End Function
-    Protected Overrides Async Function IsTriggerReceivedForModifyStoplossOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
-        Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Nothing
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim userSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
-        Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
-        Dim currentTick As ITick = _lastTick
-        If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
-            OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
-            For Each runningOrderID In OrderDetails.Keys
-                Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
-                If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
-                    Dim triggerPrice As Decimal = Decimal.MinValue
-                    Dim modifyAfterEntryTrigger As Boolean = False
-                    Dim buffer As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Buffer
-                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                        triggerPrice = ConvertFloorCeling(((_potentialHighEntryPrice - buffer) - _slPoint) + _slPoint * _initialSLPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
-                        Dim middlePoint As Decimal = (_potentialHighEntryPrice + (_potentialHighEntryPrice - _slPoint)) / 2
-                        If runningCandlePayload.PreviousPayload.LowPrice.Value < middlePoint AndAlso runningCandlePayload.PreviousPayload.LowPrice.Value > triggerPrice Then
-                            modifyAfterEntryTrigger = True
-                        End If
-                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                        triggerPrice = ConvertFloorCeling(((_potentialLowEntryPrice + buffer) + _slPoint) - _slPoint * _initialSLPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                        Dim middlePoint As Decimal = ((_potentialLowEntryPrice + _slPoint) + _potentialLowEntryPrice) / 2
-                        If runningCandlePayload.PreviousPayload.HighPrice.Value > middlePoint AndAlso runningCandlePayload.PreviousPayload.HighPrice.Value < triggerPrice Then
-                            modifyAfterEntryTrigger = True
-                        End If
-                    End If
-                    For Each slOrder In bussinessOrder.SLOrder
-                        If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
-                            Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
-                            Not slOrder.Status = IOrder.TypeOfStatus.Rejected AndAlso
-                            Not slOrder.SupportingFlag Then
+    Protected Overrides Function IsTriggerReceivedForModifyStoplossOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
+        'Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Nothing
+        'Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+        'Dim userSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
+        'Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
+        'Dim currentTick As ITick = _lastTick
+        'If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
+        '    OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+        '    For Each runningOrderID In OrderDetails.Keys
+        '        Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
+        '        If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
+        '            Dim triggerPrice As Decimal = Decimal.MinValue
+        '            Dim modifyAfterEntryTrigger As Boolean = False
+        '            Dim buffer As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Buffer
+        '            If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+        '                triggerPrice = ConvertFloorCeling((_potentialHighEntryPrice - buffer) - _slPoint, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+        '                Dim middlePoint As Decimal = (_potentialHighEntryPrice + (_potentialHighEntryPrice - _slPoint)) / 2
+        '                If runningCandlePayload.PreviousPayload.LowPrice.Value < middlePoint AndAlso runningCandlePayload.PreviousPayload.LowPrice.Value > triggerPrice Then
+        '                    modifyAfterEntryTrigger = True
+        '                End If
+        '            ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+        '                triggerPrice = ConvertFloorCeling((_potentialLowEntryPrice + buffer) + _slPoint, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+        '                Dim middlePoint As Decimal = ((_potentialLowEntryPrice + _slPoint) + _potentialLowEntryPrice) / 2
+        '                If runningCandlePayload.PreviousPayload.HighPrice.Value > middlePoint AndAlso runningCandlePayload.PreviousPayload.HighPrice.Value < triggerPrice Then
+        '                    modifyAfterEntryTrigger = True
+        '                End If
+        '            End If
+        '            For Each slOrder In bussinessOrder.SLOrder
+        '                If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
+        '                    Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
+        '                    Not slOrder.Status = IOrder.TypeOfStatus.Rejected AndAlso
+        '                    Not slOrder.SupportingFlag Then
 
-                            If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                If modifyAfterEntryTrigger AndAlso slOrder.TriggerPrice = triggerPrice AndAlso
-                                    runningCandlePayload.SnapshotDateTime > bussinessOrder.ParentOrder.TimeStamp Then
-                                    triggerPrice = runningCandlePayload.PreviousPayload.LowPrice.Value
-                                    slOrder.SupportingFlag = True
-                                Else
-                                    modifyAfterEntryTrigger = False
-                                End If
-                            ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                If modifyAfterEntryTrigger AndAlso slOrder.TriggerPrice = triggerPrice AndAlso
-                                    runningCandlePayload.SnapshotDateTime > bussinessOrder.ParentOrder.TimeStamp Then
-                                    triggerPrice = runningCandlePayload.PreviousPayload.HighPrice.Value
-                                    slOrder.SupportingFlag = True
-                                Else
-                                    modifyAfterEntryTrigger = False
-                                End If
-                            End If
+        '                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+        '                        If modifyAfterEntryTrigger AndAlso slOrder.TriggerPrice = triggerPrice AndAlso
+        '                            runningCandlePayload.SnapshotDateTime > bussinessOrder.ParentOrder.TimeStamp Then
+        '                            triggerPrice = runningCandlePayload.PreviousPayload.LowPrice.Value
+        '                            slOrder.SupportingFlag = True
+        '                        Else
+        '                            modifyAfterEntryTrigger = False
+        '                        End If
+        '                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+        '                        If modifyAfterEntryTrigger AndAlso slOrder.TriggerPrice = triggerPrice AndAlso
+        '                            runningCandlePayload.SnapshotDateTime > bussinessOrder.ParentOrder.TimeStamp Then
+        '                            triggerPrice = runningCandlePayload.PreviousPayload.HighPrice.Value
+        '                            slOrder.SupportingFlag = True
+        '                        Else
+        '                            modifyAfterEntryTrigger = False
+        '                        End If
+        '                    End If
 
-                            If triggerPrice <> Decimal.MinValue AndAlso slOrder.TriggerPrice <> triggerPrice Then
-                                'Below portion have to be done in every modify stoploss order trigger
-                                Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(slOrder.Tag)
-                                If currentSignalActivities IsNot Nothing Then
-                                    If currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
-                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
-                                        If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
-                                            Continue For
-                                        End If
-                                    End If
-                                End If
-                                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
-                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, If(modifyAfterEntryTrigger, "Aggressive Modify", "Normal Modify")))
-                            End If
-                        End If
-                    Next
-                End If
-            Next
-        End If
-        Return ret
+        '                    If triggerPrice <> Decimal.MinValue AndAlso slOrder.TriggerPrice <> triggerPrice Then
+        '                        'Below portion have to be done in every modify stoploss order trigger
+        '                        Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(slOrder.Tag)
+        '                        If currentSignalActivities IsNot Nothing Then
+        '                            If currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
+        '                                currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+        '                                currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+        '                                If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
+        '                                    Continue For
+        '                                End If
+        '                            End If
+        '                        End If
+        '                        If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
+        '                        ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, If(modifyAfterEntryTrigger, "Aggressive Modify", "Normal Modify")))
+        '                    End If
+        '                End If
+        '            Next
+        '        End If
+        '    Next
+        'End If
+        'Return ret
+        Throw New NotImplementedException()
     End Function
     Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
         Throw New NotImplementedException()
@@ -634,13 +657,15 @@ Public Class MomentumReversalStrategyInstrument
                     _potentialLowEntryPrice = candle.LowPrice.Value - userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Buffer
                     _signalCandle = candle
                     _candleRange = _signalCandle.CandleRange
-                    If _candleRange <= ConvertFloorCeling(GetHighestATROfTheDay(_signalCandle) / 2, Me.TradableInstrument.TickSize, RoundOfType.Floor) Then
-                        _slPoint = _candleRange
-                        _slRemark = "Candle SL"
-                    Else
-                        _slPoint = ConvertFloorCeling(GetHighestATROfTheDay(_signalCandle) / 2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                        _slRemark = "ATR SL"
-                    End If
+                    'If _candleRange <= ConvertFloorCeling(GetHighestATROfTheDay(_signalCandle) / 2, Me.TradableInstrument.TickSize, RoundOfType.Floor) Then
+                    '    _slPoint = _candleRange
+                    '    _slRemark = "Candle SL"
+                    'Else
+                    '    _slPoint = ConvertFloorCeling(GetHighestATROfTheDay(_signalCandle) / 2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    '    _slRemark = "ATR SL"
+                    'End If
+                    _slPoint = ConvertFloorCeling(GetHighestATROfTheDay(_signalCandle) / 2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    _slRemark = "ATR SL"
                 End If
             End If
 
@@ -655,10 +680,10 @@ Public Class MomentumReversalStrategyInstrument
                 End If
                 Dim buffer As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).Buffer
                 If tradeDirection = IOrder.TypeOfTransaction.Buy Then
-                    Dim sl As Decimal = ConvertFloorCeling(((_potentialHighEntryPrice - buffer) - _slPoint) + _slPoint * _initialSLPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                    Dim sl As Decimal = ConvertFloorCeling((_potentialHighEntryPrice - buffer) - _slPoint, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                     ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialHighEntryPrice, sl, IOrder.TypeOfTransaction.Buy)
                 ElseIf tradeDirection = IOrder.TypeOfTransaction.Sell Then
-                    Dim sl As Decimal = ConvertFloorCeling(((_potentialLowEntryPrice + buffer) + _slPoint) - _slPoint * _initialSLPercentage / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    Dim sl As Decimal = ConvertFloorCeling((_potentialLowEntryPrice + buffer) + _slPoint, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialLowEntryPrice, sl, IOrder.TypeOfTransaction.Sell)
                 End If
             End If

@@ -297,6 +297,7 @@ Public Class frmMainTabbed
     Private _MRUserInputs As MomentumReversalUserInputs = Nothing
     Private _MRdashboadList As BindingList(Of ActivityDashboard) = Nothing
     Private _MRTradableInstruments As IEnumerable(Of MomentumReversalStrategyInstrument) = Nothing
+    Private _MRStrategyToExecute As MomentumReversalStrategy = Nothing
     Private Sub sfdgvMomentumReversalMainDashboard_FilterPopupShowing(sender As Object, e As FilterPopupShowingEventArgs) Handles sfdgvMomentumReversalMainDashboard.FilterPopupShowing
         ManipulateGridEx(GridMode.TouchupPopupFilter, e, GetType(MomentumReversalStrategy))
     End Sub
@@ -354,6 +355,7 @@ Public Class frmMainTabbed
                 RemoveHandler _commonController.CollectorError, AddressOf OnCollectorError
                 RemoveHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
                 RemoveHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                RemoveHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
 
                 AddHandler _commonController.Heartbeat, AddressOf OnHeartbeat
                 AddHandler _commonController.WaitingFor, AddressOf OnWaitingFor
@@ -373,6 +375,7 @@ Public Class frmMainTabbed
                 AddHandler _commonController.CollectorError, AddressOf OnCollectorError
                 AddHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
                 AddHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                AddHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
 
 #Region "Login"
                 Dim loginMessage As String = Nothing
@@ -426,31 +429,32 @@ Public Class frmMainTabbed
             End If 'Common controller
             EnableDisableUIEx(UIMode.ReleaseOther, GetType(MomentumReversalStrategy))
 
-            Dim momentumReversalStrategyToExecute As New MomentumReversalStrategy(_commonController, 0, _MRUserInputs, 5, _cts)
-            OnHeartbeatEx(String.Format("Running strategy:{0}", momentumReversalStrategyToExecute.ToString), New List(Of Object) From {momentumReversalStrategyToExecute})
+            _MRStrategyToExecute = New MomentumReversalStrategy(_commonController, 0, _MRUserInputs, 5, _cts)
+            OnHeartbeatEx(String.Format("Running strategy:{0}", _MRStrategyToExecute.ToString), New List(Of Object) From {_MRStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()
-            Await _commonController.SubscribeStrategyAsync(momentumReversalStrategyToExecute).ConfigureAwait(False)
+            Await _commonController.SubscribeStrategyAsync(_MRStrategyToExecute).ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
 
-            _MRTradableInstruments = momentumReversalStrategyToExecute.TradableStrategyInstruments
+            _MRTradableInstruments = _MRStrategyToExecute.TradableStrategyInstruments
             SetObjectText_ThreadSafe(linklblMomentumReversalTradableInstrument, String.Format("Tradable Instruments: {0}", _MRTradableInstruments.Count))
             SetObjectEnableDisable_ThreadSafe(linklblMomentumReversalTradableInstrument, True)
             _cts.Token.ThrowIfCancellationRequested()
 
-            _MRdashboadList = New BindingList(Of ActivityDashboard)(momentumReversalStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
-                                                                                                                                                       Return x.SignalGeneratedTime
-                                                                                                                                                   End Function).ToList)
+            _MRdashboadList = New BindingList(Of ActivityDashboard)(_MRStrategyToExecute.SignalManager.ActivityDetails.Values.OrderBy(Function(x)
+                                                                                                                                          Return x.SignalGeneratedTime
+                                                                                                                                      End Function).ToList)
             SetSFGridDataBind_ThreadSafe(sfdgvMomentumReversalMainDashboard, _MRdashboadList)
             SetSFGridFreezFirstColumn_ThreadSafe(sfdgvMomentumReversalMainDashboard)
             _cts.Token.ThrowIfCancellationRequested()
 
-            Await momentumReversalStrategyToExecute.MonitorAsync().ConfigureAwait(False)
+            Await _MRStrategyToExecute.MonitorAsync().ConfigureAwait(False)
         Catch aex As AdapterBusinessException
             logger.Error(aex)
             If aex.ExceptionType = AdapterBusinessException.TypeOfException.PermissionException Then
                 _lastException = aex
             Else
+                GenerateTelegramMessageAsync(aex.Message)
                 MsgBox(String.Format("The following error occurred: {0}", aex.Message), MsgBoxStyle.Critical)
             End If
         Catch fex As ForceExitException
@@ -458,9 +462,11 @@ Public Class frmMainTabbed
             _lastException = fex
         Catch cx As OperationCanceledException
             logger.Error(cx)
+            GenerateTelegramMessageAsync(cx.Message)
             MsgBox(String.Format("The following error occurred: {0}", cx.Message), MsgBoxStyle.Critical)
         Catch ex As Exception
             logger.Error(ex)
+            GenerateTelegramMessageAsync(ex.Message)
             MsgBox(String.Format("The following error occurred: {0}", ex.Message), MsgBoxStyle.Critical)
         Finally
             ProgressStatus("No pending actions")
@@ -501,6 +507,7 @@ Public Class frmMainTabbed
         FlashTickerBulbEx(GetType(MomentumReversalStrategy))
     End Sub
     Private Async Sub btnMomentumReversalStop_Click(sender As Object, e As EventArgs) Handles btnMomentumReversalStop.Click
+        OnEndOfTheDay(_MRStrategyToExecute)
         If _commonController IsNot Nothing Then Await _commonController.CloseTickerIfConnectedAsync().ConfigureAwait(False)
         If _commonController IsNot Nothing Then Await _commonController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
         If _commonController IsNot Nothing Then Await _commonController.CloseCollectorIfConnectedAsync(True).ConfigureAwait(False)
@@ -1520,6 +1527,7 @@ Public Class frmMainTabbed
                 RemoveHandler _commonController.CollectorError, AddressOf OnCollectorError
                 RemoveHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
                 RemoveHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                RemoveHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
 
                 AddHandler _commonController.Heartbeat, AddressOf OnHeartbeat
                 AddHandler _commonController.WaitingFor, AddressOf OnWaitingFor
@@ -1539,6 +1547,7 @@ Public Class frmMainTabbed
                 AddHandler _commonController.CollectorError, AddressOf OnCollectorError
                 AddHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
                 AddHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
+                AddHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
 
 #Region "Login"
                 Dim loginMessage As String = Nothing
