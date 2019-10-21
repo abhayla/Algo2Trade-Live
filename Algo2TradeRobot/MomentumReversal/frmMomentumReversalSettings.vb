@@ -34,16 +34,12 @@ Public Class frmMomentumReversalSettings
             dtpckrTradeStartTime.Value = _MRSettings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _MRSettings.LastTradeEntryTime
             dtpckrEODExitTime.Value = _MRSettings.EODExitTime
-            txtMaxLossPerDay.Text = _MRSettings.MaxLossPerDay
-            txtMaxProfitPerDay.Text = _MRSettings.MaxProfitPerDay
-            txtATRPeriod.Text = _MRSettings.ATRPeriod
-            txtNumberOfTradePerStock.Text = _MRSettings.NumberOfTradePerStock
-            txtTargetMultiplier.Text = _MRSettings.TargetMultiplier
+            txtTradeOpenTime.Text = _MRSettings.TradeOpenTime
             txtInstrumentDetalis.Text = _MRSettings.InstrumentDetailsFilePath
 
-            txtTelegramAPI.Text = _MRSettings.TelegramAPIKey
-            txtTelegramChatID.Text = _MRSettings.TelegramChatID
-            txtTelegramChatIDForPL.Text = _MRSettings.TelegramPLChatID
+            txtRSIPeriod.Text = _MRSettings.RSIPeriod
+            txtRSIOverBought.Text = _MRSettings.RSIOverBought
+            txtRSIOverSold.Text = _MRSettings.RSIOverSold
         End If
     End Sub
     Private Sub SaveSettings()
@@ -51,22 +47,23 @@ Public Class frmMomentumReversalSettings
         _MRSettings.TradeStartTime = dtpckrTradeStartTime.Value
         _MRSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
         _MRSettings.EODExitTime = dtpckrEODExitTime.Value
-        _MRSettings.MaxLossPerDay = txtMaxLossPerDay.Text
-        _MRSettings.MaxProfitPerDay = txtMaxProfitPerDay.Text
-        _MRSettings.ATRPeriod = txtATRPeriod.Text
-        _MRSettings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
-        _MRSettings.TargetMultiplier = txtTargetMultiplier.Text
+        _MRSettings.TradeOpenTime = txtTradeOpenTime.Text
         _MRSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
-        _MRSettings.TelegramAPIKey = txtTelegramAPI.Text
-        _MRSettings.TelegramChatID = txtTelegramChatID.Text
-        _MRSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
+        _MRSettings.RSIPeriod = txtRSIPeriod.Text
+        _MRSettings.RSIOverBought = txtRSIOverBought.Text
+        _MRSettings.RSIOverSold = txtRSIOverSold.Text
 
         Utilities.Strings.SerializeFromCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename, _MRSettings)
     End Sub
-    Private Function ValidateNumbers(ByVal startNumber As Decimal, ByVal endNumber As Decimal, ByVal inputTB As TextBox) As Boolean
+    Private Function ValidateNumbers(ByVal startNumber As Decimal, ByVal endNumber As Decimal, ByVal inputTB As TextBox, Optional ByVal validateInteger As Boolean = False) As Boolean
         Dim ret As Boolean = False
         If IsNumeric(inputTB.Text) Then
+            If validateInteger Then
+                If Val(inputTB.Text) <> Math.Round(Val(inputTB.Text), 0) Then
+                    Throw New ApplicationException(String.Format("{0} should be of type Integer", inputTB.Tag))
+                End If
+            End If
             If Val(inputTB.Text) >= startNumber And Val(inputTB.Text) <= endNumber Then
                 ret = True
             End If
@@ -78,8 +75,11 @@ Public Class frmMomentumReversalSettings
         _MRSettings.FillInstrumentDetails(txtInstrumentDetalis.Text, _cts)
     End Sub
     Private Sub ValidateInputs()
-        ValidateNumbers(0, 999, txtTargetMultiplier)
-        ValidateNumbers(1, 60, txtSignalTimeFrame)
+        ValidateNumbers(1, 60, txtSignalTimeFrame, True)
+        ValidateNumbers(1, 60, txtTradeOpenTime, True)
+        ValidateNumbers(1, Integer.MaxValue, txtRSIPeriod, True)
+        ValidateNumbers(1, Integer.MaxValue, txtRSIOverBought, True)
+        ValidateNumbers(1, Integer.MaxValue, txtRSIOverSold, True)
         ValidateFile()
     End Sub
 

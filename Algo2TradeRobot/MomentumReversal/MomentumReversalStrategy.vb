@@ -45,21 +45,9 @@ Public Class MomentumReversalStrategy
                 For Each instrument In mrUserInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = Nothing
-                    Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
-                                                                                                         Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
-                                                                                                             x.RawInstrumentType = "FUT" AndAlso (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX" OrElse x.RawExchange = "CDS")
-                                                                                                     End Function)
-
-                    Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date <= Now.Date Then
-                                                                               Return x.Expiry.Value
-                                                                           Else
-                                                                               Return Date.MaxValue
-                                                                           End If
-                                                                       End Function)
-                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
-                                                                                Return x.Expiry = minExpiry
-                                                                            End Function)
+                    runningTradableInstrument = dummyAllInstruments.Find(Function(x)
+                                                                             Return x.TradingSymbol = instrument.Value.TradingSymbol
+                                                                         End Function)
                     _cts.Token.ThrowIfCancellationRequested()
                     ret = True
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
@@ -138,10 +126,6 @@ Public Class MomentumReversalStrategy
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(CType(Me.UserSettings, MomentumReversalUserInputs).MaxLossPerDay) * -1 Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
-        ElseIf Me.GetTotalPLAfterBrokerage >= CType(Me.UserSettings, MomentumReversalUserInputs).MaxProfitPerDay Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
     End Function

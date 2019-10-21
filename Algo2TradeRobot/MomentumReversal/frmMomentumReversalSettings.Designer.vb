@@ -27,24 +27,12 @@ Partial Class frmMomentumReversalSettings
         Me.btnSaveMomentumReversalSettings = New System.Windows.Forms.Button()
         Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
         Me.opnFileSettings = New System.Windows.Forms.OpenFileDialog()
-        Me.grpTelegram = New System.Windows.Forms.GroupBox()
-        Me.txtTelegramChatIDForPL = New System.Windows.Forms.TextBox()
-        Me.lblChatIDForPL = New System.Windows.Forms.Label()
-        Me.txtTelegramChatID = New System.Windows.Forms.TextBox()
-        Me.lblTelegramChatID = New System.Windows.Forms.Label()
-        Me.txtTelegramAPI = New System.Windows.Forms.TextBox()
-        Me.lblTelegramAPI = New System.Windows.Forms.Label()
+        Me.grpRSI = New System.Windows.Forms.GroupBox()
+        Me.txtRSIPeriod = New System.Windows.Forms.TextBox()
+        Me.lblRSIPeriod = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.txtTargetMultiplier = New System.Windows.Forms.TextBox()
-        Me.lblTargetMultiplier = New System.Windows.Forms.Label()
-        Me.txtNumberOfTradePerStock = New System.Windows.Forms.TextBox()
-        Me.lblNumberOfTradePerStock = New System.Windows.Forms.Label()
-        Me.txtATRPeriod = New System.Windows.Forms.TextBox()
-        Me.lblATRPeriod = New System.Windows.Forms.Label()
-        Me.txtMaxProfitPerDay = New System.Windows.Forms.TextBox()
-        Me.lblMaxProfitPercentagePerDay = New System.Windows.Forms.Label()
-        Me.txtMaxLossPerDay = New System.Windows.Forms.TextBox()
-        Me.lblMaxLossPercentagePerDay = New System.Windows.Forms.Label()
+        Me.txtTradeOpenTime = New System.Windows.Forms.TextBox()
+        Me.lblTradeOpenTime = New System.Windows.Forms.Label()
         Me.dtpckrEODExitTime = New System.Windows.Forms.DateTimePicker()
         Me.dtpckrLastTradeEntryTime = New System.Windows.Forms.DateTimePicker()
         Me.dtpckrTradeStartTime = New System.Windows.Forms.DateTimePicker()
@@ -56,7 +44,11 @@ Partial Class frmMomentumReversalSettings
         Me.lblInstrumentDetails = New System.Windows.Forms.Label()
         Me.txtSignalTimeFrame = New System.Windows.Forms.TextBox()
         Me.lblSignalTimeFrame = New System.Windows.Forms.Label()
-        Me.grpTelegram.SuspendLayout()
+        Me.txtRSIOverBought = New System.Windows.Forms.TextBox()
+        Me.lblRSIOverBought = New System.Windows.Forms.Label()
+        Me.txtRSIOverSold = New System.Windows.Forms.TextBox()
+        Me.lblRSIOverSold = New System.Windows.Forms.Label()
+        Me.grpRSI.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -69,7 +61,7 @@ Partial Class frmMomentumReversalSettings
         Me.btnSaveMomentumReversalSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSaveMomentumReversalSettings.Name = "btnSaveMomentumReversalSettings"
         Me.btnSaveMomentumReversalSettings.Size = New System.Drawing.Size(112, 58)
-        Me.btnSaveMomentumReversalSettings.TabIndex = 11
+        Me.btnSaveMomentumReversalSettings.TabIndex = 9
         Me.btnSaveMomentumReversalSettings.Text = "&Save"
         Me.btnSaveMomentumReversalSettings.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         Me.btnSaveMomentumReversalSettings.UseVisualStyleBackColor = True
@@ -83,87 +75,44 @@ Partial Class frmMomentumReversalSettings
         'opnFileSettings
         '
         '
-        'grpTelegram
+        'grpRSI
         '
-        Me.grpTelegram.Controls.Add(Me.txtTelegramChatIDForPL)
-        Me.grpTelegram.Controls.Add(Me.lblChatIDForPL)
-        Me.grpTelegram.Controls.Add(Me.txtTelegramChatID)
-        Me.grpTelegram.Controls.Add(Me.lblTelegramChatID)
-        Me.grpTelegram.Controls.Add(Me.txtTelegramAPI)
-        Me.grpTelegram.Controls.Add(Me.lblTelegramAPI)
-        Me.grpTelegram.Location = New System.Drawing.Point(3, 377)
-        Me.grpTelegram.Name = "grpTelegram"
-        Me.grpTelegram.Size = New System.Drawing.Size(451, 120)
-        Me.grpTelegram.TabIndex = 21
-        Me.grpTelegram.TabStop = False
-        Me.grpTelegram.Text = "Telegram Details"
+        Me.grpRSI.Controls.Add(Me.txtRSIOverSold)
+        Me.grpRSI.Controls.Add(Me.lblRSIOverSold)
+        Me.grpRSI.Controls.Add(Me.txtRSIOverBought)
+        Me.grpRSI.Controls.Add(Me.lblRSIOverBought)
+        Me.grpRSI.Controls.Add(Me.txtRSIPeriod)
+        Me.grpRSI.Controls.Add(Me.lblRSIPeriod)
+        Me.grpRSI.Location = New System.Drawing.Point(3, 233)
+        Me.grpRSI.Name = "grpRSI"
+        Me.grpRSI.Size = New System.Drawing.Size(451, 120)
+        Me.grpRSI.TabIndex = 21
+        Me.grpRSI.TabStop = False
+        Me.grpRSI.Text = "RSI Settings"
         '
-        'txtTelegramChatIDForPL
+        'txtRSIPeriod
         '
-        Me.txtTelegramChatIDForPL.Location = New System.Drawing.Point(174, 87)
-        Me.txtTelegramChatIDForPL.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtTelegramChatIDForPL.Name = "txtTelegramChatIDForPL"
-        Me.txtTelegramChatIDForPL.Size = New System.Drawing.Size(255, 22)
-        Me.txtTelegramChatIDForPL.TabIndex = 36
+        Me.txtRSIPeriod.Location = New System.Drawing.Point(189, 21)
+        Me.txtRSIPeriod.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtRSIPeriod.Name = "txtRSIPeriod"
+        Me.txtRSIPeriod.Size = New System.Drawing.Size(241, 22)
+        Me.txtRSIPeriod.TabIndex = 6
+        Me.txtRSIPeriod.Tag = "RSI Period"
         '
-        'lblChatIDForPL
+        'lblRSIPeriod
         '
-        Me.lblChatIDForPL.AutoSize = True
-        Me.lblChatIDForPL.Location = New System.Drawing.Point(9, 91)
-        Me.lblChatIDForPL.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblChatIDForPL.Name = "lblChatIDForPL"
-        Me.lblChatIDForPL.Size = New System.Drawing.Size(75, 17)
-        Me.lblChatIDForPL.TabIndex = 37
-        Me.lblChatIDForPL.Text = "PL Chat ID"
-        '
-        'txtTelegramChatID
-        '
-        Me.txtTelegramChatID.Location = New System.Drawing.Point(175, 56)
-        Me.txtTelegramChatID.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtTelegramChatID.Name = "txtTelegramChatID"
-        Me.txtTelegramChatID.Size = New System.Drawing.Size(254, 22)
-        Me.txtTelegramChatID.TabIndex = 32
-        '
-        'lblTelegramChatID
-        '
-        Me.lblTelegramChatID.AutoSize = True
-        Me.lblTelegramChatID.Location = New System.Drawing.Point(9, 60)
-        Me.lblTelegramChatID.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblTelegramChatID.Name = "lblTelegramChatID"
-        Me.lblTelegramChatID.Size = New System.Drawing.Size(54, 17)
-        Me.lblTelegramChatID.TabIndex = 35
-        Me.lblTelegramChatID.Text = "Chat ID"
-        '
-        'txtTelegramAPI
-        '
-        Me.txtTelegramAPI.Location = New System.Drawing.Point(174, 24)
-        Me.txtTelegramAPI.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtTelegramAPI.Name = "txtTelegramAPI"
-        Me.txtTelegramAPI.Size = New System.Drawing.Size(256, 22)
-        Me.txtTelegramAPI.TabIndex = 30
-        '
-        'lblTelegramAPI
-        '
-        Me.lblTelegramAPI.AutoSize = True
-        Me.lblTelegramAPI.Location = New System.Drawing.Point(10, 28)
-        Me.lblTelegramAPI.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblTelegramAPI.Name = "lblTelegramAPI"
-        Me.lblTelegramAPI.Size = New System.Drawing.Size(57, 17)
-        Me.lblTelegramAPI.TabIndex = 31
-        Me.lblTelegramAPI.Text = "API Key"
+        Me.lblRSIPeriod.AutoSize = True
+        Me.lblRSIPeriod.Location = New System.Drawing.Point(9, 26)
+        Me.lblRSIPeriod.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblRSIPeriod.Name = "lblRSIPeriod"
+        Me.lblRSIPeriod.Size = New System.Drawing.Size(75, 17)
+        Me.lblRSIPeriod.TabIndex = 35
+        Me.lblRSIPeriod.Text = "RSI Period"
         '
         'GroupBox1
         '
-        Me.GroupBox1.Controls.Add(Me.txtTargetMultiplier)
-        Me.GroupBox1.Controls.Add(Me.lblTargetMultiplier)
-        Me.GroupBox1.Controls.Add(Me.txtNumberOfTradePerStock)
-        Me.GroupBox1.Controls.Add(Me.lblNumberOfTradePerStock)
-        Me.GroupBox1.Controls.Add(Me.txtATRPeriod)
-        Me.GroupBox1.Controls.Add(Me.lblATRPeriod)
-        Me.GroupBox1.Controls.Add(Me.txtMaxProfitPerDay)
-        Me.GroupBox1.Controls.Add(Me.lblMaxProfitPercentagePerDay)
-        Me.GroupBox1.Controls.Add(Me.txtMaxLossPerDay)
-        Me.GroupBox1.Controls.Add(Me.lblMaxLossPercentagePerDay)
+        Me.GroupBox1.Controls.Add(Me.txtTradeOpenTime)
+        Me.GroupBox1.Controls.Add(Me.lblTradeOpenTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrEODExitTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrLastTradeEntryTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrTradeStartTime)
@@ -179,136 +128,64 @@ Partial Class frmMomentumReversalSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(451, 368)
+        Me.GroupBox1.Size = New System.Drawing.Size(451, 224)
         Me.GroupBox1.TabIndex = 20
         Me.GroupBox1.TabStop = False
         '
-        'txtTargetMultiplier
+        'txtTradeOpenTime
         '
-        Me.txtTargetMultiplier.Location = New System.Drawing.Point(174, 230)
-        Me.txtTargetMultiplier.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtTargetMultiplier.Name = "txtTargetMultiplier"
-        Me.txtTargetMultiplier.Size = New System.Drawing.Size(255, 22)
-        Me.txtTargetMultiplier.TabIndex = 35
-        Me.txtTargetMultiplier.Tag = "Max Profit Per Day"
+        Me.txtTradeOpenTime.Location = New System.Drawing.Point(189, 50)
+        Me.txtTradeOpenTime.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtTradeOpenTime.Name = "txtTradeOpenTime"
+        Me.txtTradeOpenTime.Size = New System.Drawing.Size(241, 22)
+        Me.txtTradeOpenTime.TabIndex = 1
+        Me.txtTradeOpenTime.Tag = "Trade Open Time"
         '
-        'lblTargetMultiplier
+        'lblTradeOpenTime
         '
-        Me.lblTargetMultiplier.AutoSize = True
-        Me.lblTargetMultiplier.Location = New System.Drawing.Point(8, 233)
-        Me.lblTargetMultiplier.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblTargetMultiplier.Name = "lblTargetMultiplier"
-        Me.lblTargetMultiplier.Size = New System.Drawing.Size(110, 17)
-        Me.lblTargetMultiplier.TabIndex = 37
-        Me.lblTargetMultiplier.Text = "Target Multiplier"
-        '
-        'txtNumberOfTradePerStock
-        '
-        Me.txtNumberOfTradePerStock.Location = New System.Drawing.Point(174, 195)
-        Me.txtNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtNumberOfTradePerStock.Name = "txtNumberOfTradePerStock"
-        Me.txtNumberOfTradePerStock.Size = New System.Drawing.Size(255, 22)
-        Me.txtNumberOfTradePerStock.TabIndex = 34
-        Me.txtNumberOfTradePerStock.Tag = "Max Loss Per Day"
-        '
-        'lblNumberOfTradePerStock
-        '
-        Me.lblNumberOfTradePerStock.AutoSize = True
-        Me.lblNumberOfTradePerStock.Location = New System.Drawing.Point(9, 198)
-        Me.lblNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblNumberOfTradePerStock.Name = "lblNumberOfTradePerStock"
-        Me.lblNumberOfTradePerStock.Size = New System.Drawing.Size(152, 17)
-        Me.lblNumberOfTradePerStock.TabIndex = 36
-        Me.lblNumberOfTradePerStock.Text = "No Of Trade Per Stock"
-        '
-        'txtATRPeriod
-        '
-        Me.txtATRPeriod.Location = New System.Drawing.Point(176, 14)
-        Me.txtATRPeriod.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtATRPeriod.Name = "txtATRPeriod"
-        Me.txtATRPeriod.Size = New System.Drawing.Size(253, 22)
-        Me.txtATRPeriod.TabIndex = 32
-        '
-        'lblATRPeriod
-        '
-        Me.lblATRPeriod.AutoSize = True
-        Me.lblATRPeriod.Location = New System.Drawing.Point(9, 19)
-        Me.lblATRPeriod.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblATRPeriod.Name = "lblATRPeriod"
-        Me.lblATRPeriod.Size = New System.Drawing.Size(81, 17)
-        Me.lblATRPeriod.TabIndex = 33
-        Me.lblATRPeriod.Text = "ATR Period"
-        '
-        'txtMaxProfitPerDay
-        '
-        Me.txtMaxProfitPerDay.Location = New System.Drawing.Point(174, 301)
-        Me.txtMaxProfitPerDay.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtMaxProfitPerDay.Name = "txtMaxProfitPerDay"
-        Me.txtMaxProfitPerDay.Size = New System.Drawing.Size(255, 22)
-        Me.txtMaxProfitPerDay.TabIndex = 6
-        '
-        'lblMaxProfitPercentagePerDay
-        '
-        Me.lblMaxProfitPercentagePerDay.AutoSize = True
-        Me.lblMaxProfitPercentagePerDay.Location = New System.Drawing.Point(8, 305)
-        Me.lblMaxProfitPercentagePerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblMaxProfitPercentagePerDay.Name = "lblMaxProfitPercentagePerDay"
-        Me.lblMaxProfitPercentagePerDay.Size = New System.Drawing.Size(125, 17)
-        Me.lblMaxProfitPercentagePerDay.TabIndex = 27
-        Me.lblMaxProfitPercentagePerDay.Text = "Max Profit Per Day"
-        '
-        'txtMaxLossPerDay
-        '
-        Me.txtMaxLossPerDay.Location = New System.Drawing.Point(174, 266)
-        Me.txtMaxLossPerDay.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtMaxLossPerDay.Name = "txtMaxLossPerDay"
-        Me.txtMaxLossPerDay.Size = New System.Drawing.Size(255, 22)
-        Me.txtMaxLossPerDay.TabIndex = 5
-        '
-        'lblMaxLossPercentagePerDay
-        '
-        Me.lblMaxLossPercentagePerDay.AutoSize = True
-        Me.lblMaxLossPercentagePerDay.Location = New System.Drawing.Point(8, 270)
-        Me.lblMaxLossPercentagePerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblMaxLossPercentagePerDay.Name = "lblMaxLossPercentagePerDay"
-        Me.lblMaxLossPercentagePerDay.Size = New System.Drawing.Size(122, 17)
-        Me.lblMaxLossPercentagePerDay.TabIndex = 25
-        Me.lblMaxLossPercentagePerDay.Text = "Max Loss Per Day"
+        Me.lblTradeOpenTime.AutoSize = True
+        Me.lblTradeOpenTime.Location = New System.Drawing.Point(8, 55)
+        Me.lblTradeOpenTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblTradeOpenTime.Name = "lblTradeOpenTime"
+        Me.lblTradeOpenTime.Size = New System.Drawing.Size(152, 17)
+        Me.lblTradeOpenTime.TabIndex = 33
+        Me.lblTradeOpenTime.Tag = ""
+        Me.lblTradeOpenTime.Text = "Trade Open Time(min)"
         '
         'dtpckrEODExitTime
         '
         Me.dtpckrEODExitTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrEODExitTime.Location = New System.Drawing.Point(175, 158)
+        Me.dtpckrEODExitTime.Location = New System.Drawing.Point(189, 156)
         Me.dtpckrEODExitTime.Name = "dtpckrEODExitTime"
         Me.dtpckrEODExitTime.ShowUpDown = True
-        Me.dtpckrEODExitTime.Size = New System.Drawing.Size(255, 22)
-        Me.dtpckrEODExitTime.TabIndex = 3
+        Me.dtpckrEODExitTime.Size = New System.Drawing.Size(241, 22)
+        Me.dtpckrEODExitTime.TabIndex = 4
         Me.dtpckrEODExitTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
         'dtpckrLastTradeEntryTime
         '
         Me.dtpckrLastTradeEntryTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrLastTradeEntryTime.Location = New System.Drawing.Point(176, 123)
+        Me.dtpckrLastTradeEntryTime.Location = New System.Drawing.Point(189, 121)
         Me.dtpckrLastTradeEntryTime.Name = "dtpckrLastTradeEntryTime"
         Me.dtpckrLastTradeEntryTime.ShowUpDown = True
-        Me.dtpckrLastTradeEntryTime.Size = New System.Drawing.Size(255, 22)
-        Me.dtpckrLastTradeEntryTime.TabIndex = 2
+        Me.dtpckrLastTradeEntryTime.Size = New System.Drawing.Size(242, 22)
+        Me.dtpckrLastTradeEntryTime.TabIndex = 3
         Me.dtpckrLastTradeEntryTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
         'dtpckrTradeStartTime
         '
         Me.dtpckrTradeStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrTradeStartTime.Location = New System.Drawing.Point(175, 86)
+        Me.dtpckrTradeStartTime.Location = New System.Drawing.Point(189, 84)
         Me.dtpckrTradeStartTime.Name = "dtpckrTradeStartTime"
         Me.dtpckrTradeStartTime.ShowUpDown = True
-        Me.dtpckrTradeStartTime.Size = New System.Drawing.Size(255, 22)
-        Me.dtpckrTradeStartTime.TabIndex = 1
+        Me.dtpckrTradeStartTime.Size = New System.Drawing.Size(241, 22)
+        Me.dtpckrTradeStartTime.TabIndex = 2
         Me.dtpckrTradeStartTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
         'lblEODExitTime
         '
         Me.lblEODExitTime.AutoSize = True
-        Me.lblEODExitTime.Location = New System.Drawing.Point(9, 159)
+        Me.lblEODExitTime.Location = New System.Drawing.Point(9, 157)
         Me.lblEODExitTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblEODExitTime.Name = "lblEODExitTime"
         Me.lblEODExitTime.Size = New System.Drawing.Size(99, 17)
@@ -318,7 +195,7 @@ Partial Class frmMomentumReversalSettings
         'lblLastTradeEntryTime
         '
         Me.lblLastTradeEntryTime.AutoSize = True
-        Me.lblLastTradeEntryTime.Location = New System.Drawing.Point(9, 124)
+        Me.lblLastTradeEntryTime.Location = New System.Drawing.Point(9, 122)
         Me.lblLastTradeEntryTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblLastTradeEntryTime.Name = "lblLastTradeEntryTime"
         Me.lblLastTradeEntryTime.Size = New System.Drawing.Size(149, 17)
@@ -328,7 +205,7 @@ Partial Class frmMomentumReversalSettings
         'lblTradeStartTime
         '
         Me.lblTradeStartTime.AutoSize = True
-        Me.lblTradeStartTime.Location = New System.Drawing.Point(9, 88)
+        Me.lblTradeStartTime.Location = New System.Drawing.Point(9, 86)
         Me.lblTradeStartTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblTradeStartTime.Name = "lblTradeStartTime"
         Me.lblTradeStartTime.Size = New System.Drawing.Size(115, 17)
@@ -338,27 +215,27 @@ Partial Class frmMomentumReversalSettings
         'btnBrowse
         '
         Me.btnBrowse.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnBrowse.Location = New System.Drawing.Point(404, 333)
+        Me.btnBrowse.Location = New System.Drawing.Point(404, 191)
         Me.btnBrowse.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(40, 23)
-        Me.btnBrowse.TabIndex = 8
+        Me.btnBrowse.TabIndex = 5
         Me.btnBrowse.Text = "..."
         Me.btnBrowse.UseVisualStyleBackColor = True
         '
         'txtInstrumentDetalis
         '
-        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(174, 334)
+        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(189, 192)
         Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
         Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
         Me.txtInstrumentDetalis.ReadOnly = True
-        Me.txtInstrumentDetalis.Size = New System.Drawing.Size(223, 22)
+        Me.txtInstrumentDetalis.Size = New System.Drawing.Size(208, 22)
         Me.txtInstrumentDetalis.TabIndex = 15
         '
         'lblInstrumentDetails
         '
         Me.lblInstrumentDetails.AutoSize = True
-        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 337)
+        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 195)
         Me.lblInstrumentDetails.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblInstrumentDetails.Name = "lblInstrumentDetails"
         Me.lblInstrumentDetails.Size = New System.Drawing.Size(121, 17)
@@ -367,28 +244,68 @@ Partial Class frmMomentumReversalSettings
         '
         'txtSignalTimeFrame
         '
-        Me.txtSignalTimeFrame.Location = New System.Drawing.Point(175, 49)
+        Me.txtSignalTimeFrame.Location = New System.Drawing.Point(189, 15)
         Me.txtSignalTimeFrame.Margin = New System.Windows.Forms.Padding(4)
         Me.txtSignalTimeFrame.Name = "txtSignalTimeFrame"
-        Me.txtSignalTimeFrame.Size = New System.Drawing.Size(255, 22)
+        Me.txtSignalTimeFrame.Size = New System.Drawing.Size(241, 22)
         Me.txtSignalTimeFrame.TabIndex = 0
+        Me.txtSignalTimeFrame.Tag = "Signal Timeframe"
         '
         'lblSignalTimeFrame
         '
         Me.lblSignalTimeFrame.AutoSize = True
-        Me.lblSignalTimeFrame.Location = New System.Drawing.Point(9, 52)
+        Me.lblSignalTimeFrame.Location = New System.Drawing.Point(9, 18)
         Me.lblSignalTimeFrame.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblSignalTimeFrame.Name = "lblSignalTimeFrame"
         Me.lblSignalTimeFrame.Size = New System.Drawing.Size(158, 17)
         Me.lblSignalTimeFrame.TabIndex = 3
+        Me.lblSignalTimeFrame.Tag = ""
         Me.lblSignalTimeFrame.Text = "Signal Time Frame(min)"
+        '
+        'txtRSIOverBought
+        '
+        Me.txtRSIOverBought.Location = New System.Drawing.Point(189, 53)
+        Me.txtRSIOverBought.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtRSIOverBought.Name = "txtRSIOverBought"
+        Me.txtRSIOverBought.Size = New System.Drawing.Size(241, 22)
+        Me.txtRSIOverBought.TabIndex = 7
+        Me.txtRSIOverBought.Tag = "RSI Over Bought"
+        '
+        'lblRSIOverBought
+        '
+        Me.lblRSIOverBought.AutoSize = True
+        Me.lblRSIOverBought.Location = New System.Drawing.Point(9, 58)
+        Me.lblRSIOverBought.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblRSIOverBought.Name = "lblRSIOverBought"
+        Me.lblRSIOverBought.Size = New System.Drawing.Size(114, 17)
+        Me.lblRSIOverBought.TabIndex = 37
+        Me.lblRSIOverBought.Text = "RSI Over Bought"
+        '
+        'txtRSIOverSold
+        '
+        Me.txtRSIOverSold.Location = New System.Drawing.Point(189, 84)
+        Me.txtRSIOverSold.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtRSIOverSold.Name = "txtRSIOverSold"
+        Me.txtRSIOverSold.Size = New System.Drawing.Size(241, 22)
+        Me.txtRSIOverSold.TabIndex = 8
+        Me.txtRSIOverSold.Tag = "RSI Over Sold"
+        '
+        'lblRSIOverSold
+        '
+        Me.lblRSIOverSold.AutoSize = True
+        Me.lblRSIOverSold.Location = New System.Drawing.Point(9, 89)
+        Me.lblRSIOverSold.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblRSIOverSold.Name = "lblRSIOverSold"
+        Me.lblRSIOverSold.Size = New System.Drawing.Size(97, 17)
+        Me.lblRSIOverSold.TabIndex = 39
+        Me.lblRSIOverSold.Text = "RSI Over Sold"
         '
         'frmMomentumReversalSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(576, 502)
-        Me.Controls.Add(Me.grpTelegram)
+        Me.ClientSize = New System.Drawing.Size(576, 359)
+        Me.Controls.Add(Me.grpRSI)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnSaveMomentumReversalSettings)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -397,9 +314,9 @@ Partial Class frmMomentumReversalSettings
         Me.MinimizeBox = False
         Me.Name = "frmMomentumReversalSettings"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Momentum Reversal  - Settings"
-        Me.grpTelegram.ResumeLayout(False)
-        Me.grpTelegram.PerformLayout()
+        Me.Text = "Settings"
+        Me.grpRSI.ResumeLayout(False)
+        Me.grpRSI.PerformLayout()
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.ResumeLayout(False)
@@ -409,24 +326,10 @@ Partial Class frmMomentumReversalSettings
     Friend WithEvents btnSaveMomentumReversalSettings As Button
     Friend WithEvents ImageList1 As ImageList
     Friend WithEvents opnFileSettings As OpenFileDialog
-    Friend WithEvents grpTelegram As GroupBox
-    Friend WithEvents txtTelegramChatIDForPL As TextBox
-    Friend WithEvents lblChatIDForPL As Label
-    Friend WithEvents txtTelegramChatID As TextBox
-    Friend WithEvents lblTelegramChatID As Label
-    Friend WithEvents txtTelegramAPI As TextBox
-    Friend WithEvents lblTelegramAPI As Label
+    Friend WithEvents grpRSI As GroupBox
     Friend WithEvents GroupBox1 As GroupBox
-    Friend WithEvents txtTargetMultiplier As TextBox
-    Friend WithEvents lblTargetMultiplier As Label
-    Friend WithEvents txtNumberOfTradePerStock As TextBox
-    Friend WithEvents lblNumberOfTradePerStock As Label
-    Friend WithEvents txtATRPeriod As TextBox
-    Friend WithEvents lblATRPeriod As Label
-    Friend WithEvents txtMaxProfitPerDay As TextBox
-    Friend WithEvents lblMaxProfitPercentagePerDay As Label
-    Friend WithEvents txtMaxLossPerDay As TextBox
-    Friend WithEvents lblMaxLossPercentagePerDay As Label
+    Friend WithEvents txtTradeOpenTime As TextBox
+    Friend WithEvents lblTradeOpenTime As Label
     Friend WithEvents dtpckrEODExitTime As DateTimePicker
     Friend WithEvents dtpckrLastTradeEntryTime As DateTimePicker
     Friend WithEvents dtpckrTradeStartTime As DateTimePicker
@@ -438,4 +341,10 @@ Partial Class frmMomentumReversalSettings
     Friend WithEvents lblInstrumentDetails As Label
     Friend WithEvents txtSignalTimeFrame As TextBox
     Friend WithEvents lblSignalTimeFrame As Label
+    Friend WithEvents txtRSIPeriod As TextBox
+    Friend WithEvents lblRSIPeriod As Label
+    Friend WithEvents txtRSIOverSold As TextBox
+    Friend WithEvents lblRSIOverSold As Label
+    Friend WithEvents txtRSIOverBought As TextBox
+    Friend WithEvents lblRSIOverBought As Label
 End Class

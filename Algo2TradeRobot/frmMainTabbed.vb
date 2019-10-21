@@ -4043,7 +4043,7 @@ Public Class frmMainTabbed
         If runningStrategy IsNot Nothing AndAlso runningStrategy.ExportCSV Then
             Select Case runningStrategy.GetType
                 Case GetType(MomentumReversalStrategy)
-                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Momentum Reversal Order Book.csv")))
+                    ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("Algo2Trade Order Book.csv")))
                 Case GetType(OHLStrategy)
                     ExportDataToCSV(runningStrategy, Path.Combine(My.Application.Info.DirectoryPath, String.Format("OHL Order Book.csv")))
                 Case GetType(AmiSignalStrategy)
