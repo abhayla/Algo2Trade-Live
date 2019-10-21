@@ -702,6 +702,81 @@ Namespace ChartHandler.Indicator
                 Next
             End If
         End Sub
+        Public Sub CalculateRSI(ByVal timeToCalculateFrom As Date, ByVal outputConsumer As RSIConsumer)
+            If outputConsumer IsNot Nothing AndAlso outputConsumer.ParentConsumer IsNot Nothing AndAlso
+                outputConsumer.ParentConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ParentConsumer.ConsumerPayloads.Count > 0 Then
+                Dim requiredDataSet As IEnumerable(Of Date) =
+                    outputConsumer.ParentConsumer.ConsumerPayloads.Keys.Where(Function(x)
+                                                                                  Return x >= timeToCalculateFrom
+                                                                              End Function)
+
+                For Each runningInputDate In requiredDataSet.OrderBy(Function(x)
+                                                                         Return x
+                                                                     End Function)
+                    If outputConsumer.ConsumerPayloads Is Nothing Then outputConsumer.ConsumerPayloads = New Concurrent.ConcurrentDictionary(Of Date, IPayload)
+
+                    Dim rsiValue As RSIConsumer.RSIPayload = Nothing
+                    If Not outputConsumer.ConsumerPayloads.TryGetValue(runningInputDate, rsiValue) Then
+                        rsiValue = New RSIConsumer.RSIPayload
+                    End If
+
+                    Dim previousRSIValues As IEnumerable(Of KeyValuePair(Of Date, IPayload)) = Nothing
+                    Dim previousRSIValue As RSIConsumer.RSIPayload = Nothing
+                    If outputConsumer.ConsumerPayloads IsNot Nothing AndAlso outputConsumer.ConsumerPayloads.Count > 0 Then
+                        previousRSIValues = outputConsumer.ConsumerPayloads.Where(Function(x)
+                                                                                      Return x.Key < runningInputDate
+                                                                                  End Function)
+                        If previousRSIValues IsNot Nothing AndAlso previousRSIValues.Count > 0 Then
+                            previousRSIValue = previousRSIValues.OrderBy(Function(y)
+                                                                             Return y.Key
+                                                                         End Function).LastOrDefault.Value
+                        End If
+                    End If
+
+                    Dim currentPayload As OHLCPayload = outputConsumer.ParentConsumer.ConsumerPayloads(runningInputDate)
+                    Dim sumGain As Decimal = 0
+                    Dim sumLoss As Decimal = 0
+                    Dim avgGain As Decimal = 0
+                    Dim avgLoss As Decimal = 0
+                    Dim rs As Decimal = 0
+                    Dim closeChange As Decimal = 0
+
+                    If currentPayload.PreviousPayload IsNot Nothing Then
+                        closeChange = currentPayload.ClosePrice.Value - currentPayload.PreviousPayload.ClosePrice.Value
+                        If closeChange > 0 Then
+                            sumGain += closeChange
+                        ElseIf closeChange < 0 Then
+                            sumLoss += Math.Abs(closeChange)
+                        End If
+                    End If
+
+                    If previousRSIValues Is Nothing OrElse
+                        (previousRSIValues IsNot Nothing AndAlso previousRSIValues.Count <= outputConsumer.RSIPeriod) Then
+                        If previousRSIValues IsNot Nothing AndAlso previousRSIValues.Count > 0 Then
+                            avgGain = sumGain / previousRSIValues.Count
+                            avgLoss = sumLoss / previousRSIValues.Count
+                        End If
+                    Else
+                        If closeChange > 0 Then
+                            avgGain = (previousRSIValue.AverageGain * (outputConsumer.RSIPeriod - 1) + closeChange) / outputConsumer.RSIPeriod
+                            avgLoss = (previousRSIValue.AverageLoss * (outputConsumer.RSIPeriod - 1) + 0) / outputConsumer.RSIPeriod
+                        ElseIf closeChange < 0 Then
+                            avgGain = (previousRSIValue.AverageGain * (outputConsumer.RSIPeriod - 1) + 0) / outputConsumer.RSIPeriod
+                            avgLoss = (previousRSIValue.AverageLoss * (outputConsumer.RSIPeriod - 1) + Math.Abs(closeChange)) / outputConsumer.RSIPeriod
+                        Else
+                            avgGain = (previousRSIValue.AverageGain * (outputConsumer.RSIPeriod - 1) + 0) / outputConsumer.RSIPeriod
+                            avgLoss = (previousRSIValue.AverageLoss * (outputConsumer.RSIPeriod - 1) + 0) / outputConsumer.RSIPeriod
+                        End If
+                    End If
+
+                    rs = If(Math.Round(avgLoss, 8) = 0, 100, (100 - (100 / (1 + (avgGain / avgLoss)))))
+                    rsiValue.RSI.Value = rs
+                    rsiValue.AverageGain = avgGain
+                    rsiValue.AverageLoss = avgLoss
+                    outputConsumer.ConsumerPayloads.AddOrUpdate(runningInputDate, rsiValue, Function(key, value) rsiValue)
+                Next
+            End If
+        End Sub
 #End Region
 
 #Region "Private Function"

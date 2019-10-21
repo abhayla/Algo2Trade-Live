@@ -30,6 +30,7 @@
             PivotLow
             Fractal
             VWAP
+            RSI
         End Enum
         Enum CrossDirection
             Above = 1

@@ -93,6 +93,7 @@
     <Compile Include="Entities\Indicators\EMAConsumer.vb" />
     <Compile Include="Entities\Indicators\FractalConsumer.vb" />
     <Compile Include="Entities\Indicators\PivotHighLowConsumer.vb" />
+    <Compile Include="Entities\Indicators\RSIConsumer.vb" />
     <Compile Include="Entities\Indicators\SMAConsumer.vb" />
     <Compile Include="Entities\Indicators\SpreadRatioConsumer.vb" />
     <Compile Include="Entities\Indicators\SupertrendConsumer.vb" />
