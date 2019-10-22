@@ -1,3 +1,2 @@
-Trading Symbol,Number of Lots,Buffer,SL,1st Movement LTP,1st Movement SL,Onward Movement LTP,Onward Movement SL
-BANKNIFTY19O2425200CE,1,2,20,5,25,5,5
-BANKNIFTY19O2425200PE,1,2,20,5,25,5,5
+Trading Symbol,Number of Lots,Buffer,SL,First Movement LTP,First Movement SL,Onward Movement LTP,Onward Movement SL
+JINDALSTEL,1,0.05,0.5,0.15,0.65,0.2,0.2

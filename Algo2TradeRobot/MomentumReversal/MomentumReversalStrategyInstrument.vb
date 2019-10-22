@@ -14,6 +14,7 @@ Public Class MomentumReversalStrategyInstrument
     Public Shared Shadows logger As Logger = LogManager.GetCurrentClassLogger
 #End Region
 
+    Private _lastPrevPayloadPlaceOrder As String = ""
     Private ReadOnly _dummyRSIConsumer As RSIConsumer
 
     Public Sub New(ByVal associatedInstrument As IInstrument,
@@ -97,9 +98,30 @@ Public Class MomentumReversalStrategyInstrument
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         Dim userSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
         Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
-        Dim rsiConsumer As ATRConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRSIConsumer)
+        Dim rsiConsumer As RSIConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRSIConsumer)
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
         Dim currentTime As Date = Now()
+
+        Try
+            If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
+                (Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder OrElse forcePrint) Then
+                _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
+                logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Is Active Instrument:{5}, {6}, Current Time:{7}, Current LTP:{8}, TradingSymbol:{9}",
+                            userSettings.TradeStartTime.ToString,
+                            userSettings.LastTradeEntryTime.ToString,
+                            runningCandlePayload.SnapshotDateTime.ToString,
+                            runningCandlePayload.PayloadGeneratedBy.ToString,
+                            Me.TradableInstrument.IsHistoricalCompleted,
+                            IsActiveInstrument(),
+                            rsiConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                            currentTime.ToString,
+                            currentTick.LastPrice,
+                            Me.TradableInstrument.TradingSymbol)
+            End If
+        Catch ex As Exception
+            logger.Error(ex.ToString)
+        End Try
 
         Dim parameters As PlaceOrderParameters = Nothing
         If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
@@ -169,7 +191,6 @@ Public Class MomentumReversalStrategyInstrument
                 ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameters, parameters.ToString))
             End If
         End If
-
         Return ret
     End Function
     Protected Overrides Async Function IsTriggerReceivedForModifyStoplossOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
@@ -190,15 +211,18 @@ Public Class MomentumReversalStrategyInstrument
                             Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
                             Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
                             Dim triggerPrice As Decimal = Decimal.MinValue
+                            Dim reason As String = Nothing
                             If slOrder.TriggerPrice >= firstSL Then
                                 Dim gain As Decimal = currentTick.LastPrice - firstTarget
                                 Dim multiplier As Integer = Math.Floor(gain / userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP)
                                 If multiplier > 0 Then
                                     triggerPrice = firstSL + ConvertFloorCeling(userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL * multiplier, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                                    reason = String.Format("Onward movement {0}", multiplier)
                                 End If
                             Else
                                 If currentTick.LastPrice >= firstTarget Then
                                     triggerPrice = firstSL
+                                    reason = "First movement"
                                 End If
                             End If
                             If triggerPrice <> Decimal.MinValue AndAlso slOrder.TriggerPrice < triggerPrice Then
@@ -214,7 +238,7 @@ Public Class MomentumReversalStrategyInstrument
                                     End If
                                 End If
                                 If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
-                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, "Target Protection"))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, reason))
                             End If
                         End If
                     Next
@@ -263,6 +287,11 @@ Public Class MomentumReversalStrategyInstrument
                 Next
             End If
         End If
+        If forcePrint AndAlso ret IsNot Nothing AndAlso ret.Count > 0 Then
+            For Each runningOrder In ret
+                logger.Debug("***** Exit Order ***** Order ID:{0}, Reason:{1}, {2}", runningOrder.Item2.OrderIdentifier, runningOrder.Item3, Me.TradableInstrument.TradingSymbol)
+            Next
+        End If
         Return ret
     End Function
     Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
@@ -271,6 +300,7 @@ Public Class MomentumReversalStrategyInstrument
     Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))
         Throw New NotImplementedException()
     End Function
+
     Protected Overrides Async Function ForceExitSpecificTradeAsync(order As IOrder, ByVal reason As String) As Task
         If order IsNot Nothing AndAlso Not order.Status = IOrder.TypeOfStatus.Complete AndAlso
             Not order.Status = IOrder.TypeOfStatus.Cancelled AndAlso
@@ -288,14 +318,13 @@ Public Class MomentumReversalStrategyInstrument
         Dim ret As Tuple(Of Boolean, Decimal) = Nothing
         If candle IsNot Nothing AndAlso candle.PreviousPayload IsNot Nothing Then
             Dim userSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
-            Dim rsiConsumer As ATRConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRSIConsumer)
-            If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSIOverSold Then
-                If CType(rsiConsumer.ConsumerPayloads(candle.PreviousPayload.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value < userSettings.RSIOverSold Then
-                    If candle.PreviousPayload.PreviousPayload IsNot Nothing AndAlso candle.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
-                        candle.PreviousPayload.PreviousPayload.PreviousPayload.SnapshotDateTime.Date = Now.Date Then
-                        Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.HighPrice.Value, candle.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
-                        ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
-                    End If
+            Dim rsiConsumer As RSIConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRSIConsumer)
+            If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSIOverSold AndAlso
+                CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value < userSettings.RSIOverBought Then
+                If candle.PreviousPayload.PreviousPayload IsNot Nothing AndAlso candle.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
+                    candle.PreviousPayload.PreviousPayload.PreviousPayload.SnapshotDateTime.Date = Now.Date Then
+                    Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.HighPrice.Value, candle.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
+                    ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
                 End If
             End If
         End If
