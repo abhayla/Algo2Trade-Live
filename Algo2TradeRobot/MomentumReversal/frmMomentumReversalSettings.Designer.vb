@@ -28,6 +28,10 @@ Partial Class frmMomentumReversalSettings
         Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
         Me.opnFileSettings = New System.Windows.Forms.OpenFileDialog()
         Me.grpRSI = New System.Windows.Forms.GroupBox()
+        Me.txtRSIOverSold = New System.Windows.Forms.TextBox()
+        Me.lblRSIOverSold = New System.Windows.Forms.Label()
+        Me.txtRSIOverBought = New System.Windows.Forms.TextBox()
+        Me.lblRSIOverBought = New System.Windows.Forms.Label()
         Me.txtRSIPeriod = New System.Windows.Forms.TextBox()
         Me.lblRSIPeriod = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
@@ -44,10 +48,10 @@ Partial Class frmMomentumReversalSettings
         Me.lblInstrumentDetails = New System.Windows.Forms.Label()
         Me.txtSignalTimeFrame = New System.Windows.Forms.TextBox()
         Me.lblSignalTimeFrame = New System.Windows.Forms.Label()
-        Me.txtRSIOverBought = New System.Windows.Forms.TextBox()
-        Me.lblRSIOverBought = New System.Windows.Forms.Label()
-        Me.txtRSIOverSold = New System.Windows.Forms.TextBox()
-        Me.lblRSIOverSold = New System.Windows.Forms.Label()
+        Me.dtpckrIdleTimeEnd = New System.Windows.Forms.DateTimePicker()
+        Me.dtpckrIdleTimeStart = New System.Windows.Forms.DateTimePicker()
+        Me.lblIdleTimeEnd = New System.Windows.Forms.Label()
+        Me.lblIdleTimeStart = New System.Windows.Forms.Label()
         Me.grpRSI.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
@@ -83,12 +87,50 @@ Partial Class frmMomentumReversalSettings
         Me.grpRSI.Controls.Add(Me.lblRSIOverBought)
         Me.grpRSI.Controls.Add(Me.txtRSIPeriod)
         Me.grpRSI.Controls.Add(Me.lblRSIPeriod)
-        Me.grpRSI.Location = New System.Drawing.Point(3, 233)
+        Me.grpRSI.Location = New System.Drawing.Point(3, 305)
         Me.grpRSI.Name = "grpRSI"
         Me.grpRSI.Size = New System.Drawing.Size(451, 120)
         Me.grpRSI.TabIndex = 21
         Me.grpRSI.TabStop = False
         Me.grpRSI.Text = "RSI Settings"
+        '
+        'txtRSIOverSold
+        '
+        Me.txtRSIOverSold.Location = New System.Drawing.Point(189, 84)
+        Me.txtRSIOverSold.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtRSIOverSold.Name = "txtRSIOverSold"
+        Me.txtRSIOverSold.Size = New System.Drawing.Size(241, 22)
+        Me.txtRSIOverSold.TabIndex = 8
+        Me.txtRSIOverSold.Tag = "RSI Over Sold"
+        '
+        'lblRSIOverSold
+        '
+        Me.lblRSIOverSold.AutoSize = True
+        Me.lblRSIOverSold.Location = New System.Drawing.Point(9, 89)
+        Me.lblRSIOverSold.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblRSIOverSold.Name = "lblRSIOverSold"
+        Me.lblRSIOverSold.Size = New System.Drawing.Size(97, 17)
+        Me.lblRSIOverSold.TabIndex = 39
+        Me.lblRSIOverSold.Text = "RSI Over Sold"
+        '
+        'txtRSIOverBought
+        '
+        Me.txtRSIOverBought.Location = New System.Drawing.Point(189, 53)
+        Me.txtRSIOverBought.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtRSIOverBought.Name = "txtRSIOverBought"
+        Me.txtRSIOverBought.Size = New System.Drawing.Size(241, 22)
+        Me.txtRSIOverBought.TabIndex = 7
+        Me.txtRSIOverBought.Tag = "RSI Over Bought"
+        '
+        'lblRSIOverBought
+        '
+        Me.lblRSIOverBought.AutoSize = True
+        Me.lblRSIOverBought.Location = New System.Drawing.Point(9, 58)
+        Me.lblRSIOverBought.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblRSIOverBought.Name = "lblRSIOverBought"
+        Me.lblRSIOverBought.Size = New System.Drawing.Size(114, 17)
+        Me.lblRSIOverBought.TabIndex = 37
+        Me.lblRSIOverBought.Text = "RSI Over Bought"
         '
         'txtRSIPeriod
         '
@@ -111,6 +153,10 @@ Partial Class frmMomentumReversalSettings
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.dtpckrIdleTimeEnd)
+        Me.GroupBox1.Controls.Add(Me.dtpckrIdleTimeStart)
+        Me.GroupBox1.Controls.Add(Me.lblIdleTimeEnd)
+        Me.GroupBox1.Controls.Add(Me.lblIdleTimeStart)
         Me.GroupBox1.Controls.Add(Me.txtTradeOpenTime)
         Me.GroupBox1.Controls.Add(Me.lblTradeOpenTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrEODExitTime)
@@ -128,7 +174,7 @@ Partial Class frmMomentumReversalSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(451, 224)
+        Me.GroupBox1.Size = New System.Drawing.Size(451, 300)
         Me.GroupBox1.TabIndex = 20
         Me.GroupBox1.TabStop = False
         '
@@ -215,7 +261,7 @@ Partial Class frmMomentumReversalSettings
         'btnBrowse
         '
         Me.btnBrowse.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnBrowse.Location = New System.Drawing.Point(404, 191)
+        Me.btnBrowse.Location = New System.Drawing.Point(404, 265)
         Me.btnBrowse.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(40, 23)
@@ -225,7 +271,7 @@ Partial Class frmMomentumReversalSettings
         '
         'txtInstrumentDetalis
         '
-        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(189, 192)
+        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(189, 266)
         Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
         Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
         Me.txtInstrumentDetalis.ReadOnly = True
@@ -235,7 +281,7 @@ Partial Class frmMomentumReversalSettings
         'lblInstrumentDetails
         '
         Me.lblInstrumentDetails.AutoSize = True
-        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 195)
+        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 269)
         Me.lblInstrumentDetails.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblInstrumentDetails.Name = "lblInstrumentDetails"
         Me.lblInstrumentDetails.Size = New System.Drawing.Size(121, 17)
@@ -262,49 +308,51 @@ Partial Class frmMomentumReversalSettings
         Me.lblSignalTimeFrame.Tag = ""
         Me.lblSignalTimeFrame.Text = "Signal Time Frame(min)"
         '
-        'txtRSIOverBought
+        'dtpckrIdleTimeEnd
         '
-        Me.txtRSIOverBought.Location = New System.Drawing.Point(189, 53)
-        Me.txtRSIOverBought.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtRSIOverBought.Name = "txtRSIOverBought"
-        Me.txtRSIOverBought.Size = New System.Drawing.Size(241, 22)
-        Me.txtRSIOverBought.TabIndex = 7
-        Me.txtRSIOverBought.Tag = "RSI Over Bought"
+        Me.dtpckrIdleTimeEnd.Format = System.Windows.Forms.DateTimePickerFormat.Time
+        Me.dtpckrIdleTimeEnd.Location = New System.Drawing.Point(189, 231)
+        Me.dtpckrIdleTimeEnd.Name = "dtpckrIdleTimeEnd"
+        Me.dtpckrIdleTimeEnd.ShowUpDown = True
+        Me.dtpckrIdleTimeEnd.Size = New System.Drawing.Size(242, 22)
+        Me.dtpckrIdleTimeEnd.TabIndex = 35
+        Me.dtpckrIdleTimeEnd.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
-        'lblRSIOverBought
+        'dtpckrIdleTimeStart
         '
-        Me.lblRSIOverBought.AutoSize = True
-        Me.lblRSIOverBought.Location = New System.Drawing.Point(9, 58)
-        Me.lblRSIOverBought.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblRSIOverBought.Name = "lblRSIOverBought"
-        Me.lblRSIOverBought.Size = New System.Drawing.Size(114, 17)
-        Me.lblRSIOverBought.TabIndex = 37
-        Me.lblRSIOverBought.Text = "RSI Over Bought"
+        Me.dtpckrIdleTimeStart.Format = System.Windows.Forms.DateTimePickerFormat.Time
+        Me.dtpckrIdleTimeStart.Location = New System.Drawing.Point(189, 194)
+        Me.dtpckrIdleTimeStart.Name = "dtpckrIdleTimeStart"
+        Me.dtpckrIdleTimeStart.ShowUpDown = True
+        Me.dtpckrIdleTimeStart.Size = New System.Drawing.Size(241, 22)
+        Me.dtpckrIdleTimeStart.TabIndex = 34
+        Me.dtpckrIdleTimeStart.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
-        'txtRSIOverSold
+        'lblIdleTimeEnd
         '
-        Me.txtRSIOverSold.Location = New System.Drawing.Point(189, 84)
-        Me.txtRSIOverSold.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtRSIOverSold.Name = "txtRSIOverSold"
-        Me.txtRSIOverSold.Size = New System.Drawing.Size(241, 22)
-        Me.txtRSIOverSold.TabIndex = 8
-        Me.txtRSIOverSold.Tag = "RSI Over Sold"
+        Me.lblIdleTimeEnd.AutoSize = True
+        Me.lblIdleTimeEnd.Location = New System.Drawing.Point(9, 232)
+        Me.lblIdleTimeEnd.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblIdleTimeEnd.Name = "lblIdleTimeEnd"
+        Me.lblIdleTimeEnd.Size = New System.Drawing.Size(94, 17)
+        Me.lblIdleTimeEnd.TabIndex = 37
+        Me.lblIdleTimeEnd.Text = "Idle Time End"
         '
-        'lblRSIOverSold
+        'lblIdleTimeStart
         '
-        Me.lblRSIOverSold.AutoSize = True
-        Me.lblRSIOverSold.Location = New System.Drawing.Point(9, 89)
-        Me.lblRSIOverSold.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblRSIOverSold.Name = "lblRSIOverSold"
-        Me.lblRSIOverSold.Size = New System.Drawing.Size(97, 17)
-        Me.lblRSIOverSold.TabIndex = 39
-        Me.lblRSIOverSold.Text = "RSI Over Sold"
+        Me.lblIdleTimeStart.AutoSize = True
+        Me.lblIdleTimeStart.Location = New System.Drawing.Point(9, 196)
+        Me.lblIdleTimeStart.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblIdleTimeStart.Name = "lblIdleTimeStart"
+        Me.lblIdleTimeStart.Size = New System.Drawing.Size(99, 17)
+        Me.lblIdleTimeStart.TabIndex = 36
+        Me.lblIdleTimeStart.Text = "Idle Time Start"
         '
         'frmMomentumReversalSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(576, 359)
+        Me.ClientSize = New System.Drawing.Size(576, 428)
         Me.Controls.Add(Me.grpRSI)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnSaveMomentumReversalSettings)
@@ -347,4 +395,8 @@ Partial Class frmMomentumReversalSettings
     Friend WithEvents lblRSIOverSold As Label
     Friend WithEvents txtRSIOverBought As TextBox
     Friend WithEvents lblRSIOverBought As Label
+    Friend WithEvents dtpckrIdleTimeEnd As DateTimePicker
+    Friend WithEvents dtpckrIdleTimeStart As DateTimePicker
+    Friend WithEvents lblIdleTimeEnd As Label
+    Friend WithEvents lblIdleTimeStart As Label
 End Class

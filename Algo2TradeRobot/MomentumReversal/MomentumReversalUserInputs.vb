@@ -12,6 +12,27 @@ Public Class MomentumReversalUserInputs
     Public Property RSIOverBought As Integer
     Public Property RSIOverSold As Integer
     Public Property TradeOpenTime As Integer
+
+    Private _IdleTimeStart As Date
+    Public Property IdleTimeStart As Date
+        Get
+            Return New Date(Now.Year, Now.Month, Now.Day, _IdleTimeStart.Hour, _IdleTimeStart.Minute, _IdleTimeStart.Second)
+        End Get
+        Set(value As Date)
+            _IdleTimeStart = value
+        End Set
+    End Property
+
+    Private _IdleTimeEnd As Date
+    Public Property IdleTimeEnd As Date
+        Get
+            Return New Date(Now.Year, Now.Month, Now.Day, _IdleTimeEnd.Hour, _IdleTimeEnd.Minute, _IdleTimeEnd.Second)
+        End Get
+        Set(value As Date)
+            _IdleTimeEnd = value
+        End Set
+    End Property
+
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 

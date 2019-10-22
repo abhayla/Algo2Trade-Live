@@ -34,6 +34,8 @@ Public Class frmMomentumReversalSettings
             dtpckrTradeStartTime.Value = _MRSettings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _MRSettings.LastTradeEntryTime
             dtpckrEODExitTime.Value = _MRSettings.EODExitTime
+            dtpckrIdleTimeStart.Value = _MRSettings.IdleTimeStart
+            dtpckrIdleTimeEnd.Value = _MRSettings.IdleTimeEnd
             txtTradeOpenTime.Text = _MRSettings.TradeOpenTime
             txtInstrumentDetalis.Text = _MRSettings.InstrumentDetailsFilePath
 
@@ -47,6 +49,8 @@ Public Class frmMomentumReversalSettings
         _MRSettings.TradeStartTime = dtpckrTradeStartTime.Value
         _MRSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
         _MRSettings.EODExitTime = dtpckrEODExitTime.Value
+        _MRSettings.IdleTimeStart = dtpckrIdleTimeStart.Value
+        _MRSettings.IdleTimeEnd = dtpckrIdleTimeEnd.Value
         _MRSettings.TradeOpenTime = txtTradeOpenTime.Text
         _MRSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 

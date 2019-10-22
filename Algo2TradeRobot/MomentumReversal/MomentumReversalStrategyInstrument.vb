@@ -107,14 +107,18 @@ Public Class MomentumReversalStrategyInstrument
                 (Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder OrElse forcePrint) Then
                 _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
                 logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Is Active Instrument:{5}, {6}, Current Time:{7}, Current LTP:{8}, TradingSymbol:{9}",
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, Idle Time Start:{2}, Idle Time End:{3}, RunningCandlePayloadSnapshotDateTime:{4}, PayloadGeneratedBy:{5}, IsHistoricalCompleted:{6}, Is Active Instrument:{7}, {8}, Is Last Trade Exit at current candle:{9}, Last Order Exit Time:{10}, Current Time:{11}, Current LTP:{12}, TradingSymbol:{13}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
+                            userSettings.IdleTimeStart.ToString,
+                            userSettings.IdleTimeEnd.ToString,
                             runningCandlePayload.SnapshotDateTime.ToString,
                             runningCandlePayload.PayloadGeneratedBy.ToString,
                             Me.TradableInstrument.IsHistoricalCompleted,
                             IsActiveInstrument(),
                             rsiConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                            IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime),
+                            GetLastOrderExitTime(),
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
@@ -126,23 +130,26 @@ Public Class MomentumReversalStrategyInstrument
         Dim parameters As PlaceOrderParameters = Nothing
         If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
             runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime AndAlso
-            runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso
-            Not IsActiveInstrument() AndAlso Not Me.StrategyExitAllTriggerd Then
-            Dim signal As Tuple(Of Boolean, Decimal) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick)
-            If signal IsNot Nothing AndAlso signal.Item1 Then
-                Dim triggerPrice As Decimal = signal.Item2 + userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Buffer
-                Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                Dim stoploss As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
-                Dim target As Decimal = stoploss * 1000
+            runningCandlePayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
+            runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso Not IsActiveInstrument() AndAlso
+            Not Me.StrategyExitAllTriggerd AndAlso Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime) Then
+            If currentTime < userSettings.IdleTimeStart OrElse currentTime > userSettings.IdleTimeEnd Then
+                Dim signal As Tuple(Of Boolean, Decimal) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick)
+                If signal IsNot Nothing AndAlso signal.Item1 Then
+                    Dim triggerPrice As Decimal = signal.Item2 + userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Buffer
+                    Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                    Dim stoploss As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
+                    Dim target As Decimal = ConvertFloorCeling(triggerPrice * 10 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
-                If currentTick.LastPrice < triggerPrice Then
-                    parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
-                                {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                 .TriggerPrice = triggerPrice,
-                                 .Price = price,
-                                 .StoplossValue = stoploss,
-                                 .SquareOffValue = target,
-                                 .Quantity = Me.TradableInstrument.LotSize * userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).NumberOfLots}
+                    If currentTick.LastPrice < triggerPrice Then
+                        parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                                    {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                     .TriggerPrice = triggerPrice,
+                                     .Price = price,
+                                     .StoplossValue = stoploss,
+                                     .SquareOffValue = target,
+                                     .Quantity = Me.TradableInstrument.LotSize * userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).NumberOfLots}
+                    End If
                 End If
             End If
         End If
@@ -326,6 +333,48 @@ Public Class MomentumReversalStrategyInstrument
                     Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.HighPrice.Value, candle.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
                     ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
                 End If
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Function GetLastOrderExitTime() As Date
+        Dim ret As Date = Date.MinValue
+        Dim lastExecutedOrder As IBusinessOrder = GetLastExecutedOrder()
+        If lastExecutedOrder IsNot Nothing Then
+            If lastExecutedOrder.AllOrder IsNot Nothing AndAlso lastExecutedOrder.AllOrder.Count > 0 Then
+                For Each order In lastExecutedOrder.AllOrder
+                    If order.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss Then
+                        ret = If(order.TimeStamp > ret, order.TimeStamp, ret)
+                    End If
+                Next
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Function IsLastTradeExitedAtCurrentCandle(ByVal currentCandleTime As Date) As Boolean
+        Dim ret As Boolean = False
+        Dim lastTradeExitTime As Date = GetLastOrderExitTime()
+        If lastTradeExitTime <> Date.MinValue Then
+            Dim blockDateInThisTimeframe As Date = Date.MinValue
+            Dim timeframe As Integer = Me.ParentStrategy.UserSettings.SignalTimeFrame
+            If Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute Mod timeframe = 0 Then
+                blockDateInThisTimeframe = New Date(lastTradeExitTime.Year,
+                                                    lastTradeExitTime.Month,
+                                                    lastTradeExitTime.Day,
+                                                    lastTradeExitTime.Hour,
+                                                    Math.Floor(lastTradeExitTime.Minute / timeframe) * timeframe, 0)
+            Else
+                Dim exchangeStartTime As Date = New Date(lastTradeExitTime.Year, lastTradeExitTime.Month, lastTradeExitTime.Day, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Hour, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute, 0)
+                Dim currentTime As Date = New Date(lastTradeExitTime.Year, lastTradeExitTime.Month, lastTradeExitTime.Day, lastTradeExitTime.Hour, lastTradeExitTime.Minute, 0)
+                Dim timeDifference As Double = currentTime.Subtract(exchangeStartTime).TotalMinutes
+                Dim adjustedTimeDifference As Integer = Math.Floor(timeDifference / timeframe) * timeframe
+                Dim currentMinute As Date = exchangeStartTime.AddMinutes(adjustedTimeDifference)
+                blockDateInThisTimeframe = New Date(lastTradeExitTime.Year, lastTradeExitTime.Month, lastTradeExitTime.Day, currentMinute.Hour, currentMinute.Minute, 0)
+            End If
+            If blockDateInThisTimeframe <> Date.MinValue Then
+                ret = Utilities.Time.IsDateTimeEqualTillMinutes(blockDateInThisTimeframe, currentCandleTime)
             End If
         End If
         Return ret
