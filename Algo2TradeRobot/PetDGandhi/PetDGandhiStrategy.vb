@@ -128,11 +128,49 @@ Public Class PetDGandhiStrategy
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(CType(Me.UserSettings, PetDGandhiUserInputs).MaxLossPerDay) * -1 Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
-        ElseIf Me.GetTotalPLAfterBrokerage >= CType(Me.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
+            'ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(CType(Me.UserSettings, PetDGandhiUserInputs).MaxLossPerDay) * -1 Then
+            '    ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
+            'ElseIf Me.GetTotalPLAfterBrokerage >= CType(Me.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
+            '    ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
+    End Function
+
+    Private _triggerUsed As Boolean = False
+    Public Async Function SendMTMNotification() As Task
+        If Not _triggerUsed Then
+            _triggerUsed = True
+            Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+            Try
+                _cts.Token.ThrowIfCancellationRequested()
+                Dim message As String = Nothing
+
+                message = String.Format("{0}{1}PL:{2}, {3}MaxDrawUP:{4}, MaxDrawUpTime:{5}, {6}MaxDrawDown:{7}, MaxDrawDownTime:{8}",
+                                        "Pinbar Strategy",
+                                        vbNewLine,
+                                        Math.Round(Me.GetTotalPLAfterBrokerage, 2),
+                                        vbNewLine,
+                                        Math.Round(Me.MaxDrawUp, 2),
+                                        Me.MaxDrawUpTime,
+                                        vbNewLine,
+                                        Math.Round(Me.MaxDrawDown, 2),
+                                        Me.MaxDrawDownTime)
+
+                If message.Contains("&") Then
+                    message = message.Replace("&", "_")
+                End If
+
+                Dim userInputs As PetDGandhiUserInputs = Me.UserSettings
+                If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
+                    userInputs.TelegramMTMChatID IsNot Nothing AndAlso Not userInputs.TelegramMTMChatID.Trim = "" Then
+                    Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramMTMChatID, _cts)
+                        Dim encodedString As String = Utilities.Strings.EncodeString(message)
+                        tSender.SendMessageGetAsync(encodedString)
+                    End Using
+                End If
+            Catch ex As Exception
+                logger.Error("Generate Trigger after mtm reached message generation error: {0}", ex.ToString)
+            End Try
+        End If
     End Function
 End Class
