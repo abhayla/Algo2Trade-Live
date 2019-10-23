@@ -284,7 +284,7 @@ Public Class PetDGandhiStrategyInstrument
                     Utilities.Time.IsDateTimeEqualTillMinutes(lastExecutedOrder.ParentOrder.TimeStamp, runningCandlePayload.SnapshotDateTime) Then
                     takeTrade = False
                 End If
-                If takeTrade Then
+                If takeTrade AndAlso Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime) Then
                     Dim buffer As Decimal = CalculateBuffer(signal.Item2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     If _firstTradedQuantity = Integer.MinValue Then
                         _firstTradedQuantity = CalculateQuantityFromInvestment(signal.Item2, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapital, userSettings.AllowToIncreaseCapital)
@@ -294,7 +294,7 @@ Public Class PetDGandhiStrategyInstrument
                         Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                         Dim stoplossPrice As Decimal = signal.Item3 - buffer
                         Dim stoploss As Decimal = ConvertFloorCeling(triggerPrice - stoplossPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                        Dim target As Decimal = GetCandleATR(runningCandlePayload.PreviousPayload) * userSettings.TargetMultiplier
+                        Dim target As Decimal = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload) * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
 
                         If currentTick.LastPrice >= triggerPrice Then
                             parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
@@ -311,7 +311,7 @@ Public Class PetDGandhiStrategyInstrument
                         Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                         Dim stoplossPrice As Decimal = signal.Item3 + buffer
                         Dim stoploss As Decimal = ConvertFloorCeling(stoplossPrice - triggerPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                        Dim target As Decimal = GetCandleATR(runningCandlePayload.PreviousPayload) * userSettings.TargetMultiplier
+                        Dim target As Decimal = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload) * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
 
                         If currentTick.LastPrice <= triggerPrice Then
                             parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
@@ -410,8 +410,13 @@ Public Class PetDGandhiStrategyInstrument
                                             potentialSLPrice = signalCandle.OpenPrice.Value - buffer
                                         End If
                                         Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 10
-                                        triggerPrice = Math.Min(potentialSLPrice, ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice - minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor))
-                                        reason = "Move to candle body"
+                                        If potentialSLPrice <= ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice - minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor) Then
+                                            triggerPrice = potentialSLPrice
+                                            reason = "Move to candle body"
+                                        Else
+                                            triggerPrice = ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice - minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                                            reason = "Minimum loss % per trade"
+                                        End If
                                     ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                                         Dim potentialSLPrice As Decimal = Decimal.MinValue
                                         If signalCandle.CandleColor = Color.Red Then
@@ -420,8 +425,13 @@ Public Class PetDGandhiStrategyInstrument
                                             potentialSLPrice = signalCandle.ClosePrice.Value - buffer
                                         End If
                                         Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 10
-                                        triggerPrice = Math.Max(potentialSLPrice, ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice + minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor))
-                                        reason = "Move to candle body"
+                                        If potentialSLPrice >= ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice + minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor) Then
+                                            triggerPrice = potentialSLPrice
+                                            reason = "Move to candle body"
+                                        Else
+                                            triggerPrice = ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice + minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                                            reason = "Minimum loss % per trade"
+                                        End If
                                     End If
                                 End If
                                 If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
@@ -495,7 +505,7 @@ Public Class PetDGandhiStrategyInstrument
                                         Else
                                             potentialSLPrice = signalCandle.OpenPrice.Value - buffer
                                         End If
-                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 10
+                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 100
                                         triggerPrice = Math.Min(potentialSLPrice, ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice - minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor))
                                         If runningCandlePayload.PreviousPayload.ClosePrice.Value <= triggerPrice Then
                                             exitOrder = True
@@ -507,7 +517,7 @@ Public Class PetDGandhiStrategyInstrument
                                         Else
                                             potentialSLPrice = signalCandle.ClosePrice.Value - buffer
                                         End If
-                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 10
+                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 100
                                         triggerPrice = Math.Max(potentialSLPrice, ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice + minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor))
                                         If runningCandlePayload.PreviousPayload.ClosePrice.Value >= triggerPrice Then
                                             exitOrder = True
@@ -685,7 +695,49 @@ Public Class PetDGandhiStrategyInstrument
         If candle IsNot Nothing Then
             If atrConsumer.ConsumerPayloads IsNot Nothing AndAlso atrConsumer.ConsumerPayloads.Count > 0 AndAlso
                 atrConsumer.ConsumerPayloads.ContainsKey(candle.SnapshotDateTime) Then
-                ret = CType(atrConsumer.ConsumerPayloads(candle.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
+                ret = Math.Round(CType(atrConsumer.ConsumerPayloads(candle.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value, 2)
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Function GetLastOrderExitTime() As Date
+        Dim ret As Date = Date.MinValue
+        Dim lastExecutedOrder As IBusinessOrder = GetLastExecutedOrder()
+        If lastExecutedOrder IsNot Nothing Then
+            If lastExecutedOrder.AllOrder IsNot Nothing AndAlso lastExecutedOrder.AllOrder.Count > 0 Then
+                For Each order In lastExecutedOrder.AllOrder
+                    If order.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss Then
+                        ret = If(order.TimeStamp > ret, order.TimeStamp, ret)
+                    End If
+                Next
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Function IsLastTradeExitedAtCurrentCandle(ByVal currentCandleTime As Date) As Boolean
+        Dim ret As Boolean = False
+        Dim lastTradeExitTime As Date = GetLastOrderExitTime()
+        If lastTradeExitTime <> Date.MinValue Then
+            Dim blockDateInThisTimeframe As Date = Date.MinValue
+            Dim timeframe As Integer = Me.ParentStrategy.UserSettings.SignalTimeFrame
+            If Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute Mod timeframe = 0 Then
+                blockDateInThisTimeframe = New Date(lastTradeExitTime.Year,
+                                                    lastTradeExitTime.Month,
+                                                    lastTradeExitTime.Day,
+                                                    lastTradeExitTime.Hour,
+                                                    Math.Floor(lastTradeExitTime.Minute / timeframe) * timeframe, 0)
+            Else
+                Dim exchangeStartTime As Date = New Date(lastTradeExitTime.Year, lastTradeExitTime.Month, lastTradeExitTime.Day, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Hour, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute, 0)
+                Dim currentTime As Date = New Date(lastTradeExitTime.Year, lastTradeExitTime.Month, lastTradeExitTime.Day, lastTradeExitTime.Hour, lastTradeExitTime.Minute, 0)
+                Dim timeDifference As Double = currentTime.Subtract(exchangeStartTime).TotalMinutes
+                Dim adjustedTimeDifference As Integer = Math.Floor(timeDifference / timeframe) * timeframe
+                Dim currentMinute As Date = exchangeStartTime.AddMinutes(adjustedTimeDifference)
+                blockDateInThisTimeframe = New Date(lastTradeExitTime.Year, lastTradeExitTime.Month, lastTradeExitTime.Day, currentMinute.Hour, currentMinute.Minute, 0)
+            End If
+            If blockDateInThisTimeframe <> Date.MinValue Then
+                ret = Utilities.Time.IsDateTimeEqualTillMinutes(blockDateInThisTimeframe, currentCandleTime)
             End If
         End If
         Return ret
