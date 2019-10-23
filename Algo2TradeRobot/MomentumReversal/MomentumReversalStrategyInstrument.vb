@@ -107,7 +107,7 @@ Public Class MomentumReversalStrategyInstrument
                 (Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder OrElse forcePrint) Then
                 _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
                 logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, Idle Time Start:{2}, Idle Time End:{3}, RunningCandlePayloadSnapshotDateTime:{4}, PayloadGeneratedBy:{5}, IsHistoricalCompleted:{6}, Is Active Instrument:{7}, {8}, Is Last Trade Exit at current candle:{9}, Last Order Exit Time:{10}, Current Time:{11}, Current LTP:{12}, TradingSymbol:{13}",
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, Idle Time Start:{2}, Idle Time End:{3}, RunningCandlePayloadSnapshotDateTime:{4}, PayloadGeneratedBy:{5}, IsHistoricalCompleted:{6}, Is Active Instrument:{7}, {8}, Current Time:{9}, Current LTP:{10}, TradingSymbol:{11}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             userSettings.IdleTimeStart.ToString,
@@ -117,8 +117,6 @@ Public Class MomentumReversalStrategyInstrument
                             Me.TradableInstrument.IsHistoricalCompleted,
                             IsActiveInstrument(),
                             rsiConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
-                            IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime),
-                            GetLastOrderExitTime(),
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
@@ -132,9 +130,10 @@ Public Class MomentumReversalStrategyInstrument
             runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime AndAlso
             runningCandlePayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
             runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso Not IsActiveInstrument() AndAlso
-            Not Me.StrategyExitAllTriggerd AndAlso Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime) Then
+            Not Me.StrategyExitAllTriggerd Then
+            'Not Me.StrategyExitAllTriggerd AndAlso Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime) Then
             If currentTime < userSettings.IdleTimeStart OrElse currentTime > userSettings.IdleTimeEnd Then
-                Dim signal As Tuple(Of Boolean, Decimal) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick)
+                Dim signal As Tuple(Of Boolean, Decimal) = GetSignalCandle(runningCandlePayload, currentTick)
                 If signal IsNot Nothing AndAlso signal.Item1 Then
                     Dim triggerPrice As Decimal = signal.Item2 + userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Buffer
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
@@ -323,20 +322,21 @@ Public Class MomentumReversalStrategyInstrument
 
     Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick) As Tuple(Of Boolean, Decimal)
         Dim ret As Tuple(Of Boolean, Decimal) = Nothing
-        If candle IsNot Nothing Then
+        If candle IsNot Nothing AndAlso candle.PreviousPayload IsNot Nothing Then
             Dim userSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
             Dim rsiConsumer As RSIConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRSIConsumer)
             If rsiConsumer.ConsumerPayloads IsNot Nothing AndAlso rsiConsumer.ConsumerPayloads.Count > 0 AndAlso
                 rsiConsumer.ConsumerPayloads.ContainsKey(candle.SnapshotDateTime) Then
                 If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSIOverSold AndAlso
                     CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value < userSettings.RSIOverBought Then
-                    If Utilities.Time.IsDateTimeEqualTillMinutes(candle.SnapshotDateTime, userSettings.TradeStartTime.AddMinutes(userSettings.SignalTimeFrame * -1)) Then
-                        ret = New Tuple(Of Boolean, Decimal)(True, candle.HighPrice.Value)
+                    If Utilities.Time.IsDateTimeEqualTillMinutes(candle.SnapshotDateTime, userSettings.TradeStartTime) Then
+                        ret = New Tuple(Of Boolean, Decimal)(True, candle.PreviousPayload.HighPrice.Value)
                     Else
                         If candle.PreviousPayload IsNot Nothing AndAlso
                             candle.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
-                            candle.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing Then
-                            Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.HighPrice.Value, candle.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
+                            candle.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
+                            candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing Then
+                            Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.PreviousPayload.HighPrice.Value, candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
                             ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
                         End If
                     End If

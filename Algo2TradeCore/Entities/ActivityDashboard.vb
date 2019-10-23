@@ -45,94 +45,101 @@ Namespace Entities
             Return _TotalExecutedOrders
         End Function
 
-        Private _StrategyOverAllPLAfterBrokerage As Decimal
-        <Display(Name:="Strategy PL After Brokerage", Order:=2)>
-        Public ReadOnly Property StrategyOverAllPLAfterBrokerage As Decimal
-            Get
-                _StrategyOverAllPLAfterBrokerage = ParentStrategyInstrument.ParentStrategy.GetTotalPLAfterBrokerage
-                Return _StrategyOverAllPLAfterBrokerage
-            End Get
-        End Property
-        Public Function GetDirtyStrategyOverAllPLAfterBrokerage() As Decimal
-            Return _StrategyOverAllPLAfterBrokerage
-        End Function
+        'Private _StrategyOverAllPLAfterBrokerage As Decimal
+        ''<Display(Name:="Strategy PL After Brokerage", Order:=2)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property StrategyOverAllPLAfterBrokerage As Decimal
+        '    Get
+        '        _StrategyOverAllPLAfterBrokerage = ParentStrategyInstrument.ParentStrategy.GetTotalPLAfterBrokerage
+        '        Return _StrategyOverAllPLAfterBrokerage
+        '    End Get
+        'End Property
+        'Public Function GetDirtyStrategyOverAllPLAfterBrokerage() As Decimal
+        '    Return _StrategyOverAllPLAfterBrokerage
+        'End Function
 
-        Private _StrategyMaxDrawUp As Decimal
-        <Display(Name:="Strategy Max Draw Up", Order:=3)>
-        Public ReadOnly Property StrategyMaxDrawUp As Decimal
-            Get
-                _StrategyMaxDrawUp = ParentStrategyInstrument.ParentStrategy.MaxDrawUp
-                Return _StrategyMaxDrawUp
-            End Get
-        End Property
-        Public Function GetDirtyStrategyMaxDrawUp() As Decimal
-            Return _StrategyMaxDrawUp
-        End Function
+        'Private _StrategyMaxDrawUp As Decimal
+        ''<Display(Name:="Strategy Max Draw Up", Order:=3)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property StrategyMaxDrawUp As Decimal
+        '    Get
+        '        _StrategyMaxDrawUp = ParentStrategyInstrument.ParentStrategy.MaxDrawUp
+        '        Return _StrategyMaxDrawUp
+        '    End Get
+        'End Property
+        'Public Function GetDirtyStrategyMaxDrawUp() As Decimal
+        '    Return _StrategyMaxDrawUp
+        'End Function
 
-        Private _StrategyMaxDrawUpTime As Date
-        <Display(Name:="Strategy Max Draw Up Time", Order:=4)>
-        Public ReadOnly Property StrategyMaxDrawUpTime As Date
-            Get
-                _StrategyMaxDrawUpTime = ParentStrategyInstrument.ParentStrategy.MaxDrawUpTime
-                Return _StrategyMaxDrawUpTime
-            End Get
-        End Property
-        Public Function GetDirtyStrategyMaxDrawUpTime() As Date
-            Return _StrategyMaxDrawUpTime
-        End Function
+        'Private _StrategyMaxDrawUpTime As Date
+        ''<Display(Name:="Strategy Max Draw Up Time", Order:=4)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property StrategyMaxDrawUpTime As Date
+        '    Get
+        '        _StrategyMaxDrawUpTime = ParentStrategyInstrument.ParentStrategy.MaxDrawUpTime
+        '        Return _StrategyMaxDrawUpTime
+        '    End Get
+        'End Property
+        'Public Function GetDirtyStrategyMaxDrawUpTime() As Date
+        '    Return _StrategyMaxDrawUpTime
+        'End Function
 
-        Private _StrategyMaxDrawDown As Decimal
-        <Display(Name:="Strategy Max Draw Down", Order:=5)>
-        Public ReadOnly Property StrategyMaxDrawDown As Decimal
-            Get
-                _StrategyMaxDrawDown = ParentStrategyInstrument.ParentStrategy.MaxDrawDown
-                Return _StrategyMaxDrawDown
-            End Get
-        End Property
-        Public Function GetDirtyStrategyMaxDrawDown() As Decimal
-            Return _StrategyMaxDrawDown
-        End Function
+        'Private _StrategyMaxDrawDown As Decimal
+        ''<Display(Name:="Strategy Max Draw Down", Order:=5)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property StrategyMaxDrawDown As Decimal
+        '    Get
+        '        _StrategyMaxDrawDown = ParentStrategyInstrument.ParentStrategy.MaxDrawDown
+        '        Return _StrategyMaxDrawDown
+        '    End Get
+        'End Property
+        'Public Function GetDirtyStrategyMaxDrawDown() As Decimal
+        '    Return _StrategyMaxDrawDown
+        'End Function
 
-        Private _StrategyMaxDrawDownTime As Date
-        <Display(Name:="Strategy Max Draw Down Time", Order:=6)>
-        Public ReadOnly Property StrategyMaxDrawDownTime As Date
-            Get
-                _StrategyMaxDrawDownTime = ParentStrategyInstrument.ParentStrategy.MaxDrawDownTime
-                Return _StrategyMaxDrawDownTime
-            End Get
-        End Property
-        Public Function GetDirtyStrategyMaxDrawDownTime() As Date
-            Return _StrategyMaxDrawDownTime
-        End Function
+        'Private _StrategyMaxDrawDownTime As Date
+        ''<Display(Name:="Strategy Max Draw Down Time", Order:=6)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property StrategyMaxDrawDownTime As Date
+        '    Get
+        '        _StrategyMaxDrawDownTime = ParentStrategyInstrument.ParentStrategy.MaxDrawDownTime
+        '        Return _StrategyMaxDrawDownTime
+        '    End Get
+        'End Property
+        'Public Function GetDirtyStrategyMaxDrawDownTime() As Date
+        '    Return _StrategyMaxDrawDownTime
+        'End Function
 
-        Private _OverallPL As Decimal
-        <Display(Name:="Overall PL", Order:=7)>
-        Public ReadOnly Property OverallPL As Decimal
-            Get
-                _OverallPL = Math.Round(ParentStrategyInstrument.GetOverallPLAfterBrokerage(), 2)
-                Return _OverallPL
-            End Get
-        End Property
-        Public Function GetDirtyOverallPL() As Decimal
-            Return _OverallPL
-        End Function
+        'Private _OverallPL As Decimal
+        ''<Display(Name:="Overall PL", Order:=7)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property OverallPL As Decimal
+        '    Get
+        '        _OverallPL = Math.Round(ParentStrategyInstrument.GetOverallPLAfterBrokerage(), 2)
+        '        Return _OverallPL
+        '    End Get
+        'End Property
+        'Public Function GetDirtyOverallPL() As Decimal
+        '    Return _OverallPL
+        'End Function
 
-        Private _SignalPL As Decimal
-        <Display(Name:="Signal PL", Order:=8)>
-        Public ReadOnly Property SignalPL As Decimal
-            Get
-                If ParentOrderID IsNot Nothing Then
-                    _SignalPL = Math.Round(ParentStrategyInstrument.GetTotalPLOfAnOrderAfterBrokerage(ParentOrderID), 2)
-                End If
-                Return _SignalPL
-            End Get
-        End Property
-        Public Function GetDirtySignalPL() As Decimal
-            Return _SignalPL
-        End Function
+        'Private _SignalPL As Decimal
+        ''<Display(Name:="Signal PL", Order:=8)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property SignalPL As Decimal
+        '    Get
+        '        If ParentOrderID IsNot Nothing Then
+        '            _SignalPL = Math.Round(ParentStrategyInstrument.GetTotalPLOfAnOrderAfterBrokerage(ParentOrderID), 2)
+        '        End If
+        '        Return _SignalPL
+        '    End Get
+        'End Property
+        'Public Function GetDirtySignalPL() As Decimal
+        '    Return _SignalPL
+        'End Function
 
         Private _ActiveSignal As Boolean
-        <Display(Name:="Active Signal", Order:=9)>
+        <Display(Name:="Active Signal", Order:=2)>
         Public ReadOnly Property ActiveSignal As Boolean
             Get
                 If ParentStrategyInstrument.IsActiveInstrument() Then
@@ -152,21 +159,21 @@ Namespace Entities
             Return _ActiveSignal
         End Function
 
-        <Display(Name:="Signal Generated Time", Order:=10)>
+        <Display(Name:="Signal Generated Time", Order:=3)>
         Public Property SignalGeneratedTime As Date
 
-        <Display(Name:="Signal Direction", Order:=11)>
+        <Display(Name:="Signal Direction", Order:=4)>
         Public Property SignalDirection As IOrder.TypeOfTransaction
 
         <System.ComponentModel.Browsable(False)>
         Public Property EntryActivity As Activity
-        <Display(Name:="Entry Request Time", Order:=12)>
+        <Display(Name:="Entry Request Time", Order:=5)>
         Public ReadOnly Property EntryRequestTime As Date
             Get
                 Return EntryActivity.RequestTime
             End Get
         End Property
-        <Display(Name:="Entry Request Status", Order:=13)>
+        <Display(Name:="Entry Request Status", Order:=6)>
         Public ReadOnly Property EntryRequestStatus As SignalStatusType
             Get
                 Return EntryActivity.RequestStatus
@@ -175,57 +182,66 @@ Namespace Entities
 
         <System.ComponentModel.Browsable(False)>
         Public Property TargetModifyActivity As Activity
-        <Display(Name:="Target Modify Request Time", Order:=14)>
-        Public ReadOnly Property TargetModifyRequestTime As Date
-            Get
-                Return TargetModifyActivity.RequestTime
-            End Get
-        End Property
-        <Display(Name:="Target Modify Request Status", Order:=15)>
-        Public ReadOnly Property TargetModifyRequestStatus As SignalStatusType
-            Get
-                Return TargetModifyActivity.RequestStatus
-            End Get
-        End Property
+        ''<Display(Name:="Target Modify Request Time", Order:=14)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property TargetModifyRequestTime As Date
+        '    Get
+        '        Return TargetModifyActivity.RequestTime
+        '    End Get
+        'End Property
+        ''<Display(Name:="Target Modify Request Status", Order:=15)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property TargetModifyRequestStatus As SignalStatusType
+        '    Get
+        '        Return TargetModifyActivity.RequestStatus
+        '    End Get
+        'End Property
+        ''<Display(Name:="Target Modify Remarks", Order:=16)>
+        '<System.ComponentModel.Browsable(False)>
+        'Public ReadOnly Property TargetModifyRemarks As String
+        '    Get
+        '        Return TargetModifyActivity.RequestRemarks
+        '    End Get
+        'End Property
 
-        <Display(Name:="Target Modify Remarks", Order:=16)>
-        Public ReadOnly Property TargetModifyRemarks As String
-            Get
-                Return TargetModifyActivity.RequestRemarks
-            End Get
-        End Property
 
         <System.ComponentModel.Browsable(False)>
         Public Property StoplossModifyActivity As Activity
-        <Display(Name:="Stoploss Modify Request Time", Order:=17)>
+        <Display(Name:="Stoploss Modify Request Time", Order:=7)>
         Public ReadOnly Property StoplossModifyRequestTime As Date
             Get
                 Return StoplossModifyActivity.RequestTime
             End Get
         End Property
-        <Display(Name:="Stoploss Modify Request Status", Order:=18)>
+        <Display(Name:="Stoploss Modify Request Status", Order:=8)>
         Public ReadOnly Property StoplossModifyRequestStatus As SignalStatusType
             Get
                 Return StoplossModifyActivity.RequestStatus
             End Get
         End Property
+        <Display(Name:="Stoploss Modify Request Remarks", Order:=9)>
+        Public ReadOnly Property StoplossModifyRequestRemarks As String
+            Get
+                Return StoplossModifyActivity.RequestRemarks
+            End Get
+        End Property
 
         <System.ComponentModel.Browsable(False)>
         Public Property CancelActivity As Activity
-        <Display(Name:="Exit Request Time", Order:=19)>
+        <Display(Name:="Exit Request Time", Order:=10)>
         Public ReadOnly Property CancelRequestTime As Date
             Get
                 Return CancelActivity.RequestTime
             End Get
         End Property
-        <Display(Name:="Exit Request Status", Order:=20)>
+        <Display(Name:="Exit Request Status", Order:=11)>
         Public ReadOnly Property CancelRequestStatus As SignalStatusType
             Get
                 Return CancelActivity.RequestStatus
             End Get
         End Property
 
-        <Display(Name:="Exit Request Remarks", Order:=21)>
+        <Display(Name:="Exit Request Remarks", Order:=12)>
         Public ReadOnly Property CancelRequestRemarks As String
             Get
                 Return CancelActivity.RequestRemarks
@@ -233,7 +249,7 @@ Namespace Entities
         End Property
 
         Private _LastPrice As Decimal
-        <Display(Name:="Last Price", Order:=22)>
+        <Display(Name:="Last Price", Order:=13)>
         Public ReadOnly Property LastPrice As Decimal
             Get
                 If ParentStrategyInstrument.TradableInstrument.LastTick IsNot Nothing Then
@@ -247,7 +263,7 @@ Namespace Entities
         End Function
 
         Private _Timestamp As Date?
-        <Display(Name:="Timestamp", Order:=23)>
+        <Display(Name:="Timestamp", Order:=14)>
         Public ReadOnly Property Timestamp As Date?
             Get
                 If ParentStrategyInstrument.TradableInstrument.LastTick IsNot Nothing Then
@@ -261,7 +277,7 @@ Namespace Entities
         End Function
 
         Private _LastCandleTime As Date
-        <Display(Name:="Last Candle Time", Order:=24)>
+        <Display(Name:="Last Candle Time", Order:=15)>
         Public ReadOnly Property LastCandleTime As Date
             Get
                 If ParentStrategyInstrument.TradableInstrument.RawPayloads IsNot Nothing AndAlso
@@ -277,7 +293,7 @@ Namespace Entities
             Return _LastCandleTime
         End Function
 
-        <Display(Name:="Parent Order ID", Order:=25)>
+        <Display(Name:="Parent Order ID", Order:=16)>
         Public Property ParentOrderID As String
 
 
