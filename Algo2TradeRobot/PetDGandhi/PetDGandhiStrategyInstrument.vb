@@ -118,6 +118,14 @@ Public Class PetDGandhiStrategyInstrument
                 'Place Order block end
 
                 _cts.Token.ThrowIfCancellationRequested()
+                'Exit Order block start
+                Dim exitOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Await IsTriggerReceivedForExitOrderAsync(False).ConfigureAwait(False)
+                If exitOrderTrigger IsNot Nothing AndAlso exitOrderTrigger.Count > 0 Then
+                    Await ForceExitAllTradesAsync(exitOrderTrigger.FirstOrDefault.Item3).ConfigureAwait(False)
+                End If
+                'Exit Order block end
+
+                _cts.Token.ThrowIfCancellationRequested()
                 'Modify Order block start
                 Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
                 If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
@@ -458,8 +466,80 @@ Public Class PetDGandhiStrategyInstrument
         Throw New NotImplementedException()
     End Function
 
-    Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
-        Throw New NotImplementedException()
+    Protected Overrides Async Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
+        Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Nothing
+        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+        Dim userSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
+        Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
+        Dim currentTick As ITick = _lastTick
+        If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
+            OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+            For Each runningOrderID In OrderDetails.Keys
+                Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
+                If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
+                    For Each slOrder In bussinessOrder.SLOrder
+                        If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
+                            Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
+                            Not slOrder.Status = IOrder.TypeOfStatus.Rejected AndAlso
+                            Not slOrder.SupportingFlag Then
+                            Dim exitOrder As Boolean = False
+                            Dim triggerPrice As Decimal = Decimal.MinValue
+                            Dim signalCandle As OHLCPayload = GetSignalCandleOfAnOrder(bussinessOrder.ParentOrderIdentifier, userSettings.SignalTimeFrame)
+                            Dim buffer As Decimal = CalculateBuffer(bussinessOrder.ParentOrder.AveragePrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                            If signalCandle IsNot Nothing Then
+                                If signalCandle.SnapshotDateTime = runningCandlePayload.PreviousPayload.PreviousPayload.SnapshotDateTime Then
+                                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                        Dim potentialSLPrice As Decimal = Decimal.MinValue
+                                        If signalCandle.CandleColor = Color.Red Then
+                                            potentialSLPrice = signalCandle.ClosePrice.Value - buffer
+                                        Else
+                                            potentialSLPrice = signalCandle.OpenPrice.Value - buffer
+                                        End If
+                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 10
+                                        triggerPrice = Math.Min(potentialSLPrice, ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice - minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor))
+                                        If runningCandlePayload.PreviousPayload.ClosePrice.Value <= triggerPrice Then
+                                            exitOrder = True
+                                        End If
+                                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                        Dim potentialSLPrice As Decimal = Decimal.MinValue
+                                        If signalCandle.CandleColor = Color.Red Then
+                                            potentialSLPrice = signalCandle.OpenPrice.Value + buffer
+                                        Else
+                                            potentialSLPrice = signalCandle.ClosePrice.Value - buffer
+                                        End If
+                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 10
+                                        triggerPrice = Math.Max(potentialSLPrice, ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice + minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor))
+                                        If runningCandlePayload.PreviousPayload.ClosePrice.Value >= triggerPrice Then
+                                            exitOrder = True
+                                        End If
+                                    End If
+                                End If
+                            End If
+
+                            If exitOrder Then
+                                'Below portion have to be done in every cancel order trigger
+                                Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(bussinessOrder.ParentOrder.Tag)
+                                If currentSignalActivities IsNot Nothing Then
+                                    If currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
+                                    currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                    currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                        Continue For
+                                    End If
+                                End If
+                                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, String))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, bussinessOrder.ParentOrder, "Candle closed beyond body"))
+                            End If
+                        End If
+                    Next
+                End If
+            Next
+        End If
+        If forcePrint AndAlso ret IsNot Nothing AndAlso ret.Count > 0 Then
+            For Each runningOrder In ret
+                logger.Debug("***** Exit Order ***** Order ID:{0}, Reason:{1}, {2}", runningOrder.Item2.OrderIdentifier, runningOrder.Item3, Me.TradableInstrument.TradingSymbol)
+            Next
+        End If
+        Return ret
     End Function
 
     Protected Overrides Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, IOrder, String)))

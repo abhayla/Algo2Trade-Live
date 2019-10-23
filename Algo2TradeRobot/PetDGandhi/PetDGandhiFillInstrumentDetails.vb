@@ -168,7 +168,7 @@ Public Class PetDGandhiFillInstrumentDetails
                                                                                                                                        _cts.Token.ThrowIfCancellationRequested()
                                                                                                                                        If avgVolume >= (_userInputs.MinVolume / 100) * lastDayClosePrice Then
                                                                                                                                            If highATRStocks Is Nothing Then highATRStocks = New Concurrent.ConcurrentDictionary(Of String, Decimal())
-                                                                                                                                           highATRStocks.TryAdd(instrumentData.Value, {atrPercentage, avgVolume * 100 / ((_userInputs.MinVolume / 100) * lastDayClosePrice)})
+                                                                                                                                           highATRStocks.TryAdd(instrumentData.Value, {atrPercentage})
                                                                                                                                        End If
                                                                                                                                    End If
                                                                                                                                End If
