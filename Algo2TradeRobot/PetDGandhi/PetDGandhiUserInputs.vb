@@ -14,16 +14,33 @@ Public Class PetDGandhiUserInputs
     Public Property MaxLossPerDay As Decimal
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
+    Public Property PinbarTalePercentage As Decimal
+    Public Property MaxLossPercentagePerStock As Decimal
+    Public Property MaxLossPercentagePerTrade As Decimal
+    Public Property MinLossPercentagePerTrade As Decimal
+
+    Public Property AutoSelectStock As Boolean
+    Public Property CashInstrument As Boolean
+    Public Property FutureInstrument As Boolean
+    Public Property AllowToIncreaseCapital As Boolean
+    Public Property MinCapital As Decimal
+
+    Public Property MinPrice As Decimal
+    Public Property MaxPrice As Decimal
+    Public Property ATRPercentage As Decimal
+    Public Property MinVolume As Decimal
+    Public Property BlankCandlePercentage As Decimal
+    Public Property NumberOfStock As Integer
 
     Public Property TelegramAPIKey As String
-    Public Property TelegramChatID As String
-    Public Property TelegramPLChatID As String
+    Public Property TelegramTradeChatID As String
+    Public Property TelegramTargetChatID As String
+    Public Property TelegramMTMChatID As String
 
     <Serializable>
     Public Class InstrumentDetails
-        Public Property InstrumentName As String
-        Public Property Quantity As Decimal
-        Public Property Buffer As Decimal
+        Public Property TradingSymbol As String
+        Public Property MarginMultiplier As Decimal
     End Class
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
         If filePath IsNot Nothing Then
@@ -35,9 +52,9 @@ Public Class PetDGandhiUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"INSTRUMENT NAME", "QUANTITY", "BUFFER"}
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "MARGIN MULTIPLIER"}
 
-                        For colCtr = 0 To 2
+                        For colCtr = 0 To 1
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -48,8 +65,7 @@ Public Class PetDGandhiUserInputs
                         Next
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim instrumentName As String = Nothing
-                            Dim quantity As Decimal = Decimal.MinValue
-                            Dim buffer As Decimal = Decimal.MinValue
+                            Dim margin As Decimal = Decimal.MinValue
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
@@ -64,36 +80,26 @@ Public Class PetDGandhiUserInputs
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            quantity = instrumentDetails(rowCtr, columnCtr)
+                                            margin = instrumentDetails(rowCtr, columnCtr)
                                         Else
                                             Throw New ApplicationException(String.Format("Margin Multiplier cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                         End If
                                     Else
                                         Throw New ApplicationException(String.Format("Margin Multiplier cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
-                                ElseIf columnCtr = 2 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            buffer = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("Buffer cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Buffer cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                    End If
                                 End If
                             Next
                             If instrumentName IsNot Nothing Then
                                 Dim instrumentData As New InstrumentDetails
-                                instrumentData.InstrumentName = instrumentName.ToUpper
-                                instrumentData.Quantity = quantity
-                                instrumentData.Buffer = buffer
+                                With instrumentData
+                                    .TradingSymbol = instrumentName.ToUpper
+                                    .MarginMultiplier = margin
+                                End With
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
-                                If Me.InstrumentsData.ContainsKey(instrumentData.InstrumentName) Then
-                                    Throw New ApplicationException(String.Format("Duplicate Instrument Name {0}", instrumentData.InstrumentName))
+                                If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then
+                                    Throw New ApplicationException(String.Format("Duplicate Instrument Name {0}", instrumentData.TradingSymbol))
                                 End If
-                                Me.InstrumentsData.Add(instrumentData.InstrumentName, instrumentData)
+                                Me.InstrumentsData.Add(instrumentData.TradingSymbol, instrumentData)
                             End If
                         Next
                     Else
@@ -109,5 +115,4 @@ Public Class PetDGandhiUserInputs
             Throw New ApplicationException("No valid file path exists")
         End If
     End Sub
-
 End Class

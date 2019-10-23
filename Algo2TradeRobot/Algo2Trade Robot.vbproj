@@ -270,6 +270,7 @@
     <Compile Include="PetDGandhi\frmPetDGandhiTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="PetDGandhi\PetDGandhiFillInstrumentDetails.vb" />
     <Compile Include="PetDGandhi\PetDGandhiStrategy.vb" />
     <Compile Include="PetDGandhi\PetDGandhiStrategyInstrument.vb" />
     <Compile Include="PetDGandhi\PetDGandhiUserInputs.vb" />

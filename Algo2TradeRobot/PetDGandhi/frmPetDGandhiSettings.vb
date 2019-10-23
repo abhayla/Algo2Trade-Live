@@ -3,12 +3,12 @@ Imports System.IO
 
 Public Class frmPetDGandhiSettings
     Private _cts As CancellationTokenSource = Nothing
-    Private _PetDGandhiSettings As PetDGandhiUserInputs = Nothing
+    Private _settings As PetDGandhiUserInputs = Nothing
     Private _PetDGandhiSettingsFilename As String = Path.Combine(My.Application.Info.DirectoryPath, "PetDGandhiSettings.Strategy.a2t")
 
     Public Sub New(ByRef PetDGandhiUserInputs As PetDGandhiUserInputs)
         InitializeComponent()
-        _PetDGandhiSettings = PetDGandhiUserInputs
+        _settings = PetDGandhiUserInputs
     End Sub
 
     Private Sub frmPetDGandhiSettings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -18,8 +18,8 @@ Public Class frmPetDGandhiSettings
     Private Sub btnSavePetDGandhiSettings_Click(sender As Object, e As EventArgs) Handles btnSavePetDGandhiSettings.Click
         Try
             _cts = New CancellationTokenSource
-            If _PetDGandhiSettings Is Nothing Then _PetDGandhiSettings = New PetDGandhiUserInputs
-            _PetDGandhiSettings.InstrumentsData = Nothing
+            If _settings Is Nothing Then _settings = New PetDGandhiUserInputs
+            _settings.InstrumentsData = Nothing
             ValidateInputs()
             SaveSettings()
             Me.Close()
@@ -44,40 +44,76 @@ Public Class frmPetDGandhiSettings
 
     Private Sub LoadSettings()
         If File.Exists(_PetDGandhiSettingsFilename) Then
-            _PetDGandhiSettings = Utilities.Strings.DeserializeToCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename)
-            txtSignalTimeFrame.Text = _PetDGandhiSettings.SignalTimeFrame
-            dtpckrTradeStartTime.Value = _PetDGandhiSettings.TradeStartTime
-            dtpckrLastTradeEntryTime.Value = _PetDGandhiSettings.LastTradeEntryTime
-            dtpckrEODExitTime.Value = _PetDGandhiSettings.EODExitTime
-            txtMaxLossPerDay.Text = _PetDGandhiSettings.MaxLossPerDay
-            txtMaxProfitPerDay.Text = _PetDGandhiSettings.MaxProfitPerDay
-            txtATRPeriod.Text = _PetDGandhiSettings.ATRPeriod
-            txtNumberOfTradePerStock.Text = _PetDGandhiSettings.NumberOfTradePerStock
-            txtTargetMultiplier.Text = _PetDGandhiSettings.TargetMultiplier
-            txtInstrumentDetalis.Text = _PetDGandhiSettings.InstrumentDetailsFilePath
+            _settings = Utilities.Strings.DeserializeToCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename)
+            txtATRPeriod.Text = _settings.ATRPeriod
+            txtSignalTimeFrame.Text = _settings.SignalTimeFrame
+            dtpckrTradeStartTime.Value = _settings.TradeStartTime
+            dtpckrLastTradeEntryTime.Value = _settings.LastTradeEntryTime
+            dtpckrEODExitTime.Value = _settings.EODExitTime
+            txtNumberOfTradePerStock.Text = _settings.NumberOfTradePerStock
+            txtTargetMultiplier.Text = _settings.TargetMultiplier
+            txtMaxLossPerDay.Text = _settings.MaxLossPerDay
+            txtMaxProfitPerDay.Text = _settings.MaxProfitPerDay
+            txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
+            txtPinbarTalePercentage.Text = _settings.PinbarTalePercentage
+            txtMaxLossPercentagePerStock.Text = _settings.MaxLossPercentagePerStock
+            txtMaxLossPercentagePerTrade.Text = _settings.MaxLossPercentagePerTrade
+            txtMinLossPercentagePerTrade.Text = _settings.MinLossPercentagePerTrade
 
-            txtTelegramAPI.Text = _PetDGandhiSettings.TelegramAPIKey
-            txtTelegramChatID.Text = _PetDGandhiSettings.TelegramChatID
-            txtTelegramChatIDForPL.Text = _PetDGandhiSettings.TelegramPLChatID
+            chbAutoSelectStock.Checked = _settings.AutoSelectStock
+            chbCash.Checked = _settings.CashInstrument
+            chbFuture.Checked = _settings.FutureInstrument
+            chbAllowToIncreaseCapital.Checked = _settings.AllowToIncreaseCapital
+            txtMinCapital.Text = _settings.MinCapital
+
+            txtMinPrice.Text = _settings.MinPrice
+            txtMaxPrice.Text = _settings.MaxPrice
+            txtATRPercentage.Text = _settings.ATRPercentage
+            txtMinVolume.Text = _settings.MinVolume
+            txtBlankCandlePercentage.Text = _settings.BlankCandlePercentage
+            txtNumberOfStock.Text = _settings.NumberOfStock
+
+            txtTelegramAPI.Text = _settings.TelegramAPIKey
+            txtTelegramTradeChatID.Text = _settings.TelegramTradeChatID
+            txtTelegramTargetChatID.Text = _settings.TelegramTargetChatID
+            txtTelegramMTMChatID.Text = _settings.TelegramMTMChatID
         End If
     End Sub
     Private Sub SaveSettings()
-        _PetDGandhiSettings.SignalTimeFrame = txtSignalTimeFrame.Text
-        _PetDGandhiSettings.TradeStartTime = dtpckrTradeStartTime.Value
-        _PetDGandhiSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
-        _PetDGandhiSettings.EODExitTime = dtpckrEODExitTime.Value
-        _PetDGandhiSettings.MaxLossPerDay = txtMaxLossPerDay.Text
-        _PetDGandhiSettings.MaxProfitPerDay = txtMaxProfitPerDay.Text
-        _PetDGandhiSettings.ATRPeriod = txtATRPeriod.Text
-        _PetDGandhiSettings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
-        _PetDGandhiSettings.TargetMultiplier = txtTargetMultiplier.Text
-        _PetDGandhiSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+        _settings.ATRPeriod = txtATRPeriod.Text
+        _settings.SignalTimeFrame = txtSignalTimeFrame.Text
+        _settings.TradeStartTime = dtpckrTradeStartTime.Value
+        _settings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
+        _settings.EODExitTime = dtpckrEODExitTime.Value
+        _settings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
+        _settings.TargetMultiplier = txtTargetMultiplier.Text
+        _settings.MaxLossPerDay = Math.Abs(CDec(txtMaxLossPerDay.Text))
+        _settings.MaxProfitPerDay = txtMaxProfitPerDay.Text
+        _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+        _settings.PinbarTalePercentage = txtPinbarTalePercentage.Text
+        _settings.MaxLossPercentagePerStock = Math.Abs(CDec(txtMaxLossPercentagePerStock.Text))
+        _settings.MaxLossPercentagePerTrade = Math.Abs(CDec(txtMaxLossPercentagePerTrade.Text))
+        _settings.MinLossPercentagePerTrade = Math.Abs(CDec(txtMinLossPercentagePerTrade.Text))
 
-        _PetDGandhiSettings.TelegramAPIKey = txtTelegramAPI.Text
-        _PetDGandhiSettings.TelegramChatID = txtTelegramChatID.Text
-        _PetDGandhiSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
+        _settings.AutoSelectStock = chbAutoSelectStock.Checked
+        _settings.CashInstrument = chbCash.Checked
+        _settings.FutureInstrument = chbFuture.Checked
+        _settings.AllowToIncreaseCapital = chbAllowToIncreaseCapital.Checked
+        _settings.MinCapital = txtMinCapital.Text
 
-        Utilities.Strings.SerializeFromCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename, _PetDGandhiSettings)
+        _settings.MinPrice = txtMinPrice.Text
+        _settings.MaxPrice = txtMaxPrice.Text
+        _settings.ATRPercentage = txtATRPercentage.Text
+        _settings.MinVolume = txtMinVolume.Text
+        _settings.BlankCandlePercentage = txtBlankCandlePercentage.Text
+        _settings.NumberOfStock = txtNumberOfStock.Text
+
+        _settings.TelegramAPIKey = txtTelegramAPI.Text
+        _settings.TelegramTradeChatID = txtTelegramTradeChatID.Text
+        _settings.TelegramTargetChatID = txtTelegramTargetChatID.Text
+        _settings.TelegramMTMChatID = txtTelegramMTMChatID.Text
+
+        Utilities.Strings.SerializeFromCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename, _settings)
     End Sub
     Private Function ValidateNumbers(ByVal startNumber As Decimal, ByVal endNumber As Decimal, ByVal inputTB As TextBox) As Boolean
         Dim ret As Boolean = False
@@ -90,13 +126,10 @@ Public Class frmPetDGandhiSettings
         Return ret
     End Function
     Private Sub ValidateFile()
-        _PetDGandhiSettings.FillInstrumentDetails(txtInstrumentDetalis.Text, _cts)
+        _settings.FillInstrumentDetails(txtInstrumentDetalis.Text, _cts)
     End Sub
     Private Sub ValidateInputs()
         ValidateNumbers(1, 60, txtSignalTimeFrame)
-        ValidateNumbers(Decimal.MinValue, Decimal.MaxValue, txtMaxLossPerDay)
-        ValidateNumbers(0, Decimal.MaxValue, txtMaxProfitPerDay)
-        ValidateNumbers(1, Integer.MaxValue, txtATRPeriod)
         ValidateFile()
     End Sub
 
