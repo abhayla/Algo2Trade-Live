@@ -323,16 +323,22 @@ Public Class MomentumReversalStrategyInstrument
 
     Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick) As Tuple(Of Boolean, Decimal)
         Dim ret As Tuple(Of Boolean, Decimal) = Nothing
-        If candle IsNot Nothing AndAlso candle.PreviousPayload IsNot Nothing Then
+        If candle IsNot Nothing Then
             Dim userSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
             Dim rsiConsumer As RSIConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRSIConsumer)
             If rsiConsumer.ConsumerPayloads IsNot Nothing AndAlso rsiConsumer.ConsumerPayloads.Count > 0 AndAlso
                 rsiConsumer.ConsumerPayloads.ContainsKey(candle.SnapshotDateTime) Then
                 If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSIOverSold AndAlso
                     CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value < userSettings.RSIOverBought Then
-                    If candle.PreviousPayload.PreviousPayload IsNot Nothing AndAlso candle.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing Then
-                        Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.HighPrice.Value, candle.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
-                        ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
+                    If Utilities.Time.IsDateTimeEqualTillMinutes(candle.SnapshotDateTime, userSettings.TradeStartTime.AddMinutes(userSettings.SignalTimeFrame * -1)) Then
+                        ret = New Tuple(Of Boolean, Decimal)(True, candle.HighPrice.Value)
+                    Else
+                        If candle.PreviousPayload IsNot Nothing AndAlso
+                            candle.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
+                            candle.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing Then
+                            Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.HighPrice.Value, candle.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
+                            ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
+                        End If
                     End If
                 End If
             End If
