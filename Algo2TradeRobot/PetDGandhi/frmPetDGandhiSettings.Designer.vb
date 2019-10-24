@@ -25,9 +25,9 @@ Partial Class frmPetDGandhiSettings
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmPetDGandhiSettings))
         Me.txtMaxProfitPerDay = New System.Windows.Forms.TextBox()
-        Me.lblMaxProfitPercentagePerDay = New System.Windows.Forms.Label()
+        Me.lblMaxProfitPerDay = New System.Windows.Forms.Label()
         Me.txtMaxLossPerDay = New System.Windows.Forms.TextBox()
-        Me.lblMaxLossPercentagePerDay = New System.Windows.Forms.Label()
+        Me.lblMaxLossPerDay = New System.Windows.Forms.Label()
         Me.dtpckrEODExitTime = New System.Windows.Forms.DateTimePicker()
         Me.dtpckrLastTradeEntryTime = New System.Windows.Forms.DateTimePicker()
         Me.dtpckrTradeStartTime = New System.Windows.Forms.DateTimePicker()
@@ -100,15 +100,15 @@ Partial Class frmPetDGandhiSettings
         Me.txtMaxProfitPerDay.Size = New System.Drawing.Size(255, 22)
         Me.txtMaxProfitPerDay.TabIndex = 6
         '
-        'lblMaxProfitPercentagePerDay
+        'lblMaxProfitPerDay
         '
-        Me.lblMaxProfitPercentagePerDay.AutoSize = True
-        Me.lblMaxProfitPercentagePerDay.Location = New System.Drawing.Point(8, 305)
-        Me.lblMaxProfitPercentagePerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblMaxProfitPercentagePerDay.Name = "lblMaxProfitPercentagePerDay"
-        Me.lblMaxProfitPercentagePerDay.Size = New System.Drawing.Size(125, 17)
-        Me.lblMaxProfitPercentagePerDay.TabIndex = 27
-        Me.lblMaxProfitPercentagePerDay.Text = "Max Profit Per Day"
+        Me.lblMaxProfitPerDay.AutoSize = True
+        Me.lblMaxProfitPerDay.Location = New System.Drawing.Point(8, 305)
+        Me.lblMaxProfitPerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxProfitPerDay.Name = "lblMaxProfitPerDay"
+        Me.lblMaxProfitPerDay.Size = New System.Drawing.Size(125, 17)
+        Me.lblMaxProfitPerDay.TabIndex = 27
+        Me.lblMaxProfitPerDay.Text = "Max Profit Per Day"
         '
         'txtMaxLossPerDay
         '
@@ -118,15 +118,15 @@ Partial Class frmPetDGandhiSettings
         Me.txtMaxLossPerDay.Size = New System.Drawing.Size(255, 22)
         Me.txtMaxLossPerDay.TabIndex = 5
         '
-        'lblMaxLossPercentagePerDay
+        'lblMaxLossPerDay
         '
-        Me.lblMaxLossPercentagePerDay.AutoSize = True
-        Me.lblMaxLossPercentagePerDay.Location = New System.Drawing.Point(8, 270)
-        Me.lblMaxLossPercentagePerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblMaxLossPercentagePerDay.Name = "lblMaxLossPercentagePerDay"
-        Me.lblMaxLossPercentagePerDay.Size = New System.Drawing.Size(122, 17)
-        Me.lblMaxLossPercentagePerDay.TabIndex = 25
-        Me.lblMaxLossPercentagePerDay.Text = "Max Loss Per Day"
+        Me.lblMaxLossPerDay.AutoSize = True
+        Me.lblMaxLossPerDay.Location = New System.Drawing.Point(8, 270)
+        Me.lblMaxLossPerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxLossPerDay.Name = "lblMaxLossPerDay"
+        Me.lblMaxLossPerDay.Size = New System.Drawing.Size(122, 17)
+        Me.lblMaxLossPerDay.TabIndex = 25
+        Me.lblMaxLossPerDay.Text = "Max Loss Per Day"
         '
         'dtpckrEODExitTime
         '
@@ -225,9 +225,9 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox1.Controls.Add(Me.txtATRPeriod)
         Me.GroupBox1.Controls.Add(Me.lblATRPeriod)
         Me.GroupBox1.Controls.Add(Me.txtMaxProfitPerDay)
-        Me.GroupBox1.Controls.Add(Me.lblMaxProfitPercentagePerDay)
+        Me.GroupBox1.Controls.Add(Me.lblMaxProfitPerDay)
         Me.GroupBox1.Controls.Add(Me.txtMaxLossPerDay)
-        Me.GroupBox1.Controls.Add(Me.lblMaxLossPercentagePerDay)
+        Me.GroupBox1.Controls.Add(Me.lblMaxLossPerDay)
         Me.GroupBox1.Controls.Add(Me.dtpckrEODExitTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrLastTradeEntryTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrTradeStartTime)
@@ -753,9 +753,9 @@ Partial Class frmPetDGandhiSettings
 
     End Sub
     Friend WithEvents txtMaxProfitPerDay As TextBox
-    Friend WithEvents lblMaxProfitPercentagePerDay As Label
+    Friend WithEvents lblMaxProfitPerDay As Label
     Friend WithEvents txtMaxLossPerDay As TextBox
-    Friend WithEvents lblMaxLossPercentagePerDay As Label
+    Friend WithEvents lblMaxLossPerDay As Label
     Friend WithEvents dtpckrEODExitTime As DateTimePicker
     Friend WithEvents dtpckrLastTradeEntryTime As DateTimePicker
     Friend WithEvents dtpckrTradeStartTime As DateTimePicker

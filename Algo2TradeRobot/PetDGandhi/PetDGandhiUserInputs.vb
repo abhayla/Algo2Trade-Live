@@ -15,8 +15,6 @@ Public Class PetDGandhiUserInputs
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
     Public Property PinbarTalePercentage As Decimal
-    Public Property MaxLossPercentagePerStock As Decimal
-    Public Property MaxLossPercentagePerTrade As Decimal
     Public Property MinLossPercentagePerTrade As Decimal
 
     Public Property AutoSelectStock As Boolean

@@ -146,7 +146,7 @@ Public Class PetDGandhiStrategy
                 Dim message As String = Nothing
 
                 message = String.Format("{0}{1}PL:{2}, {3}MaxDrawUP:{4}, MaxDrawUpTime:{5}, {6}MaxDrawDown:{7}, MaxDrawDownTime:{8}",
-                                        "Pinbar Strategy",
+                                        "Pinbar Strategy MTM reached",
                                         vbNewLine,
                                         Math.Round(Me.GetTotalPLAfterBrokerage, 2),
                                         vbNewLine,

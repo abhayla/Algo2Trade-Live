@@ -12,6 +12,10 @@ Public Class frmPetDGandhiSettings
     End Sub
 
     Private Sub frmPetDGandhiSettings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        lblMaxLossPercentagePerStock.Visible = False
+        txtMaxLossPercentagePerStock.Visible = False
+        lblMaxLossPercentagePerTrade.Visible = False
+        txtMaxLossPercentagePerTrade.Visible = False
         LoadSettings()
     End Sub
 
@@ -56,8 +60,8 @@ Public Class frmPetDGandhiSettings
             txtMaxProfitPerDay.Text = _settings.MaxProfitPerDay
             txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
             txtPinbarTalePercentage.Text = _settings.PinbarTalePercentage
-            txtMaxLossPercentagePerStock.Text = _settings.MaxLossPercentagePerStock
-            txtMaxLossPercentagePerTrade.Text = _settings.MaxLossPercentagePerTrade
+            'txtMaxLossPercentagePerStock.Text = _settings.MaxLossPercentagePerStock
+            'txtMaxLossPercentagePerTrade.Text = _settings.MaxLossPercentagePerTrade
             txtMinLossPercentagePerTrade.Text = _settings.MinLossPercentagePerTrade
 
             chbAutoSelectStock.Checked = _settings.AutoSelectStock
@@ -91,8 +95,8 @@ Public Class frmPetDGandhiSettings
         _settings.MaxProfitPerDay = txtMaxProfitPerDay.Text
         _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
         _settings.PinbarTalePercentage = txtPinbarTalePercentage.Text
-        _settings.MaxLossPercentagePerStock = Math.Abs(CDec(txtMaxLossPercentagePerStock.Text))
-        _settings.MaxLossPercentagePerTrade = Math.Abs(CDec(txtMaxLossPercentagePerTrade.Text))
+        '_settings.MaxLossPercentagePerStock = Math.Abs(CDec(txtMaxLossPercentagePerStock.Text))
+        '_settings.MaxLossPercentagePerTrade = Math.Abs(CDec(txtMaxLossPercentagePerTrade.Text))
         _settings.MinLossPercentagePerTrade = Math.Abs(CDec(txtMinLossPercentagePerTrade.Text))
 
         _settings.AutoSelectStock = chbAutoSelectStock.Checked

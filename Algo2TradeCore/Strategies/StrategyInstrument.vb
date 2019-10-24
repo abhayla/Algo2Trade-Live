@@ -502,11 +502,11 @@ Namespace Strategies
                                 quantityToCalculate += slOrder.Quantity
                             End If
                         Next
-                    End If
-                    If parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                        plOfDay += Me.TradableInstrument.LastTick.LastPrice * quantityToCalculate
-                    ElseIf parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                        plOfDay += Me.TradableInstrument.LastTick.LastPrice * quantityToCalculate * -1
+                        If parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                            plOfDay += Me.TradableInstrument.LastTick.LastPrice * quantityToCalculate
+                        ElseIf parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                            plOfDay += Me.TradableInstrument.LastTick.LastPrice * quantityToCalculate * -1
+                        End If
                     End If
                 End If
                 Return plOfDay * Me.TradableInstrument.QuantityMultiplier
@@ -520,6 +520,75 @@ Namespace Strategies
             If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
                 For Each parentOrderId In OrderDetails.Keys
                     plOfDay += GetTotalPLOfAnOrder(parentOrderId)
+                Next
+                Return plOfDay
+            Else
+                Return 0
+            End If
+        End Function
+        Public Function GetTotalPLPointOfAnOrder(ByVal parentOrderId As String) As Decimal
+            Dim plOfDay As Decimal = 0
+            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 AndAlso OrderDetails.ContainsKey(parentOrderId) Then
+                Dim parentBusinessOrder As IBusinessOrder = OrderDetails(parentOrderId)
+                Dim calculateWithLTP As Boolean = False
+                If parentBusinessOrder.SLOrder IsNot Nothing AndAlso parentBusinessOrder.SLOrder.Count > 0 Then
+                    calculateWithLTP = True
+                End If
+                If parentBusinessOrder.TargetOrder IsNot Nothing AndAlso parentBusinessOrder.TargetOrder.Count > 0 Then
+                    calculateWithLTP = True
+                End If
+
+                If parentBusinessOrder.AllOrder IsNot Nothing AndAlso parentBusinessOrder.AllOrder.Count > 0 Then
+                    For Each order In parentBusinessOrder.AllOrder
+                        'If order.Status = IOrder.TypeOfStatus.Cancelled OrElse order.Status = IOrder.TypeOfStatus.Complete Then
+                        If order.Status = IOrder.TypeOfStatus.Complete Then
+                            If order.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                plOfDay += order.AveragePrice * -1
+                            ElseIf order.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                plOfDay += order.AveragePrice
+                            End If
+                        ElseIf Not order.Status = IOrder.TypeOfStatus.Rejected Then
+                            calculateWithLTP = True
+                        End If
+                    Next
+                Else
+                    calculateWithLTP = True
+                End If
+
+                If parentBusinessOrder.ParentOrder IsNot Nothing AndAlso parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                    plOfDay += parentBusinessOrder.ParentOrder.AveragePrice * -1
+                ElseIf parentBusinessOrder.ParentOrder IsNot Nothing AndAlso parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                    plOfDay += parentBusinessOrder.ParentOrder.AveragePrice
+                End If
+                If calculateWithLTP AndAlso parentBusinessOrder.ParentOrder IsNot Nothing AndAlso parentBusinessOrder.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                    Dim quantityToCalculate As Integer = parentBusinessOrder.ParentOrder.Quantity
+                    If parentBusinessOrder.SLOrder IsNot Nothing AndAlso parentBusinessOrder.SLOrder.Count > 0 Then
+                        quantityToCalculate = 0
+                        For Each slOrder In parentBusinessOrder.SLOrder
+                            If Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso Not slOrder.Status = IOrder.TypeOfStatus.Complete Then
+                                quantityToCalculate += slOrder.Quantity
+                            End If
+                        Next
+                        If quantityToCalculate <> 0 Then
+                            If parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                plOfDay += Me.TradableInstrument.LastTick.LastPrice
+                            ElseIf parentBusinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                plOfDay += Me.TradableInstrument.LastTick.LastPrice * -1
+                            End If
+                        End If
+                    End If
+                End If
+                Return plOfDay
+            Else
+                Return 0
+            End If
+        End Function
+        Public Function GetOverallPLPoint() As Decimal
+            'logger.Debug("CalculatePL, parameters:Nothing")
+            Dim plOfDay As Decimal = 0
+            If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+                For Each parentOrderId In OrderDetails.Keys
+                    plOfDay += GetTotalPLPointOfAnOrder(parentOrderId)
                 Next
                 Return plOfDay
             Else
