@@ -128,7 +128,6 @@ Public Class MomentumReversalStrategyInstrument
         Dim parameters As PlaceOrderParameters = Nothing
         If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
             runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime AndAlso
-            runningCandlePayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
             runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso Not IsActiveInstrument() AndAlso
             Not Me.StrategyExitAllTriggerd Then
             'Not Me.StrategyExitAllTriggerd AndAlso Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime) Then
@@ -270,12 +269,14 @@ Public Class MomentumReversalStrategyInstrument
         If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 Then
             Dim parentOrders As List(Of IOrder) = allActiveOrders.FindAll(Function(x)
                                                                               Return x.ParentOrderIdentifier Is Nothing AndAlso
-                                                                              x.Status = IOrder.TypeOfStatus.TriggerPending
+                                                                              (x.Status = IOrder.TypeOfStatus.TriggerPending OrElse
+                                                                              x.Status = IOrder.TypeOfStatus.Open)
                                                                           End Function)
             If parentOrders IsNot Nothing AndAlso parentOrders.Count > 0 Then
                 For Each parentOrder In parentOrders
                     Dim parentBussinessOrder As IBusinessOrder = OrderDetails(parentOrder.OrderIdentifier)
-                    If parentOrder.Status = IOrder.TypeOfStatus.TriggerPending Then
+                    If parentOrder.Status = IOrder.TypeOfStatus.TriggerPending OrElse
+                        parentOrder.Status = IOrder.TypeOfStatus.Open Then
                         If Now() >= parentOrder.TimeStamp.AddMinutes(userSettings.TradeOpenTime) Then
                             'Below portion have to be done in every cancel order trigger
                             Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(parentOrder.Tag)
