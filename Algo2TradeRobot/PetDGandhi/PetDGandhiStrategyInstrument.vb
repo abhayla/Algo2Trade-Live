@@ -24,7 +24,7 @@ Public Class PetDGandhiStrategyInstrument
     Private _exitDoneForStockMaxLoss As Boolean = False
 
     Private ReadOnly _maxLossPerTradeMultiplier As Decimal = 1 / 2
-    Private ReadOnly _maxLossPerStockMultiplier As Decimal = 1
+    Private ReadOnly _maxLossPerStockMultiplier As Decimal = 2
     Private ReadOnly _maxProfitPerStockMultiplier As Decimal = 1
 
     Private ReadOnly _dummyATRConsumer As ATRConsumer
