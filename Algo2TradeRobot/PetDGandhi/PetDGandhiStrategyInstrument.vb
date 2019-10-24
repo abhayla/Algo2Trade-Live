@@ -52,6 +52,15 @@ Public Class PetDGandhiStrategyInstrument
         End If
     End Sub
 
+    Public Overrides Function HandleTickTriggerToUIETCAsync() As Task
+        Return MyBase.HandleTickTriggerToUIETCAsync()
+        If Me.ParentStrategy.GetTotalPLAfterBrokerage <= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).MaxLossPerDay * -1 Then
+            CType(Me.ParentStrategy, PetDGandhiStrategy).SendMTMNotification()
+        ElseIf Me.ParentStrategy.GetTotalPLAfterBrokerage >= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
+            CType(Me.ParentStrategy, PetDGandhiStrategy).SendMTMNotification()
+        End If
+    End Function
+
     Public Overrides Async Function MonitorAsync() As Task
         Try
             Dim petDGandhiUserSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
@@ -246,7 +255,7 @@ Public Class PetDGandhiStrategyInstrument
                 _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
                 logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
 
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Potential Signal Candle Time:{5}, Potential Signal Candle Range:{6}, Potential Signal Candle Source:{7}, Potential Signal Candle ATR:{8}, Is Active Instrument:{9}, Number Of Trade:{10}, OverAll PL:{11}, Stock PL:{12}, Is Any Trade Target Reached:{13}, Current Time:{14}, Current LTP:{15}, TradingSymbol:{16}",
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Potential Signal Candle Time:{5}, Potential Signal Candle Range:{6}, Potential Signal Candle Top:{7}%, Potential Signal Candle Bottom:{8}%, Potential Signal Candle Source:{9}, Potential Signal Candle ATR:{10}, Is Active Instrument:{11}, Number Of Trade:{12}, OverAll PL:{13}, Stock PL:{14}, Is Any Trade Target Reached:{15}, Current Time:{16}, Current LTP:{17}, TradingSymbol:{18}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             runningCandlePayload.SnapshotDateTime.ToString,
@@ -254,6 +263,8 @@ Public Class PetDGandhiStrategyInstrument
                             Me.TradableInstrument.IsHistoricalCompleted,
                             runningCandlePayload.PreviousPayload.SnapshotDateTime.ToShortTimeString,
                             runningCandlePayload.PreviousPayload.CandleRange,
+                            (runningCandlePayload.PreviousPayload.CandleWicks.Top / runningCandlePayload.PreviousPayload.CandleRange) * 100,
+                            (runningCandlePayload.PreviousPayload.CandleWicks.Bottom / runningCandlePayload.PreviousPayload.CandleRange) * 100,
                             runningCandlePayload.PreviousPayload.PayloadGeneratedBy.ToString,
                             GetCandleATR(runningCandlePayload.PreviousPayload),
                             IsActiveInstrument(),
@@ -409,7 +420,7 @@ Public Class PetDGandhiStrategyInstrument
                                         Else
                                             potentialSLPrice = signalCandle.OpenPrice.Value - buffer
                                         End If
-                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 10
+                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 100
                                         If potentialSLPrice <= ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice - minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor) Then
                                             triggerPrice = potentialSLPrice
                                             reason = "Move to candle body"
@@ -424,7 +435,7 @@ Public Class PetDGandhiStrategyInstrument
                                         Else
                                             potentialSLPrice = signalCandle.ClosePrice.Value - buffer
                                         End If
-                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 10
+                                        Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 100
                                         If potentialSLPrice >= ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice + minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor) Then
                                             triggerPrice = potentialSLPrice
                                             reason = "Move to candle body"
