@@ -263,8 +263,8 @@ Public Class PetDGandhiStrategyInstrument
                             Me.TradableInstrument.IsHistoricalCompleted,
                             runningCandlePayload.PreviousPayload.SnapshotDateTime.ToShortTimeString,
                             runningCandlePayload.PreviousPayload.CandleRange,
-                            (runningCandlePayload.PreviousPayload.CandleWicks.Top / runningCandlePayload.PreviousPayload.CandleRange) * 100,
-                            (runningCandlePayload.PreviousPayload.CandleWicks.Bottom / runningCandlePayload.PreviousPayload.CandleRange) * 100,
+                            Math.Round((runningCandlePayload.PreviousPayload.CandleWicks.Top / runningCandlePayload.PreviousPayload.CandleRange) * 100, 2),
+                            Math.Round((runningCandlePayload.PreviousPayload.CandleWicks.Bottom / runningCandlePayload.PreviousPayload.CandleRange) * 100, 2),
                             runningCandlePayload.PreviousPayload.PayloadGeneratedBy.ToString,
                             GetCandleATR(runningCandlePayload.PreviousPayload),
                             IsActiveInstrument(),
@@ -690,7 +690,7 @@ Public Class PetDGandhiStrategyInstrument
                 Else
                     potentialSLPrice = candle.ClosePrice.Value
                 End If
-                If Math.Abs(((potentialSLPrice / candle.LowPrice.Value) - 1)) * 100 < userSettings.MaxLossPercentagePerTrade Then
+                If Math.Abs(potentialSLPrice - candle.LowPrice.Value) <= GetCandleATR(candle) * userSettings.MaxLossPercentagePerTrade / 100 Then
                     If slPoint < candle.LowPrice.Value * userSettings.MinLossPercentagePerTrade / 100 Then
                         slPoint = ConvertFloorCeling(candle.LowPrice.Value * userSettings.MinLossPercentagePerTrade / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     End If
@@ -703,7 +703,7 @@ Public Class PetDGandhiStrategyInstrument
                 Else
                     potentialSLPrice = candle.OpenPrice.Value
                 End If
-                If Math.Abs(((candle.HighPrice.Value / potentialSLPrice) - 1)) * 100 < userSettings.MaxLossPercentagePerTrade Then
+                If Math.Abs(candle.HighPrice.Value - potentialSLPrice) <= GetCandleATR(candle) * userSettings.MaxLossPercentagePerTrade / 100 Then
                     If slPoint < candle.HighPrice.Value * userSettings.MinLossPercentagePerTrade / 100 Then
                         slPoint = ConvertFloorCeling(candle.HighPrice.Value * userSettings.MinLossPercentagePerTrade / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     End If
