@@ -154,7 +154,7 @@ Public Class PetDGandhiStrategyInstrument
                             potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
                             potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
                         End If
-                        Dim message As String = String.Format("Order Modified. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Entry Price:{8}, {9}Stoploss Price:{10}, Potential Stoploss PL:₹{11}, {12}Target Price:{13}, Potential Target PL:₹{14}, {15}Reason:{16}, {17}Total Stock PL:₹{18}, Timestamp:{19}",
+                        Dim message As String = String.Format("Order Modified. Reason:{16}, {15}Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Entry Price:{8}, {9}Stoploss Price:{10}, Potential Stoploss PL:₹{11}, {12}Target Price:{13}, Potential Target PL:₹{14}, {17}Total Stock PL:₹{18}, Timestamp:{19}",
                                                                 Me.TradableInstrument.TradingSymbol,
                                                                 signalCandle.SnapshotDateTime.ToShortTimeString,
                                                                 signalCandle.CandleRange,
@@ -255,7 +255,7 @@ Public Class PetDGandhiStrategyInstrument
                 _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
                 logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
 
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Potential Signal Candle Time:{5}, Potential Signal Candle Range:{6}, Potential Signal Candle Top:{7}%, Potential Signal Candle Bottom:{8}%, Potential Signal Candle Source:{9}, Potential Signal Candle ATR:{10}, Is Active Instrument:{11}, Number Of Trade:{12}, OverAll PL:{13}, Stock PL:{14}, Is Any Trade Target Reached:{15}, Current Time:{16}, Current LTP:{17}, TradingSymbol:{18}",
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Potential Signal Candle Time:{5}, Potential Signal Candle Range:{6}, Potential Signal Candle Top:{7}%, Potential Signal Candle Bottom:{8}%, Potential Signal Candle Top Body:{9}%, Potential Signal Candle Bottom Body:{10}%, Potential Signal Candle Source:{1}, Potential Signal Candle ATR:{12}, Is Active Instrument:{13}, Number Of Trade:{14}, OverAll PL:{15}, Stock PL:{16}, Is Any Trade Target Reached:{17}, Current Time:{18}, Current LTP:{19}, TradingSymbol:{20}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             runningCandlePayload.SnapshotDateTime.ToString,
@@ -265,6 +265,8 @@ Public Class PetDGandhiStrategyInstrument
                             runningCandlePayload.PreviousPayload.CandleRange,
                             Math.Round((runningCandlePayload.PreviousPayload.CandleWicks.Top / runningCandlePayload.PreviousPayload.CandleRange) * 100, 2),
                             Math.Round((runningCandlePayload.PreviousPayload.CandleWicks.Bottom / runningCandlePayload.PreviousPayload.CandleRange) * 100, 2),
+                            Math.Round(If(runningCandlePayload.PreviousPayload.CandleColor = Color.Red, runningCandlePayload.PreviousPayload.HighPrice.Value - runningCandlePayload.PreviousPayload.ClosePrice.Value, runningCandlePayload.PreviousPayload.HighPrice.Value - runningCandlePayload.PreviousPayload.OpenPrice.Value) / GetCandleATR(runningCandlePayload.PreviousPayload) * 100, 2),
+                            Math.Round(If(runningCandlePayload.PreviousPayload.CandleColor = Color.Red, runningCandlePayload.PreviousPayload.OpenPrice.Value - runningCandlePayload.PreviousPayload.LowPrice.Value, runningCandlePayload.PreviousPayload.ClosePrice.Value - runningCandlePayload.PreviousPayload.LowPrice.Value) / GetCandleATR(runningCandlePayload.PreviousPayload) * 100, 2),
                             runningCandlePayload.PreviousPayload.PayloadGeneratedBy.ToString,
                             GetCandleATR(runningCandlePayload.PreviousPayload),
                             IsActiveInstrument(),
@@ -433,7 +435,7 @@ Public Class PetDGandhiStrategyInstrument
                                         If signalCandle.CandleColor = Color.Red Then
                                             potentialSLPrice = signalCandle.OpenPrice.Value + buffer
                                         Else
-                                            potentialSLPrice = signalCandle.ClosePrice.Value - buffer
+                                            potentialSLPrice = signalCandle.ClosePrice.Value + buffer
                                         End If
                                         Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 100
                                         If potentialSLPrice >= ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice + minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor) Then
@@ -548,7 +550,7 @@ Public Class PetDGandhiStrategyInstrument
                                     End If
                                 End If
                                 If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, String))
-                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, bussinessOrder.ParentOrder, "Candle closed beyond body"))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, bussinessOrder.ParentOrder, "Force Exit. Reason:Candle closed beyond body"))
                             End If
                         End If
                     Next
@@ -582,6 +584,9 @@ Public Class PetDGandhiStrategyInstrument
                 potentialExitPrice = GetParentFromChildOrder(cancellableOrder.LastOrDefault.Item2).TargetOrder.LastOrDefault.AveragePrice
                 exitOrderResponses = Await ForceCancelPaperTradeAsync(cancellableOrder, True, _lastTick).ConfigureAwait(False)
             ElseIf reason.ToUpper = "STOPLOSS REACHED" Then
+                potentialExitPrice = GetParentFromChildOrder(cancellableOrder.LastOrDefault.Item2).SLOrder.LastOrDefault.TriggerPrice
+                exitOrderResponses = Await ForceCancelPaperTradeAsync(cancellableOrder, True, _lastTick).ConfigureAwait(False)
+            ElseIf reason.ToUpper = "FORCE EXIT. REASON:CANDLE CLOSED BEYOND BODY" Then
                 potentialExitPrice = GetParentFromChildOrder(cancellableOrder.LastOrDefault.Item2).SLOrder.LastOrDefault.TriggerPrice
                 exitOrderResponses = Await ForceCancelPaperTradeAsync(cancellableOrder, True, _lastTick).ConfigureAwait(False)
             Else
@@ -618,7 +623,7 @@ Public Class PetDGandhiStrategyInstrument
                     slipage = potentialExitPrice - exitPrice
                     plSlipage = orderPL - potentialExitPL
                 End If
-                Dim message As String = String.Format("{0}. Trading Symbol:{1}, Signal Candle Time:{2}, Candle Range:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, {8}Entry Price:{9}, {10}Potential Exit Price:{11}, Exit Price:{12}({13}), {14}Potential Exit PL:₹{15}, Exit PL:₹{16}(₹{17}), {18}Total Stock PL:₹{19}, Number Of Trade:{20}, {21}LTP:{22}, Tick Timestamp:{23}, {24}Timestamp:{25}",
+                Dim message As String = String.Format("{0}. {26}Trading Symbol:{1}, Signal Candle Time:{2}, Candle Range:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, {8}Entry Price:{9}, {10}Potential Exit Price:{11}, Exit Price:{12}({13}), {14}Potential Exit PL:₹{15}, Exit PL:₹{16}(₹{17}), {18}Total Stock PL:₹{19}, Number Of Trade:{20}, {21}LTP:{22}, Tick Timestamp:{23}, {24}Timestamp:{25}",
                                                         reason,
                                                         Me.TradableInstrument.TradingSymbol,
                                                         signalCandle.SnapshotDateTime.ToShortTimeString,
@@ -644,7 +649,8 @@ Public Class PetDGandhiStrategyInstrument
                                                         _lastTick.LastPrice,
                                                         _lastTick.Timestamp,
                                                         vbNewLine,
-                                                        Now)
+                                                        Now,
+                                                        vbNewLine)
                 GenerateTelegramMessageAsync(message)
             End If
         End If
@@ -665,7 +671,7 @@ Public Class PetDGandhiStrategyInstrument
                             ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                                 target = bussinessOrder.ParentOrder.AveragePrice - order.AveragePrice
                             End If
-                            If target >= 0 Then
+                            If target > GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, bussinessOrder.ParentOrder.TransactionType) + Me.TradableInstrument.TickSize Then
                                 ret = True
                                 Exit For
                             End If
