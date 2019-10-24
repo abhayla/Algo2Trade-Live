@@ -682,14 +682,28 @@ Public Class PetDGandhiStrategyInstrument
         Dim ret As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction) = Nothing
         If candle IsNot Nothing AndAlso Not candle.DeadCandle Then
             Dim userSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
-            If candle.CandleRange <= candle.OpenPrice.Value * userSettings.MaxLossPercentagePerTrade / 100 Then
-                Dim slPoint As Decimal = candle.CandleRange
-                If candle.CandleWicks.Top >= candle.CandleRange * userSettings.PinbarTalePercentage / 100 Then
+            Dim slPoint As Decimal = candle.CandleRange
+            If candle.CandleWicks.Top >= candle.CandleRange * userSettings.PinbarTalePercentage / 100 Then
+                Dim potentialSLPrice As Decimal = Decimal.MinValue
+                If candle.CandleColor = Color.Red Then
+                    potentialSLPrice = candle.OpenPrice.Value
+                Else
+                    potentialSLPrice = candle.ClosePrice.Value
+                End If
+                If Math.Abs(((potentialSLPrice / candle.LowPrice.Value) - 1)) * 100 < userSettings.MaxLossPercentagePerTrade Then
                     If slPoint < candle.LowPrice.Value * userSettings.MinLossPercentagePerTrade / 100 Then
                         slPoint = ConvertFloorCeling(candle.LowPrice.Value * userSettings.MinLossPercentagePerTrade / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     End If
                     ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, candle.LowPrice.Value, candle.LowPrice.Value + slPoint, IOrder.TypeOfTransaction.Sell)
-                ElseIf candle.CandleWicks.Bottom >= candle.CandleRange * userSettings.PinbarTalePercentage / 100 Then
+                End If
+            ElseIf candle.CandleWicks.Bottom >= candle.CandleRange * userSettings.PinbarTalePercentage / 100 Then
+                Dim potentialSLPrice As Decimal = Decimal.MinValue
+                If candle.CandleColor = Color.Red Then
+                    potentialSLPrice = candle.ClosePrice.Value
+                Else
+                    potentialSLPrice = candle.OpenPrice.Value
+                End If
+                If Math.Abs(((candle.HighPrice.Value / potentialSLPrice) - 1)) * 100 < userSettings.MaxLossPercentagePerTrade Then
                     If slPoint < candle.HighPrice.Value * userSettings.MinLossPercentagePerTrade / 100 Then
                         slPoint = ConvertFloorCeling(candle.HighPrice.Value * userSettings.MinLossPercentagePerTrade / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     End If
