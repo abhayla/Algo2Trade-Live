@@ -560,7 +560,7 @@ Public Class PetDGandhiStrategyInstrument
                                         If signalCandle.CandleColor = Color.Red Then
                                             potentialSLPrice = signalCandle.OpenPrice.Value + buffer
                                         Else
-                                            potentialSLPrice = signalCandle.ClosePrice.Value - buffer
+                                            potentialSLPrice = signalCandle.ClosePrice.Value + buffer
                                         End If
                                         Dim minimusSL As Decimal = bussinessOrder.ParentOrder.AveragePrice * userSettings.MinLossPercentagePerTrade / 100
                                         triggerPrice = Math.Max(potentialSLPrice, ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice + minimusSL, Me.TradableInstrument.TickSize, RoundOfType.Floor))
