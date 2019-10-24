@@ -378,7 +378,7 @@ Public Class PetDGandhiStrategyInstrument
                 _stockMaxProfitPoint = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload) * _maxProfitPerStockMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
             End If
             If _stockMaxLossPoint = Decimal.MinValue Then
-                _stockMaxLossPoint = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload) * _maxLossPerStockMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                _stockMaxLossPoint = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload) * _maxLossPerStockMultiplier * -1, Me.TradableInstrument.TickSize, RoundOfType.Celing)
             End If
 
             Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
