@@ -378,7 +378,7 @@ Public Class PetDGandhiStrategyInstrument
                 _stockMaxProfitPoint = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload) * _maxProfitPerStockMultiplier, Me.TradableInstrument.TickSize, RoundOfType.Celing)
             End If
             If _stockMaxLossPoint = Decimal.MinValue Then
-                _stockMaxLossPoint = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload) * _maxLossPerStockMultiplier * -1, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                _stockMaxLossPoint = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload) * _maxLossPerStockMultiplier * -1, Me.TradableInstrument.TickSize, RoundOfType.Floor)
             End If
 
             Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
@@ -728,6 +728,7 @@ Public Class PetDGandhiStrategyInstrument
             Dim slPoint As Decimal = candle.CandleRange
             If candle.CandleWicks.Top >= candle.CandleRange * userSettings.PinbarTalePercentage / 100 Then
                 Dim buffer As Decimal = CalculateBuffer(candle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                slPoint = slPoint + 2 * buffer
                 Dim potentialSLPrice As Decimal = Decimal.MinValue
                 If candle.CandleColor = Color.Red Then
                     potentialSLPrice = candle.OpenPrice.Value
@@ -737,13 +738,12 @@ Public Class PetDGandhiStrategyInstrument
                 If Math.Abs(potentialSLPrice - candle.LowPrice.Value) <= GetCandleATR(candle) * _maxLossPerTradeMultiplier Then
                     If slPoint < candle.LowPrice.Value * userSettings.MinLossPercentagePerTrade / 100 Then
                         slPoint = ConvertFloorCeling(candle.LowPrice.Value * userSettings.MinLossPercentagePerTrade / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                    Else
-                        slPoint = slPoint + 2 * buffer
                     End If
                     ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, candle.LowPrice.Value - buffer, candle.LowPrice.Value - buffer + slPoint, IOrder.TypeOfTransaction.Sell)
                 End If
             ElseIf candle.CandleWicks.Bottom >= candle.CandleRange * userSettings.PinbarTalePercentage / 100 Then
                 Dim buffer As Decimal = CalculateBuffer(candle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                slPoint = slPoint + 2 * buffer
                 Dim potentialSLPrice As Decimal = Decimal.MinValue
                 If candle.CandleColor = Color.Red Then
                     potentialSLPrice = candle.ClosePrice.Value
@@ -753,8 +753,6 @@ Public Class PetDGandhiStrategyInstrument
                 If Math.Abs(candle.HighPrice.Value - potentialSLPrice) <= GetCandleATR(candle) * _maxLossPerTradeMultiplier Then
                     If slPoint < candle.HighPrice.Value * userSettings.MinLossPercentagePerTrade / 100 Then
                         slPoint = ConvertFloorCeling(candle.HighPrice.Value * userSettings.MinLossPercentagePerTrade / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                    Else
-                        slPoint = slPoint + 2 * buffer
                     End If
                     ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, candle.HighPrice.Value + buffer, candle.HighPrice.Value + buffer - slPoint, IOrder.TypeOfTransaction.Buy)
                 End If
