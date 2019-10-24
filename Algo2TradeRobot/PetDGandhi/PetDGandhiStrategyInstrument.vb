@@ -53,12 +53,12 @@ Public Class PetDGandhiStrategyInstrument
     End Sub
 
     Public Overrides Function HandleTickTriggerToUIETCAsync() As Task
-        Return MyBase.HandleTickTriggerToUIETCAsync()
         If Me.ParentStrategy.GetTotalPLAfterBrokerage <= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).MaxLossPerDay * -1 Then
             CType(Me.ParentStrategy, PetDGandhiStrategy).SendMTMNotification()
         ElseIf Me.ParentStrategy.GetTotalPLAfterBrokerage >= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
             CType(Me.ParentStrategy, PetDGandhiStrategy).SendMTMNotification()
         End If
+        Return MyBase.HandleTickTriggerToUIETCAsync()
     End Function
 
     Public Overrides Async Function MonitorAsync() As Task
