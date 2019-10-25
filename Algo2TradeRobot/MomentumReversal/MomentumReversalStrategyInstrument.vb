@@ -139,7 +139,7 @@ Public Class MomentumReversalStrategyInstrument
                     Dim stoploss As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
                     Dim target As Decimal = ConvertFloorCeling(triggerPrice * 10 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
-                    If currentTick.LastPrice < triggerPrice Then
+                    If triggerPrice < 300 AndAlso currentTick.LastPrice < triggerPrice Then
                         parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                      .TriggerPrice = triggerPrice,
