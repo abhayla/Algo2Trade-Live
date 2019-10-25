@@ -918,7 +918,7 @@ Public Class PetDGandhiStrategyInstrument
                 If Not IsActiveInstrument() Then
                     'message = String.Format("{0}{1}Active Instrument OK. Is Active Instrument:{2}", message, vbNewLine, IsActiveInstrument())
                 Else
-                    message = String.Format("{0}{1}<b>Active Instrument NOT OK</b> {2}Is Actv Instrmnt:{3}", message, vbNewLine, vbNewLine, IsActiveInstrument())
+                    message = String.Format("{0}{1}<b>InActive Instrument NOT OK</b> {2}Is Actv Instrmnt:{3}", message, vbNewLine, vbNewLine, IsActiveInstrument())
                 End If
 
                 If GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock Then
@@ -933,7 +933,7 @@ Public Class PetDGandhiStrategyInstrument
                     'message = String.Format("{0}{1}Force exit OK. Strategy Exit All Triggerd:{2}, Stock Max Loss Triggerd:{3}",
                     '                        message, vbNewLine, Me.StrategyExitAllTriggerd, _exitDoneForStockMaxLoss)
                 Else
-                    message = String.Format("{0}{1}<b>Force exit NOT OK</b> {2}Strgy Ext All Trgrd:{3}, Stck Max Loss Trgrd:{4}",
+                    message = String.Format("{0}{1}<b>No Force exit NOT OK</b> {2}Strgy Ext All Trgrd:{3}, Stck Max Loss Trgrd:{4}",
                                             message, vbNewLine, vbNewLine, Me.StrategyExitAllTriggerd, _exitDoneForStockMaxLoss)
                 End If
 
@@ -976,7 +976,7 @@ Public Class PetDGandhiStrategyInstrument
                     '                        message, vbNewLine, IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime),
                     '                        GetLastOrderExitTime())
                 Else
-                    message = String.Format("{0}{1}<b>Last Trade Exit NOT OK</b> {2}Is Lst Trd Extd At Crnt Cndl:{3}, Last Trd Ext Tm:{4}",
+                    message = String.Format("{0}{1}<b>No Last Trade Exit NOT OK</b> {2}Is Lst Trd Extd At Crnt Cndl:{3}, Last Trd Ext Tm:{4}",
                                             message, vbNewLine, vbNewLine, IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime),
                                             GetLastOrderExitTime())
                 End If
