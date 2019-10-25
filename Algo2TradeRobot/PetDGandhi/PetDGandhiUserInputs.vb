@@ -15,6 +15,9 @@ Public Class PetDGandhiUserInputs
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
     Public Property PinbarTalePercentage As Decimal
+    Public Property MaxLossPerStockMultiplier As Decimal
+    Public Property MaxProfitPerStockMultiplier As Decimal
+    Public Property MaxLossPerTradeMultiplier As Decimal
     Public Property MinLossPercentagePerTrade As Decimal
 
     Public Property AutoSelectStock As Boolean
@@ -32,6 +35,7 @@ Public Class PetDGandhiUserInputs
 
     Public Property TelegramAPIKey As String
     Public Property TelegramTradeChatID As String
+    Public Property TelegramSignalChatID As String
     Public Property TelegramTargetChatID As String
     Public Property TelegramMTMChatID As String
 

@@ -12,10 +12,6 @@ Public Class frmPetDGandhiSettings
     End Sub
 
     Private Sub frmPetDGandhiSettings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        lblMaxLossPercentagePerStock.Visible = False
-        txtMaxLossPercentagePerStock.Visible = False
-        lblMaxLossPercentagePerTrade.Visible = False
-        txtMaxLossPercentagePerTrade.Visible = False
         LoadSettings()
     End Sub
 
@@ -60,8 +56,9 @@ Public Class frmPetDGandhiSettings
             txtMaxProfitPerDay.Text = _settings.MaxProfitPerDay
             txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
             txtPinbarTalePercentage.Text = _settings.PinbarTalePercentage
-            'txtMaxLossPercentagePerStock.Text = _settings.MaxLossPercentagePerStock
-            'txtMaxLossPercentagePerTrade.Text = _settings.MaxLossPercentagePerTrade
+            txtMaxLossPerStockMultiplier.Text = _settings.MaxLossPerStockMultiplier
+            txtMaxProfitPerStockMultiplier.Text = _settings.MaxProfitPerStockMultiplier
+            txtMaxLossPerTradeMultiplier.Text = _settings.MaxLossPerTradeMultiplier
             txtMinLossPercentagePerTrade.Text = _settings.MinLossPercentagePerTrade
 
             chbAutoSelectStock.Checked = _settings.AutoSelectStock
@@ -79,6 +76,7 @@ Public Class frmPetDGandhiSettings
 
             txtTelegramAPI.Text = _settings.TelegramAPIKey
             txtTelegramTradeChatID.Text = _settings.TelegramTradeChatID
+            txtTelegramSignalChatID.Text = _settings.TelegramSignalChatID
             txtTelegramTargetChatID.Text = _settings.TelegramTargetChatID
             txtTelegramMTMChatID.Text = _settings.TelegramMTMChatID
         End If
@@ -95,8 +93,9 @@ Public Class frmPetDGandhiSettings
         _settings.MaxProfitPerDay = txtMaxProfitPerDay.Text
         _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
         _settings.PinbarTalePercentage = txtPinbarTalePercentage.Text
-        '_settings.MaxLossPercentagePerStock = Math.Abs(CDec(txtMaxLossPercentagePerStock.Text))
-        '_settings.MaxLossPercentagePerTrade = Math.Abs(CDec(txtMaxLossPercentagePerTrade.Text))
+        _settings.MaxLossPerStockMultiplier = Math.Abs(CDec(txtMaxLossPerStockMultiplier.Text))
+        _settings.MaxProfitPerStockMultiplier = txtMaxProfitPerStockMultiplier.Text
+        _settings.MaxLossPerTradeMultiplier = Math.Abs(CDec(txtMaxLossPerTradeMultiplier.Text))
         _settings.MinLossPercentagePerTrade = Math.Abs(CDec(txtMinLossPercentagePerTrade.Text))
 
         _settings.AutoSelectStock = chbAutoSelectStock.Checked
@@ -114,6 +113,7 @@ Public Class frmPetDGandhiSettings
 
         _settings.TelegramAPIKey = txtTelegramAPI.Text
         _settings.TelegramTradeChatID = txtTelegramTradeChatID.Text
+        _settings.TelegramSignalChatID = txtTelegramSignalChatID.Text
         _settings.TelegramTargetChatID = txtTelegramTargetChatID.Text
         _settings.TelegramMTMChatID = txtTelegramMTMChatID.Text
 

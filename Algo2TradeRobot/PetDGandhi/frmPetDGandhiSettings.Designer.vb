@@ -37,14 +37,16 @@ Partial Class frmPetDGandhiSettings
         Me.btnBrowse = New System.Windows.Forms.Button()
         Me.txtInstrumentDetalis = New System.Windows.Forms.TextBox()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.txtMaxLossPercentagePerStock = New System.Windows.Forms.TextBox()
-        Me.lblMaxLossPercentagePerStock = New System.Windows.Forms.Label()
+        Me.txtMaxProfitPerStockMultiplier = New System.Windows.Forms.TextBox()
+        Me.lblMaxProfitPerStockMultiplier = New System.Windows.Forms.Label()
+        Me.txtMaxLossPerStockMultiplier = New System.Windows.Forms.TextBox()
+        Me.lblMaxLossPerStockMultiplier = New System.Windows.Forms.Label()
         Me.txtPinbarTalePercentage = New System.Windows.Forms.TextBox()
         Me.lblPinbarTalePercentage = New System.Windows.Forms.Label()
         Me.txtMinLossPercentagePerTrade = New System.Windows.Forms.TextBox()
         Me.lblMinLossPercentagePerTrade = New System.Windows.Forms.Label()
-        Me.txtMaxLossPercentagePerTrade = New System.Windows.Forms.TextBox()
-        Me.lblMaxLossPercentagePerTrade = New System.Windows.Forms.Label()
+        Me.txtMaxLossPerTradeMultiplier = New System.Windows.Forms.TextBox()
+        Me.lblMaxLossPerTrade = New System.Windows.Forms.Label()
         Me.txtTargetMultiplier = New System.Windows.Forms.TextBox()
         Me.lblTargetMultiplier = New System.Windows.Forms.Label()
         Me.txtNumberOfTradePerStock = New System.Windows.Forms.TextBox()
@@ -58,6 +60,8 @@ Partial Class frmPetDGandhiSettings
         Me.btnSavePetDGandhiSettings = New System.Windows.Forms.Button()
         Me.opnFileSettings = New System.Windows.Forms.OpenFileDialog()
         Me.grpTelegram = New System.Windows.Forms.GroupBox()
+        Me.txtTelegramSignalChatID = New System.Windows.Forms.TextBox()
+        Me.lblTelegramSignalChatID = New System.Windows.Forms.Label()
         Me.txtTelegramTargetChatID = New System.Windows.Forms.TextBox()
         Me.lblTelegramTargetChatID = New System.Windows.Forms.Label()
         Me.txtTelegramMTMChatID = New System.Windows.Forms.TextBox()
@@ -98,7 +102,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtMaxProfitPerDay.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMaxProfitPerDay.Name = "txtMaxProfitPerDay"
         Me.txtMaxProfitPerDay.Size = New System.Drawing.Size(255, 22)
-        Me.txtMaxProfitPerDay.TabIndex = 6
+        Me.txtMaxProfitPerDay.TabIndex = 9
         '
         'lblMaxProfitPerDay
         '
@@ -116,7 +120,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtMaxLossPerDay.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMaxLossPerDay.Name = "txtMaxLossPerDay"
         Me.txtMaxLossPerDay.Size = New System.Drawing.Size(255, 22)
-        Me.txtMaxLossPerDay.TabIndex = 5
+        Me.txtMaxLossPerDay.TabIndex = 8
         '
         'lblMaxLossPerDay
         '
@@ -135,7 +139,7 @@ Partial Class frmPetDGandhiSettings
         Me.dtpckrEODExitTime.Name = "dtpckrEODExitTime"
         Me.dtpckrEODExitTime.ShowUpDown = True
         Me.dtpckrEODExitTime.Size = New System.Drawing.Size(255, 22)
-        Me.dtpckrEODExitTime.TabIndex = 3
+        Me.dtpckrEODExitTime.TabIndex = 5
         Me.dtpckrEODExitTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
         'dtpckrLastTradeEntryTime
@@ -145,7 +149,7 @@ Partial Class frmPetDGandhiSettings
         Me.dtpckrLastTradeEntryTime.Name = "dtpckrLastTradeEntryTime"
         Me.dtpckrLastTradeEntryTime.ShowUpDown = True
         Me.dtpckrLastTradeEntryTime.Size = New System.Drawing.Size(255, 22)
-        Me.dtpckrLastTradeEntryTime.TabIndex = 2
+        Me.dtpckrLastTradeEntryTime.TabIndex = 4
         Me.dtpckrLastTradeEntryTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
         'dtpckrTradeStartTime
@@ -155,7 +159,7 @@ Partial Class frmPetDGandhiSettings
         Me.dtpckrTradeStartTime.Name = "dtpckrTradeStartTime"
         Me.dtpckrTradeStartTime.ShowUpDown = True
         Me.dtpckrTradeStartTime.Size = New System.Drawing.Size(255, 22)
-        Me.dtpckrTradeStartTime.TabIndex = 1
+        Me.dtpckrTradeStartTime.TabIndex = 3
         Me.dtpckrTradeStartTime.Value = New Date(2019, 3, 12, 0, 0, 0, 0)
         '
         'lblEODExitTime
@@ -195,7 +199,7 @@ Partial Class frmPetDGandhiSettings
         Me.btnBrowse.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(40, 23)
-        Me.btnBrowse.TabIndex = 8
+        Me.btnBrowse.TabIndex = 10
         Me.btnBrowse.Text = "..."
         Me.btnBrowse.UseVisualStyleBackColor = True
         '
@@ -206,18 +210,20 @@ Partial Class frmPetDGandhiSettings
         Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
         Me.txtInstrumentDetalis.ReadOnly = True
         Me.txtInstrumentDetalis.Size = New System.Drawing.Size(223, 22)
-        Me.txtInstrumentDetalis.TabIndex = 15
+        Me.txtInstrumentDetalis.TabIndex = 11
         '
         'GroupBox1
         '
-        Me.GroupBox1.Controls.Add(Me.txtMaxLossPercentagePerStock)
-        Me.GroupBox1.Controls.Add(Me.lblMaxLossPercentagePerStock)
+        Me.GroupBox1.Controls.Add(Me.txtMaxProfitPerStockMultiplier)
+        Me.GroupBox1.Controls.Add(Me.lblMaxProfitPerStockMultiplier)
+        Me.GroupBox1.Controls.Add(Me.txtMaxLossPerStockMultiplier)
+        Me.GroupBox1.Controls.Add(Me.lblMaxLossPerStockMultiplier)
         Me.GroupBox1.Controls.Add(Me.txtPinbarTalePercentage)
         Me.GroupBox1.Controls.Add(Me.lblPinbarTalePercentage)
         Me.GroupBox1.Controls.Add(Me.txtMinLossPercentagePerTrade)
         Me.GroupBox1.Controls.Add(Me.lblMinLossPercentagePerTrade)
-        Me.GroupBox1.Controls.Add(Me.txtMaxLossPercentagePerTrade)
-        Me.GroupBox1.Controls.Add(Me.lblMaxLossPercentagePerTrade)
+        Me.GroupBox1.Controls.Add(Me.txtMaxLossPerTradeMultiplier)
+        Me.GroupBox1.Controls.Add(Me.lblMaxLossPerTrade)
         Me.GroupBox1.Controls.Add(Me.txtTargetMultiplier)
         Me.GroupBox1.Controls.Add(Me.lblTargetMultiplier)
         Me.GroupBox1.Controls.Add(Me.txtNumberOfTradePerStock)
@@ -243,28 +249,47 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(451, 509)
+        Me.GroupBox1.Size = New System.Drawing.Size(451, 543)
         Me.GroupBox1.TabIndex = 15
         Me.GroupBox1.TabStop = False
         '
-        'txtMaxLossPercentagePerStock
+        'txtMaxProfitPerStockMultiplier
         '
-        Me.txtMaxLossPercentagePerStock.Location = New System.Drawing.Point(174, 405)
-        Me.txtMaxLossPercentagePerStock.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtMaxLossPercentagePerStock.Name = "txtMaxLossPercentagePerStock"
-        Me.txtMaxLossPercentagePerStock.Size = New System.Drawing.Size(255, 22)
-        Me.txtMaxLossPercentagePerStock.TabIndex = 43
-        Me.txtMaxLossPercentagePerStock.Tag = ""
+        Me.txtMaxProfitPerStockMultiplier.Location = New System.Drawing.Point(174, 439)
+        Me.txtMaxProfitPerStockMultiplier.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxProfitPerStockMultiplier.Name = "txtMaxProfitPerStockMultiplier"
+        Me.txtMaxProfitPerStockMultiplier.Size = New System.Drawing.Size(255, 22)
+        Me.txtMaxProfitPerStockMultiplier.TabIndex = 14
+        Me.txtMaxProfitPerStockMultiplier.Tag = ""
         '
-        'lblMaxLossPercentagePerStock
+        'lblMaxProfitPerStockMultiplier
         '
-        Me.lblMaxLossPercentagePerStock.AutoSize = True
-        Me.lblMaxLossPercentagePerStock.Location = New System.Drawing.Point(8, 408)
-        Me.lblMaxLossPercentagePerStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblMaxLossPercentagePerStock.Name = "lblMaxLossPercentagePerStock"
-        Me.lblMaxLossPercentagePerStock.Size = New System.Drawing.Size(148, 17)
-        Me.lblMaxLossPercentagePerStock.TabIndex = 45
-        Me.lblMaxLossPercentagePerStock.Text = "Max Loss % Per Stock"
+        Me.lblMaxProfitPerStockMultiplier.AutoSize = True
+        Me.lblMaxProfitPerStockMultiplier.Location = New System.Drawing.Point(8, 442)
+        Me.lblMaxProfitPerStockMultiplier.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxProfitPerStockMultiplier.Name = "lblMaxProfitPerStockMultiplier"
+        Me.lblMaxProfitPerStockMultiplier.Size = New System.Drawing.Size(161, 17)
+        Me.lblMaxProfitPerStockMultiplier.TabIndex = 47
+        Me.lblMaxProfitPerStockMultiplier.Text = "Max Profit Per Stock Mul"
+        '
+        'txtMaxLossPerStockMultiplier
+        '
+        Me.txtMaxLossPerStockMultiplier.Location = New System.Drawing.Point(174, 405)
+        Me.txtMaxLossPerStockMultiplier.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxLossPerStockMultiplier.Name = "txtMaxLossPerStockMultiplier"
+        Me.txtMaxLossPerStockMultiplier.Size = New System.Drawing.Size(255, 22)
+        Me.txtMaxLossPerStockMultiplier.TabIndex = 13
+        Me.txtMaxLossPerStockMultiplier.Tag = ""
+        '
+        'lblMaxLossPerStockMultiplier
+        '
+        Me.lblMaxLossPerStockMultiplier.AutoSize = True
+        Me.lblMaxLossPerStockMultiplier.Location = New System.Drawing.Point(8, 408)
+        Me.lblMaxLossPerStockMultiplier.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxLossPerStockMultiplier.Name = "lblMaxLossPerStockMultiplier"
+        Me.lblMaxLossPerStockMultiplier.Size = New System.Drawing.Size(158, 17)
+        Me.lblMaxLossPerStockMultiplier.TabIndex = 45
+        Me.lblMaxLossPerStockMultiplier.Text = "Max Loss Per Stock Mul"
         '
         'txtPinbarTalePercentage
         '
@@ -272,7 +297,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtPinbarTalePercentage.Margin = New System.Windows.Forms.Padding(4)
         Me.txtPinbarTalePercentage.Name = "txtPinbarTalePercentage"
         Me.txtPinbarTalePercentage.Size = New System.Drawing.Size(255, 22)
-        Me.txtPinbarTalePercentage.TabIndex = 42
+        Me.txtPinbarTalePercentage.TabIndex = 12
         Me.txtPinbarTalePercentage.Tag = "Max Loss Per Day"
         '
         'lblPinbarTalePercentage
@@ -287,39 +312,39 @@ Partial Class frmPetDGandhiSettings
         '
         'txtMinLossPercentagePerTrade
         '
-        Me.txtMinLossPercentagePerTrade.Location = New System.Drawing.Point(174, 476)
+        Me.txtMinLossPercentagePerTrade.Location = New System.Drawing.Point(174, 505)
         Me.txtMinLossPercentagePerTrade.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMinLossPercentagePerTrade.Name = "txtMinLossPercentagePerTrade"
         Me.txtMinLossPercentagePerTrade.Size = New System.Drawing.Size(255, 22)
-        Me.txtMinLossPercentagePerTrade.TabIndex = 39
+        Me.txtMinLossPercentagePerTrade.TabIndex = 16
         '
         'lblMinLossPercentagePerTrade
         '
         Me.lblMinLossPercentagePerTrade.AutoSize = True
-        Me.lblMinLossPercentagePerTrade.Location = New System.Drawing.Point(8, 480)
+        Me.lblMinLossPercentagePerTrade.Location = New System.Drawing.Point(8, 509)
         Me.lblMinLossPercentagePerTrade.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblMinLossPercentagePerTrade.Name = "lblMinLossPercentagePerTrade"
         Me.lblMinLossPercentagePerTrade.Size = New System.Drawing.Size(148, 17)
         Me.lblMinLossPercentagePerTrade.TabIndex = 41
         Me.lblMinLossPercentagePerTrade.Text = "Min Loss % Per Trade"
         '
-        'txtMaxLossPercentagePerTrade
+        'txtMaxLossPerTradeMultiplier
         '
-        Me.txtMaxLossPercentagePerTrade.Location = New System.Drawing.Point(174, 441)
-        Me.txtMaxLossPercentagePerTrade.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtMaxLossPercentagePerTrade.Name = "txtMaxLossPercentagePerTrade"
-        Me.txtMaxLossPercentagePerTrade.Size = New System.Drawing.Size(255, 22)
-        Me.txtMaxLossPercentagePerTrade.TabIndex = 38
+        Me.txtMaxLossPerTradeMultiplier.Location = New System.Drawing.Point(174, 470)
+        Me.txtMaxLossPerTradeMultiplier.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxLossPerTradeMultiplier.Name = "txtMaxLossPerTradeMultiplier"
+        Me.txtMaxLossPerTradeMultiplier.Size = New System.Drawing.Size(255, 22)
+        Me.txtMaxLossPerTradeMultiplier.TabIndex = 15
         '
-        'lblMaxLossPercentagePerTrade
+        'lblMaxLossPerTrade
         '
-        Me.lblMaxLossPercentagePerTrade.AutoSize = True
-        Me.lblMaxLossPercentagePerTrade.Location = New System.Drawing.Point(8, 445)
-        Me.lblMaxLossPercentagePerTrade.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblMaxLossPercentagePerTrade.Name = "lblMaxLossPercentagePerTrade"
-        Me.lblMaxLossPercentagePerTrade.Size = New System.Drawing.Size(151, 17)
-        Me.lblMaxLossPercentagePerTrade.TabIndex = 40
-        Me.lblMaxLossPercentagePerTrade.Text = "Max Loss % Per Trade"
+        Me.lblMaxLossPerTrade.AutoSize = True
+        Me.lblMaxLossPerTrade.Location = New System.Drawing.Point(8, 474)
+        Me.lblMaxLossPerTrade.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxLossPerTrade.Name = "lblMaxLossPerTrade"
+        Me.lblMaxLossPerTrade.Size = New System.Drawing.Size(161, 17)
+        Me.lblMaxLossPerTrade.TabIndex = 40
+        Me.lblMaxLossPerTrade.Text = "Max Loss Per Trade Mul"
         '
         'txtTargetMultiplier
         '
@@ -327,7 +352,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtTargetMultiplier.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTargetMultiplier.Name = "txtTargetMultiplier"
         Me.txtTargetMultiplier.Size = New System.Drawing.Size(255, 22)
-        Me.txtTargetMultiplier.TabIndex = 35
+        Me.txtTargetMultiplier.TabIndex = 7
         Me.txtTargetMultiplier.Tag = "Max Profit Per Day"
         '
         'lblTargetMultiplier
@@ -346,7 +371,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4)
         Me.txtNumberOfTradePerStock.Name = "txtNumberOfTradePerStock"
         Me.txtNumberOfTradePerStock.Size = New System.Drawing.Size(255, 22)
-        Me.txtNumberOfTradePerStock.TabIndex = 34
+        Me.txtNumberOfTradePerStock.TabIndex = 6
         Me.txtNumberOfTradePerStock.Tag = "Max Loss Per Day"
         '
         'lblNumberOfTradePerStock
@@ -365,7 +390,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtATRPeriod.Margin = New System.Windows.Forms.Padding(4)
         Me.txtATRPeriod.Name = "txtATRPeriod"
         Me.txtATRPeriod.Size = New System.Drawing.Size(253, 22)
-        Me.txtATRPeriod.TabIndex = 32
+        Me.txtATRPeriod.TabIndex = 1
         '
         'lblATRPeriod
         '
@@ -393,7 +418,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtSignalTimeFrame.Margin = New System.Windows.Forms.Padding(4)
         Me.txtSignalTimeFrame.Name = "txtSignalTimeFrame"
         Me.txtSignalTimeFrame.Size = New System.Drawing.Size(255, 22)
-        Me.txtSignalTimeFrame.TabIndex = 0
+        Me.txtSignalTimeFrame.TabIndex = 2
         '
         'lblSignalTimeFrame
         '
@@ -420,7 +445,7 @@ Partial Class frmPetDGandhiSettings
         Me.btnSavePetDGandhiSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSavePetDGandhiSettings.Name = "btnSavePetDGandhiSettings"
         Me.btnSavePetDGandhiSettings.Size = New System.Drawing.Size(112, 58)
-        Me.btnSavePetDGandhiSettings.TabIndex = 14
+        Me.btnSavePetDGandhiSettings.TabIndex = 0
         Me.btnSavePetDGandhiSettings.Text = "&Save"
         Me.btnSavePetDGandhiSettings.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         Me.btnSavePetDGandhiSettings.UseVisualStyleBackColor = True
@@ -430,6 +455,8 @@ Partial Class frmPetDGandhiSettings
         '
         'grpTelegram
         '
+        Me.grpTelegram.Controls.Add(Me.txtTelegramSignalChatID)
+        Me.grpTelegram.Controls.Add(Me.lblTelegramSignalChatID)
         Me.grpTelegram.Controls.Add(Me.txtTelegramTargetChatID)
         Me.grpTelegram.Controls.Add(Me.lblTelegramTargetChatID)
         Me.grpTelegram.Controls.Add(Me.txtTelegramMTMChatID)
@@ -440,23 +467,41 @@ Partial Class frmPetDGandhiSettings
         Me.grpTelegram.Controls.Add(Me.lblTelegramAPI)
         Me.grpTelegram.Location = New System.Drawing.Point(463, 150)
         Me.grpTelegram.Name = "grpTelegram"
-        Me.grpTelegram.Size = New System.Drawing.Size(358, 154)
+        Me.grpTelegram.Size = New System.Drawing.Size(358, 189)
         Me.grpTelegram.TabIndex = 19
         Me.grpTelegram.TabStop = False
         Me.grpTelegram.Text = "Telegram Details"
         '
+        'txtTelegramSignalChatID
+        '
+        Me.txtTelegramSignalChatID.Location = New System.Drawing.Point(146, 88)
+        Me.txtTelegramSignalChatID.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtTelegramSignalChatID.Name = "txtTelegramSignalChatID"
+        Me.txtTelegramSignalChatID.Size = New System.Drawing.Size(201, 22)
+        Me.txtTelegramSignalChatID.TabIndex = 24
+        '
+        'lblTelegramSignalChatID
+        '
+        Me.lblTelegramSignalChatID.AutoSize = True
+        Me.lblTelegramSignalChatID.Location = New System.Drawing.Point(9, 92)
+        Me.lblTelegramSignalChatID.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblTelegramSignalChatID.Name = "lblTelegramSignalChatID"
+        Me.lblTelegramSignalChatID.Size = New System.Drawing.Size(97, 17)
+        Me.lblTelegramSignalChatID.TabIndex = 41
+        Me.lblTelegramSignalChatID.Text = "Signal Chat ID"
+        '
         'txtTelegramTargetChatID
         '
-        Me.txtTelegramTargetChatID.Location = New System.Drawing.Point(146, 87)
+        Me.txtTelegramTargetChatID.Location = New System.Drawing.Point(146, 119)
         Me.txtTelegramTargetChatID.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTelegramTargetChatID.Name = "txtTelegramTargetChatID"
         Me.txtTelegramTargetChatID.Size = New System.Drawing.Size(201, 22)
-        Me.txtTelegramTargetChatID.TabIndex = 38
+        Me.txtTelegramTargetChatID.TabIndex = 25
         '
         'lblTelegramTargetChatID
         '
         Me.lblTelegramTargetChatID.AutoSize = True
-        Me.lblTelegramTargetChatID.Location = New System.Drawing.Point(9, 91)
+        Me.lblTelegramTargetChatID.Location = New System.Drawing.Point(9, 123)
         Me.lblTelegramTargetChatID.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblTelegramTargetChatID.Name = "lblTelegramTargetChatID"
         Me.lblTelegramTargetChatID.Size = New System.Drawing.Size(100, 17)
@@ -465,16 +510,16 @@ Partial Class frmPetDGandhiSettings
         '
         'txtTelegramMTMChatID
         '
-        Me.txtTelegramMTMChatID.Location = New System.Drawing.Point(146, 118)
+        Me.txtTelegramMTMChatID.Location = New System.Drawing.Point(146, 150)
         Me.txtTelegramMTMChatID.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTelegramMTMChatID.Name = "txtTelegramMTMChatID"
         Me.txtTelegramMTMChatID.Size = New System.Drawing.Size(201, 22)
-        Me.txtTelegramMTMChatID.TabIndex = 36
+        Me.txtTelegramMTMChatID.TabIndex = 26
         '
         'lblMTMChatID
         '
         Me.lblMTMChatID.AutoSize = True
-        Me.lblMTMChatID.Location = New System.Drawing.Point(9, 122)
+        Me.lblMTMChatID.Location = New System.Drawing.Point(9, 154)
         Me.lblMTMChatID.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblMTMChatID.Name = "lblMTMChatID"
         Me.lblMTMChatID.Size = New System.Drawing.Size(89, 17)
@@ -487,7 +532,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtTelegramTradeChatID.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTelegramTradeChatID.Name = "txtTelegramTradeChatID"
         Me.txtTelegramTradeChatID.Size = New System.Drawing.Size(201, 22)
-        Me.txtTelegramTradeChatID.TabIndex = 32
+        Me.txtTelegramTradeChatID.TabIndex = 23
         '
         'lblTelegramTradeChatID
         '
@@ -505,7 +550,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtTelegramAPI.Margin = New System.Windows.Forms.Padding(4)
         Me.txtTelegramAPI.Name = "txtTelegramAPI"
         Me.txtTelegramAPI.Size = New System.Drawing.Size(201, 22)
-        Me.txtTelegramAPI.TabIndex = 30
+        Me.txtTelegramAPI.TabIndex = 22
         '
         'lblTelegramAPI
         '
@@ -537,7 +582,7 @@ Partial Class frmPetDGandhiSettings
         Me.chbAllowToIncreaseCapital.Location = New System.Drawing.Point(12, 72)
         Me.chbAllowToIncreaseCapital.Name = "chbAllowToIncreaseCapital"
         Me.chbAllowToIncreaseCapital.Size = New System.Drawing.Size(188, 21)
-        Me.chbAllowToIncreaseCapital.TabIndex = 41
+        Me.chbAllowToIncreaseCapital.TabIndex = 20
         Me.chbAllowToIncreaseCapital.Text = "Allow To Increase Capital"
         Me.chbAllowToIncreaseCapital.UseVisualStyleBackColor = True
         '
@@ -547,7 +592,7 @@ Partial Class frmPetDGandhiSettings
         Me.chbAutoSelectStock.Location = New System.Drawing.Point(12, 14)
         Me.chbAutoSelectStock.Name = "chbAutoSelectStock"
         Me.chbAutoSelectStock.Size = New System.Drawing.Size(141, 21)
-        Me.chbAutoSelectStock.TabIndex = 40
+        Me.chbAutoSelectStock.TabIndex = 17
         Me.chbAutoSelectStock.Text = "Auto Select Stock"
         Me.chbAutoSelectStock.UseVisualStyleBackColor = True
         '
@@ -557,7 +602,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtMinCapital.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMinCapital.Name = "txtMinCapital"
         Me.txtMinCapital.Size = New System.Drawing.Size(201, 22)
-        Me.txtMinCapital.TabIndex = 36
+        Me.txtMinCapital.TabIndex = 21
         Me.txtMinCapital.Tag = ""
         '
         'lblFutureMinCapital
@@ -576,7 +621,7 @@ Partial Class frmPetDGandhiSettings
         Me.chbFuture.Location = New System.Drawing.Point(84, 43)
         Me.chbFuture.Name = "chbFuture"
         Me.chbFuture.Size = New System.Drawing.Size(71, 21)
-        Me.chbFuture.TabIndex = 1
+        Me.chbFuture.TabIndex = 19
         Me.chbFuture.Text = "Future"
         Me.chbFuture.UseVisualStyleBackColor = True
         '
@@ -586,7 +631,7 @@ Partial Class frmPetDGandhiSettings
         Me.chbCash.Location = New System.Drawing.Point(12, 42)
         Me.chbCash.Name = "chbCash"
         Me.chbCash.Size = New System.Drawing.Size(62, 21)
-        Me.chbCash.TabIndex = 0
+        Me.chbCash.TabIndex = 18
         Me.chbCash.Text = "Cash"
         Me.chbCash.UseVisualStyleBackColor = True
         '
@@ -604,7 +649,7 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox3.Controls.Add(Me.lblMaxPrice)
         Me.GroupBox3.Controls.Add(Me.txtMinPrice)
         Me.GroupBox3.Controls.Add(Me.lblMinPrice)
-        Me.GroupBox3.Location = New System.Drawing.Point(463, 311)
+        Me.GroupBox3.Location = New System.Drawing.Point(463, 345)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Size = New System.Drawing.Size(358, 204)
         Me.GroupBox3.TabIndex = 39
@@ -617,7 +662,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtBlankCandlePercentage.Margin = New System.Windows.Forms.Padding(4)
         Me.txtBlankCandlePercentage.Name = "txtBlankCandlePercentage"
         Me.txtBlankCandlePercentage.Size = New System.Drawing.Size(201, 22)
-        Me.txtBlankCandlePercentage.TabIndex = 44
+        Me.txtBlankCandlePercentage.TabIndex = 31
         Me.txtBlankCandlePercentage.Tag = "Number Of Stock"
         '
         'lblBlankCandlePercentage
@@ -636,7 +681,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtNumberOfStock.Margin = New System.Windows.Forms.Padding(4)
         Me.txtNumberOfStock.Name = "txtNumberOfStock"
         Me.txtNumberOfStock.Size = New System.Drawing.Size(201, 22)
-        Me.txtNumberOfStock.TabIndex = 42
+        Me.txtNumberOfStock.TabIndex = 32
         Me.txtNumberOfStock.Tag = "Number Of Stock"
         '
         'lblNumberOfStock
@@ -655,7 +700,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtMinVolume.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMinVolume.Name = "txtMinVolume"
         Me.txtMinVolume.Size = New System.Drawing.Size(201, 22)
-        Me.txtMinVolume.TabIndex = 40
+        Me.txtMinVolume.TabIndex = 30
         Me.txtMinVolume.Tag = "Min Volume"
         '
         'lblMinVolume
@@ -674,7 +719,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtATRPercentage.Margin = New System.Windows.Forms.Padding(4)
         Me.txtATRPercentage.Name = "txtATRPercentage"
         Me.txtATRPercentage.Size = New System.Drawing.Size(201, 22)
-        Me.txtATRPercentage.TabIndex = 38
+        Me.txtATRPercentage.TabIndex = 29
         Me.txtATRPercentage.Tag = "ATR %"
         '
         'lblATR
@@ -693,7 +738,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtMaxPrice.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMaxPrice.Name = "txtMaxPrice"
         Me.txtMaxPrice.Size = New System.Drawing.Size(201, 22)
-        Me.txtMaxPrice.TabIndex = 36
+        Me.txtMaxPrice.TabIndex = 28
         Me.txtMaxPrice.Tag = "Max Price"
         '
         'lblMaxPrice
@@ -712,7 +757,7 @@ Partial Class frmPetDGandhiSettings
         Me.txtMinPrice.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMinPrice.Name = "txtMinPrice"
         Me.txtMinPrice.Size = New System.Drawing.Size(201, 22)
-        Me.txtMinPrice.TabIndex = 34
+        Me.txtMinPrice.TabIndex = 27
         Me.txtMinPrice.Tag = "Min Price"
         '
         'lblMinPrice
@@ -729,7 +774,7 @@ Partial Class frmPetDGandhiSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(947, 524)
+        Me.ClientSize = New System.Drawing.Size(947, 555)
         Me.Controls.Add(Me.GroupBox3)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.grpTelegram)
@@ -806,12 +851,16 @@ Partial Class frmPetDGandhiSettings
     Friend WithEvents lblBlankCandlePercentage As Label
     Friend WithEvents txtTelegramTargetChatID As TextBox
     Friend WithEvents lblTelegramTargetChatID As Label
-    Friend WithEvents txtMaxLossPercentagePerStock As TextBox
-    Friend WithEvents lblMaxLossPercentagePerStock As Label
+    Friend WithEvents txtMaxLossPerStockMultiplier As TextBox
+    Friend WithEvents lblMaxLossPerStockMultiplier As Label
     Friend WithEvents txtPinbarTalePercentage As TextBox
     Friend WithEvents lblPinbarTalePercentage As Label
     Friend WithEvents txtMinLossPercentagePerTrade As TextBox
     Friend WithEvents lblMinLossPercentagePerTrade As Label
-    Friend WithEvents txtMaxLossPercentagePerTrade As TextBox
-    Friend WithEvents lblMaxLossPercentagePerTrade As Label
+    Friend WithEvents txtMaxLossPerTradeMultiplier As TextBox
+    Friend WithEvents lblMaxLossPerTrade As Label
+    Friend WithEvents txtMaxProfitPerStockMultiplier As TextBox
+    Friend WithEvents lblMaxProfitPerStockMultiplier As Label
+    Friend WithEvents txtTelegramSignalChatID As TextBox
+    Friend WithEvents lblTelegramSignalChatID As Label
 End Class
