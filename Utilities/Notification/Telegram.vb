@@ -35,7 +35,7 @@ Namespace Notification
         Private ReadOnly _apikey As String
         Private ReadOnly _chatId As String
         Protected _canceller As CancellationTokenSource
-        Private Const _SMS_API_URL = "https://api.telegram.org/bot{0}/sendMessage?chat_id={1}&text={2}"
+        Private Const _SMS_API_URL = "https://api.telegram.org/bot{0}/sendMessage?chat_id={1}&text={2}&parse_mode=html"
 
         Public Sub New(ByVal apiKey As String, ByVal chatId As String, ByVal canceller As CancellationTokenSource)
             _apikey = apiKey

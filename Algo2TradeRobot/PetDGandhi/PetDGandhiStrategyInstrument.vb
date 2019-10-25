@@ -886,8 +886,17 @@ Public Class PetDGandhiStrategyInstrument
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         Try
             If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing Then
-                Dim message As String = String.Format("{0} __{1}__", runningCandlePayload.SnapshotDateTime.ToString("HH:mm:ss"), Me.TradableInstrument.TradingSymbol)
-                message = String.Format("{0}{1}Potential Signal Candle is:{2}. Will check rest parameters.", message, vbNewLine, runningCandlePayload.PreviousPayload.ToString)
+                Dim message As String = String.Format("{0} <i>{1}</i>", runningCandlePayload.SnapshotDateTime.ToString("HH:mm:ss"), Me.TradableInstrument.TradingSymbol)
+                message = String.Format("{0}{1}Potential Signal Candle Open:{2}, Low:{3}, High{3}, Close:{4}, Source:{5}, Time:{6}",
+                                        message, vbNewLine,
+                                        runningCandlePayload.OpenPrice.Value,
+                                        runningCandlePayload.LowPrice.Value,
+                                        runningCandlePayload.HighPrice.Value,
+                                        runningCandlePayload.ClosePrice.Value,
+                                        runningCandlePayload.PayloadGeneratedBy.ToString,
+                                        runningCandlePayload.SnapshotDateTime.ToString("dd-MM-yyyy HH:mm:ss"))
+
+                message = String.Format("{0}{1}-----------------------", message, vbNewLine)
 
                 If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
                     runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime Then
@@ -895,7 +904,7 @@ Public Class PetDGandhiStrategyInstrument
                     '                        message, vbNewLine, userSettings.TradeStartTime.ToString, userSettings.LastTradeEntryTime.ToString,
                     '                        runningCandlePayload.SnapshotDateTime.ToString, currentTime.ToString)
                 Else
-                    message = String.Format("{0}{1}**Entry time NOT OK** {2}Trade Start Time:{3}, Last Trade Entry Time:{4}, Running Candle Time:{5}, Current Time:{6}",
+                    message = String.Format("{0}{1}<b>Entry time NOT OK</b> {2}Trd Strt Tm:{3}, Lst Trd Ntry Tm:{4}, Rng Cndl Tm:{5}, Crnt Tm:{6}",
                                             message, vbNewLine, vbNewLine, userSettings.TradeStartTime.ToString, userSettings.LastTradeEntryTime.ToString,
                                             runningCandlePayload.SnapshotDateTime.ToString, currentTime.ToString)
                 End If
@@ -903,20 +912,20 @@ Public Class PetDGandhiStrategyInstrument
                 If Me.TradableInstrument.IsHistoricalCompleted Then
                     'message = String.Format("{0}{1}Historical OK. Is Historical Completed:{2}", message, vbNewLine, Me.TradableInstrument.IsHistoricalCompleted)
                 Else
-                    message = String.Format("{0}{1}**Historical NOT OK** {2}Is Historical Completed:{3}", message, vbNewLine, vbNewLine, Me.TradableInstrument.IsHistoricalCompleted)
+                    message = String.Format("{0}{1}<b>Historical NOT OK</b> {2}Is Hstrcl Cmpltd:{3}", message, vbNewLine, vbNewLine, Me.TradableInstrument.IsHistoricalCompleted)
                 End If
 
                 If Not IsActiveInstrument() Then
                     'message = String.Format("{0}{1}Active Instrument OK. Is Active Instrument:{2}", message, vbNewLine, IsActiveInstrument())
                 Else
-                    message = String.Format("{0}{1}**Active Instrument NOT OK** {2}Is Active Instrument:{3}", message, vbNewLine, vbNewLine, IsActiveInstrument())
+                    message = String.Format("{0}{1}<b>Active Instrument NOT OK</b> {2}Is Actv Instrmnt:{3}", message, vbNewLine, vbNewLine, IsActiveInstrument())
                 End If
 
                 If GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock Then
                     'message = String.Format("{0}{1}Number Of Trade OK. Total Trade:{2}, Max Number of Trade:{3}",
                     '                        message, vbNewLine, GetTotalExecutedOrders(), userSettings.NumberOfTradePerStock)
                 Else
-                    message = String.Format("{0}{1}**Number Of Trade NOT OK** {2}Total Trade:{3}, Max Number of Trade:{4}",
+                    message = String.Format("{0}{1}<b>Number Of Trade NOT OK</b> {2}Total Trd:{3}, Max Nmbr of Trd:{4}",
                                             message, vbNewLine, vbNewLine, GetTotalExecutedOrders(), userSettings.NumberOfTradePerStock)
                 End If
 
@@ -924,7 +933,7 @@ Public Class PetDGandhiStrategyInstrument
                     'message = String.Format("{0}{1}Force exit OK. Strategy Exit All Triggerd:{2}, Stock Max Loss Triggerd:{3}",
                     '                        message, vbNewLine, Me.StrategyExitAllTriggerd, _exitDoneForStockMaxLoss)
                 Else
-                    message = String.Format("{0}{1}**Force exit NOT OK** {2}Strategy Exit All Triggerd:{3}, Stock Max Loss Triggerd:{4}",
+                    message = String.Format("{0}{1}<b>Force exit NOT OK</b> {2}Strgy Ext All Trgrd:{3}, Stck Max Loss Trgrd:{4}",
                                             message, vbNewLine, vbNewLine, Me.StrategyExitAllTriggerd, _exitDoneForStockMaxLoss)
                 End If
 
@@ -936,7 +945,7 @@ Public Class PetDGandhiStrategyInstrument
                     'message = String.Format("{0}{1}Pinbar OK. Top Tail:{2}%, Bottom Tail:{3}%, Minimum Pinbar Tail:{4}%",
                     '                        message, vbNewLine, topTail, bottomTail, userSettings.PinbarTailPercentage)
                 Else
-                    message = String.Format("{0}{1}**Pinbar NOT OK** {2}Top Tail:{3}%, Bottom Tail:{4}%, Minimum Pinbar Tail:{5}%",
+                    message = String.Format("{0}{1}<b>Pinbar NOT OK</b> {2}Top Tail:{3}%, Btm Tail:{4}%, Min Pinbar Tail:{5}%",
                                             message, vbNewLine, vbNewLine, topTail, bottomTail, userSettings.PinbarTailPercentage)
                 End If
 
@@ -947,7 +956,7 @@ Public Class PetDGandhiStrategyInstrument
                         'message = String.Format("{0}{1}Candle Body OK. Body:{2}, Max allowable body:{3}, ATR:{4}",
                         '                        message, vbNewLine, body, maxAllowableBody, GetCandleATR(runningCandlePayload.PreviousPayload))
                     Else
-                        message = String.Format("{0}{1}**Candle Body NOT OK** {2}Body:{3}, Max allowable body:{4}, ATR:{5}",
+                        message = String.Format("{0}{1}<b>Candle Body NOT OK</b> {2}Body:{3}, Max alwbl body:{4}, ATR:{5}",
                                                 message, vbNewLine, vbNewLine, body, maxAllowableBody, GetCandleATR(runningCandlePayload.PreviousPayload))
                     End If
                 ElseIf bottomTail >= userSettings.PinbarTailPercentage Then
@@ -957,7 +966,7 @@ Public Class PetDGandhiStrategyInstrument
                         'message = String.Format("{0}{1}Candle Body OK. Body:{2}, Max allowable body:{3}, ATR:{4}",
                         '                        message, vbNewLine, body, maxAllowableBody, GetCandleATR(runningCandlePayload.PreviousPayload))
                     Else
-                        message = String.Format("{0}{1}**Candle Body NOT OK** {2}Body:{3}, Max allowable body:{4}, ATR:{5}",
+                        message = String.Format("{0}{1}<b>Candle Body NOT OK</b> {2}Body:{3}, Max alwbl body:{4}, ATR:{5}",
                                                 message, vbNewLine, vbNewLine, body, maxAllowableBody, GetCandleATR(runningCandlePayload.PreviousPayload))
                     End If
                 End If
@@ -967,12 +976,12 @@ Public Class PetDGandhiStrategyInstrument
                     '                        message, vbNewLine, IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime),
                     '                        GetLastOrderExitTime())
                 Else
-                    message = String.Format("{0}{1}**Last Trade Exit NOT OK** {2}Is Last Trade Exited At Current Candle:{3}, Last Trade Exit Time:{4}",
+                    message = String.Format("{0}{1}<b>Last Trade Exit NOT OK</b> {2}Is Lst Trd Extd At Crnt Cndl:{3}, Last Trd Ext Tm:{4}",
                                             message, vbNewLine, vbNewLine, IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime),
                                             GetLastOrderExitTime())
                 End If
 
-                message = String.Format("{0}{1}Last Trade Force Exit For Candle Close:{2}", message, vbNewLine, IsLastTradeForceExitForCandleClose())
+                message = String.Format("{0}{1}Lst Trd Frc Ext fr Cndl Cls:{2}", message, vbNewLine, IsLastTradeForceExitForCandleClose())
 
                 If message.Contains("&") Then
                     message = message.Replace("&", "_")
