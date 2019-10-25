@@ -336,7 +336,8 @@ Public Class MomentumReversalStrategyInstrument
                         If candle.PreviousPayload IsNot Nothing AndAlso
                             candle.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
                             candle.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
-                            candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing Then
+                            candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
+                            candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload.SnapshotDateTime.Date = Now.Date Then
                             Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.PreviousPayload.HighPrice.Value, candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
                             ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
                         End If
