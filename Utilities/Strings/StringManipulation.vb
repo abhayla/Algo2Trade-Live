@@ -194,6 +194,14 @@ Namespace Strings
             logger.Debug("Decoding string")
             Return HtmlDecode(inputString)
         End Function
+        Public Function EncodeURLString(ByVal inputString As String)
+            logger.Debug("Encoding string")
+            Return UrlEncode(inputString)
+        End Function
+        Public Function DecodeURLString(ByVal inputString As String)
+            logger.Debug("Decoding string")
+            Return UrlDecode(inputString)
+        End Function
         Public Function ContainsText(ByVal inputString As String, ByVal searchString As String, ByVal options As StringMatchoptions) As Boolean
             logger.Debug("Checking contains text")
             Dim ret = False

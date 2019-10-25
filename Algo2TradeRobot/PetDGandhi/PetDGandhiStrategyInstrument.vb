@@ -301,7 +301,7 @@ Public Class PetDGandhiStrategyInstrument
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
 
-                SendCandleDetails(runningCandlePayload, currentTime, userSettings)
+                Await SendCandleDetails(runningCandlePayload, currentTime, userSettings).ConfigureAwait(False)
             End If
         Catch ex As Exception
             logger.Error(ex.ToString)
@@ -887,8 +887,9 @@ Public Class PetDGandhiStrategyInstrument
         Try
             If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing Then
                 Dim message As String = String.Format("{0} <i>{1}</i>", runningCandlePayload.PreviousPayload.SnapshotDateTime.ToString("HH:mm:ss"), Me.TradableInstrument.TradingSymbol)
-                message = String.Format("{0}{1}Potential Signal Candle Open:{2}, Low:{3}, High{3}, Close:{4}, Source:{5}",
-                                        message, vbNewLine,
+                message = String.Format("{0}{1}Open:{2}, Low:{3}, High:{4}, Close:{5}, Source:{6}",
+                                        message,
+                                        vbNewLine,
                                         runningCandlePayload.PreviousPayload.OpenPrice.Value,
                                         runningCandlePayload.PreviousPayload.LowPrice.Value,
                                         runningCandlePayload.PreviousPayload.HighPrice.Value,
@@ -980,7 +981,7 @@ Public Class PetDGandhiStrategyInstrument
                                             GetLastOrderExitTime())
                 End If
 
-                message = String.Format("{0}{1}Lst Trd Frc Ext fr Cndl Cls:{2}", message, vbNewLine, IsLastTradeForceExitForCandleClose())
+                'message = String.Format("{0}{1}Lst Trd Frc Ext fr Cndl Cls:{2}", message, vbNewLine, IsLastTradeForceExitForCandleClose())
 
                 If message.Contains("&") Then
                     message = message.Replace("&", "_")
@@ -990,7 +991,7 @@ Public Class PetDGandhiStrategyInstrument
                 If userSettings.TelegramAPIKey IsNot Nothing AndAlso Not userSettings.TelegramAPIKey.Trim = "" AndAlso
                     userSettings.TelegramSignalChatID IsNot Nothing AndAlso Not userSettings.TelegramSignalChatID.Trim = "" Then
                     Using tSender As New Utilities.Notification.Telegram(userSettings.TelegramAPIKey.Trim, userSettings.TelegramSignalChatID, _cts)
-                        Dim encodedString As String = Utilities.Strings.EncodeString(message)
+                        Dim encodedString As String = Utilities.Strings.EncodeURLString(message)
                         Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
                     End Using
                 End If
