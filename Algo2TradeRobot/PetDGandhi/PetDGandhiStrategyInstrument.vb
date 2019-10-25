@@ -119,10 +119,10 @@ Public Class PetDGandhiStrategyInstrument
                             potentialEntry = placeOrderTrigger.Item2.TriggerPrice
                             slipage = placeOrderResponse.ParentOrder.AveragePrice - potentialEntry
                         End If
-                        Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Potential Entry:{8}, Entry Price:{9}({10}), {11}Stoploss Price:{12}, Potential Stoploss PL:₹{13}, {14}Target Price:{15}, Potential Target PL:₹{16}, {17}Total Stock PL:₹{18}, {19}LTP:{20}, Tick Timestamp:{21}, {22}Timestamp:{23}",
+                        Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Body:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Potential Entry:{8}, Entry Price:{9}({10}), {11}Stoploss Price:{12}, Potential Stoploss PL:₹{13}, {14}Target Price:{15}, Potential Target PL:₹{16}, {17}Total Stock PL:₹{18}, {19}LTP:{20}, Tick Timestamp:{21}, {22}Timestamp:{23}",
                                                                 Me.TradableInstrument.TradingSymbol,
                                                                 placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime.ToShortTimeString,
-                                                                placeOrderTrigger.Item2.SignalCandle.CandleRange,
+                                                                GetCandleBody(placeOrderTrigger.Item2.SignalCandle, placeOrderResponse.ParentOrder.TransactionType),
                                                                 GetCandleATR(placeOrderTrigger.Item2.SignalCandle),
                                                                 placeOrderResponse.ParentOrder.Quantity,
                                                                 vbNewLine,
@@ -177,7 +177,7 @@ Public Class PetDGandhiStrategyInstrument
                             potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
                             potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
                         End If
-                        Dim message As String = String.Format("Order Modified. Reason:{16}, {15}Trading Symbol:{0}, Signal Candle Time:{1}, Candle Range:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Entry Price:{8}, {9}Stoploss Price:{10}, Potential Stoploss PL:₹{11}, {12}Target Price:{13}, Potential Target PL:₹{14}, {17}Total Stock PL:₹{18}, Timestamp:{19}",
+                        Dim message As String = String.Format("Order Modified. Reason:{16}, {15}Trading Symbol:{0}, Signal Candle Time:{1}, Candle Body:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Entry Price:{8}, {9}Stoploss Price:{10}, Potential Stoploss PL:₹{11}, {12}Target Price:{13}, Potential Target PL:₹{14}, {17}Total Stock PL:₹{18}, Timestamp:{19}",
                                                                 Me.TradableInstrument.TradingSymbol,
                                                                 signalCandle.SnapshotDateTime.ToShortTimeString,
                                                                 signalCandle.CandleRange,
@@ -312,7 +312,7 @@ Public Class PetDGandhiStrategyInstrument
             runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime AndAlso
             runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso
             Not IsActiveInstrument() AndAlso GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock AndAlso
-            Not IsAnyTradeTargetReached() AndAlso Me.ParentStrategy.GetTotalPLAfterBrokerage() > userSettings.MaxLossPerDay * -1 AndAlso
+            Me.ParentStrategy.GetTotalPLAfterBrokerage() > userSettings.MaxLossPerDay * -1 AndAlso
             Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay AndAlso
             Not Me.StrategyExitAllTriggerd AndAlso Not _exitDoneForStockMaxLoss Then
 
@@ -761,6 +761,26 @@ Public Class PetDGandhiStrategyInstrument
         Return ret
     End Function
 
+    Private Function GetCandleBody(ByVal candle As OHLCPayload, ByVal direction As IOrder.TypeOfTransaction) As Decimal
+        Dim ret As Decimal = Decimal.MinValue
+        If candle IsNot Nothing Then
+            If candle.CandleColor = Color.Red Then
+                If direction = IOrder.TypeOfTransaction.Buy Then
+                    ret = candle.HighPrice.Value - candle.ClosePrice.Value
+                ElseIf direction = IOrder.TypeOfTransaction.Sell Then
+                    ret = candle.OpenPrice.Value - candle.LowPrice.Value
+                End If
+            Else
+                If direction = IOrder.TypeOfTransaction.Buy Then
+                    ret = candle.HighPrice.Value - candle.OpenPrice.Value
+                ElseIf direction = IOrder.TypeOfTransaction.Sell Then
+                    ret = candle.ClosePrice.Value - candle.LowPrice.Value
+                End If
+            End If
+        End If
+        Return ret
+    End Function
+
     Private Function GetCandleATR(ByVal candle As OHLCPayload) As Decimal
         Dim ret As Decimal = Decimal.MinValue
         Dim atrConsumer As ATRConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyATRConsumer)
@@ -779,7 +799,7 @@ Public Class PetDGandhiStrategyInstrument
         If lastExecutedOrder IsNot Nothing Then
             If lastExecutedOrder.AllOrder IsNot Nothing AndAlso lastExecutedOrder.AllOrder.Count > 0 Then
                 For Each order In lastExecutedOrder.AllOrder
-                    If order.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss Then
+                    If order.Status = IOrder.TypeOfStatus.Complete Then
                         ret = If(order.TimeStamp > ret, order.TimeStamp, ret)
                     End If
                 Next
@@ -840,7 +860,7 @@ Public Class PetDGandhiStrategyInstrument
                 Dim message As String = Nothing
 
                 message = String.Format("{0}{1}{2}, Stock PL:{3}, {4}Strategy PL:{5}, {6}MaxDrawUP:{7}, MaxDrawUpTime:{8}, {9}MaxDrawDown:{10}, MaxDrawDownTime:{11}",
-                                        "Pinbar Stock Max Profit% reached",
+                                        "Pinbar Stock Max Profit reached",
                                         vbNewLine,
                                         Me.TradableInstrument.TradingSymbol,
                                         Me.GetOverallPLAfterBrokerage(),
