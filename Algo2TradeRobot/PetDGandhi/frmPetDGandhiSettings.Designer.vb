@@ -41,8 +41,8 @@ Partial Class frmPetDGandhiSettings
         Me.lblMaxProfitPerStockMultiplier = New System.Windows.Forms.Label()
         Me.txtMaxLossPerStockMultiplier = New System.Windows.Forms.TextBox()
         Me.lblMaxLossPerStockMultiplier = New System.Windows.Forms.Label()
-        Me.txtPinbarTalePercentage = New System.Windows.Forms.TextBox()
-        Me.lblPinbarTalePercentage = New System.Windows.Forms.Label()
+        Me.txtPinbarTailPercentage = New System.Windows.Forms.TextBox()
+        Me.lblPinbarTailPercentage = New System.Windows.Forms.Label()
         Me.txtMinLossPercentagePerTrade = New System.Windows.Forms.TextBox()
         Me.lblMinLossPercentagePerTrade = New System.Windows.Forms.Label()
         Me.txtMaxLossPerTradeMultiplier = New System.Windows.Forms.TextBox()
@@ -218,8 +218,8 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox1.Controls.Add(Me.lblMaxProfitPerStockMultiplier)
         Me.GroupBox1.Controls.Add(Me.txtMaxLossPerStockMultiplier)
         Me.GroupBox1.Controls.Add(Me.lblMaxLossPerStockMultiplier)
-        Me.GroupBox1.Controls.Add(Me.txtPinbarTalePercentage)
-        Me.GroupBox1.Controls.Add(Me.lblPinbarTalePercentage)
+        Me.GroupBox1.Controls.Add(Me.txtPinbarTailPercentage)
+        Me.GroupBox1.Controls.Add(Me.lblPinbarTailPercentage)
         Me.GroupBox1.Controls.Add(Me.txtMinLossPercentagePerTrade)
         Me.GroupBox1.Controls.Add(Me.lblMinLossPercentagePerTrade)
         Me.GroupBox1.Controls.Add(Me.txtMaxLossPerTradeMultiplier)
@@ -291,24 +291,24 @@ Partial Class frmPetDGandhiSettings
         Me.lblMaxLossPerStockMultiplier.TabIndex = 45
         Me.lblMaxLossPerStockMultiplier.Text = "Max Loss Per Stock Mul"
         '
-        'txtPinbarTalePercentage
+        'txtPinbarTailPercentage
         '
-        Me.txtPinbarTalePercentage.Location = New System.Drawing.Point(174, 370)
-        Me.txtPinbarTalePercentage.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtPinbarTalePercentage.Name = "txtPinbarTalePercentage"
-        Me.txtPinbarTalePercentage.Size = New System.Drawing.Size(255, 22)
-        Me.txtPinbarTalePercentage.TabIndex = 12
-        Me.txtPinbarTalePercentage.Tag = "Max Loss Per Day"
+        Me.txtPinbarTailPercentage.Location = New System.Drawing.Point(174, 370)
+        Me.txtPinbarTailPercentage.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtPinbarTailPercentage.Name = "txtPinbarTailPercentage"
+        Me.txtPinbarTailPercentage.Size = New System.Drawing.Size(255, 22)
+        Me.txtPinbarTailPercentage.TabIndex = 12
+        Me.txtPinbarTailPercentage.Tag = "Max Loss Per Day"
         '
-        'lblPinbarTalePercentage
+        'lblPinbarTailPercentage
         '
-        Me.lblPinbarTalePercentage.AutoSize = True
-        Me.lblPinbarTalePercentage.Location = New System.Drawing.Point(9, 373)
-        Me.lblPinbarTalePercentage.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblPinbarTalePercentage.Name = "lblPinbarTalePercentage"
-        Me.lblPinbarTalePercentage.Size = New System.Drawing.Size(97, 17)
-        Me.lblPinbarTalePercentage.TabIndex = 44
-        Me.lblPinbarTalePercentage.Text = "Pinbar Tale %"
+        Me.lblPinbarTailPercentage.AutoSize = True
+        Me.lblPinbarTailPercentage.Location = New System.Drawing.Point(9, 373)
+        Me.lblPinbarTailPercentage.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblPinbarTailPercentage.Name = "lblPinbarTailPercentage"
+        Me.lblPinbarTailPercentage.Size = New System.Drawing.Size(92, 17)
+        Me.lblPinbarTailPercentage.TabIndex = 44
+        Me.lblPinbarTailPercentage.Text = "Pinbar Tail %"
         '
         'txtMinLossPercentagePerTrade
         '
@@ -853,8 +853,8 @@ Partial Class frmPetDGandhiSettings
     Friend WithEvents lblTelegramTargetChatID As Label
     Friend WithEvents txtMaxLossPerStockMultiplier As TextBox
     Friend WithEvents lblMaxLossPerStockMultiplier As Label
-    Friend WithEvents txtPinbarTalePercentage As TextBox
-    Friend WithEvents lblPinbarTalePercentage As Label
+    Friend WithEvents txtPinbarTailPercentage As TextBox
+    Friend WithEvents lblPinbarTailPercentage As Label
     Friend WithEvents txtMinLossPercentagePerTrade As TextBox
     Friend WithEvents lblMinLossPercentagePerTrade As Label
     Friend WithEvents txtMaxLossPerTradeMultiplier As TextBox

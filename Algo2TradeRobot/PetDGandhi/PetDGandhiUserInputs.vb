@@ -14,7 +14,7 @@ Public Class PetDGandhiUserInputs
     Public Property MaxLossPerDay As Decimal
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
-    Public Property PinbarTalePercentage As Decimal
+    Public Property PinbarTailPercentage As Decimal
     Public Property MaxLossPerStockMultiplier As Decimal
     Public Property MaxProfitPerStockMultiplier As Decimal
     Public Property MaxLossPerTradeMultiplier As Decimal

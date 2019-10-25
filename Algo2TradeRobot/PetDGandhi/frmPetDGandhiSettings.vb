@@ -55,7 +55,7 @@ Public Class frmPetDGandhiSettings
             txtMaxLossPerDay.Text = _settings.MaxLossPerDay
             txtMaxProfitPerDay.Text = _settings.MaxProfitPerDay
             txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
-            txtPinbarTalePercentage.Text = _settings.PinbarTalePercentage
+            txtPinbarTailPercentage.Text = _settings.PinbarTailPercentage
             txtMaxLossPerStockMultiplier.Text = _settings.MaxLossPerStockMultiplier
             txtMaxProfitPerStockMultiplier.Text = _settings.MaxProfitPerStockMultiplier
             txtMaxLossPerTradeMultiplier.Text = _settings.MaxLossPerTradeMultiplier
@@ -92,7 +92,7 @@ Public Class frmPetDGandhiSettings
         _settings.MaxLossPerDay = Math.Abs(CDec(txtMaxLossPerDay.Text))
         _settings.MaxProfitPerDay = txtMaxProfitPerDay.Text
         _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
-        _settings.PinbarTalePercentage = txtPinbarTalePercentage.Text
+        _settings.PinbarTailPercentage = txtPinbarTailPercentage.Text
         _settings.MaxLossPerStockMultiplier = Math.Abs(CDec(txtMaxLossPerStockMultiplier.Text))
         _settings.MaxProfitPerStockMultiplier = txtMaxProfitPerStockMultiplier.Text
         _settings.MaxLossPerTradeMultiplier = Math.Abs(CDec(txtMaxLossPerTradeMultiplier.Text))
