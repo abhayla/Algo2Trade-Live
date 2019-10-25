@@ -180,7 +180,7 @@ Public Class PetDGandhiStrategyInstrument
                         Dim message As String = String.Format("Order Modified. Reason:{16}, {15}Trading Symbol:{0}, Signal Candle Time:{1}, Candle Body:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Entry Price:{8}, {9}Stoploss Price:{10}, Potential Stoploss PL:₹{11}, {12}Target Price:{13}, Potential Target PL:₹{14}, {17}Total Stock PL:₹{18}, Timestamp:{19}",
                                                                 Me.TradableInstrument.TradingSymbol,
                                                                 signalCandle.SnapshotDateTime.ToShortTimeString,
-                                                                signalCandle.CandleRange,
+                                                                GetCandleBody(signalCandle, modifyOrderResponse.ParentOrder.TransactionType),
                                                                 GetCandleATR(signalCandle),
                                                                 modifyOrderResponse.ParentOrder.Quantity,
                                                                 vbNewLine,
@@ -312,8 +312,6 @@ Public Class PetDGandhiStrategyInstrument
             runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime AndAlso
             runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso
             Not IsActiveInstrument() AndAlso GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock AndAlso
-            Me.ParentStrategy.GetTotalPLAfterBrokerage() > userSettings.MaxLossPerDay * -1 AndAlso
-            Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay AndAlso
             Not Me.StrategyExitAllTriggerd AndAlso Not _exitDoneForStockMaxLoss Then
 
             Dim signal As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick)
@@ -660,11 +658,11 @@ Public Class PetDGandhiStrategyInstrument
                     slipage = potentialExitPrice - exitPrice
                     plSlipage = orderPL - potentialExitPL
                 End If
-                Dim message As String = String.Format("{0}. {26}Trading Symbol:{1}, Signal Candle Time:{2}, Candle Range:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, {8}Entry Price:{9}, {10}Potential Exit Price:{11}, Exit Price:{12}({13}), {14}Potential Exit PL:₹{15}, Exit PL:₹{16}(₹{17}), {18}Total Stock PL:₹{19}, Number Of Trade:{20}, {21}LTP:{22}, Tick Timestamp:{23}, {24}Timestamp:{25}",
+                Dim message As String = String.Format("{0}. {26}Trading Symbol:{1}, Signal Candle Time:{2}, Candle Body:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, {8}Entry Price:{9}, {10}Potential Exit Price:{11}, Exit Price:{12}({13}), {14}Potential Exit PL:₹{15}, Exit PL:₹{16}(₹{17}), {18}Total Stock PL:₹{19}, Number Of Trade:{20}, {21}LTP:{22}, Tick Timestamp:{23}, {24}Timestamp:{25}",
                                                         reason,
                                                         Me.TradableInstrument.TradingSymbol,
                                                         signalCandle.SnapshotDateTime.ToShortTimeString,
-                                                        signalCandle.CandleRange,
+                                                        GetCandleBody(signalCandle, exitOrderResponse.ParentOrder.TransactionType),
                                                         GetCandleATR(signalCandle),
                                                         exitOrderResponse.ParentOrder.Quantity,
                                                         vbNewLine,
