@@ -886,7 +886,7 @@ Public Class PetDGandhiStrategyInstrument
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         Try
             If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing Then
-                Dim message As String = String.Format("{0} <i>{1}</i>", runningCandlePayload.PreviousPayload.SnapshotDateTime.ToString("HH:mm:ss"), Me.TradableInstrument.TradingSymbol)
+                Dim message As String = String.Format("{0} <b>{1}</b>", runningCandlePayload.PreviousPayload.SnapshotDateTime.ToString("HH:mm:ss"), Me.TradableInstrument.TradingSymbol)
                 message = String.Format("{0}{1}Open:{2}, Low:{3}, High:{4}, Close:{5}, Source:{6}",
                                         message,
                                         vbNewLine,
