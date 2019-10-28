@@ -19,6 +19,7 @@ Public Class PetDGandhiUserInputs
     Public Property MaxProfitPerStockMultiplier As Decimal
     Public Property MaxLossPerTradeMultiplier As Decimal
     Public Property MinLossPercentagePerTrade As Decimal
+    Public Property MaxCapitalToBeUsed As Decimal
 
     Public Property AutoSelectStock As Boolean
     Public Property CashInstrument As Boolean

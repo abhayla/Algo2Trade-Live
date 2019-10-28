@@ -90,6 +90,8 @@ Partial Class frmPetDGandhiSettings
         Me.lblMaxPrice = New System.Windows.Forms.Label()
         Me.txtMinPrice = New System.Windows.Forms.TextBox()
         Me.lblMinPrice = New System.Windows.Forms.Label()
+        Me.txtMaxCapital = New System.Windows.Forms.TextBox()
+        Me.lblMaxCapital = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.grpTelegram.SuspendLayout()
         Me.GroupBox4.SuspendLayout()
@@ -195,7 +197,7 @@ Partial Class frmPetDGandhiSettings
         'btnBrowse
         '
         Me.btnBrowse.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnBrowse.Location = New System.Drawing.Point(404, 333)
+        Me.btnBrowse.Location = New System.Drawing.Point(390, 333)
         Me.btnBrowse.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(40, 23)
@@ -209,11 +211,13 @@ Partial Class frmPetDGandhiSettings
         Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
         Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
         Me.txtInstrumentDetalis.ReadOnly = True
-        Me.txtInstrumentDetalis.Size = New System.Drawing.Size(223, 22)
+        Me.txtInstrumentDetalis.Size = New System.Drawing.Size(215, 22)
         Me.txtInstrumentDetalis.TabIndex = 11
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.txtMaxCapital)
+        Me.GroupBox1.Controls.Add(Me.lblMaxCapital)
         Me.GroupBox1.Controls.Add(Me.txtMaxProfitPerStockMultiplier)
         Me.GroupBox1.Controls.Add(Me.lblMaxProfitPerStockMultiplier)
         Me.GroupBox1.Controls.Add(Me.txtMaxLossPerStockMultiplier)
@@ -249,7 +253,7 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(451, 543)
+        Me.GroupBox1.Size = New System.Drawing.Size(437, 569)
         Me.GroupBox1.TabIndex = 15
         Me.GroupBox1.TabStop = False
         '
@@ -465,7 +469,7 @@ Partial Class frmPetDGandhiSettings
         Me.grpTelegram.Controls.Add(Me.lblTelegramTradeChatID)
         Me.grpTelegram.Controls.Add(Me.txtTelegramAPI)
         Me.grpTelegram.Controls.Add(Me.lblTelegramAPI)
-        Me.grpTelegram.Location = New System.Drawing.Point(463, 150)
+        Me.grpTelegram.Location = New System.Drawing.Point(452, 169)
         Me.grpTelegram.Name = "grpTelegram"
         Me.grpTelegram.Size = New System.Drawing.Size(358, 189)
         Me.grpTelegram.TabIndex = 19
@@ -570,7 +574,7 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox4.Controls.Add(Me.lblMinCapitalPerStock)
         Me.GroupBox4.Controls.Add(Me.chbFuture)
         Me.GroupBox4.Controls.Add(Me.chbCash)
-        Me.GroupBox4.Location = New System.Drawing.Point(463, 7)
+        Me.GroupBox4.Location = New System.Drawing.Point(452, 5)
         Me.GroupBox4.Name = "GroupBox4"
         Me.GroupBox4.Size = New System.Drawing.Size(358, 141)
         Me.GroupBox4.TabIndex = 38
@@ -649,7 +653,7 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox3.Controls.Add(Me.lblMaxPrice)
         Me.GroupBox3.Controls.Add(Me.txtMinPrice)
         Me.GroupBox3.Controls.Add(Me.lblMinPrice)
-        Me.GroupBox3.Location = New System.Drawing.Point(463, 345)
+        Me.GroupBox3.Location = New System.Drawing.Point(452, 371)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Size = New System.Drawing.Size(358, 204)
         Me.GroupBox3.TabIndex = 39
@@ -770,11 +774,29 @@ Partial Class frmPetDGandhiSettings
         Me.lblMinPrice.TabIndex = 35
         Me.lblMinPrice.Text = "Min Price"
         '
+        'txtMaxCapital
+        '
+        Me.txtMaxCapital.Location = New System.Drawing.Point(174, 539)
+        Me.txtMaxCapital.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxCapital.Name = "txtMaxCapital"
+        Me.txtMaxCapital.Size = New System.Drawing.Size(255, 22)
+        Me.txtMaxCapital.TabIndex = 48
+        '
+        'lblMaxCapital
+        '
+        Me.lblMaxCapital.AutoSize = True
+        Me.lblMaxCapital.Location = New System.Drawing.Point(8, 543)
+        Me.lblMaxCapital.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxCapital.Name = "lblMaxCapital"
+        Me.lblMaxCapital.Size = New System.Drawing.Size(159, 17)
+        Me.lblMaxCapital.TabIndex = 49
+        Me.lblMaxCapital.Text = "Max Capital To Be Used"
+        '
         'frmPetDGandhiSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(947, 555)
+        Me.ClientSize = New System.Drawing.Size(947, 580)
         Me.Controls.Add(Me.GroupBox3)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.grpTelegram)
@@ -863,4 +885,6 @@ Partial Class frmPetDGandhiSettings
     Friend WithEvents lblMaxProfitPerStockMultiplier As Label
     Friend WithEvents txtTelegramSignalChatID As TextBox
     Friend WithEvents lblTelegramSignalChatID As Label
+    Friend WithEvents txtMaxCapital As TextBox
+    Friend WithEvents lblMaxCapital As Label
 End Class

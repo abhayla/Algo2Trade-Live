@@ -60,6 +60,7 @@ Public Class frmPetDGandhiSettings
             txtMaxProfitPerStockMultiplier.Text = _settings.MaxProfitPerStockMultiplier
             txtMaxLossPerTradeMultiplier.Text = _settings.MaxLossPerTradeMultiplier
             txtMinLossPercentagePerTrade.Text = _settings.MinLossPercentagePerTrade
+            txtMaxCapital.Text = _settings.MaxCapitalToBeUsed
 
             chbAutoSelectStock.Checked = _settings.AutoSelectStock
             chbCash.Checked = _settings.CashInstrument
@@ -97,6 +98,7 @@ Public Class frmPetDGandhiSettings
         _settings.MaxProfitPerStockMultiplier = txtMaxProfitPerStockMultiplier.Text
         _settings.MaxLossPerTradeMultiplier = Math.Abs(CDec(txtMaxLossPerTradeMultiplier.Text))
         _settings.MinLossPercentagePerTrade = Math.Abs(CDec(txtMinLossPercentagePerTrade.Text))
+        _settings.MaxCapitalToBeUsed = txtMaxCapital.Text
 
         _settings.AutoSelectStock = chbAutoSelectStock.Checked
         _settings.CashInstrument = chbCash.Checked

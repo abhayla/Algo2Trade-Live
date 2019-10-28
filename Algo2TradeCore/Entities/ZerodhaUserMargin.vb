@@ -17,6 +17,18 @@ Namespace Entities
             End Get
         End Property
 
+        Public ReadOnly Property AvailableMargin As Decimal Implements IUserMargin.AvailableMargin
+            Get
+                Return WrappedUserMargin.Available.Cash
+            End Get
+        End Property
+
+        Public ReadOnly Property UtilisedMargin As Decimal Implements IUserMargin.UtilisedMargin
+            Get
+                Return WrappedUserMargin.Utilised.M2MRealised
+            End Get
+        End Property
+
         Public ReadOnly Property Broker As APISource Implements IUserMargin.Broker
             Get
                 Return APISource.Zerodha
@@ -33,6 +45,5 @@ Namespace Entities
                 _WrappedUserMargin = value
             End Set
         End Property
-
     End Class
 End Namespace

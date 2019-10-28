@@ -138,6 +138,7 @@ Namespace Strategies
             End If
             Return plOfDay
         End Function
+
         Public Function GetTotalPLAfterBrokerage() As Decimal
             Dim plOfDay As Decimal = 0
             If TradableStrategyInstruments IsNot Nothing AndAlso TradableStrategyInstruments.Count > 0 Then
@@ -321,6 +322,10 @@ Namespace Strategies
                     End If
                 Next
             End If
+        End Function
+        Public Overridable Async Function GetRunningCapitalAsync(ByVal exchange As Enums.TypeOfExchage) As Task(Of Decimal)
+            Await Task.Delay(0).ConfigureAwait(False)
+            Throw New NotImplementedException
         End Function
 #End Region
 

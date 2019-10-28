@@ -123,6 +123,44 @@ Public Class PetDGandhiStrategy
         End If
     End Function
 
+    Public Overrides Async Function GetRunningCapitalAsync(exchange As TypeOfExchage) As Task(Of Decimal)
+        Await Task.Delay(0).ConfigureAwait(False)
+        Dim ret As Decimal = 0
+        If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Count > 0 Then
+            Dim userInput As PetDGandhiUserInputs = Me.UserSettings
+            For Each runningStrategyInstrument In Me.TradableStrategyInstruments
+                Dim marginMultiplier As Decimal = userInput.InstrumentsData(runningStrategyInstrument.TradableInstrument.TradingSymbol).MarginMultiplier
+                Dim activeOrders As List(Of IOrder) = runningStrategyInstrument.GetAllActiveOrders(IOrder.TypeOfTransaction.None)
+                If activeOrders IsNot Nothing AndAlso activeOrders.Count > 0 Then
+                    For Each runningOrder In activeOrders
+                        Dim parentOrder As IOrder = Nothing
+                        If runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Parent Then
+                            parentOrder = runningOrder
+                        Else
+                            If runningStrategyInstrument.GetParentFromChildOrder(runningOrder) IsNot Nothing Then
+                                parentOrder = runningStrategyInstrument.GetParentFromChildOrder(runningOrder).ParentOrder
+                            End If
+                        End If
+                        If parentOrder IsNot Nothing Then
+                            Dim price As Decimal = Decimal.MinValue
+                            If parentOrder.AveragePrice <> Decimal.MinValue AndAlso parentOrder.AveragePrice <> 0 Then
+                                price = parentOrder.AveragePrice
+                            ElseIf parentOrder.TriggerPrice <> Decimal.MinValue AndAlso parentOrder.TriggerPrice <> 0 Then
+                                price = parentOrder.TriggerPrice
+                            ElseIf parentOrder.Price <> Decimal.MinValue AndAlso parentOrder.Price <> 0 Then
+                                price = parentOrder.Price
+                            End If
+                            If price <> Decimal.MinValue Then
+                                ret += price * parentOrder.Quantity / marginMultiplier
+                            End If
+                        End If
+                    Next
+                End If
+            Next
+        End If
+        Return ret
+    End Function
+
     Protected Overrides Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)
         Dim ret As Tuple(Of Boolean, String) = Nothing
         Dim currentTime As Date = Now
