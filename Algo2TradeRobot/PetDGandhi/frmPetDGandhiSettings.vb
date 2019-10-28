@@ -64,8 +64,8 @@ Public Class frmPetDGandhiSettings
             chbAutoSelectStock.Checked = _settings.AutoSelectStock
             chbCash.Checked = _settings.CashInstrument
             chbFuture.Checked = _settings.FutureInstrument
-            chbAllowToIncreaseCapital.Checked = _settings.AllowToIncreaseCapital
-            txtMinCapital.Text = _settings.MinCapital
+            chbAllowToIncreaseQuantity.Checked = _settings.AllowToIncreaseQuantity
+            txtMinCapitalPerStock.Text = _settings.MinCapitalPerStock
 
             txtMinPrice.Text = _settings.MinPrice
             txtMaxPrice.Text = _settings.MaxPrice
@@ -101,8 +101,8 @@ Public Class frmPetDGandhiSettings
         _settings.AutoSelectStock = chbAutoSelectStock.Checked
         _settings.CashInstrument = chbCash.Checked
         _settings.FutureInstrument = chbFuture.Checked
-        _settings.AllowToIncreaseCapital = chbAllowToIncreaseCapital.Checked
-        _settings.MinCapital = txtMinCapital.Text
+        _settings.AllowToIncreaseQuantity = chbAllowToIncreaseQuantity.Checked
+        _settings.MinCapitalPerStock = txtMinCapitalPerStock.Text
 
         _settings.MinPrice = txtMinPrice.Text
         _settings.MaxPrice = txtMaxPrice.Text

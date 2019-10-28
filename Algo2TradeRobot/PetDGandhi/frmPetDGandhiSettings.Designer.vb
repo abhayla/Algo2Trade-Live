@@ -71,10 +71,10 @@ Partial Class frmPetDGandhiSettings
         Me.txtTelegramAPI = New System.Windows.Forms.TextBox()
         Me.lblTelegramAPI = New System.Windows.Forms.Label()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
-        Me.chbAllowToIncreaseCapital = New System.Windows.Forms.CheckBox()
+        Me.chbAllowToIncreaseQuantity = New System.Windows.Forms.CheckBox()
         Me.chbAutoSelectStock = New System.Windows.Forms.CheckBox()
-        Me.txtMinCapital = New System.Windows.Forms.TextBox()
-        Me.lblFutureMinCapital = New System.Windows.Forms.Label()
+        Me.txtMinCapitalPerStock = New System.Windows.Forms.TextBox()
+        Me.lblMinCapitalPerStock = New System.Windows.Forms.Label()
         Me.chbFuture = New System.Windows.Forms.CheckBox()
         Me.chbCash = New System.Windows.Forms.CheckBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
@@ -564,10 +564,10 @@ Partial Class frmPetDGandhiSettings
         '
         'GroupBox4
         '
-        Me.GroupBox4.Controls.Add(Me.chbAllowToIncreaseCapital)
+        Me.GroupBox4.Controls.Add(Me.chbAllowToIncreaseQuantity)
         Me.GroupBox4.Controls.Add(Me.chbAutoSelectStock)
-        Me.GroupBox4.Controls.Add(Me.txtMinCapital)
-        Me.GroupBox4.Controls.Add(Me.lblFutureMinCapital)
+        Me.GroupBox4.Controls.Add(Me.txtMinCapitalPerStock)
+        Me.GroupBox4.Controls.Add(Me.lblMinCapitalPerStock)
         Me.GroupBox4.Controls.Add(Me.chbFuture)
         Me.GroupBox4.Controls.Add(Me.chbCash)
         Me.GroupBox4.Location = New System.Drawing.Point(463, 7)
@@ -576,15 +576,15 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox4.TabIndex = 38
         Me.GroupBox4.TabStop = False
         '
-        'chbAllowToIncreaseCapital
+        'chbAllowToIncreaseQuantity
         '
-        Me.chbAllowToIncreaseCapital.AutoSize = True
-        Me.chbAllowToIncreaseCapital.Location = New System.Drawing.Point(12, 72)
-        Me.chbAllowToIncreaseCapital.Name = "chbAllowToIncreaseCapital"
-        Me.chbAllowToIncreaseCapital.Size = New System.Drawing.Size(188, 21)
-        Me.chbAllowToIncreaseCapital.TabIndex = 20
-        Me.chbAllowToIncreaseCapital.Text = "Allow To Increase Capital"
-        Me.chbAllowToIncreaseCapital.UseVisualStyleBackColor = True
+        Me.chbAllowToIncreaseQuantity.AutoSize = True
+        Me.chbAllowToIncreaseQuantity.Location = New System.Drawing.Point(12, 72)
+        Me.chbAllowToIncreaseQuantity.Name = "chbAllowToIncreaseQuantity"
+        Me.chbAllowToIncreaseQuantity.Size = New System.Drawing.Size(198, 21)
+        Me.chbAllowToIncreaseQuantity.TabIndex = 20
+        Me.chbAllowToIncreaseQuantity.Text = "Allow To Increase Quantity"
+        Me.chbAllowToIncreaseQuantity.UseVisualStyleBackColor = True
         '
         'chbAutoSelectStock
         '
@@ -596,24 +596,24 @@ Partial Class frmPetDGandhiSettings
         Me.chbAutoSelectStock.Text = "Auto Select Stock"
         Me.chbAutoSelectStock.UseVisualStyleBackColor = True
         '
-        'txtMinCapital
+        'txtMinCapitalPerStock
         '
-        Me.txtMinCapital.Location = New System.Drawing.Point(146, 101)
-        Me.txtMinCapital.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtMinCapital.Name = "txtMinCapital"
-        Me.txtMinCapital.Size = New System.Drawing.Size(201, 22)
-        Me.txtMinCapital.TabIndex = 21
-        Me.txtMinCapital.Tag = ""
+        Me.txtMinCapitalPerStock.Location = New System.Drawing.Point(146, 101)
+        Me.txtMinCapitalPerStock.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMinCapitalPerStock.Name = "txtMinCapitalPerStock"
+        Me.txtMinCapitalPerStock.Size = New System.Drawing.Size(201, 22)
+        Me.txtMinCapitalPerStock.TabIndex = 21
+        Me.txtMinCapitalPerStock.Tag = ""
         '
-        'lblFutureMinCapital
+        'lblMinCapitalPerStock
         '
-        Me.lblFutureMinCapital.AutoSize = True
-        Me.lblFutureMinCapital.Location = New System.Drawing.Point(6, 104)
-        Me.lblFutureMinCapital.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblFutureMinCapital.Name = "lblFutureMinCapital"
-        Me.lblFutureMinCapital.Size = New System.Drawing.Size(77, 17)
-        Me.lblFutureMinCapital.TabIndex = 37
-        Me.lblFutureMinCapital.Text = "Min Capital"
+        Me.lblMinCapitalPerStock.AutoSize = True
+        Me.lblMinCapitalPerStock.Location = New System.Drawing.Point(6, 104)
+        Me.lblMinCapitalPerStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMinCapitalPerStock.Name = "lblMinCapitalPerStock"
+        Me.lblMinCapitalPerStock.Size = New System.Drawing.Size(142, 17)
+        Me.lblMinCapitalPerStock.TabIndex = 37
+        Me.lblMinCapitalPerStock.Text = "Min Capital Per Stock"
         '
         'chbFuture
         '
@@ -830,10 +830,10 @@ Partial Class frmPetDGandhiSettings
     Friend WithEvents txtNumberOfTradePerStock As TextBox
     Friend WithEvents lblNumberOfTradePerStock As Label
     Friend WithEvents GroupBox4 As GroupBox
-    Friend WithEvents chbAllowToIncreaseCapital As CheckBox
+    Friend WithEvents chbAllowToIncreaseQuantity As CheckBox
     Friend WithEvents chbAutoSelectStock As CheckBox
-    Friend WithEvents txtMinCapital As TextBox
-    Friend WithEvents lblFutureMinCapital As Label
+    Friend WithEvents txtMinCapitalPerStock As TextBox
+    Friend WithEvents lblMinCapitalPerStock As Label
     Friend WithEvents chbFuture As CheckBox
     Friend WithEvents chbCash As CheckBox
     Friend WithEvents GroupBox3 As GroupBox
