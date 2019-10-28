@@ -40,6 +40,12 @@ Public Class MomentumReversalStrategy
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             Dim mrUserInputs As MomentumReversalUserInputs = Me.UserSettings
+            If mrUserInputs.AutoSelectStock Then
+                Using fillInstrumentDetails As New MomentumReversalFillInstrumentDetails(_cts, Me)
+                    Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+                End Using
+                logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
+            End If
             If mrUserInputs.InstrumentsData IsNot Nothing AndAlso mrUserInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In mrUserInputs.InstrumentsData

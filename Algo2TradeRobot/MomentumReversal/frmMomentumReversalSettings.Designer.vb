@@ -70,12 +70,7 @@ Partial Class frmMomentumReversalSettings
         Me.txtMinPrice = New System.Windows.Forms.TextBox()
         Me.lblMinPrice = New System.Windows.Forms.Label()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
-        Me.chbAllowToIncreaseQuantity = New System.Windows.Forms.CheckBox()
         Me.chbAutoSelectStock = New System.Windows.Forms.CheckBox()
-        Me.txtMinCapitalPerStock = New System.Windows.Forms.TextBox()
-        Me.lblMinCapitalPerStock = New System.Windows.Forms.Label()
-        Me.chbFuture = New System.Windows.Forms.CheckBox()
-        Me.chbCash = New System.Windows.Forms.CheckBox()
         Me.grpTelegram.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
@@ -419,7 +414,7 @@ Partial Class frmMomentumReversalSettings
         Me.GroupBox3.Controls.Add(Me.lblMaxPrice)
         Me.GroupBox3.Controls.Add(Me.txtMinPrice)
         Me.GroupBox3.Controls.Add(Me.lblMinPrice)
-        Me.GroupBox3.Location = New System.Drawing.Point(461, 166)
+        Me.GroupBox3.Location = New System.Drawing.Point(461, 51)
         Me.GroupBox3.Name = "GroupBox3"
         Me.GroupBox3.Size = New System.Drawing.Size(358, 204)
         Me.GroupBox3.TabIndex = 41
@@ -542,27 +537,12 @@ Partial Class frmMomentumReversalSettings
         '
         'GroupBox4
         '
-        Me.GroupBox4.Controls.Add(Me.chbAllowToIncreaseQuantity)
         Me.GroupBox4.Controls.Add(Me.chbAutoSelectStock)
-        Me.GroupBox4.Controls.Add(Me.txtMinCapitalPerStock)
-        Me.GroupBox4.Controls.Add(Me.lblMinCapitalPerStock)
-        Me.GroupBox4.Controls.Add(Me.chbFuture)
-        Me.GroupBox4.Controls.Add(Me.chbCash)
         Me.GroupBox4.Location = New System.Drawing.Point(462, 2)
         Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Size = New System.Drawing.Size(358, 141)
+        Me.GroupBox4.Size = New System.Drawing.Size(358, 47)
         Me.GroupBox4.TabIndex = 40
         Me.GroupBox4.TabStop = False
-        '
-        'chbAllowToIncreaseQuantity
-        '
-        Me.chbAllowToIncreaseQuantity.AutoSize = True
-        Me.chbAllowToIncreaseQuantity.Location = New System.Drawing.Point(12, 72)
-        Me.chbAllowToIncreaseQuantity.Name = "chbAllowToIncreaseQuantity"
-        Me.chbAllowToIncreaseQuantity.Size = New System.Drawing.Size(198, 21)
-        Me.chbAllowToIncreaseQuantity.TabIndex = 20
-        Me.chbAllowToIncreaseQuantity.Text = "Allow To Increase Quantity"
-        Me.chbAllowToIncreaseQuantity.UseVisualStyleBackColor = True
         '
         'chbAutoSelectStock
         '
@@ -573,45 +553,6 @@ Partial Class frmMomentumReversalSettings
         Me.chbAutoSelectStock.TabIndex = 17
         Me.chbAutoSelectStock.Text = "Auto Select Stock"
         Me.chbAutoSelectStock.UseVisualStyleBackColor = True
-        '
-        'txtMinCapitalPerStock
-        '
-        Me.txtMinCapitalPerStock.Location = New System.Drawing.Point(146, 101)
-        Me.txtMinCapitalPerStock.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtMinCapitalPerStock.Name = "txtMinCapitalPerStock"
-        Me.txtMinCapitalPerStock.Size = New System.Drawing.Size(201, 22)
-        Me.txtMinCapitalPerStock.TabIndex = 21
-        Me.txtMinCapitalPerStock.Tag = ""
-        '
-        'lblMinCapitalPerStock
-        '
-        Me.lblMinCapitalPerStock.AutoSize = True
-        Me.lblMinCapitalPerStock.Location = New System.Drawing.Point(6, 104)
-        Me.lblMinCapitalPerStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblMinCapitalPerStock.Name = "lblMinCapitalPerStock"
-        Me.lblMinCapitalPerStock.Size = New System.Drawing.Size(142, 17)
-        Me.lblMinCapitalPerStock.TabIndex = 37
-        Me.lblMinCapitalPerStock.Text = "Min Capital Per Stock"
-        '
-        'chbFuture
-        '
-        Me.chbFuture.AutoSize = True
-        Me.chbFuture.Location = New System.Drawing.Point(84, 43)
-        Me.chbFuture.Name = "chbFuture"
-        Me.chbFuture.Size = New System.Drawing.Size(71, 21)
-        Me.chbFuture.TabIndex = 19
-        Me.chbFuture.Text = "Future"
-        Me.chbFuture.UseVisualStyleBackColor = True
-        '
-        'chbCash
-        '
-        Me.chbCash.AutoSize = True
-        Me.chbCash.Location = New System.Drawing.Point(12, 42)
-        Me.chbCash.Name = "chbCash"
-        Me.chbCash.Size = New System.Drawing.Size(62, 21)
-        Me.chbCash.TabIndex = 18
-        Me.chbCash.Text = "Cash"
-        Me.chbCash.UseVisualStyleBackColor = True
         '
         'frmMomentumReversalSettings
         '
@@ -688,10 +629,5 @@ Partial Class frmMomentumReversalSettings
     Friend WithEvents txtMinPrice As TextBox
     Friend WithEvents lblMinPrice As Label
     Friend WithEvents GroupBox4 As GroupBox
-    Friend WithEvents chbAllowToIncreaseQuantity As CheckBox
     Friend WithEvents chbAutoSelectStock As CheckBox
-    Friend WithEvents txtMinCapitalPerStock As TextBox
-    Friend WithEvents lblMinCapitalPerStock As Label
-    Friend WithEvents chbFuture As CheckBox
-    Friend WithEvents chbCash As CheckBox
 End Class

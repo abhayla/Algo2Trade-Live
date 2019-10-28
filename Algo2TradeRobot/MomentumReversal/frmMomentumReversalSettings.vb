@@ -42,10 +42,6 @@ Public Class frmMomentumReversalSettings
             txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
 
             chbAutoSelectStock.Checked = _settings.AutoSelectStock
-            chbCash.Checked = _settings.CashInstrument
-            chbFuture.Checked = _settings.FutureInstrument
-            chbAllowToIncreaseQuantity.Checked = _settings.AllowToIncreaseQuantity
-            txtMinCapitalPerStock.Text = _settings.MinCapitalPerStock
 
             txtMinPrice.Text = _settings.MinPrice
             txtMaxPrice.Text = _settings.MaxPrice
@@ -72,10 +68,6 @@ Public Class frmMomentumReversalSettings
         _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         _settings.AutoSelectStock = chbAutoSelectStock.Checked
-        _settings.CashInstrument = chbCash.Checked
-        _settings.FutureInstrument = chbFuture.Checked
-        _settings.AllowToIncreaseQuantity = chbAllowToIncreaseQuantity.Checked
-        _settings.MinCapitalPerStock = txtMinCapitalPerStock.Text
 
         _settings.MinPrice = txtMinPrice.Text
         _settings.MaxPrice = txtMaxPrice.Text
