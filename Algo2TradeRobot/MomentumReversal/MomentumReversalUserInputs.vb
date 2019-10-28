@@ -32,7 +32,6 @@ Public Class MomentumReversalUserInputs
     Public Property BlankCandlePercentage As Decimal
     Public Property NumberOfStock As Integer
 
-
     <Serializable>
     Public Class InstrumentDetails
         Public Property InstrumentName As String
