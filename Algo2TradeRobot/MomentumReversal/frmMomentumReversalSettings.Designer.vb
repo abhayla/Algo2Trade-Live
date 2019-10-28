@@ -56,8 +56,30 @@ Partial Class frmMomentumReversalSettings
         Me.lblInstrumentDetails = New System.Windows.Forms.Label()
         Me.txtSignalTimeFrame = New System.Windows.Forms.TextBox()
         Me.lblSignalTimeFrame = New System.Windows.Forms.Label()
+        Me.GroupBox3 = New System.Windows.Forms.GroupBox()
+        Me.txtBlankCandlePercentage = New System.Windows.Forms.TextBox()
+        Me.lblBlankCandlePercentage = New System.Windows.Forms.Label()
+        Me.txtNumberOfStock = New System.Windows.Forms.TextBox()
+        Me.lblNumberOfStock = New System.Windows.Forms.Label()
+        Me.txtMinVolume = New System.Windows.Forms.TextBox()
+        Me.lblMinVolume = New System.Windows.Forms.Label()
+        Me.txtATRPercentage = New System.Windows.Forms.TextBox()
+        Me.lblATR = New System.Windows.Forms.Label()
+        Me.txtMaxPrice = New System.Windows.Forms.TextBox()
+        Me.lblMaxPrice = New System.Windows.Forms.Label()
+        Me.txtMinPrice = New System.Windows.Forms.TextBox()
+        Me.lblMinPrice = New System.Windows.Forms.Label()
+        Me.GroupBox4 = New System.Windows.Forms.GroupBox()
+        Me.chbAllowToIncreaseQuantity = New System.Windows.Forms.CheckBox()
+        Me.chbAutoSelectStock = New System.Windows.Forms.CheckBox()
+        Me.txtMinCapitalPerStock = New System.Windows.Forms.TextBox()
+        Me.lblMinCapitalPerStock = New System.Windows.Forms.Label()
+        Me.chbFuture = New System.Windows.Forms.CheckBox()
+        Me.chbCash = New System.Windows.Forms.CheckBox()
         Me.grpTelegram.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
+        Me.GroupBox3.SuspendLayout()
+        Me.GroupBox4.SuspendLayout()
         Me.SuspendLayout()
         '
         'btnSaveMomentumReversalSettings
@@ -65,7 +87,7 @@ Partial Class frmMomentumReversalSettings
         Me.btnSaveMomentumReversalSettings.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
         Me.btnSaveMomentumReversalSettings.ImageKey = "save-icon-36533.png"
         Me.btnSaveMomentumReversalSettings.ImageList = Me.ImageList1
-        Me.btnSaveMomentumReversalSettings.Location = New System.Drawing.Point(459, 11)
+        Me.btnSaveMomentumReversalSettings.Location = New System.Drawing.Point(827, 8)
         Me.btnSaveMomentumReversalSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSaveMomentumReversalSettings.Name = "btnSaveMomentumReversalSettings"
         Me.btnSaveMomentumReversalSettings.Size = New System.Drawing.Size(112, 58)
@@ -383,11 +405,221 @@ Partial Class frmMomentumReversalSettings
         Me.lblSignalTimeFrame.TabIndex = 3
         Me.lblSignalTimeFrame.Text = "Signal Time Frame(min)"
         '
+        'GroupBox3
+        '
+        Me.GroupBox3.Controls.Add(Me.txtBlankCandlePercentage)
+        Me.GroupBox3.Controls.Add(Me.lblBlankCandlePercentage)
+        Me.GroupBox3.Controls.Add(Me.txtNumberOfStock)
+        Me.GroupBox3.Controls.Add(Me.lblNumberOfStock)
+        Me.GroupBox3.Controls.Add(Me.txtMinVolume)
+        Me.GroupBox3.Controls.Add(Me.lblMinVolume)
+        Me.GroupBox3.Controls.Add(Me.txtATRPercentage)
+        Me.GroupBox3.Controls.Add(Me.lblATR)
+        Me.GroupBox3.Controls.Add(Me.txtMaxPrice)
+        Me.GroupBox3.Controls.Add(Me.lblMaxPrice)
+        Me.GroupBox3.Controls.Add(Me.txtMinPrice)
+        Me.GroupBox3.Controls.Add(Me.lblMinPrice)
+        Me.GroupBox3.Location = New System.Drawing.Point(461, 166)
+        Me.GroupBox3.Name = "GroupBox3"
+        Me.GroupBox3.Size = New System.Drawing.Size(358, 204)
+        Me.GroupBox3.TabIndex = 41
+        Me.GroupBox3.TabStop = False
+        Me.GroupBox3.Text = "Stock Selection Settings"
+        '
+        'txtBlankCandlePercentage
+        '
+        Me.txtBlankCandlePercentage.Location = New System.Drawing.Point(146, 143)
+        Me.txtBlankCandlePercentage.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtBlankCandlePercentage.Name = "txtBlankCandlePercentage"
+        Me.txtBlankCandlePercentage.Size = New System.Drawing.Size(201, 22)
+        Me.txtBlankCandlePercentage.TabIndex = 31
+        Me.txtBlankCandlePercentage.Tag = "Number Of Stock"
+        '
+        'lblBlankCandlePercentage
+        '
+        Me.lblBlankCandlePercentage.AutoSize = True
+        Me.lblBlankCandlePercentage.Location = New System.Drawing.Point(10, 146)
+        Me.lblBlankCandlePercentage.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblBlankCandlePercentage.Name = "lblBlankCandlePercentage"
+        Me.lblBlankCandlePercentage.Size = New System.Drawing.Size(107, 17)
+        Me.lblBlankCandlePercentage.TabIndex = 45
+        Me.lblBlankCandlePercentage.Text = "Blank Candle %"
+        '
+        'txtNumberOfStock
+        '
+        Me.txtNumberOfStock.Location = New System.Drawing.Point(146, 173)
+        Me.txtNumberOfStock.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtNumberOfStock.Name = "txtNumberOfStock"
+        Me.txtNumberOfStock.Size = New System.Drawing.Size(201, 22)
+        Me.txtNumberOfStock.TabIndex = 32
+        Me.txtNumberOfStock.Tag = "Number Of Stock"
+        '
+        'lblNumberOfStock
+        '
+        Me.lblNumberOfStock.AutoSize = True
+        Me.lblNumberOfStock.Location = New System.Drawing.Point(9, 176)
+        Me.lblNumberOfStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblNumberOfStock.Name = "lblNumberOfStock"
+        Me.lblNumberOfStock.Size = New System.Drawing.Size(116, 17)
+        Me.lblNumberOfStock.TabIndex = 43
+        Me.lblNumberOfStock.Text = "Number Of Stock"
+        '
+        'txtMinVolume
+        '
+        Me.txtMinVolume.Location = New System.Drawing.Point(146, 114)
+        Me.txtMinVolume.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMinVolume.Name = "txtMinVolume"
+        Me.txtMinVolume.Size = New System.Drawing.Size(201, 22)
+        Me.txtMinVolume.TabIndex = 30
+        Me.txtMinVolume.Tag = "Min Volume"
+        '
+        'lblMinVolume
+        '
+        Me.lblMinVolume.AutoSize = True
+        Me.lblMinVolume.Location = New System.Drawing.Point(9, 114)
+        Me.lblMinVolume.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMinVolume.Name = "lblMinVolume"
+        Me.lblMinVolume.Size = New System.Drawing.Size(81, 17)
+        Me.lblMinVolume.TabIndex = 41
+        Me.lblMinVolume.Text = "Min Volume"
+        '
+        'txtATRPercentage
+        '
+        Me.txtATRPercentage.Location = New System.Drawing.Point(146, 84)
+        Me.txtATRPercentage.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtATRPercentage.Name = "txtATRPercentage"
+        Me.txtATRPercentage.Size = New System.Drawing.Size(201, 22)
+        Me.txtATRPercentage.TabIndex = 29
+        Me.txtATRPercentage.Tag = "ATR %"
+        '
+        'lblATR
+        '
+        Me.lblATR.AutoSize = True
+        Me.lblATR.Location = New System.Drawing.Point(9, 87)
+        Me.lblATR.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblATR.Name = "lblATR"
+        Me.lblATR.Size = New System.Drawing.Size(52, 17)
+        Me.lblATR.TabIndex = 39
+        Me.lblATR.Text = "ATR %"
+        '
+        'txtMaxPrice
+        '
+        Me.txtMaxPrice.Location = New System.Drawing.Point(146, 55)
+        Me.txtMaxPrice.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxPrice.Name = "txtMaxPrice"
+        Me.txtMaxPrice.Size = New System.Drawing.Size(201, 22)
+        Me.txtMaxPrice.TabIndex = 28
+        Me.txtMaxPrice.Tag = "Max Price"
+        '
+        'lblMaxPrice
+        '
+        Me.lblMaxPrice.AutoSize = True
+        Me.lblMaxPrice.Location = New System.Drawing.Point(9, 59)
+        Me.lblMaxPrice.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxPrice.Name = "lblMaxPrice"
+        Me.lblMaxPrice.Size = New System.Drawing.Size(69, 17)
+        Me.lblMaxPrice.TabIndex = 37
+        Me.lblMaxPrice.Text = "Max Price"
+        '
+        'txtMinPrice
+        '
+        Me.txtMinPrice.Location = New System.Drawing.Point(146, 25)
+        Me.txtMinPrice.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMinPrice.Name = "txtMinPrice"
+        Me.txtMinPrice.Size = New System.Drawing.Size(201, 22)
+        Me.txtMinPrice.TabIndex = 27
+        Me.txtMinPrice.Tag = "Min Price"
+        '
+        'lblMinPrice
+        '
+        Me.lblMinPrice.AutoSize = True
+        Me.lblMinPrice.Location = New System.Drawing.Point(9, 28)
+        Me.lblMinPrice.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMinPrice.Name = "lblMinPrice"
+        Me.lblMinPrice.Size = New System.Drawing.Size(66, 17)
+        Me.lblMinPrice.TabIndex = 35
+        Me.lblMinPrice.Text = "Min Price"
+        '
+        'GroupBox4
+        '
+        Me.GroupBox4.Controls.Add(Me.chbAllowToIncreaseQuantity)
+        Me.GroupBox4.Controls.Add(Me.chbAutoSelectStock)
+        Me.GroupBox4.Controls.Add(Me.txtMinCapitalPerStock)
+        Me.GroupBox4.Controls.Add(Me.lblMinCapitalPerStock)
+        Me.GroupBox4.Controls.Add(Me.chbFuture)
+        Me.GroupBox4.Controls.Add(Me.chbCash)
+        Me.GroupBox4.Location = New System.Drawing.Point(462, 2)
+        Me.GroupBox4.Name = "GroupBox4"
+        Me.GroupBox4.Size = New System.Drawing.Size(358, 141)
+        Me.GroupBox4.TabIndex = 40
+        Me.GroupBox4.TabStop = False
+        '
+        'chbAllowToIncreaseQuantity
+        '
+        Me.chbAllowToIncreaseQuantity.AutoSize = True
+        Me.chbAllowToIncreaseQuantity.Location = New System.Drawing.Point(12, 72)
+        Me.chbAllowToIncreaseQuantity.Name = "chbAllowToIncreaseQuantity"
+        Me.chbAllowToIncreaseQuantity.Size = New System.Drawing.Size(198, 21)
+        Me.chbAllowToIncreaseQuantity.TabIndex = 20
+        Me.chbAllowToIncreaseQuantity.Text = "Allow To Increase Quantity"
+        Me.chbAllowToIncreaseQuantity.UseVisualStyleBackColor = True
+        '
+        'chbAutoSelectStock
+        '
+        Me.chbAutoSelectStock.AutoSize = True
+        Me.chbAutoSelectStock.Location = New System.Drawing.Point(12, 14)
+        Me.chbAutoSelectStock.Name = "chbAutoSelectStock"
+        Me.chbAutoSelectStock.Size = New System.Drawing.Size(141, 21)
+        Me.chbAutoSelectStock.TabIndex = 17
+        Me.chbAutoSelectStock.Text = "Auto Select Stock"
+        Me.chbAutoSelectStock.UseVisualStyleBackColor = True
+        '
+        'txtMinCapitalPerStock
+        '
+        Me.txtMinCapitalPerStock.Location = New System.Drawing.Point(146, 101)
+        Me.txtMinCapitalPerStock.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMinCapitalPerStock.Name = "txtMinCapitalPerStock"
+        Me.txtMinCapitalPerStock.Size = New System.Drawing.Size(201, 22)
+        Me.txtMinCapitalPerStock.TabIndex = 21
+        Me.txtMinCapitalPerStock.Tag = ""
+        '
+        'lblMinCapitalPerStock
+        '
+        Me.lblMinCapitalPerStock.AutoSize = True
+        Me.lblMinCapitalPerStock.Location = New System.Drawing.Point(6, 104)
+        Me.lblMinCapitalPerStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMinCapitalPerStock.Name = "lblMinCapitalPerStock"
+        Me.lblMinCapitalPerStock.Size = New System.Drawing.Size(142, 17)
+        Me.lblMinCapitalPerStock.TabIndex = 37
+        Me.lblMinCapitalPerStock.Text = "Min Capital Per Stock"
+        '
+        'chbFuture
+        '
+        Me.chbFuture.AutoSize = True
+        Me.chbFuture.Location = New System.Drawing.Point(84, 43)
+        Me.chbFuture.Name = "chbFuture"
+        Me.chbFuture.Size = New System.Drawing.Size(71, 21)
+        Me.chbFuture.TabIndex = 19
+        Me.chbFuture.Text = "Future"
+        Me.chbFuture.UseVisualStyleBackColor = True
+        '
+        'chbCash
+        '
+        Me.chbCash.AutoSize = True
+        Me.chbCash.Location = New System.Drawing.Point(12, 42)
+        Me.chbCash.Name = "chbCash"
+        Me.chbCash.Size = New System.Drawing.Size(62, 21)
+        Me.chbCash.TabIndex = 18
+        Me.chbCash.Text = "Cash"
+        Me.chbCash.UseVisualStyleBackColor = True
+        '
         'frmMomentumReversalSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(576, 502)
+        Me.ClientSize = New System.Drawing.Size(950, 502)
+        Me.Controls.Add(Me.GroupBox3)
+        Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.grpTelegram)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnSaveMomentumReversalSettings)
@@ -402,6 +634,10 @@ Partial Class frmMomentumReversalSettings
         Me.grpTelegram.PerformLayout()
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
+        Me.GroupBox3.ResumeLayout(False)
+        Me.GroupBox3.PerformLayout()
+        Me.GroupBox4.ResumeLayout(False)
+        Me.GroupBox4.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -438,4 +674,24 @@ Partial Class frmMomentumReversalSettings
     Friend WithEvents lblInstrumentDetails As Label
     Friend WithEvents txtSignalTimeFrame As TextBox
     Friend WithEvents lblSignalTimeFrame As Label
+    Friend WithEvents GroupBox3 As GroupBox
+    Friend WithEvents txtBlankCandlePercentage As TextBox
+    Friend WithEvents lblBlankCandlePercentage As Label
+    Friend WithEvents txtNumberOfStock As TextBox
+    Friend WithEvents lblNumberOfStock As Label
+    Friend WithEvents txtMinVolume As TextBox
+    Friend WithEvents lblMinVolume As Label
+    Friend WithEvents txtATRPercentage As TextBox
+    Friend WithEvents lblATR As Label
+    Friend WithEvents txtMaxPrice As TextBox
+    Friend WithEvents lblMaxPrice As Label
+    Friend WithEvents txtMinPrice As TextBox
+    Friend WithEvents lblMinPrice As Label
+    Friend WithEvents GroupBox4 As GroupBox
+    Friend WithEvents chbAllowToIncreaseQuantity As CheckBox
+    Friend WithEvents chbAutoSelectStock As CheckBox
+    Friend WithEvents txtMinCapitalPerStock As TextBox
+    Friend WithEvents lblMinCapitalPerStock As Label
+    Friend WithEvents chbFuture As CheckBox
+    Friend WithEvents chbCash As CheckBox
 End Class
