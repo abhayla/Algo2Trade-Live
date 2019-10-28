@@ -4,12 +4,12 @@ Imports System.Threading
 Public Class frmMomentumReversalSettings
 
     Private _cts As CancellationTokenSource = Nothing
-    Private _MRSettings As MomentumReversalUserInputs = Nothing
+    Private _settings As MomentumReversalUserInputs = Nothing
     Private _MRSettingsFilename As String = Path.Combine(My.Application.Info.DirectoryPath, "MomentumReversalSettings.Strategy.a2t")
 
     Public Sub New(ByRef MRUserInputs As MomentumReversalUserInputs)
         InitializeComponent()
-        _MRSettings = MRUserInputs
+        _settings = MRUserInputs
     End Sub
 
     Private Sub frmMomentumReversalSettings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -18,8 +18,8 @@ Public Class frmMomentumReversalSettings
     Private Sub btnSaveMomentumReversalSettings_Click(sender As Object, e As EventArgs) Handles btnSaveMomentumReversalSettings.Click
         Try
             _cts = New CancellationTokenSource
-            If _MRSettings Is Nothing Then _MRSettings = New MomentumReversalUserInputs
-            _MRSettings.InstrumentsData = Nothing
+            If _settings Is Nothing Then _settings = New MomentumReversalUserInputs
+            _settings.InstrumentsData = Nothing
             ValidateInputs()
             SaveSettings()
             Me.Close()
@@ -29,40 +29,40 @@ Public Class frmMomentumReversalSettings
     End Sub
     Private Sub LoadSettings()
         If File.Exists(_MRSettingsFilename) Then
-            _MRSettings = Utilities.Strings.DeserializeToCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename)
-            txtSignalTimeFrame.Text = _MRSettings.SignalTimeFrame
-            dtpckrTradeStartTime.Value = _MRSettings.TradeStartTime
-            dtpckrLastTradeEntryTime.Value = _MRSettings.LastTradeEntryTime
-            dtpckrEODExitTime.Value = _MRSettings.EODExitTime
-            txtMaxLossPerDay.Text = _MRSettings.MaxLossPerDay
-            txtMaxProfitPerDay.Text = _MRSettings.MaxProfitPerDay
-            txtATRPeriod.Text = _MRSettings.ATRPeriod
-            txtNumberOfTradePerStock.Text = _MRSettings.NumberOfTradePerStock
-            txtTargetMultiplier.Text = _MRSettings.TargetMultiplier
-            txtInstrumentDetalis.Text = _MRSettings.InstrumentDetailsFilePath
+            _settings = Utilities.Strings.DeserializeToCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename)
+            txtSignalTimeFrame.Text = _settings.SignalTimeFrame
+            dtpckrTradeStartTime.Value = _settings.TradeStartTime
+            dtpckrLastTradeEntryTime.Value = _settings.LastTradeEntryTime
+            dtpckrEODExitTime.Value = _settings.EODExitTime
+            txtMaxLossPerDay.Text = _settings.MaxLossPerDay
+            txtMaxProfitPerDay.Text = _settings.MaxProfitPerDay
+            txtATRPeriod.Text = _settings.ATRPeriod
+            txtNumberOfTradePerStock.Text = _settings.NumberOfTradePerStock
+            txtTargetMultiplier.Text = _settings.TargetMultiplier
+            txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
 
-            txtTelegramAPI.Text = _MRSettings.TelegramAPIKey
-            txtTelegramChatID.Text = _MRSettings.TelegramChatID
-            txtTelegramChatIDForPL.Text = _MRSettings.TelegramPLChatID
+            txtTelegramAPI.Text = _settings.TelegramAPIKey
+            txtTelegramChatID.Text = _settings.TelegramChatID
+            txtTelegramChatIDForPL.Text = _settings.TelegramPLChatID
         End If
     End Sub
     Private Sub SaveSettings()
-        _MRSettings.SignalTimeFrame = txtSignalTimeFrame.Text
-        _MRSettings.TradeStartTime = dtpckrTradeStartTime.Value
-        _MRSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
-        _MRSettings.EODExitTime = dtpckrEODExitTime.Value
-        _MRSettings.MaxLossPerDay = txtMaxLossPerDay.Text
-        _MRSettings.MaxProfitPerDay = txtMaxProfitPerDay.Text
-        _MRSettings.ATRPeriod = txtATRPeriod.Text
-        _MRSettings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
-        _MRSettings.TargetMultiplier = txtTargetMultiplier.Text
-        _MRSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+        _settings.SignalTimeFrame = txtSignalTimeFrame.Text
+        _settings.TradeStartTime = dtpckrTradeStartTime.Value
+        _settings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
+        _settings.EODExitTime = dtpckrEODExitTime.Value
+        _settings.MaxLossPerDay = txtMaxLossPerDay.Text
+        _settings.MaxProfitPerDay = txtMaxProfitPerDay.Text
+        _settings.ATRPeriod = txtATRPeriod.Text
+        _settings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
+        _settings.TargetMultiplier = txtTargetMultiplier.Text
+        _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
-        _MRSettings.TelegramAPIKey = txtTelegramAPI.Text
-        _MRSettings.TelegramChatID = txtTelegramChatID.Text
-        _MRSettings.TelegramPLChatID = txtTelegramChatIDForPL.Text
+        _settings.TelegramAPIKey = txtTelegramAPI.Text
+        _settings.TelegramChatID = txtTelegramChatID.Text
+        _settings.TelegramPLChatID = txtTelegramChatIDForPL.Text
 
-        Utilities.Strings.SerializeFromCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename, _MRSettings)
+        Utilities.Strings.SerializeFromCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename, _settings)
     End Sub
     Private Function ValidateNumbers(ByVal startNumber As Decimal, ByVal endNumber As Decimal, ByVal inputTB As TextBox) As Boolean
         Dim ret As Boolean = False
@@ -75,7 +75,7 @@ Public Class frmMomentumReversalSettings
         Return ret
     End Function
     Private Sub ValidateFile()
-        _MRSettings.FillInstrumentDetails(txtInstrumentDetalis.Text, _cts)
+        _settings.FillInstrumentDetails(txtInstrumentDetalis.Text, _cts)
     End Sub
     Private Sub ValidateInputs()
         ValidateNumbers(0, 999, txtTargetMultiplier)

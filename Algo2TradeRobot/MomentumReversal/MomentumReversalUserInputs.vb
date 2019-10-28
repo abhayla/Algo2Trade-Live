@@ -19,6 +19,20 @@ Public Class MomentumReversalUserInputs
     Public Property TelegramChatID As String
     Public Property TelegramPLChatID As String
 
+    Public Property AutoSelectStock As Boolean
+    Public Property CashInstrument As Boolean
+    Public Property FutureInstrument As Boolean
+    Public Property AllowToIncreaseQuantity As Boolean
+    Public Property MinCapitalPerStock As Decimal
+
+    Public Property MinPrice As Decimal
+    Public Property MaxPrice As Decimal
+    Public Property ATRPercentage As Decimal
+    Public Property MinVolume As Decimal
+    Public Property BlankCandlePercentage As Decimal
+    Public Property NumberOfStock As Integer
+
+
     <Serializable>
     Public Class InstrumentDetails
         Public Property InstrumentName As String
