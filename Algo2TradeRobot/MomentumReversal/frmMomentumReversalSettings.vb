@@ -41,6 +41,19 @@ Public Class frmMomentumReversalSettings
             txtTargetMultiplier.Text = _settings.TargetMultiplier
             txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
 
+            chbAutoSelectStock.Checked = _settings.AutoSelectStock
+            chbCash.Checked = _settings.CashInstrument
+            chbFuture.Checked = _settings.FutureInstrument
+            chbAllowToIncreaseQuantity.Checked = _settings.AllowToIncreaseQuantity
+            txtMinCapitalPerStock.Text = _settings.MinCapitalPerStock
+
+            txtMinPrice.Text = _settings.MinPrice
+            txtMaxPrice.Text = _settings.MaxPrice
+            txtATRPercentage.Text = _settings.ATRPercentage
+            txtMinVolume.Text = _settings.MinVolume
+            txtBlankCandlePercentage.Text = _settings.BlankCandlePercentage
+            txtNumberOfStock.Text = _settings.NumberOfStock
+
             txtTelegramAPI.Text = _settings.TelegramAPIKey
             txtTelegramChatID.Text = _settings.TelegramChatID
             txtTelegramChatIDForPL.Text = _settings.TelegramPLChatID
