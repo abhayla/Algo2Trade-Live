@@ -19,8 +19,8 @@ Public Class PetDGandhiStrategyInstrument
     Private _firstTradedQuantity As Integer = Integer.MinValue
     Private _lastTick As ITick = Nothing
 
-    Private _stockMaxProfitPoint As Decimal = Decimal.MinValue
-    Private _stockMaxLossPoint As Decimal = Decimal.MinValue
+    Private _stockMaxProfitPL As Decimal = Decimal.MinValue
+    Private _stockMaxLossPL As Decimal = Decimal.MinValue
     Private _exitDoneForStockMaxLoss As Boolean = False
 
     Private ReadOnly _dummyATRConsumer As ATRConsumer
@@ -62,8 +62,8 @@ Public Class PetDGandhiStrategyInstrument
         ElseIf Me.ParentStrategy.GetTotalPLAfterBrokerage >= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
             CType(Me.ParentStrategy, PetDGandhiStrategy).SendMTMNotification()
         End If
-        If _stockMaxProfitPoint <> Decimal.MinValue Then
-            If Me.GetOverallPLPoint >= _stockMaxProfitPoint Then
+        If _stockMaxProfitPL <> Decimal.MinValue Then
+            If Me.GetOverallPLAfterBrokerage >= _stockMaxProfitPL Then
                 SendNotification()
             End If
         End If
@@ -80,8 +80,8 @@ Public Class PetDGandhiStrategyInstrument
                 _cts.Token.ThrowIfCancellationRequested()
 
                 'Stock max loss
-                If _stockMaxLossPoint <> Decimal.MinValue Then
-                    If Me.GetOverallPLPoint <= _stockMaxLossPoint Then
+                If _stockMaxLossPL <> Decimal.MinValue Then
+                    If Me.GetOverallPLAfterBrokerage <= _stockMaxLossPL Then
                         Await ForceExitAllTradesAsync("Force Exit. Reason:Stock Max Loss reached").ConfigureAwait(False)
                         _exitDoneForStockMaxLoss = True
                     End If
@@ -297,7 +297,7 @@ Public Class PetDGandhiStrategyInstrument
                             Me._exitDoneForStockMaxLoss,
                             IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime),
                             IsLastTradeForceExitForCandleClose(),
-                            Await Me.ParentStrategy.GetRunningCapitalAsync(Me.TradableInstrument.ExchangeDetails.ExchangeType).ConfigureAwait(False),
+                            Math.Round(Await Me.ParentStrategy.GetRunningCapitalAsync(Me.TradableInstrument.ExchangeDetails.ExchangeType).ConfigureAwait(False), 4),
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
@@ -376,11 +376,13 @@ Public Class PetDGandhiStrategyInstrument
                     logger.Error(ex.ToString)
                 End Try
 
-                If _stockMaxProfitPoint = Decimal.MinValue Then
-                    _stockMaxProfitPoint = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload), Me.TradableInstrument.TickSize, RoundOfType.Celing) * userSettings.MaxProfitPerStockMultiplier
+                If _stockMaxProfitPL = Decimal.MinValue Then
+                    Dim stockMaxProfitPoint As Decimal = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload), Me.TradableInstrument.TickSize, RoundOfType.Celing) * userSettings.MaxProfitPerStockMultiplier
+                    _stockMaxProfitPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, parameters.TriggerPrice, parameters.TriggerPrice + stockMaxProfitPoint, parameters.Quantity)
                 End If
-                If _stockMaxLossPoint = Decimal.MinValue Then
-                    _stockMaxLossPoint = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload), Me.TradableInstrument.TickSize, RoundOfType.Floor) * userSettings.MaxLossPerStockMultiplier * -1
+                If _stockMaxLossPL = Decimal.MinValue Then
+                    Dim stockMaxLossPoint As Decimal = ConvertFloorCeling(GetCandleATR(runningCandlePayload.PreviousPayload), Me.TradableInstrument.TickSize, RoundOfType.Floor) * userSettings.MaxLossPerStockMultiplier
+                    _stockMaxLossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, parameters.TriggerPrice, parameters.TriggerPrice - stockMaxLossPoint, parameters.Quantity)
                 End If
 
                 Dim currentSignalActivities As IEnumerable(Of ActivityDashboard) = Me.ParentStrategy.SignalManager.GetSignalActivities(parameters.SignalCandle.SnapshotDateTime, Me.TradableInstrument.InstrumentIdentifier)
@@ -662,6 +664,9 @@ Public Class PetDGandhiStrategyInstrument
                     slipage = potentialExitPrice - exitPrice
                     plSlipage = orderPL - potentialExitPL
                 End If
+                If reason.ToUpper = "STOPLOSS REACHED" AndAlso potentialExitPL >= 0 Then
+                    reason = "Breakeven Exit"
+                End If
                 Dim message As String = String.Format("{0}. {26}Trading Symbol:{1}, Signal Candle Time:{2}, Candle Body:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, {8}Entry Price:{9}, {10}Potential Exit Price:{11}, Exit Price:{12}({13}), {14}Potential Exit PL:₹{15}, Exit PL:₹{16}(₹{17}), {18}Total Stock PL:₹{19}, Number Of Trade:{20}, {21}LTP:{22}, Tick Timestamp:{23}, {24}Timestamp:{25}",
                                                         reason,
                                                         Me.TradableInstrument.TradingSymbol,
@@ -871,11 +876,13 @@ Public Class PetDGandhiStrategyInstrument
                     End If
                     If lastTradeExitPrice <> Decimal.MinValue Then
                         If lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                            If lastTradeExitPrice > signalCandle.LowPrice.Value Then
+                            If lastTradeExitPrice > signalCandle.LowPrice.Value AndAlso
+                                lastTradeExitPrice < signalCandle.HighPrice.Value Then
                                 ret = True
                             End If
                         ElseIf lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                            If lastTradeExitPrice < signalCandle.HighPrice.Value Then
+                            If lastTradeExitPrice < signalCandle.HighPrice.Value AndAlso
+                                lastTradeExitPrice > signalCandle.LowPrice.Value Then
                                 ret = True
                             End If
                         End If
