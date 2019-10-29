@@ -302,7 +302,7 @@ Public Class PetDGandhiStrategyInstrument
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
 
-                Await SendCandleDetails(runningCandlePayload, currentTime, userSettings).ConfigureAwait(False)
+                SendCandleDetails(runningCandlePayload, currentTime, userSettings)
             End If
         Catch ex As Exception
             logger.Error(ex.ToString)
@@ -902,13 +902,12 @@ Public Class PetDGandhiStrategyInstrument
 
                 message = String.Format("{0}{1}-----------------------", message, vbNewLine)
 
-                Dim conditionMatched As Boolean = False
+                Dim conditionMatched As Boolean = True
                 If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
                     runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime Then
                     'message = String.Format("{0}{1}Entry time OK. Trade Start Time:{2}, Last Trade Entry Time:{3}, Running Candle Time:{4}, Current Time:{5}",
                     '                        message, vbNewLine, userSettings.TradeStartTime.ToString, userSettings.LastTradeEntryTime.ToString,
                     '                        runningCandlePayload.SnapshotDateTime.ToString, currentTime.ToString)
-                    conditionMatched = True
                 Else
                     message = String.Format("{0}{1}<b>Entry time NOT OK</b> {2}Trd Strt Tm:{3}, Lst Trd Ntry Tm:{4}, Rng Cndl Tm:{5}, Crnt Tm:{6}",
                                             message, vbNewLine, vbNewLine, userSettings.TradeStartTime.ToString, userSettings.LastTradeEntryTime.ToString,
@@ -918,7 +917,6 @@ Public Class PetDGandhiStrategyInstrument
 
                 If Me.TradableInstrument.IsHistoricalCompleted Then
                     'message = String.Format("{0}{1}Historical OK. Is Historical Completed:{2}", message, vbNewLine, Me.TradableInstrument.IsHistoricalCompleted)
-                    conditionMatched = True
                 Else
                     message = String.Format("{0}{1}<b>Historical NOT OK</b> {2}Is Hstrcl Cmpltd:{3}", message, vbNewLine, vbNewLine, Me.TradableInstrument.IsHistoricalCompleted)
                     conditionMatched = False
@@ -926,7 +924,6 @@ Public Class PetDGandhiStrategyInstrument
 
                 If Not IsActiveInstrument() Then
                     'message = String.Format("{0}{1}Active Instrument OK. Is Active Instrument:{2}", message, vbNewLine, IsActiveInstrument())
-                    conditionMatched = True
                 Else
                     message = String.Format("{0}{1}<b>InActive Instrument NOT OK</b> {2}Is Actv Instrmnt:{3}", message, vbNewLine, vbNewLine, IsActiveInstrument())
                     conditionMatched = False
@@ -935,7 +932,6 @@ Public Class PetDGandhiStrategyInstrument
                 If GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock Then
                     'message = String.Format("{0}{1}Number Of Trade OK. Total Trade:{2}, Max Number of Trade:{3}",
                     '                        message, vbNewLine, GetTotalExecutedOrders(), userSettings.NumberOfTradePerStock)
-                    conditionMatched = True
                 Else
                     message = String.Format("{0}{1}<b>Number Of Trade NOT OK</b> {2}Total Trd:{3}, Max Nmbr of Trd:{4}",
                                             message, vbNewLine, vbNewLine, GetTotalExecutedOrders(), userSettings.NumberOfTradePerStock)
@@ -945,7 +941,6 @@ Public Class PetDGandhiStrategyInstrument
                 If Not Me.StrategyExitAllTriggerd AndAlso Not _exitDoneForStockMaxLoss Then
                     'message = String.Format("{0}{1}Force exit OK. Strategy Exit All Triggerd:{2}, Stock Max Loss Triggerd:{3}",
                     '                        message, vbNewLine, Me.StrategyExitAllTriggerd, _exitDoneForStockMaxLoss)
-                    conditionMatched = True
                 Else
                     message = String.Format("{0}{1}<b>No Force exit NOT OK</b> {2}Strgy Ext All Trgrd:{3}, Stck Max Loss Trgrd:{4}",
                                             message, vbNewLine, vbNewLine, Me.StrategyExitAllTriggerd, _exitDoneForStockMaxLoss)
@@ -959,7 +954,6 @@ Public Class PetDGandhiStrategyInstrument
                 If topTail >= userSettings.PinbarTailPercentage OrElse bottomTail >= userSettings.PinbarTailPercentage Then
                     'message = String.Format("{0}{1}Pinbar OK. Top Tail:{2}%, Bottom Tail:{3}%, Minimum Pinbar Tail:{4}%",
                     '                        message, vbNewLine, topTail, bottomTail, userSettings.PinbarTailPercentage)
-                    conditionMatched = True
                 Else
                     message = String.Format("{0}{1}<b>Pinbar NOT OK</b> {2}Top Tail:{3}%, Btm Tail:{4}%, Min Pinbar Tail:{5}%",
                                             message, vbNewLine, vbNewLine, topTail, bottomTail, userSettings.PinbarTailPercentage)
@@ -972,7 +966,6 @@ Public Class PetDGandhiStrategyInstrument
                     If body <= maxAllowableBody Then
                         'message = String.Format("{0}{1}Candle Body OK. Body:{2}, Max allowable body:{3}, ATR:{4}",
                         '                        message, vbNewLine, body, maxAllowableBody, GetCandleATR(runningCandlePayload.PreviousPayload))
-                        conditionMatched = True
                     Else
                         message = String.Format("{0}{1}<b>Candle Body NOT OK</b> {2}Body:{3}, Max alwbl body:{4}, ATR:{5}",
                                                 message, vbNewLine, vbNewLine, body, maxAllowableBody, GetCandleATR(runningCandlePayload.PreviousPayload))
@@ -984,7 +977,6 @@ Public Class PetDGandhiStrategyInstrument
                     If body <= maxAllowableBody Then
                         'message = String.Format("{0}{1}Candle Body OK. Body:{2}, Max allowable body:{3}, ATR:{4}",
                         '                        message, vbNewLine, body, maxAllowableBody, GetCandleATR(runningCandlePayload.PreviousPayload))
-                        conditionMatched = True
                     Else
                         message = String.Format("{0}{1}<b>Candle Body NOT OK</b> {2}Body:{3}, Max alwbl body:{4}, ATR:{5}",
                                                 message, vbNewLine, vbNewLine, body, maxAllowableBody, GetCandleATR(runningCandlePayload.PreviousPayload))
@@ -996,7 +988,6 @@ Public Class PetDGandhiStrategyInstrument
                     'message = String.Format("{0}{1}Last Trade Exit OK. Is Last Trade Exited At Current Candle:{2}, Last Trade Exit Time:{3}",
                     '                        message, vbNewLine, IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime),
                     '                        GetLastOrderExitTime())
-                    conditionMatched = True
                 Else
                     message = String.Format("{0}{1}<b>No Last Trade Exit NOT OK</b> {2}Is Lst Trd Extd At Crnt Cndl:{3}, Last Trd Ext Tm:{4}",
                                             message, vbNewLine, vbNewLine, IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime),
