@@ -893,6 +893,28 @@ Public Class PetDGandhiStrategyInstrument
         Return ret
     End Function
 
+    Public Function GetMovementPoint(ByVal entryPrice As Decimal, ByVal quantity As Integer, ByVal direction As IOrder.TypeOfTransaction) As Decimal
+        Dim ret As Decimal = Me.TradableInstrument.TickSize
+        If direction = IOrder.TypeOfTransaction.Buy Then
+            For exitPrice As Decimal = entryPrice To Decimal.MaxValue Step ret
+                Dim pl As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, entryPrice, exitPrice, quantity)
+                If pl >= -100 Then
+                    ret = ConvertFloorCeling(exitPrice - entryPrice, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                    Exit For
+                End If
+            Next
+        ElseIf direction = IOrder.TypeOfTransaction.Sell Then
+            For exitPrice As Decimal = entryPrice To Decimal.MinValue Step ret * -1
+                Dim pl As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, exitPrice, entryPrice, quantity)
+                If pl >= -100 Then
+                    ret = ConvertFloorCeling(entryPrice - exitPrice, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                    Exit For
+                End If
+            Next
+        End If
+        Return ret
+    End Function
+
     Private Async Function SendCandleDetails(ByVal runningCandlePayload As OHLCPayload, ByVal currentTime As Date, ByVal userSettings As PetDGandhiUserInputs) As Task
         Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
         Try
