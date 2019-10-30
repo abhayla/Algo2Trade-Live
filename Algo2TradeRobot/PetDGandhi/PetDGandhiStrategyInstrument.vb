@@ -951,8 +951,8 @@ Public Class PetDGandhiStrategyInstrument
         ElseIf signalCandle.HighPrice.Value <= signalCandle.PreviousPayload.HighPrice.Value AndAlso
             signalCandle.LowPrice.Value >= signalCandle.PreviousPayload.LowPrice.Value Then
             ret = "Inside Bar"
-        ElseIf signalCandle.HighPrice.Value > signalCandle.PreviousPayload.HighPrice.Value AndAlso
-            signalCandle.LowPrice.Value < signalCandle.PreviousPayload.LowPrice.Value Then
+        ElseIf signalCandle.HighPrice.Value >= signalCandle.PreviousPayload.HighPrice.Value AndAlso
+            signalCandle.LowPrice.Value <= signalCandle.PreviousPayload.LowPrice.Value Then
             ret = "Outside Bar"
         End If
 
