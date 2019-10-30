@@ -704,7 +704,7 @@ Namespace Strategies
                     End If
                 Next
             ElseIf direction = IOrder.TypeOfTransaction.Sell Then
-                For exitPrice As Decimal = entryPrice To Decimal.MinusOne Step ret * -1
+                For exitPrice As Decimal = entryPrice To Decimal.MinValue Step ret * -1
                     Dim pl As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, exitPrice, entryPrice, quantity)
                     If pl >= 0 Then
                         ret = ConvertFloorCeling(entryPrice - exitPrice, Me.TradableInstrument.TickSize, RoundOfType.Celing)
