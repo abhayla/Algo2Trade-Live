@@ -737,7 +737,7 @@ Public Class PetDGandhiStrategyInstrument
             Dim userSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
             Dim slPoint As Decimal = candle.CandleRange
             Dim lowBuffer As Decimal = CalculateBuffer(candle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-            Dim highBuffer As Decimal = CalculateBuffer(candle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+            Dim highBuffer As Decimal = CalculateBuffer(candle.HighPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
             If candle.CandleWicks.Top + lowBuffer >= candle.CandleRange * userSettings.PinbarTailPercentage / 100 Then
                 slPoint = slPoint + 2 * lowBuffer
                 Dim potentialSLPrice As Decimal = Decimal.MinValue
@@ -1016,7 +1016,7 @@ Public Class PetDGandhiStrategyInstrument
                 End If
 
                 Dim lowBuffer As Decimal = CalculateBuffer(runningCandlePayload.PreviousPayload.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                Dim highBuffer As Decimal = CalculateBuffer(runningCandlePayload.PreviousPayload.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                Dim highBuffer As Decimal = CalculateBuffer(runningCandlePayload.PreviousPayload.HighPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                 Dim topTail As Decimal = Math.Round(((runningCandlePayload.PreviousPayload.CandleWicks.Top + lowBuffer) / runningCandlePayload.PreviousPayload.CandleRange) * 100, 2)
                 Dim bottomTail As Decimal = Math.Round(((runningCandlePayload.PreviousPayload.CandleWicks.Bottom + highBuffer) / runningCandlePayload.PreviousPayload.CandleRange) * 100, 2)
                 If topTail >= userSettings.PinbarTailPercentage OrElse bottomTail >= userSettings.PinbarTailPercentage Then
