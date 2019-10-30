@@ -935,18 +935,18 @@ Public Class PetDGandhiStrategyInstrument
             ElseIf signalDirection = IOrder.TypeOfTransaction.Sell Then
                 ret = "RHHLL"
             End If
-        ElseIf signalCandle.HighPrice.Value < signalCandle.PreviousPayload.HighPrice.Value AndAlso
-            signalCandle.LowPrice.Value > signalCandle.PreviousPayload.LowPrice.Value Then
+        ElseIf signalCandle.HighPrice.Value <= signalCandle.PreviousPayload.HighPrice.Value AndAlso
+            signalCandle.LowPrice.Value >= signalCandle.PreviousPayload.LowPrice.Value Then
             ret = "Inside Bar"
-        ElseIf signalCandle.HighPrice.Value >= signalCandle.PreviousPayload.HighPrice.Value AndAlso
-            signalCandle.LowPrice.Value <= signalCandle.PreviousPayload.LowPrice.Value Then
+        ElseIf signalCandle.HighPrice.Value > signalCandle.PreviousPayload.HighPrice.Value AndAlso
+            signalCandle.LowPrice.Value < signalCandle.PreviousPayload.LowPrice.Value Then
             ret = "Outside Bar"
         End If
 
         Dim result As Decimal = signalCandle.PreviousPayload.Volume.Value * signalCandle.CandleRange / signalCandle.PreviousPayload.CandleRange
-        If result > signalCandle.Volume.Value Then
+        If result < signalCandle.Volume.Value Then
             ret = String.Format("{0} - Good", ret)
-        ElseIf result >= signalCandle.Volume.Value * 90 / 100 Then
+        ElseIf result <= signalCandle.Volume.Value * 90 / 100 Then
             ret = String.Format("{0} - Ok", ret)
         Else
             ret = String.Format("{0} - Poor", ret)
