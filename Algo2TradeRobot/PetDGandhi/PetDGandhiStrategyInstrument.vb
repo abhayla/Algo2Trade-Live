@@ -115,7 +115,7 @@ Public Class PetDGandhiStrategyInstrument
                             potentialEntry = placeOrderTrigger.Item2.TriggerPrice
                             slipage = placeOrderResponse.ParentOrder.AveragePrice - potentialEntry
                         End If
-                        Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Signal Candle Time:{1}, Candle Body:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Potential Entry:{8}, Entry Price:{9}({10}), {11}Stoploss Price:{12}, Potential Stoploss PL:₹{13}, {14}Target Price:{15}, Potential Target PL:₹{16}, {17}Total Stock PL:₹{18}, {19}LTP:{20}, Tick Timestamp:{21}, {22}Timestamp:{23}",
+                        Dim message As String = String.Format("Order Placed. Trading Symbol:{0}, Signal Candle Time:{1}, Type:{24}, Candle Body:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Potential Entry:{8}, Entry Price:{9}({10}), {11}Stoploss Price:{12}, Potential Stoploss PL:₹{13}, {14}Target Price:{15}, Potential Target PL:₹{16}, {17}Total Stock PL:₹{18}, {19}LTP:{20}, Tick Timestamp:{21}, {22}Timestamp:{23}",
                                                                 Me.TradableInstrument.TradingSymbol,
                                                                 placeOrderTrigger.Item2.SignalCandle.SnapshotDateTime.ToShortTimeString,
                                                                 GetCandleBody(placeOrderTrigger.Item2.SignalCandle, placeOrderResponse.ParentOrder.TransactionType),
@@ -139,7 +139,8 @@ Public Class PetDGandhiStrategyInstrument
                                                                 _lastTick.LastPrice,
                                                                 _lastTick.Timestamp,
                                                                 vbNewLine,
-                                                                Now)
+                                                                Now,
+                                                                GetSignalCandleType(placeOrderTrigger.Item2.SignalCandle, placeOrderResponse.ParentOrder.TransactionType))
                         GenerateTelegramMessageAsync(message)
                     End If
                 End If
@@ -173,7 +174,7 @@ Public Class PetDGandhiStrategyInstrument
                             potentialTargetPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.TargetOrder.FirstOrDefault.AveragePrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
                             potentialStoplossPL = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, modifyOrderResponse.SLOrder.FirstOrDefault.TriggerPrice, modifyOrderResponse.ParentOrder.AveragePrice, modifyOrderResponse.ParentOrder.Quantity)
                         End If
-                        Dim message As String = String.Format("Order Modified. Reason:{16}, {15}Trading Symbol:{0}, Signal Candle Time:{1}, Candle Body:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Entry Price:{8}, {9}Stoploss Price:{10}, Potential Stoploss PL:₹{11}, {12}Target Price:{13}, Potential Target PL:₹{14}, {17}Total Stock PL:₹{18}, Timestamp:{19}",
+                        Dim message As String = String.Format("Order Modified. Reason:{16}, {15}Trading Symbol:{0}, Signal Candle Time:{1}, Type:{20}, Candle Body:{2}, ATR:{3}, Quantity:{4}, {5}Direction:{6}, {7}Entry Price:{8}, {9}Stoploss Price:{10}, Potential Stoploss PL:₹{11}, {12}Target Price:{13}, Potential Target PL:₹{14}, {17}Total Stock PL:₹{18}, Timestamp:{19}",
                                                                 Me.TradableInstrument.TradingSymbol,
                                                                 signalCandle.SnapshotDateTime.ToShortTimeString,
                                                                 GetCandleBody(signalCandle, modifyOrderResponse.ParentOrder.TransactionType),
@@ -193,7 +194,8 @@ Public Class PetDGandhiStrategyInstrument
                                                                 modifyStoplossOrderTrigger.LastOrDefault.Item4,
                                                                 vbNewLine,
                                                                 Math.Round(Me.GetOverallPLAfterBrokerage(), 2),
-                                                                Now)
+                                                                Now,
+                                                                GetSignalCandleType(signalCandle, modifyOrderResponse.ParentOrder.TransactionType))
                         GenerateTelegramMessageAsync(message)
                     End If
                 End If
@@ -485,13 +487,13 @@ Public Class PetDGandhiStrategyInstrument
                                 End If
                                 If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
                                     If runningCandlePayload.PreviousPayload.LowPrice.Value > bussinessOrder.ParentOrder.AveragePrice Then
-                                        Dim potentialPrice As Decimal = bussinessOrder.ParentOrder.AveragePrice + GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, bussinessOrder.ParentOrder.TransactionType)
+                                        Dim potentialPrice As Decimal = bussinessOrder.ParentOrder.AveragePrice + GetMovementPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, bussinessOrder.ParentOrder.TransactionType)
                                         triggerPrice = ConvertFloorCeling(potentialPrice, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                                         reason = "Breakeven movement"
                                     End If
                                 ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                                     If runningCandlePayload.PreviousPayload.HighPrice.Value < bussinessOrder.ParentOrder.AveragePrice Then
-                                        Dim potentialPrice As Decimal = bussinessOrder.ParentOrder.AveragePrice - GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, bussinessOrder.ParentOrder.TransactionType)
+                                        Dim potentialPrice As Decimal = bussinessOrder.ParentOrder.AveragePrice - GetMovementPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, bussinessOrder.ParentOrder.TransactionType)
                                         triggerPrice = ConvertFloorCeling(potentialPrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                                         reason = "Breakeven movement"
                                     End If
@@ -664,10 +666,10 @@ Public Class PetDGandhiStrategyInstrument
                     slipage = potentialExitPrice - exitPrice
                     plSlipage = orderPL - potentialExitPL
                 End If
-                If reason.ToUpper = "STOPLOSS REACHED" AndAlso potentialExitPL >= 0 Then
+                If reason.ToUpper = "STOPLOSS REACHED" AndAlso potentialExitPL >= -100 Then
                     reason = "Breakeven Exit"
                 End If
-                Dim message As String = String.Format("{0}. {26}Trading Symbol:{1}, Signal Candle Time:{2}, Candle Body:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, {8}Entry Price:{9}, {10}Potential Exit Price:{11}, Exit Price:{12}({13}), {14}Potential Exit PL:₹{15}, Exit PL:₹{16}(₹{17}), {18}Total Stock PL:₹{19}, Number Of Trade:{20}, {21}LTP:{22}, Tick Timestamp:{23}, {24}Timestamp:{25}",
+                Dim message As String = String.Format("{0}. {26}Trading Symbol:{1}, Signal Candle Time:{2}, Type:{27}, Candle Body:{3}, ATR:{4}, Quantity:{5}, {6}Direction:{7}, {8}Entry Price:{9}, {10}Potential Exit Price:{11}, Exit Price:{12}({13}), {14}Potential Exit PL:₹{15}, Exit PL:₹{16}(₹{17}), {18}Total Stock PL:₹{19}, Number Of Trade:{20}, {21}LTP:{22}, Tick Timestamp:{23}, {24}Timestamp:{25}",
                                                         reason,
                                                         Me.TradableInstrument.TradingSymbol,
                                                         signalCandle.SnapshotDateTime.ToShortTimeString,
@@ -694,7 +696,8 @@ Public Class PetDGandhiStrategyInstrument
                                                         _lastTick.Timestamp,
                                                         vbNewLine,
                                                         Now,
-                                                        vbNewLine)
+                                                        vbNewLine,
+                                                        GetSignalCandleType(signalCandle, exitOrderResponse.ParentOrder.TransactionType))
                 GenerateTelegramMessageAsync(message)
             End If
         End If
@@ -893,10 +896,11 @@ Public Class PetDGandhiStrategyInstrument
         Return ret
     End Function
 
-    Public Function GetMovementPoint(ByVal entryPrice As Decimal, ByVal quantity As Integer, ByVal direction As IOrder.TypeOfTransaction) As Decimal
+    Private Function GetMovementPoint(ByVal entryPrice As Decimal, ByVal quantity As Integer, ByVal direction As IOrder.TypeOfTransaction) As Decimal
         Dim ret As Decimal = Me.TradableInstrument.TickSize
+        Dim potentialExitPoint As Decimal = ConvertFloorCeling(entryPrice * 0.1 / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
         If direction = IOrder.TypeOfTransaction.Buy Then
-            For exitPrice As Decimal = entryPrice To Decimal.MaxValue Step ret
+            For exitPrice As Decimal = (entryPrice - potentialExitPoint) To Decimal.MaxValue Step ret
                 Dim pl As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, entryPrice, exitPrice, quantity)
                 If pl >= -100 Then
                     ret = ConvertFloorCeling(exitPrice - entryPrice, Me.TradableInstrument.TickSize, RoundOfType.Celing)
@@ -904,13 +908,48 @@ Public Class PetDGandhiStrategyInstrument
                 End If
             Next
         ElseIf direction = IOrder.TypeOfTransaction.Sell Then
-            For exitPrice As Decimal = entryPrice To Decimal.MinValue Step ret * -1
+            For exitPrice As Decimal = (entryPrice + potentialExitPoint) To Decimal.MinValue Step ret * -1
                 Dim pl As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, exitPrice, entryPrice, quantity)
                 If pl >= -100 Then
                     ret = ConvertFloorCeling(entryPrice - exitPrice, Me.TradableInstrument.TickSize, RoundOfType.Celing)
                     Exit For
                 End If
             Next
+        End If
+        Return ret
+    End Function
+
+    Private Function GetSignalCandleType(ByVal signalCandle As OHLCPayload, ByVal signalDirection As IOrder.TypeOfTransaction) As String
+        Dim ret As String = ""
+        If signalCandle.HighPrice.Value > signalCandle.PreviousPayload.HighPrice.Value AndAlso
+            signalCandle.LowPrice.Value > signalCandle.PreviousPayload.LowPrice.Value Then
+            If signalDirection = IOrder.TypeOfTransaction.Buy Then
+                ret = "RHHLL"
+            ElseIf signalDirection = IOrder.TypeOfTransaction.Sell Then
+                ret = "HHLL"
+            End If
+        ElseIf signalCandle.HighPrice.Value < signalCandle.PreviousPayload.HighPrice.Value AndAlso
+            signalCandle.LowPrice.Value < signalCandle.PreviousPayload.LowPrice.Value Then
+            If signalDirection = IOrder.TypeOfTransaction.Buy Then
+                ret = "HHLL"
+            ElseIf signalDirection = IOrder.TypeOfTransaction.Sell Then
+                ret = "RHHLL"
+            End If
+        ElseIf signalCandle.HighPrice.Value < signalCandle.PreviousPayload.HighPrice.Value AndAlso
+            signalCandle.LowPrice.Value > signalCandle.PreviousPayload.LowPrice.Value Then
+            ret = "Inside Bar"
+        ElseIf signalCandle.HighPrice.Value >= signalCandle.PreviousPayload.HighPrice.Value AndAlso
+            signalCandle.LowPrice.Value <= signalCandle.PreviousPayload.LowPrice.Value Then
+            ret = "Outside Bar"
+        End If
+
+        Dim result As Decimal = signalCandle.PreviousPayload.Volume.Value * signalCandle.CandleRange / signalCandle.PreviousPayload.CandleRange
+        If result > signalCandle.Volume.Value Then
+            ret = String.Format("{0} - Good", ret)
+        ElseIf result >= signalCandle.Volume.Value * 90 / 100 Then
+            ret = String.Format("{0} - Ok", ret)
+        Else
+            ret = String.Format("{0} - Poor", ret)
         End If
         Return ret
     End Function
