@@ -889,16 +889,16 @@ Public Class PetDGandhiStrategyInstrument
                             Dim buffer As Decimal = CalculateBuffer(signalCandle.HighPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                             Dim potentialExitPrice As Decimal = signalCandle.HighPrice.Value - GetCandleBody(signalCandle, IOrder.TypeOfTransaction.Buy) - buffer
 
-                            If blockCandle.ClosePrice.Value > signalCandle.LowPrice.Value AndAlso
-                                blockCandle.ClosePrice.Value <= potentialExitPrice Then
+                            If blockCandle.PreviousPayload.ClosePrice.Value > signalCandle.LowPrice.Value AndAlso
+                                blockCandle.PreviousPayload.ClosePrice.Value <= potentialExitPrice Then
                                 ret = True
                             End If
                         ElseIf lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                             Dim buffer As Decimal = CalculateBuffer(signalCandle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                             Dim potentialExitPrice As Decimal = signalCandle.LowPrice.Value + GetCandleBody(signalCandle, IOrder.TypeOfTransaction.Sell) + buffer
 
-                            If blockCandle.ClosePrice.Value < signalCandle.HighPrice.Value AndAlso
-                                blockCandle.ClosePrice.Value >= potentialExitPrice Then
+                            If blockCandle.PreviousPayload.ClosePrice.Value < signalCandle.HighPrice.Value AndAlso
+                                blockCandle.PreviousPayload.ClosePrice.Value >= potentialExitPrice Then
                                 ret = True
                             End If
                         End If
