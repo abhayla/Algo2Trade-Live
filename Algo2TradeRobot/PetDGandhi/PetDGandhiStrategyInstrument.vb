@@ -869,23 +869,36 @@ Public Class PetDGandhiStrategyInstrument
                 End If
                 Dim signalCandle As OHLCPayload = GetSignalCandleOfAnOrder(lastExecutedOrder.ParentOrderIdentifier, timeframe)
                 If blockDateInThisTimeframe = signalCandle.SnapshotDateTime.AddMinutes(2 * timeframe) Then
-                    Dim lastTradeExitPrice As Decimal = Decimal.MinValue
-                    If lastExecutedOrder.AllOrder IsNot Nothing AndAlso lastExecutedOrder.AllOrder.Count > 0 Then
-                        For Each order In lastExecutedOrder.AllOrder
-                            If order.Status = IOrder.TypeOfStatus.Complete Then
-                                lastTradeExitPrice = order.AveragePrice
-                            End If
-                        Next
+                    Dim blockCandle As OHLCPayload = Nothing
+                    If Me.RawPayloadDependentConsumers IsNot Nothing AndAlso Me.RawPayloadDependentConsumers.Count > 0 Then
+                        Dim XMinutePayloadConsumer As PayloadToChartConsumer = RawPayloadDependentConsumers.Find(Function(x)
+                                                                                                                     If x.GetType Is GetType(PayloadToChartConsumer) Then
+                                                                                                                         Return CType(x, PayloadToChartConsumer).Timeframe = timeframe
+                                                                                                                     Else
+                                                                                                                         Return Nothing
+                                                                                                                     End If
+                                                                                                                 End Function)
+
+                        If XMinutePayloadConsumer IsNot Nothing AndAlso
+                            XMinutePayloadConsumer.ConsumerPayloads IsNot Nothing AndAlso XMinutePayloadConsumer.ConsumerPayloads.Count > 0 Then
+                            blockCandle = XMinutePayloadConsumer.ConsumerPayloads(blockDateInThisTimeframe)
+                        End If
                     End If
-                    If lastTradeExitPrice <> Decimal.MinValue Then
+                    If blockCandle IsNot Nothing Then
                         If lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                            If lastTradeExitPrice > signalCandle.LowPrice.Value AndAlso
-                                lastTradeExitPrice < signalCandle.HighPrice.Value Then
+                            Dim buffer As Decimal = CalculateBuffer(signalCandle.HighPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                            Dim potentialExitPrice As Decimal = signalCandle.HighPrice.Value - GetCandleBody(signalCandle, IOrder.TypeOfTransaction.Buy) - buffer
+
+                            If blockCandle.ClosePrice.Value > signalCandle.LowPrice.Value AndAlso
+                                blockCandle.ClosePrice.Value <= potentialExitPrice Then
                                 ret = True
                             End If
                         ElseIf lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                            If lastTradeExitPrice < signalCandle.HighPrice.Value AndAlso
-                                lastTradeExitPrice > signalCandle.LowPrice.Value Then
+                            Dim buffer As Decimal = CalculateBuffer(signalCandle.LowPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                            Dim potentialExitPrice As Decimal = signalCandle.LowPrice.Value + GetCandleBody(signalCandle, IOrder.TypeOfTransaction.Sell) + buffer
+
+                            If blockCandle.ClosePrice.Value < signalCandle.HighPrice.Value AndAlso
+                                blockCandle.ClosePrice.Value >= potentialExitPrice Then
                                 ret = True
                             End If
                         End If
