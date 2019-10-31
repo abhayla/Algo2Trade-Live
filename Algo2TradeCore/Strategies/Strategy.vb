@@ -322,6 +322,10 @@ Namespace Strategies
                 Next
             End If
         End Function
+        Public Overridable Async Function GetRunningCapitalAsync(ByVal exchange As Enums.TypeOfExchage) As Task(Of Decimal)
+            Await Task.Delay(0).ConfigureAwait(False)
+            Throw New NotImplementedException
+        End Function
 #End Region
 
 #Region "Public MustOverride Functions"
