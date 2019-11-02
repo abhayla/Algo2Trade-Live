@@ -3572,7 +3572,7 @@ Public Class frmMainTabbed
 
         tmrTickerStatusCommon.Enabled = False
 
-        Dim trialEndDate As Date = New Date(2019, 11, 2, 0, 0, 0)
+        Dim trialEndDate As Date = New Date(2019, 11, 6, 0, 0, 0)
         If Now() >= trialEndDate Then
             MsgBox("You Trial Period is over. Kindly contact Algo2Trade", MsgBoxStyle.Critical)
             End
