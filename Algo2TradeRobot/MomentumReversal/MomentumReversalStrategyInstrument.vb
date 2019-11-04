@@ -78,13 +78,6 @@ Public Class MomentumReversalStrategyInstrument
                 End If
                 'Modify Order block end
                 _cts.Token.ThrowIfCancellationRequested()
-                'Exit Order block start
-                Dim exitOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Await IsTriggerReceivedForExitOrderAsync(False).ConfigureAwait(False)
-                If exitOrderTrigger IsNot Nothing AndAlso exitOrderTrigger.Count > 0 Then
-                    Await ExecuteCommandAsync(ExecuteCommands.CancelBOOrder, Nothing).ConfigureAwait(False)
-                End If
-                'Exit Order block end
-                _cts.Token.ThrowIfCancellationRequested()
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While
         Catch ex As Exception
@@ -261,46 +254,8 @@ Public Class MomentumReversalStrategyInstrument
     Protected Overrides Function IsTriggerReceivedForModifyTargetOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
         Throw New NotImplementedException()
     End Function
-    Protected Overrides Async Function IsTriggerReceivedForExitOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
-        Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Nothing
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim userSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
-        Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(Me.ParentStrategy.UserSettings.SignalTimeFrame)
-        Dim allActiveOrders As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.None)
-        If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 Then
-            Dim parentOrders As List(Of IOrder) = allActiveOrders.FindAll(Function(x)
-                                                                              Return x.ParentOrderIdentifier Is Nothing AndAlso
-                                                                              (x.Status = IOrder.TypeOfStatus.TriggerPending OrElse
-                                                                              x.Status = IOrder.TypeOfStatus.Open)
-                                                                          End Function)
-            If parentOrders IsNot Nothing AndAlso parentOrders.Count > 0 Then
-                For Each parentOrder In parentOrders
-                    Dim parentBussinessOrder As IBusinessOrder = OrderDetails(parentOrder.OrderIdentifier)
-                    If parentOrder.Status = IOrder.TypeOfStatus.TriggerPending OrElse
-                        parentOrder.Status = IOrder.TypeOfStatus.Open Then
-                        If Now() >= parentOrder.TimeStamp.AddMinutes(userSettings.TradeOpenTime) Then
-                            'Below portion have to be done in every cancel order trigger
-                            Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(parentOrder.Tag)
-                            If currentSignalActivities IsNot Nothing Then
-                                If currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                    currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
-                                    currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
-                                    Continue For
-                                End If
-                            End If
-                            If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, String))
-                            ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, parentBussinessOrder.ParentOrder, "Trade not triggerd in max open time"))
-                        End If
-                    End If
-                Next
-            End If
-        End If
-        If forcePrint AndAlso ret IsNot Nothing AndAlso ret.Count > 0 Then
-            For Each runningOrder In ret
-                logger.Debug("***** Exit Order ***** Order ID:{0}, Reason:{1}, {2}", runningOrder.Item2.OrderIdentifier, runningOrder.Item3, Me.TradableInstrument.TradingSymbol)
-            Next
-        End If
-        Return ret
+    Protected Overrides Function IsTriggerReceivedForExitOrderAsync(ByVal forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
+        Throw New NotImplementedException()
     End Function
     Protected Overrides Function IsTriggerReceivedForPlaceOrderAsync(forcePrint As Boolean, data As Object) As Task(Of List(Of Tuple(Of ExecuteCommandAction, StrategyInstrument, PlaceOrderParameters, String)))
         Throw New NotImplementedException()

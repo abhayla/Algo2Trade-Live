@@ -10,7 +10,6 @@ Public Class MomentumReversalUserInputs
 
     Public Property RSIPeriod As Integer
     Public Property RSILevel As Integer
-    Public Property TradeOpenTime As Integer
 
     Private _IdleTimeStart As Date
     Public Property IdleTimeStart As Date
