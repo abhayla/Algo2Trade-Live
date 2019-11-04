@@ -9,8 +9,7 @@ Public Class MomentumReversalUserInputs
     Inherits StrategyUserInputs
 
     Public Property RSIPeriod As Integer
-    Public Property RSIOverBought As Integer
-    Public Property RSIOverSold As Integer
+    Public Property RSILevel As Integer
     Public Property TradeOpenTime As Integer
 
     Private _IdleTimeStart As Date

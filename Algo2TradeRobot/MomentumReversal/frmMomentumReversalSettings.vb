@@ -40,8 +40,7 @@ Public Class frmMomentumReversalSettings
             txtInstrumentDetalis.Text = _MRSettings.InstrumentDetailsFilePath
 
             txtRSIPeriod.Text = _MRSettings.RSIPeriod
-            txtRSIOverBought.Text = _MRSettings.RSIOverBought
-            txtRSIOverSold.Text = _MRSettings.RSIOverSold
+            txtRSILevel.Text = _MRSettings.RSILevel
         End If
     End Sub
     Private Sub SaveSettings()
@@ -55,8 +54,7 @@ Public Class frmMomentumReversalSettings
         _MRSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         _MRSettings.RSIPeriod = txtRSIPeriod.Text
-        _MRSettings.RSIOverBought = txtRSIOverBought.Text
-        _MRSettings.RSIOverSold = txtRSIOverSold.Text
+        _MRSettings.RSILevel = txtRSILevel.Text
 
         Utilities.Strings.SerializeFromCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename, _MRSettings)
     End Sub
@@ -82,8 +80,7 @@ Public Class frmMomentumReversalSettings
         ValidateNumbers(1, 60, txtSignalTimeFrame, True)
         ValidateNumbers(1, 60, txtTradeOpenTime, True)
         ValidateNumbers(1, Integer.MaxValue, txtRSIPeriod, True)
-        ValidateNumbers(1, Integer.MaxValue, txtRSIOverBought, True)
-        ValidateNumbers(1, Integer.MaxValue, txtRSIOverSold, True)
+        ValidateNumbers(1, Integer.MaxValue, txtRSILevel, True)
         ValidateFile()
     End Sub
 

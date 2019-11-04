@@ -15,6 +15,7 @@ Public Class MomentumReversalStrategyInstrument
 #End Region
 
     Private _lastPrevPayloadPlaceOrder As String = ""
+    Private _previousRSIWasBelowLevel As Boolean = False
     Private ReadOnly _dummyRSIConsumer As RSIConsumer
 
     Public Sub New(ByVal associatedInstrument As IInstrument,
@@ -66,7 +67,7 @@ Public Class MomentumReversalStrategyInstrument
                 'Place Order block start
                 Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
                 If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
-                    Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                    Await ExecuteCommandAsync(ExecuteCommands.PlaceBOLimitMISOrder, Nothing).ConfigureAwait(False)
                 End If
                 'Place Order block end
                 _cts.Token.ThrowIfCancellationRequested()
@@ -139,7 +140,7 @@ Public Class MomentumReversalStrategyInstrument
                     Dim stoploss As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
                     Dim target As Decimal = ConvertFloorCeling(triggerPrice * 10 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
-                    If triggerPrice < 300 AndAlso currentTick.LastPrice < triggerPrice Then
+                    If triggerPrice < 300 Then
                         parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                      .TriggerPrice = triggerPrice,
@@ -328,20 +329,12 @@ Public Class MomentumReversalStrategyInstrument
             Dim rsiConsumer As RSIConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRSIConsumer)
             If rsiConsumer.ConsumerPayloads IsNot Nothing AndAlso rsiConsumer.ConsumerPayloads.Count > 0 AndAlso
                 rsiConsumer.ConsumerPayloads.ContainsKey(candle.SnapshotDateTime) Then
-                If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSIOverSold AndAlso
-                    CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value < userSettings.RSIOverBought Then
-                    If Utilities.Time.IsDateTimeEqualTillMinutes(candle.SnapshotDateTime, userSettings.TradeStartTime) Then
-                        ret = New Tuple(Of Boolean, Decimal)(True, candle.PreviousPayload.HighPrice.Value)
-                    Else
-                        If candle.PreviousPayload IsNot Nothing AndAlso
-                            candle.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
-                            candle.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
-                            candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
-                            candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload.SnapshotDateTime.Date = Now.Date Then
-                            Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.PreviousPayload.HighPrice.Value, candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
-                            ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
-                        End If
-                    End If
+                If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSILevel AndAlso
+                    _previousRSIWasBelowLevel Then
+                    _previousRSIWasBelowLevel = False
+                    ret = New Tuple(Of Boolean, Decimal)(True, Me.TradableInstrument.LastTick.LastPrice)
+                ElseIf CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value < userSettings.RSILevel Then
+                    _previousRSIWasBelowLevel = True
                 End If
             End If
         End If
