@@ -80,6 +80,7 @@
     <Compile Include="Adapter\APIHistoricalDataFetcher.vb" />
     <Compile Include="Adapter\APITicker.vb" />
     <Compile Include="Adapter\BannedStockDataFetcher.vb" />
+    <Compile Include="Adapter\ToolExpiryDataFetcher.vb" />
     <Compile Include="Adapter\ZerodhaAdapter.vb" />
     <Compile Include="Adapter\ZerodhaInformationCollector.vb" />
     <Compile Include="Adapter\ZerodhaHistoricalDataFetcher.vb" />
@@ -174,6 +175,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>

@@ -145,6 +145,10 @@ Namespace Network
                     logger.Debug("Inside application/javascript output conversion")
                     Dim jsString As String = Await response.Content.ReadAsStringAsync().ConfigureAwait(False)
                     Return jsString
+                ElseIf response.Content.Headers.ContentType.MediaType = "text/plain" Then
+                    logger.Debug("Inside text/ plain output conversion")
+                    Dim textString As String = Await response.Content.ReadAsStringAsync().ConfigureAwait(False)
+                    Return textString
                 Else
                     Throw New NotImplementedException
                 End If

@@ -12,6 +12,8 @@ Imports System.IO
 Imports System.Runtime.Serialization.Formatters.Binary
 Imports Algo2TradeCore.Entities.UserSettings
 Imports Algo2TradeCore.Strategies
+Imports System.Reflection
+Imports System.Runtime.InteropServices
 
 Public Class frmMainTabbed
 
@@ -376,6 +378,12 @@ Public Class frmMainTabbed
                 AddHandler _commonController.NewItemAdded, AddressOf OnNewItemAdded
                 AddHandler _commonController.SessionExpiry, AddressOf OnSessionExpiry
                 AddHandler _commonController.EndOfTheDay, AddressOf OnEndOfTheDay
+
+                Dim currentAssembly As Assembly = Assembly.GetExecutingAssembly()
+                Dim attribute As GuidAttribute = currentAssembly.GetCustomAttributes(GetType(GuidAttribute), True)(0)
+                Dim toolID As String = attribute.Value
+                Dim toolRunning As Boolean = Await _commonController.IsToolRunning(toolID).ConfigureAwait(False)
+                If Not toolRunning Then Throw New ApplicationException("You version is expired. Please contact Algo2Trade.")
 
 #Region "Login"
                 Dim loginMessage As String = Nothing
@@ -3571,12 +3579,6 @@ Public Class frmMainTabbed
         End If
 
         tmrTickerStatusCommon.Enabled = False
-
-        Dim trialEndDate As Date = New Date(2019, 11, 6, 0, 0, 0)
-        If Now() >= trialEndDate Then
-            MsgBox("You Trial Period is over. Kindly contact Algo2Trade", MsgBoxStyle.Critical)
-            End
-        End If
 
         If tmrTickerStatusCommon.Interval = 700 Then
             tmrTickerStatusCommon.Interval = 2000
