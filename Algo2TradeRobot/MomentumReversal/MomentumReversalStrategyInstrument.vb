@@ -126,7 +126,7 @@ Public Class MomentumReversalStrategyInstrument
             Not Me.StrategyExitAllTriggerd Then
             'Not Me.StrategyExitAllTriggerd AndAlso Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime) Then
             If currentTime < userSettings.IdleTimeStart OrElse currentTime > userSettings.IdleTimeEnd Then
-                Dim signal As Tuple(Of Boolean, Decimal) = GetSignalCandle(runningCandlePayload, currentTick)
+                Dim signal As Tuple(Of Boolean, Decimal) = GetSignalCandle(runningCandlePayload, currentTick, forcePrint)
                 If signal IsNot Nothing AndAlso signal.Item1 Then
                     Dim triggerPrice As Decimal = signal.Item2 + userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Buffer
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
@@ -277,7 +277,7 @@ Public Class MomentumReversalStrategyInstrument
         End If
     End Function
 
-    Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick) As Tuple(Of Boolean, Decimal)
+    Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick, ByVal executeCommand As Boolean) As Tuple(Of Boolean, Decimal)
         Dim ret As Tuple(Of Boolean, Decimal) = Nothing
         If candle IsNot Nothing AndAlso candle.PreviousPayload IsNot Nothing Then
             Dim userSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
@@ -286,7 +286,7 @@ Public Class MomentumReversalStrategyInstrument
                 rsiConsumer.ConsumerPayloads.ContainsKey(candle.SnapshotDateTime) Then
                 If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSILevel AndAlso
                     _previousRSIWasBelowLevel Then
-                    _previousRSIWasBelowLevel = False
+                    If executeCommand Then _previousRSIWasBelowLevel = False
                     ret = New Tuple(Of Boolean, Decimal)(True, Me.TradableInstrument.LastTick.LastPrice)
                 ElseIf CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value < userSettings.RSILevel Then
                     _previousRSIWasBelowLevel = True
