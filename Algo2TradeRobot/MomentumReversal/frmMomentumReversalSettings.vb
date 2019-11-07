@@ -36,10 +36,12 @@ Public Class frmMomentumReversalSettings
             dtpckrEODExitTime.Value = _MRSettings.EODExitTime
             dtpckrIdleTimeStart.Value = _MRSettings.IdleTimeStart
             dtpckrIdleTimeEnd.Value = _MRSettings.IdleTimeEnd
+            txtTradeOpenTime.Text = _MRSettings.TradeOpenTime
             txtInstrumentDetalis.Text = _MRSettings.InstrumentDetailsFilePath
 
             txtRSIPeriod.Text = _MRSettings.RSIPeriod
-            txtRSILevel.Text = _MRSettings.RSILevel
+            txtRSIOverBought.Text = _MRSettings.RSIOverBought
+            txtRSIOverSold.Text = _MRSettings.RSIOverSold
         End If
     End Sub
     Private Sub SaveSettings()
@@ -49,10 +51,12 @@ Public Class frmMomentumReversalSettings
         _MRSettings.EODExitTime = dtpckrEODExitTime.Value
         _MRSettings.IdleTimeStart = dtpckrIdleTimeStart.Value
         _MRSettings.IdleTimeEnd = dtpckrIdleTimeEnd.Value
+        _MRSettings.TradeOpenTime = txtTradeOpenTime.Text
         _MRSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         _MRSettings.RSIPeriod = txtRSIPeriod.Text
-        _MRSettings.RSILevel = txtRSILevel.Text
+        _MRSettings.RSIOverBought = txtRSIOverBought.Text
+        _MRSettings.RSIOverSold = txtRSIOverSold.Text
 
         Utilities.Strings.SerializeFromCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename, _MRSettings)
     End Sub
@@ -76,8 +80,10 @@ Public Class frmMomentumReversalSettings
     End Sub
     Private Sub ValidateInputs()
         ValidateNumbers(1, 60, txtSignalTimeFrame, True)
+        ValidateNumbers(1, 60, txtTradeOpenTime, True)
         ValidateNumbers(1, Integer.MaxValue, txtRSIPeriod, True)
-        ValidateNumbers(1, Integer.MaxValue, txtRSILevel, True)
+        ValidateNumbers(1, Integer.MaxValue, txtRSIOverBought, True)
+        ValidateNumbers(1, Integer.MaxValue, txtRSIOverSold, True)
         ValidateFile()
     End Sub
 
