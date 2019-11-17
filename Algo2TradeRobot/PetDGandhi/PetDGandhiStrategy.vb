@@ -23,6 +23,7 @@ Public Class PetDGandhiStrategy
         'the fron end grid can bind to this created TradableStrategyInstruments which will be empty
         'TradableStrategyInstruments = New List(Of StrategyInstrument)
     End Sub
+
     Public Overrides Async Function CreateTradableStrategyInstrumentsAsync(allInstruments As IEnumerable(Of IInstrument), ByVal bannedInstruments As List(Of String)) As Task(Of Boolean)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             logger.Debug("CreateTradableStrategyInstrumentsAsync, allInstruments.Count:{0}", allInstruments.Count)
@@ -46,13 +47,15 @@ Public Class PetDGandhiStrategy
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
-                    Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
-                                                                                                Return x.TradingSymbol = instrument.Value.TradingSymbol
-                                                                                            End Function)
-                    _cts.Token.ThrowIfCancellationRequested()
-                    If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
-                    If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
-                    ret = True
+                    If instrument.Value.Take Then
+                        Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
+                                                                                                    Return x.TradingSymbol = instrument.Value.TradingSymbol
+                                                                                                End Function)
+                        _cts.Token.ThrowIfCancellationRequested()
+                        If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
+                        If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
+                        ret = True
+                    End If
                 Next
                 TradableInstrumentsAsPerStrategy = retTradableInstrumentsAsPerStrategy
             End If
@@ -123,92 +126,16 @@ Public Class PetDGandhiStrategy
         End If
     End Function
 
-    Public Overrides Async Function GetRunningCapitalAsync(exchange As TypeOfExchage) As Task(Of Decimal)
-        Await Task.Delay(0).ConfigureAwait(False)
-        Dim ret As Decimal = 0
-        If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Count > 0 Then
-            Dim userInput As PetDGandhiUserInputs = Me.UserSettings
-            For Each runningStrategyInstrument In Me.TradableStrategyInstruments
-                Dim marginMultiplier As Decimal = userInput.InstrumentsData(runningStrategyInstrument.TradableInstrument.TradingSymbol).MarginMultiplier
-                Dim activeOrders As List(Of IOrder) = runningStrategyInstrument.GetAllActiveOrders(IOrder.TypeOfTransaction.None)
-                If activeOrders IsNot Nothing AndAlso activeOrders.Count > 0 Then
-                    For Each runningOrder In activeOrders
-                        Dim parentOrder As IOrder = Nothing
-                        If runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Parent Then
-                            parentOrder = runningOrder
-                        Else
-                            If runningStrategyInstrument.GetParentFromChildOrder(runningOrder) IsNot Nothing Then
-                                parentOrder = runningStrategyInstrument.GetParentFromChildOrder(runningOrder).ParentOrder
-                            End If
-                        End If
-                        If parentOrder IsNot Nothing Then
-                            Dim price As Decimal = Decimal.MinValue
-                            If parentOrder.AveragePrice <> Decimal.MinValue AndAlso parentOrder.AveragePrice <> 0 Then
-                                price = parentOrder.AveragePrice
-                            ElseIf parentOrder.TriggerPrice <> Decimal.MinValue AndAlso parentOrder.TriggerPrice <> 0 Then
-                                price = parentOrder.TriggerPrice
-                            ElseIf parentOrder.Price <> Decimal.MinValue AndAlso parentOrder.Price <> 0 Then
-                                price = parentOrder.Price
-                            End If
-                            If price <> Decimal.MinValue Then
-                                ret += price * parentOrder.Quantity / marginMultiplier
-                            End If
-                        End If
-                    Next
-                End If
-            Next
-        End If
-        Return ret
-    End Function
-
     Protected Overrides Function IsTriggerReceivedForExitAllOrders() As Tuple(Of Boolean, String)
         Dim ret As Tuple(Of Boolean, String) = Nothing
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-            'ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(CType(Me.UserSettings, PetDGandhiUserInputs).MaxLossPerDay) * -1 Then
-            '    ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
-            'ElseIf Me.GetTotalPLAfterBrokerage >= CType(Me.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
-            '    ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
+        ElseIf Me.GetTotalPLAfterBrokerage <= CType(Me.UserSettings, PetDGandhiUserInputs).MaxLossPerDay Then
+            ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
+        ElseIf Me.GetTotalPLAfterBrokerage >= CType(Me.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
+            ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
-    End Function
-
-    Private _triggerUsed As Boolean = False
-    Public Async Function SendMTMNotification() As Task
-        If Not _triggerUsed Then
-            _triggerUsed = True
-            Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-            Try
-                _cts.Token.ThrowIfCancellationRequested()
-                Dim message As String = Nothing
-
-                message = String.Format("{0}{1}PL:{2}, {3}MaxDrawUP:{4}, MaxDrawUpTime:{5}, {6}MaxDrawDown:{7}, MaxDrawDownTime:{8}",
-                                        "Pinbar Strategy MTM reached",
-                                        vbNewLine,
-                                        Math.Round(Me.GetTotalPLAfterBrokerage, 2),
-                                        vbNewLine,
-                                        Math.Round(Me.MaxDrawUp, 2),
-                                        Me.MaxDrawUpTime,
-                                        vbNewLine,
-                                        Math.Round(Me.MaxDrawDown, 2),
-                                        Me.MaxDrawDownTime)
-
-                If message.Contains("&") Then
-                    message = message.Replace("&", "_")
-                End If
-
-                Dim userInputs As PetDGandhiUserInputs = Me.UserSettings
-                If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
-                    userInputs.TelegramMTMChatID IsNot Nothing AndAlso Not userInputs.TelegramMTMChatID.Trim = "" Then
-                    Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramMTMChatID, _cts)
-                        Dim encodedString As String = Utilities.Strings.EncodeString(message)
-                        tSender.SendMessageGetAsync(encodedString)
-                    End Using
-                End If
-            Catch ex As Exception
-                logger.Error("Generate Trigger after mtm reached message generation error: {0}", ex.ToString)
-            End Try
-        End If
     End Function
 End Class

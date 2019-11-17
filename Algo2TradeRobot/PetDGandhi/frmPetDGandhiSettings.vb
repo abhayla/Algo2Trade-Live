@@ -45,7 +45,6 @@ Public Class frmPetDGandhiSettings
     Private Sub LoadSettings()
         If File.Exists(_PetDGandhiSettingsFilename) Then
             _settings = Utilities.Strings.DeserializeToCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename)
-            txtATRPeriod.Text = _settings.ATRPeriod
             txtSignalTimeFrame.Text = _settings.SignalTimeFrame
             dtpckrTradeStartTime.Value = _settings.TradeStartTime
             dtpckrLastTradeEntryTime.Value = _settings.LastTradeEntryTime
@@ -55,12 +54,6 @@ Public Class frmPetDGandhiSettings
             txtMaxLossPerDay.Text = _settings.MaxLossPerDay
             txtMaxProfitPerDay.Text = _settings.MaxProfitPerDay
             txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
-            txtPinbarTailPercentage.Text = _settings.PinbarTailPercentage
-            txtMaxLossPerStockMultiplier.Text = _settings.MaxLossPerStockMultiplier
-            txtMaxProfitPerStockMultiplier.Text = _settings.MaxProfitPerStockMultiplier
-            txtMaxLossPerTradeMultiplier.Text = _settings.MaxLossPerTradeMultiplier
-            txtMinLossPercentagePerTrade.Text = _settings.MinLossPercentagePerTrade
-            txtMaxCapital.Text = _settings.MaxCapitalToBeUsed
 
             chbAutoSelectStock.Checked = _settings.AutoSelectStock
             chbCash.Checked = _settings.CashInstrument
@@ -74,31 +67,18 @@ Public Class frmPetDGandhiSettings
             txtMinVolume.Text = _settings.MinVolume
             txtBlankCandlePercentage.Text = _settings.BlankCandlePercentage
             txtNumberOfStock.Text = _settings.NumberOfStock
-
-            txtTelegramAPI.Text = _settings.TelegramAPIKey
-            txtTelegramTradeChatID.Text = _settings.TelegramTradeChatID
-            txtTelegramSignalChatID.Text = _settings.TelegramSignalChatID
-            txtTelegramTargetChatID.Text = _settings.TelegramTargetChatID
-            txtTelegramMTMChatID.Text = _settings.TelegramMTMChatID
         End If
     End Sub
     Private Sub SaveSettings()
-        _settings.ATRPeriod = txtATRPeriod.Text
         _settings.SignalTimeFrame = txtSignalTimeFrame.Text
         _settings.TradeStartTime = dtpckrTradeStartTime.Value
         _settings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
         _settings.EODExitTime = dtpckrEODExitTime.Value
         _settings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
         _settings.TargetMultiplier = txtTargetMultiplier.Text
-        _settings.MaxLossPerDay = Math.Abs(CDec(txtMaxLossPerDay.Text))
+        _settings.MaxLossPerDay = Math.Abs(CDec(txtMaxLossPerDay.Text)) * -1
         _settings.MaxProfitPerDay = txtMaxProfitPerDay.Text
         _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
-        _settings.PinbarTailPercentage = txtPinbarTailPercentage.Text
-        _settings.MaxLossPerStockMultiplier = Math.Abs(CDec(txtMaxLossPerStockMultiplier.Text))
-        _settings.MaxProfitPerStockMultiplier = txtMaxProfitPerStockMultiplier.Text
-        _settings.MaxLossPerTradeMultiplier = Math.Abs(CDec(txtMaxLossPerTradeMultiplier.Text))
-        _settings.MinLossPercentagePerTrade = Math.Abs(CDec(txtMinLossPercentagePerTrade.Text))
-        _settings.MaxCapitalToBeUsed = txtMaxCapital.Text
 
         _settings.AutoSelectStock = chbAutoSelectStock.Checked
         _settings.CashInstrument = chbCash.Checked
@@ -112,12 +92,6 @@ Public Class frmPetDGandhiSettings
         _settings.MinVolume = txtMinVolume.Text
         _settings.BlankCandlePercentage = txtBlankCandlePercentage.Text
         _settings.NumberOfStock = txtNumberOfStock.Text
-
-        _settings.TelegramAPIKey = txtTelegramAPI.Text
-        _settings.TelegramTradeChatID = txtTelegramTradeChatID.Text
-        _settings.TelegramSignalChatID = txtTelegramSignalChatID.Text
-        _settings.TelegramTargetChatID = txtTelegramTargetChatID.Text
-        _settings.TelegramMTMChatID = txtTelegramMTMChatID.Text
 
         Utilities.Strings.SerializeFromCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename, _settings)
     End Sub

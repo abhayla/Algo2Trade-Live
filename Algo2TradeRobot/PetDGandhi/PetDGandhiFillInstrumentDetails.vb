@@ -279,7 +279,7 @@ Public Class PetDGandhiFillInstrumentDetails
                         End If
                     Next
                     If capableStocks IsNot Nothing AndAlso capableStocks.Count > 0 Then
-                        Dim todayStockList As List(Of String) = Nothing
+                        Dim todayStockList As Dictionary(Of String, InstrumentDetails) = Nothing
                         Dim stocksLessThanMaxBlankCandlePercentage As IEnumerable(Of KeyValuePair(Of String, InstrumentDetails)) =
                                     capableStocks.Where(Function(x)
                                                             Return x.Value.BlankCandlePercentage <> Decimal.MinValue AndAlso
@@ -291,10 +291,10 @@ Public Class PetDGandhiFillInstrumentDetails
                                                                                                                Return x.Value.ATR
                                                                                                            End Function)
                                 _cts.Token.ThrowIfCancellationRequested()
-                                If todayStockList Is Nothing Then todayStockList = New List(Of String)
-                                todayStockList.Add(stockData.Key)
+                                If todayStockList Is Nothing Then todayStockList = New Dictionary(Of String, InstrumentDetails)
+                                todayStockList.Add(stockData.Key, stockData.Value)
                                 stockCounter += 1
-                                If stockCounter = _userInputs.NumberOfStock Then Exit For
+                                'If stockCounter = _userInputs.NumberOfStock Then Exit For
                             Next
                         End If
                         _cts.Token.ThrowIfCancellationRequested()
@@ -308,17 +308,29 @@ Public Class PetDGandhiFillInstrumentDetails
                                     allStockData = New DataTable
                                     allStockData.Columns.Add("Trading Symbol")
                                     allStockData.Columns.Add("Margin Multiplier")
+                                    allStockData.Columns.Add("ATR %")
+                                    allStockData.Columns.Add("Change %")
+                                    allStockData.Columns.Add("Take")
+                                    allStockData.Columns.Add("Slab")
                                     For Each stock In todayStockList
                                         If _userInputs.CashInstrument Then
                                             Dim row As DataRow = allStockData.NewRow
-                                            row("Trading Symbol") = stock.Remove(stock.Count - 8)
+                                            row("Trading Symbol") = stock.Key.Remove(stock.Key.Count - 8)
                                             row("Margin Multiplier") = 13
+                                            row("ATR %") = stock.Value.ATR
+                                            row("Change %") = 0
+                                            row("Take") = "N"
+                                            row("Slab") = 0
                                             allStockData.Rows.Add(row)
                                         End If
                                         If _userInputs.FutureInstrument Then
                                             Dim row As DataRow = allStockData.NewRow
-                                            row("Trading Symbol") = stock
+                                            row("Trading Symbol") = stock.Key
                                             row("Margin Multiplier") = 30
+                                            row("ATR %") = stock.Value.ATR
+                                            row("Change %") = 0
+                                            row("Take") = "N"
+                                            row("Slab") = 0
                                             allStockData.Rows.Add(row)
                                         End If
                                     Next

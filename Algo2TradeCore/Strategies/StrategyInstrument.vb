@@ -703,13 +703,11 @@ Namespace Strategies
             Dim previousQuantity As Integer = lotSize
             For quantityMultiplier = 1 To Integer.MaxValue
                 Dim plAfterBrokerage As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, sellPrice, lotSize * quantityMultiplier)
-                If NetProfitLossOfTrade > 0 Then
-                    If plAfterBrokerage >= NetProfitLossOfTrade Then
-                        previousQuantity = lotSize * quantityMultiplier
-                        Exit For
-                    Else
-                        previousQuantity = lotSize * quantityMultiplier
-                    End If
+                If plAfterBrokerage >= NetProfitLossOfTrade Then
+                    previousQuantity = lotSize * quantityMultiplier
+                    Exit For
+                Else
+                    previousQuantity = lotSize * quantityMultiplier
                 End If
             Next
             Return previousQuantity
@@ -720,13 +718,11 @@ Namespace Strategies
             Dim previousQuantity As Integer = lotSize
             For quantityMultiplier = 1 To Integer.MaxValue
                 Dim plAfterBrokerage As Decimal = _APIAdapter.CalculatePLWithBrokerage(Me.TradableInstrument, buyPrice, sellPrice, lotSize * quantityMultiplier)
-                If NetProfitLossOfTrade > 0 Then
-                    If plAfterBrokerage <= Math.Abs(NetProfitLossOfTrade) * -1 Then
-                        previousQuantity = lotSize * If(quantityMultiplier - 1 = 0, 1, quantityMultiplier - 1)
-                        Exit For
-                    Else
-                        previousQuantity = lotSize * quantityMultiplier
-                    End If
+                If plAfterBrokerage <= Math.Abs(NetProfitLossOfTrade) * -1 Then
+                    previousQuantity = lotSize * If(quantityMultiplier - 1 = 0, 1, quantityMultiplier - 1)
+                    Exit For
+                Else
+                    previousQuantity = lotSize * quantityMultiplier
                 End If
             Next
             Return previousQuantity
