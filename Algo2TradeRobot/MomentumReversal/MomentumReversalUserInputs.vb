@@ -12,6 +12,7 @@ Public Class MomentumReversalUserInputs
     Public Property RSIOverBought As Integer
     Public Property RSIOverSold As Integer
     Public Property TradeOpenTime As Integer
+    Public Property TimeGapBetweenBackToBackTrades As Integer
 
     Private _IdleTimeStart As Date
     Public Property IdleTimeStart As Date
