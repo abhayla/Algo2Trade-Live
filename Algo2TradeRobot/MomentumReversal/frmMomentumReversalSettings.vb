@@ -37,6 +37,7 @@ Public Class frmMomentumReversalSettings
             dtpckrIdleTimeStart.Value = _MRSettings.IdleTimeStart
             dtpckrIdleTimeEnd.Value = _MRSettings.IdleTimeEnd
             txtTradeOpenTime.Text = _MRSettings.TradeOpenTime
+            txtBackToBackTradeTimeGap.Text = _MRSettings.TimeGapBetweenBackToBackTrades
             txtInstrumentDetalis.Text = _MRSettings.InstrumentDetailsFilePath
 
             txtRSIPeriod.Text = _MRSettings.RSIPeriod
@@ -52,6 +53,7 @@ Public Class frmMomentumReversalSettings
         _MRSettings.IdleTimeStart = dtpckrIdleTimeStart.Value
         _MRSettings.IdleTimeEnd = dtpckrIdleTimeEnd.Value
         _MRSettings.TradeOpenTime = txtTradeOpenTime.Text
+        _MRSettings.TimeGapBetweenBackToBackTrades = txtBackToBackTradeTimeGap.Text
         _MRSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         _MRSettings.RSIPeriod = txtRSIPeriod.Text
@@ -81,6 +83,7 @@ Public Class frmMomentumReversalSettings
     Private Sub ValidateInputs()
         ValidateNumbers(1, 60, txtSignalTimeFrame, True)
         ValidateNumbers(1, 60, txtTradeOpenTime, True)
+        ValidateNumbers(1, 3600, txtBackToBackTradeTimeGap, True)
         ValidateNumbers(1, Integer.MaxValue, txtRSIPeriod, True)
         ValidateNumbers(1, Integer.MaxValue, txtRSIOverBought, True)
         ValidateNumbers(1, Integer.MaxValue, txtRSIOverSold, True)

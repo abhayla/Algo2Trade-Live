@@ -134,19 +134,21 @@ Public Class MomentumReversalStrategyInstrument
             If currentTime < userSettings.IdleTimeStart OrElse currentTime > userSettings.IdleTimeEnd Then
                 Dim signal As Tuple(Of Boolean, Decimal) = GetSignalCandle(runningCandlePayload, currentTick, forcePrint)
                 If signal IsNot Nothing AndAlso signal.Item1 Then
-                    Dim triggerPrice As Decimal = signal.Item2 + userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Buffer
-                    Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                    Dim stoploss As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
-                    Dim target As Decimal = ConvertFloorCeling(triggerPrice * 10 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
+                    If GetLastOrderExitTime() = Date.MinValue OrElse currentTime >= GetLastOrderExitTime().AddSeconds(userSettings.TimeGapBetweenBackToBackTrades) Then
+                        Dim triggerPrice As Decimal = signal.Item2 + userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Buffer
+                        Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                        Dim stoploss As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
+                        Dim target As Decimal = ConvertFloorCeling(triggerPrice * 10 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
-                    If triggerPrice < 300 AndAlso currentTick.LastPrice < triggerPrice Then
-                        parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                        If triggerPrice < 300 AndAlso currentTick.LastPrice < triggerPrice Then
+                            parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                      .TriggerPrice = triggerPrice,
                                      .Price = price,
                                      .StoplossValue = stoploss,
                                      .SquareOffValue = target,
                                      .Quantity = Me.TradableInstrument.LotSize * userSettings.InstrumentsData(Me.TradableInstrument.RawInstrumentName).NumberOfLots}
+                        End If
                     End If
                 End If
             End If
