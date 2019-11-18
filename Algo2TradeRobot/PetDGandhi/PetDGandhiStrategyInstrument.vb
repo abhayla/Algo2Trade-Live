@@ -85,7 +85,7 @@ Public Class PetDGandhiStrategyInstrument
                 End If
                 'Modify Order block end
                 _cts.Token.ThrowIfCancellationRequested()
-                Await Task.Delay(500, _cts.Token).ConfigureAwait(False)
+                Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While
         Catch ex As Exception
             'To log exceptions getting created from this function as the bubble up of the exception
@@ -117,20 +117,7 @@ Public Class PetDGandhiStrategyInstrument
                 If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Slab <> Decimal.MinValue Then
                     Me.Slab = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Slab
                 Else
-                    Dim supportedSlab As Decimal = runningCandlePayload.OpenPrice.Value * 0.2 / 100
-                    If supportedSlab < 1 Then
-                        Me.Slab = 0.5
-                    ElseIf supportedSlab >= 1 AndAlso supportedSlab < 2.5 Then
-                        Me.Slab = 1
-                    ElseIf supportedSlab >= 2.5 AndAlso supportedSlab < 5 Then
-                        Me.Slab = 2.5
-                    ElseIf supportedSlab >= 5 AndAlso supportedSlab < 10 Then
-                        Me.Slab = 5
-                    ElseIf supportedSlab >= 10 AndAlso supportedSlab < 15 Then
-                        Me.Slab = 10
-                    ElseIf supportedSlab >= 15 Then
-                        Me.Slab = 15
-                    End If
+                    Me.Slab = CalculateSlab(runningCandlePayload.OpenPrice.Value)
                 End If
             End If
             If _firstTradedQuantity = Integer.MinValue Then
@@ -147,10 +134,28 @@ Public Class PetDGandhiStrategyInstrument
             Dim sellPrice As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Sell)
 
             If longActiveOrders IsNot Nothing AndAlso longActiveOrders.Count > 0 Then
-                sellPrice = sellPrice - Me.Slab
+                For Each runningActiveTrade In longActiveOrders
+                    If runningActiveTrade.LogicalOrderType = IOrder.LogicalTypeOfOrder.Parent Then
+                        If runningActiveTrade.Status = IOrder.TypeOfStatus.Complete Then
+                            sellPrice = runningActiveTrade.TriggerPrice - Me.Slab
+                        Else
+                            sellPrice = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Sell)
+                        End If
+                        Exit For
+                    End If
+                Next
             End If
             If shortActiveOrders IsNot Nothing AndAlso shortActiveOrders.Count > 0 Then
-                buyPrice = buyPrice + Me.Slab
+                For Each runningActiveTrade In shortActiveOrders
+                    If runningActiveTrade.LogicalOrderType = IOrder.LogicalTypeOfOrder.Parent Then
+                        If runningActiveTrade.Status = IOrder.TypeOfStatus.Complete Then
+                            buyPrice = runningActiveTrade.TriggerPrice + Me.Slab
+                        Else
+                            buyPrice = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Buy)
+                        End If
+                        Exit For
+                    End If
+                Next
             End If
 
             If longActiveOrders Is Nothing OrElse longActiveOrders.Count = 0 Then
@@ -161,7 +166,7 @@ Public Class PetDGandhiStrategyInstrument
                 Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
 
                 If currentTick.LastPrice < triggerPrice Then
-                    parameter1 = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                    parameter1 = New PlaceOrderParameters(runningCandlePayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                      .TriggerPrice = triggerPrice,
                                      .Price = price,
@@ -169,9 +174,7 @@ Public Class PetDGandhiStrategyInstrument
                                      .SquareOffValue = target,
                                      .Quantity = _firstTradedQuantity}
                 End If
-            End If
-
-            If shortActiveOrders Is Nothing OrElse shortActiveOrders.Count = 0 Then
+            ElseIf shortActiveOrders Is Nothing OrElse shortActiveOrders.Count = 0 Then
                 Dim triggerPrice As Decimal = sellPrice
                 Dim price As Decimal = triggerPrice - ConvertFloorCeling(Me.Slab / 2, TradableInstrument.TickSize, RoundOfType.Celing)
                 Dim stoplossPrice As Decimal = triggerPrice + Me.Slab
@@ -179,7 +182,7 @@ Public Class PetDGandhiStrategyInstrument
                 Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
 
                 If currentTick.LastPrice > triggerPrice Then
-                    parameter2 = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                    parameter2 = New PlaceOrderParameters(runningCandlePayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                                      .TriggerPrice = triggerPrice,
                                      .Price = price,
@@ -191,10 +194,11 @@ Public Class PetDGandhiStrategyInstrument
 
             If forcePrint Then
                 Try
-                    logger.Debug("Place Order Details: Long Active Trades:{0}, Short Active Trades:{1}, LTP:{2}, Trading Symbol:{3}",
+                    logger.Debug("Place Order Details: Long Active Trades:{0}, Short Active Trades:{1}, LTP:{2}, Slab:{3}, Trading Symbol:{4}",
                                  If(longActiveOrders Is Nothing, "Nothing", longActiveOrders.Count),
                                  If(shortActiveOrders Is Nothing, "Nothing", shortActiveOrders.Count),
                                  currentTick.LastPrice,
+                                 Me.Slab,
                                  Me.TradableInstrument.TradingSymbol)
                 Catch ex As Exception
                     logger.Error(ex.ToString)
@@ -313,17 +317,29 @@ Public Class PetDGandhiStrategyInstrument
                             Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
                             Dim triggerPrice As Decimal = Decimal.MinValue
                             Dim reason As String = Nothing
-                            If slOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                Dim price As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Buy) + Me.Slab
-                                If price < slOrder.TriggerPrice Then
-                                    triggerPrice = price
-                                    reason = ""
+                            If Not slOrder.SupportingFlag Then
+                                If bussinessOrder.ParentOrder.AveragePrice <> bussinessOrder.ParentOrder.TriggerPrice Then
+                                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                        triggerPrice = bussinessOrder.ParentOrder.TriggerPrice - Me.Slab
+                                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                        triggerPrice = bussinessOrder.ParentOrder.TriggerPrice + Me.Slab
+                                    End If
+                                    reason = "Slippage"
                                 End If
-                            ElseIf slOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                Dim price As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Sell) - Me.Slab
-                                If price > slOrder.TriggerPrice Then
-                                    triggerPrice = price
-                                    reason = ""
+                                slOrder.SupportingFlag = True
+                            Else
+                                If slOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                    Dim price As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Buy) + Me.Slab
+                                    If price < slOrder.TriggerPrice Then
+                                        triggerPrice = price
+                                        reason = "SL order LTP based Movement"
+                                    End If
+                                ElseIf slOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                    Dim price As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Sell) - Me.Slab
+                                    If price > slOrder.TriggerPrice Then
+                                        triggerPrice = price
+                                        reason = "SL order LTP based Movement"
+                                    End If
                                 End If
                             End If
                             If triggerPrice <> Decimal.MinValue AndAlso slOrder.TriggerPrice <> triggerPrice Then
@@ -334,7 +350,9 @@ Public Class PetDGandhiStrategyInstrument
                                         currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
                                         currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
                                         If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
-                                            Continue For
+                                            If currentSignalActivities.StoplossModifyActivity.RequestRemarks.Contains("SL order") Then
+                                                Continue For
+                                            End If
                                         End If
                                     End If
                                 End If
@@ -348,16 +366,20 @@ Public Class PetDGandhiStrategyInstrument
                     Dim triggerPrice As Decimal = Decimal.MinValue
                     Dim reason As String = Nothing
                     If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                        Dim price As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Buy) + Me.Slab
+                        Dim price As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Buy)
+                        Dim runningOrder As List(Of IOrder) = GetRunningOrders(IOrder.TypeOfTransaction.Sell)
+                        If runningOrder IsNot Nothing AndAlso runningOrder.Count > 0 Then price = price + Me.Slab
                         If price < bussinessOrder.ParentOrder.TriggerPrice Then
                             triggerPrice = price
-                            reason = ""
+                            reason = "Parent order LTP based Movement"
                         End If
                     ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                        Dim price As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Sell) - Me.Slab
+                        Dim price As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Sell)
+                        Dim runningOrder As List(Of IOrder) = GetRunningOrders(IOrder.TypeOfTransaction.Buy)
+                        If runningOrder IsNot Nothing AndAlso runningOrder.Count > 0 Then price = price - Me.Slab
                         If price > bussinessOrder.ParentOrder.TriggerPrice Then
                             triggerPrice = price
-                            reason = ""
+                            reason = "Parent order LTP based Movement"
                         End If
                     End If
                     If triggerPrice <> Decimal.MinValue AndAlso bussinessOrder.ParentOrder.TriggerPrice <> triggerPrice Then
@@ -377,6 +399,18 @@ Public Class PetDGandhiStrategyInstrument
                     End If
                 End If
             Next
+        End If
+        If forcePrint Then
+            Try
+                If ret IsNot Nothing AndAlso ret.Count > 0 Then
+                    For Each runningAction In ret
+                        logger.Debug("Modify Order: Order ID:{0}, Trigger Price:{1}, Reason:{2}, Trading Symbol:{3}",
+                                     runningAction.Item2.OrderIdentifier, runningAction.Item3, runningAction.Item4, Me.TradableInstrument.TradingSymbol)
+                    Next
+                End If
+            Catch ex As Exception
+                logger.Error(ex.ToString)
+            End Try
         End If
         Return ret
     End Function
@@ -412,6 +446,45 @@ Public Class PetDGandhiStrategyInstrument
             ret = Math.Ceiling(price / Me.Slab) * Me.Slab
         ElseIf direction = IOrder.TypeOfTransaction.Sell Then
             ret = Math.Floor(price / Me.Slab) * Me.Slab
+        End If
+        Return ret
+    End Function
+
+    Private Function CalculateSlab(ByVal price As Decimal) As Decimal
+        Dim ret As Decimal = 0.5
+        Dim slabList As List(Of Decimal) = New List(Of Decimal) From {0.5, 1, 2.5, 5, 10, 15}
+        Dim supportedLowerSlab As Decimal = price * 0.2 / 100
+        Dim supportedUpperSlab As Decimal = price * 0.5 / 100
+        Dim supportedSlabList As List(Of Decimal) = slabList.FindAll(Function(x)
+                                                                         Return x >= supportedLowerSlab AndAlso
+                                                                         x <= supportedUpperSlab
+                                                                     End Function)
+        If supportedSlabList IsNot Nothing AndAlso supportedSlabList.Count > 0 Then
+            ret = supportedSlabList.Min
+        End If
+        Return ret
+    End Function
+
+    Private Function GetRunningOrders(ByVal signalDirection As IOrder.TypeOfTransaction) As List(Of IOrder)
+        Dim ret As List(Of IOrder) = Nothing
+        If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
+            For Each parentOrderId In OrderDetails.Keys
+                Dim parentBusinessOrder As IBusinessOrder = OrderDetails(parentOrderId)
+                If parentBusinessOrder IsNot Nothing AndAlso parentBusinessOrder.ParentOrder IsNot Nothing Then
+                    If signalDirection = IOrder.TypeOfTransaction.None OrElse parentBusinessOrder.ParentOrder.TransactionType = signalDirection Then
+                        If Not parentBusinessOrder.ParentOrder.Status = IOrder.TypeOfStatus.Rejected Then
+                            If parentBusinessOrder.SLOrder IsNot Nothing AndAlso parentBusinessOrder.SLOrder.Count > 0 Then
+                                For Each slOrder In parentBusinessOrder.SLOrder
+                                    If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not slOrder.Status = IOrder.TypeOfStatus.Cancelled Then
+                                        If ret Is Nothing Then ret = New List(Of IOrder)
+                                        ret.Add(parentBusinessOrder.ParentOrder)
+                                    End If
+                                Next
+                            End If
+                        End If
+                    End If
+                End If
+            Next
         End If
         Return ret
     End Function
