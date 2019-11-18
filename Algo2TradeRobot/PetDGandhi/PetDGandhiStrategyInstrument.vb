@@ -155,7 +155,7 @@ Public Class PetDGandhiStrategyInstrument
 
             If longActiveOrders Is Nothing OrElse longActiveOrders.Count = 0 Then
                 Dim triggerPrice As Decimal = buyPrice
-                Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim price As Decimal = triggerPrice + ConvertFloorCeling(Me.Slab / 2, TradableInstrument.TickSize, RoundOfType.Celing)
                 Dim stoplossPrice As Decimal = triggerPrice - Me.Slab
                 Dim stoploss As Decimal = ConvertFloorCeling(triggerPrice - stoplossPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                 Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
@@ -173,7 +173,7 @@ Public Class PetDGandhiStrategyInstrument
 
             If shortActiveOrders Is Nothing OrElse shortActiveOrders.Count = 0 Then
                 Dim triggerPrice As Decimal = sellPrice
-                Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
+                Dim price As Decimal = triggerPrice - ConvertFloorCeling(Me.Slab / 2, TradableInstrument.TickSize, RoundOfType.Celing)
                 Dim stoplossPrice As Decimal = triggerPrice + Me.Slab
                 Dim stoploss As Decimal = ConvertFloorCeling(stoplossPrice - triggerPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
                 Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
@@ -187,6 +187,18 @@ Public Class PetDGandhiStrategyInstrument
                                      .SquareOffValue = target,
                                      .Quantity = _firstTradedQuantity}
                 End If
+            End If
+
+            If forcePrint Then
+                Try
+                    logger.Debug("Place Order Details: Long Active Trades:{0}, Short Active Trades:{1}, LTP:{2}, Trading Symbol:{3}",
+                                 If(longActiveOrders Is Nothing, "Nothing", longActiveOrders.Count),
+                                 If(shortActiveOrders Is Nothing, "Nothing", shortActiveOrders.Count),
+                                 currentTick.LastPrice,
+                                 Me.TradableInstrument.TradingSymbol)
+                Catch ex As Exception
+                    logger.Error(ex.ToString)
+                End Try
             End If
         End If
 
