@@ -65,10 +65,10 @@ Namespace Strategies
                                                     ByVal associatedOrderID As String,
                                                     ByVal receivedTime As Date) As Task
             Await AddOrUpdateEntryActivity(activityTag:=activityTag,
-                                     associatedStrategyInstrument:=associatedStrategyInstrument,
-                                     associatedOrderID:=associatedOrderID,
-                                     receivedTime:=receivedTime,
-                                     requestStatus:=ActivityDashboard.SignalStatusType.Activated).ConfigureAwait(False)
+                                             associatedStrategyInstrument:=associatedStrategyInstrument,
+                                             associatedOrderID:=associatedOrderID,
+                                             receivedTime:=receivedTime,
+                                             requestStatus:=ActivityDashboard.SignalStatusType.Activated).ConfigureAwait(False)
         End Function
         Public Async Function DiscardEntryActivity(ByVal activityTag As String,
                                                     ByVal associatedStrategyInstrument As StrategyInstrument,
@@ -113,6 +113,14 @@ Namespace Strategies
                                             associatedStrategyInstrument:=associatedStrategyInstrument,
                                             associatedOrderID:=associatedOrderID,
                                             requestStatus:=ActivityDashboard.SignalStatusType.Running).ConfigureAwait(False)
+        End Function
+        Public Async Function UpdateEntryActivity(ByVal activityTag As String,
+                                                    ByVal associatedStrategyInstrument As StrategyInstrument,
+                                                    ByVal associatedOrderID As String) As Task
+            Await AddOrUpdateEntryActivity(activityTag:=activityTag,
+                                            associatedStrategyInstrument:=associatedStrategyInstrument,
+                                            associatedOrderID:=associatedOrderID,
+                                            requestStatus:=ActivityDashboard.SignalStatusType.Updated).ConfigureAwait(False)
         End Function
 #End Region
 
@@ -288,6 +296,23 @@ Namespace Strategies
             If Me.ActivityDetails IsNot Nothing AndAlso Me.ActivityDetails.Count > 0 AndAlso Me.ActivityDetails.ContainsKey(activityTag) Then
                 ret = Me.ActivityDetails(activityTag)
             End If
+            Return ret
+        End Function
+        Public Function GetAllSignalActivitiesForInstrument(ByVal instrumentIdentifier As String) As IEnumerable(Of KeyValuePair(Of String, ActivityDashboard))
+            Dim ret As IEnumerable(Of KeyValuePair(Of String, ActivityDashboard)) = Nothing
+            Try
+                If Me.ActivityDetails IsNot Nothing AndAlso Me.ActivityDetails.Count > 0 Then
+                    ret = Me.ActivityDetails.Where(Function(x)
+                                                       Dim key As String = Convert.ToInt64(x.Key, 16)
+                                                       Return key.Substring(0, 1).Equals(Me.ParentStrategy.StrategyIdentifier) AndAlso
+                                                        Val(key.Substring(1, 3)) = Val(Me.ParentController.InstrumentMappingTable(instrumentIdentifier))
+                                                   End Function)
+
+                End If
+            Catch ex As Exception
+                logger.Error(ex)
+                Throw ex
+            End Try
             Return ret
         End Function
 #End Region

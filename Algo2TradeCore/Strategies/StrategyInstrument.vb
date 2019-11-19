@@ -1210,6 +1210,8 @@ Namespace Strategies
                 Else
                     Await Me.ParentStrategy.SignalManager.CompleteEntryActivity(orderData.ParentOrder.Tag, Me, orderData.ParentOrderIdentifier).ConfigureAwait(False)
                 End If
+            Else
+                Await Me.ParentStrategy.SignalManager.UpdateEntryActivity(orderData.ParentOrder.Tag, Me, orderData.ParentOrderIdentifier).ConfigureAwait(False)
             End If
 
             _cts.Token.ThrowIfCancellationRequested()

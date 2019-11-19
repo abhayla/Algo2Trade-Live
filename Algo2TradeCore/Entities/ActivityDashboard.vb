@@ -137,6 +137,7 @@ Namespace Entities
             Get
                 If ParentStrategyInstrument.IsActiveInstrument() Then
                     If Me.EntryActivity.RequestStatus = SignalStatusType.Activated OrElse
+                        Me.EntryActivity.RequestStatus = SignalStatusType.Updated OrElse
                        Me.EntryActivity.RequestStatus = SignalStatusType.Running Then
                         _ActiveSignal = True
                     Else
@@ -399,6 +400,7 @@ Namespace Entities
             Cancelled
             Rejected
             Discarded
+            Updated
             None
         End Enum
 #End Region
