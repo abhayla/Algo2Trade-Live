@@ -1,9 +1,11 @@
-﻿Imports System.Text.RegularExpressions
+﻿Imports System.IO
+Imports System.Text.RegularExpressions
 Imports System.Threading
 Imports Algo2TradeCore.Controller
 Imports Algo2TradeCore.Entities
 Imports Algo2TradeCore.Strategies
 Imports NLog
+Imports Utilities.DAL
 
 Public Class PetDGandhiStrategy
     Inherits Strategy
@@ -113,6 +115,7 @@ Public Class PetDGandhiStrategy
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
+            If CType(Me.UserSettings, PetDGandhiUserInputs).AutoSelectStock Then tasks.Add(Task.Run(AddressOf CompleteProcessAsync, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
         Catch ex As Exception
             lastException = ex
@@ -137,5 +140,87 @@ Public Class PetDGandhiStrategy
             ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
+    End Function
+
+    Private Async Function CompleteProcessAsync() As Task
+        Try
+            Dim delayCtr As Integer = 0
+            While True
+                If Me.ParentController.OrphanException IsNot Nothing Then
+                    Throw Me.ParentController.OrphanException
+                End If
+                _cts.Token.ThrowIfCancellationRequested()
+                If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Where(Function(z)
+                                                                                                                 Return CType(z, PetDGandhiStrategyInstrument).FilledPreviousClose
+                                                                                                             End Function).Count > 0 Then
+                    Dim counter As Integer = 0
+                    For Each runningCashInstrument In Me.TradableStrategyInstruments
+                        If CType(runningCashInstrument, PetDGandhiStrategyInstrument).FilledPreviousClose Then
+                            CType(runningCashInstrument, PetDGandhiStrategyInstrument).EligibleToTakeTrade = True
+                            runningCashInstrument.TradableInstrument.FetchHistorical = True
+                            counter += 1
+                            If counter = CType(Me.UserSettings, PetDGandhiUserInputs).NumberOfStock Then
+                                Exit For
+                            End If
+                        End If
+                    Next
+                    WriteCSV()
+                    For Each runningInstrument In Me.TradableStrategyInstruments
+                        If Not CType(runningInstrument, PetDGandhiStrategyInstrument).EligibleToTakeTrade Then
+                            runningInstrument.TradableInstrument.FetchHistorical = False
+                            Await Me.ParentController.UnSubscribeTicker(runningInstrument.TradableInstrument.InstrumentIdentifier).ConfigureAwait(False)
+                            CType(runningInstrument, PetDGandhiStrategyInstrument).StopStrategyInstrument = True
+                        End If
+                    Next
+                    Exit While
+                End If
+                Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
+            End While
+        Catch ex As Exception
+            'To log exceptions getting created from this function as the bubble up of the exception
+            'will anyways happen to Strategy.MonitorAsync but it will not be shown until all tasks exit
+            logger.Error("Strategy:{0}, error:{1}", Me.ToString, ex.ToString)
+            Throw ex
+        End Try
+    End Function
+
+    Private Async Function WriteCSV() As Task
+        Await Task.Delay(0).ConfigureAwait(False)
+        Try
+            If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Count > 0 Then
+                Dim allStockData As DataTable = Nothing
+                If CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentDetailsFilePath IsNot Nothing AndAlso
+                    File.Exists(CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentDetailsFilePath) Then
+                    File.Delete(CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentDetailsFilePath)
+                    Using csv As New CSVHelper(CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentDetailsFilePath, ",", _cts)
+                        _cts.Token.ThrowIfCancellationRequested()
+                        allStockData = New DataTable
+                        allStockData.Columns.Add("Trading Symbol")
+                        allStockData.Columns.Add("Margin Multiplier")
+                        allStockData.Columns.Add("ATR %")
+                        allStockData.Columns.Add("Change %")
+                        allStockData.Columns.Add("Take")
+                        allStockData.Columns.Add("Slab")
+                        For Each runningInstrument In Me.TradableStrategyInstruments
+                            If CType(runningInstrument, PetDGandhiStrategyInstrument).EligibleToTakeTrade Then
+                                Dim instrumentData As PetDGandhiUserInputs.InstrumentDetails =
+                                    CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentsData(runningInstrument.TradableInstrument.TradingSymbol)
+                                Dim row As DataRow = allStockData.NewRow
+                                row("Trading Symbol") = runningInstrument.TradableInstrument.TradingSymbol
+                                row("Margin Multiplier") = instrumentData.MarginMultiplier
+                                row("ATR %") = instrumentData.ATRPercentage
+                                row("Change %") = instrumentData.ChangePercentage
+                                row("Take") = "Y"
+                                row("Slab") = If(instrumentData.Slab = Decimal.MinValue, 0, instrumentData.Slab)
+                                allStockData.Rows.Add(row)
+                            End If
+                        Next
+                        csv.GetCSVFromDataTable(allStockData)
+                    End Using
+                End If
+            End If
+        Catch ex As Exception
+            logger.Error(ex.ToString)
+        End Try
     End Function
 End Class

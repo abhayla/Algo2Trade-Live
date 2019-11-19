@@ -15,7 +15,14 @@ Public Class PetDGandhiStrategyInstrument
     Public Shared Shadows logger As Logger = LogManager.GetCurrentClassLogger
 #End Region
 
+    Public EligibleToTakeTrade As Boolean
+    Public StopStrategyInstrument As Boolean
+    Public FilledPreviousClose As Boolean
+
     Private _lastPrevPayloadPlaceOrder As String = ""
+    Private _potentialHighEntryPrice As Decimal = Decimal.MinValue
+    Private _potentialLowEntryPrice As Decimal = Decimal.MinValue
+    Private _entryChanged As Boolean = False
     Private _firstTradedQuantity As Integer = Integer.MinValue
 
     Public Property Slab As Decimal = Decimal.MinValue
@@ -45,6 +52,12 @@ Public Class PetDGandhiStrategyInstrument
                 Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
             End If
         End If
+        Me.EligibleToTakeTrade = False
+        Me.FilledPreviousClose = False
+        Me.StopStrategyInstrument = False
+        If Not CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).AutoSelectStock Then
+            Me.EligibleToTakeTrade = True
+        End If
     End Sub
 
     Public Overrides Function HandleTickTriggerToUIETCAsync() As Task
@@ -60,7 +73,7 @@ Public Class PetDGandhiStrategyInstrument
 
     Public Overrides Async Function MonitorAsync() As Task
         Try
-            Dim petDGandhiUserSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
+            Dim userSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
             While True
                 If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
                     Throw Me.ParentStrategy.ParentController.OrphanException
@@ -71,19 +84,31 @@ Public Class PetDGandhiStrategyInstrument
                     Throw Me._RMSException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-                'Place Order block start
-                Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
-                If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
-                    Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                'Get Stock Data Start
+                If userSettings.AutoSelectStock AndAlso Not Me.FilledPreviousClose Then
+                    Await GetStockData().ConfigureAwait(False)
                 End If
-                'Place Order block end
+                'Get Stock Data end
                 _cts.Token.ThrowIfCancellationRequested()
-                'Modify Order block start
-                Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
-                If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
-                    Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
+                If Me.StopStrategyInstrument Then
+                    Exit While
                 End If
-                'Modify Order block end
+                If Me.EligibleToTakeTrade Then
+                    _cts.Token.ThrowIfCancellationRequested()
+                    'Place Order block start
+                    Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
+                    If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
+                        Await ExecuteCommandAsync(ExecuteCommands.PlaceBOSLMISOrder, Nothing).ConfigureAwait(False)
+                    End If
+                    'Place Order block end
+                    _cts.Token.ThrowIfCancellationRequested()
+                    'Modify Order block start
+                    Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
+                    If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
+                        Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
+                    End If
+                    'Modify Order block end
+                End If
                 _cts.Token.ThrowIfCancellationRequested()
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While
@@ -419,6 +444,50 @@ Public Class PetDGandhiStrategyInstrument
         End If
     End Function
 
+    Private Async Function GetStockData() As Task
+        Await Task.Delay(0).ConfigureAwait(False)
+        If Me.FilledPreviousClose = False AndAlso Me.TradableInstrument.IsHistoricalCompleted Then
+            Me.TradableInstrument.FetchHistorical = False
+            Dim userSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
+            Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
+            If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime AndAlso
+                Me.RawPayloadDependentConsumers IsNot Nothing AndAlso Me.RawPayloadDependentConsumers.Count > 0 Then
+                Dim XMinutePayloadConsumer As PayloadToChartConsumer = RawPayloadDependentConsumers.Find(Function(x)
+                                                                                                             If x.GetType Is GetType(PayloadToChartConsumer) Then
+                                                                                                                 Return CType(x, PayloadToChartConsumer).Timeframe = Me.ParentStrategy.UserSettings.SignalTimeFrame
+                                                                                                             Else
+                                                                                                                 Return Nothing
+                                                                                                             End If
+                                                                                                         End Function)
+
+                If XMinutePayloadConsumer IsNot Nothing AndAlso XMinutePayloadConsumer.ConsumerPayloads IsNot Nothing AndAlso XMinutePayloadConsumer.ConsumerPayloads.Count > 0 Then
+                    Dim currentDayFirstCandle As OHLCPayload = Nothing
+                    For Each runningPayload In XMinutePayloadConsumer.ConsumerPayloads.Keys.OrderByDescending(Function(x)
+                                                                                                                  Return x
+                                                                                                              End Function)
+                        Dim firstCandle As Date = New Date(runningPayload.Year, runningPayload.Month, runningPayload.Day, 9, 15, 0)
+                        If runningPayload.Date = Now.Date Then
+                            If runningPayload = firstCandle Then
+                                currentDayFirstCandle = XMinutePayloadConsumer.ConsumerPayloads(runningPayload)
+                            End If
+                        End If
+                    Next
+                    If currentDayFirstCandle IsNot Nothing AndAlso currentDayFirstCandle.PreviousPayload IsNot Nothing Then
+                        If currentDayFirstCandle.OpenPrice.Value < currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
+                            If currentDayFirstCandle.HighPrice.Value >= currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
+                                Me.FilledPreviousClose = True
+                            End If
+                        ElseIf currentDayFirstCandle.OpenPrice.Value >= currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
+                            If currentDayFirstCandle.LowPrice.Value <= currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
+                                Me.FilledPreviousClose = True
+                            End If
+                        End If
+                    End If
+                End If
+            End If
+        End If
+    End Function
+
     Private Function GetSlabBasedLevel(ByVal price As Decimal, ByVal direction As IOrder.TypeOfTransaction) As Decimal
         Dim ret As Decimal = Decimal.MinValue
         If direction = IOrder.TypeOfTransaction.Buy Then
@@ -468,6 +537,46 @@ Public Class PetDGandhiStrategyInstrument
         Return ret
     End Function
 
+    Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick) As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)
+        Dim ret As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction) = Nothing
+        If candle IsNot Nothing AndAlso candle.PreviousPayload IsNot Nothing AndAlso
+            Not candle.DeadCandle AndAlso Not candle.PreviousPayload.DeadCandle Then
+            Dim userSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
+            If _potentialHighEntryPrice = Decimal.MinValue AndAlso _potentialLowEntryPrice = Decimal.MinValue Then
+                _potentialHighEntryPrice = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Buy)
+                _potentialLowEntryPrice = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Sell)
+            End If
+
+            If _potentialHighEntryPrice <> Decimal.MinValue AndAlso _potentialLowEntryPrice <> Decimal.MinValue Then
+                If _entryChanged Then
+                    Dim middlePoint As Decimal = (_potentialHighEntryPrice + _potentialLowEntryPrice) / 2
+                    Dim range As Decimal = _potentialHighEntryPrice - middlePoint
+                    If currentTick.LastPrice >= middlePoint + range * 60 / 100 Then
+                        ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialHighEntryPrice, middlePoint, IOrder.TypeOfTransaction.Buy)
+                    ElseIf currentTick.LastPrice <= middlePoint - range * 60 / 100 Then
+                        ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialLowEntryPrice, middlePoint, IOrder.TypeOfTransaction.Sell)
+                    End If
+                Else
+                    _potentialHighEntryPrice = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Buy)
+                    _potentialLowEntryPrice = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Sell)
+                    Dim tradeDirection As IOrder.TypeOfTransaction = IOrder.TypeOfTransaction.None
+                    Dim middlePoint As Decimal = (_potentialHighEntryPrice + _potentialLowEntryPrice) / 2
+                    Dim range As Decimal = _potentialHighEntryPrice - middlePoint
+                    If currentTick.LastPrice >= middlePoint + range * 30 / 100 Then
+                        tradeDirection = IOrder.TypeOfTransaction.Buy
+                    ElseIf currentTick.LastPrice <= middlePoint - range * 30 / 100 Then
+                        tradeDirection = IOrder.TypeOfTransaction.Sell
+                    End If
+                    If tradeDirection = IOrder.TypeOfTransaction.Buy Then
+                        ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialHighEntryPrice, _potentialHighEntryPrice - Me.Slab, IOrder.TypeOfTransaction.Buy)
+                    ElseIf tradeDirection = IOrder.TypeOfTransaction.Sell Then
+                        ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialLowEntryPrice, _potentialLowEntryPrice + Me.Slab, IOrder.TypeOfTransaction.Sell)
+                    End If
+                End If
+            End If
+        End If
+        Return ret
+    End Function
 #Region "IDisposable Support"
     Private disposedValue As Boolean ' To detect redundant calls
 

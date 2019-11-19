@@ -319,7 +319,7 @@ Public Class PetDGandhiFillInstrumentDetails
                                             row("Margin Multiplier") = 13
                                             row("ATR %") = stock.Value.ATR
                                             row("Change %") = 0
-                                            row("Take") = "N"
+                                            row("Take") = "Y"
                                             row("Slab") = 0
                                             allStockData.Rows.Add(row)
                                         End If
@@ -329,7 +329,7 @@ Public Class PetDGandhiFillInstrumentDetails
                                             row("Margin Multiplier") = 30
                                             row("ATR %") = stock.Value.ATR
                                             row("Change %") = 0
-                                            row("Take") = "N"
+                                            row("Take") = "Y"
                                             row("Slab") = 0
                                             allStockData.Rows.Add(row)
                                         End If
