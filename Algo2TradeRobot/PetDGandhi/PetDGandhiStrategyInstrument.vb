@@ -121,7 +121,7 @@ Public Class PetDGandhiStrategyInstrument
             End If
             If _firstTradedQuantity = Integer.MinValue Then
                 If userSettings.CashInstrument Then
-                    _firstTradedQuantity = CalculateQuantityFromStoploss(runningCandlePayload.OpenPrice.Value, runningCandlePayload.OpenPrice.Value - Me.Slab, -1)
+                    _firstTradedQuantity = CalculateQuantityFromStoploss(runningCandlePayload.OpenPrice.Value, runningCandlePayload.OpenPrice.Value - Me.Slab, -50)
                 ElseIf userSettings.FutureInstrument Then
                     _firstTradedQuantity = CalculateQuantityFromInvestment(runningCandlePayload.OpenPrice.Value, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapitalPerStock, userSettings.AllowToIncreaseQuantity)
                 End If
