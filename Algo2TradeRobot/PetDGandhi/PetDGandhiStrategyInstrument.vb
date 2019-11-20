@@ -179,7 +179,8 @@ Public Class PetDGandhiStrategyInstrument
                 If userSettings.CashInstrument Then
                     _firstTradedQuantity = CalculateQuantityFromStoploss(runningCandlePayload.OpenPrice.Value, runningCandlePayload.OpenPrice.Value - Me.Slab, -1)
                 ElseIf userSettings.FutureInstrument Then
-                    _firstTradedQuantity = CalculateQuantityFromInvestment(runningCandlePayload.OpenPrice.Value, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapitalPerStock, userSettings.AllowToIncreaseQuantity)
+                    '_firstTradedQuantity = CalculateQuantityFromInvestment(runningCandlePayload.OpenPrice.Value, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapitalPerStock, userSettings.AllowToIncreaseQuantity)
+                    _firstTradedQuantity = 1
                 End If
             End If
         End If
@@ -344,12 +345,12 @@ Public Class PetDGandhiStrategyInstrument
                                 End If
                             ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                                 Dim price As Decimal = GetSlabBasedLevel(currentTick.LastPrice, IOrder.TypeOfTransaction.Buy)
-                                    If (bussinessOrder.ParentOrder.TriggerPrice + buffer) - price >= Me.Slab Then
-                                        Dim brkevn As Decimal = GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, bussinessOrder.ParentOrder.TransactionType)
-                                        triggerPrice = bussinessOrder.ParentOrder.AveragePrice - brkevn
-                                        reason = "Breakeven Mocement"
-                                    End If
+                                If (bussinessOrder.ParentOrder.TriggerPrice + buffer) - price >= Me.Slab Then
+                                    Dim brkevn As Decimal = GetBreakevenPoint(bussinessOrder.ParentOrder.AveragePrice, bussinessOrder.ParentOrder.Quantity, bussinessOrder.ParentOrder.TransactionType)
+                                    triggerPrice = bussinessOrder.ParentOrder.AveragePrice - brkevn
+                                    reason = "Breakeven Mocement"
                                 End If
+                            End If
                             'End If
                             If triggerPrice <> Decimal.MinValue AndAlso slOrder.TriggerPrice <> triggerPrice Then
                                 'Below portion have to be done in every modify stoploss order trigger
