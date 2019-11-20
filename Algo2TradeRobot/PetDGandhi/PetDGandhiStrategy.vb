@@ -151,8 +151,8 @@ Public Class PetDGandhiStrategy
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
                 If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Where(Function(z)
-                                                                                                                 Return CType(z, PetDGandhiStrategyInstrument).FilledPreviousClose
-                                                                                                             End Function).Count > 0 Then
+                                                                                                                 Return CType(z, PetDGandhiStrategyInstrument).ProcessingDone
+                                                                                                             End Function).Count = Me.TradableStrategyInstruments.Count Then
                     Dim counter As Integer = 0
                     For Each runningCashInstrument In Me.TradableStrategyInstruments
                         If CType(runningCashInstrument, PetDGandhiStrategyInstrument).FilledPreviousClose Then

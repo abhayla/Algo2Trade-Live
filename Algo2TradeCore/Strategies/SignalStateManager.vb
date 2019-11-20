@@ -481,6 +481,7 @@ Namespace Strategies
             If requestStatus <> ActivityDashboard.SignalStatusType.None Then existingActivities.TargetModifyActivity.RequestStatus = requestStatus
             If requestRemarks IsNot Nothing Then existingActivities.TargetModifyActivity.RequestRemarks = requestRemarks
             If lastException IsNot Nothing Then existingActivities.TargetModifyActivity.LastException = If(lastException.Equals(_defaultExceptionValue), Nothing, lastException)
+            If price <> Decimal.MinValue Then existingActivities.TargetModifyActivity.Supporting = price
 
             Me.ActivityDetails.AddOrUpdate(activityTag, existingActivities, Function(key, value) existingActivities)
             If newItemAdded Then OnNewItemAdded(ActivityDetails(activityTag))
