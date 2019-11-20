@@ -331,9 +331,11 @@ Public Class frmMainTabbed
             Else
                 Throw New ApplicationException("Settings file not found. Please complete your settings properly.")
             End If
+            logger.Debug(Utilities.Strings.JsonSerialize(_MRUserInputs))
 
             If Not Common.IsZerodhaUserDetailsPopulated(_commonControllerUserInput) Then Throw New ApplicationException("Cannot proceed without API user details being entered")
             Dim currentUser As ZerodhaUser = Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput)
+            logger.Debug(Utilities.Strings.JsonSerialize(currentUser))
 
             If _commonController IsNot Nothing Then
                 _commonController.RefreshCancellationToken(_cts)

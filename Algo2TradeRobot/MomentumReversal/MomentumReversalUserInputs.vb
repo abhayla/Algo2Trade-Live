@@ -9,8 +9,7 @@ Public Class MomentumReversalUserInputs
     Inherits StrategyUserInputs
 
     Public Property RSIPeriod As Integer
-    Public Property RSIOverBought As Integer
-    Public Property RSIOverSold As Integer
+    Public Property RSILevel As Integer
     Public Property TradeOpenTime As Integer
     Public Property TimeGapBetweenBackToBackTrades As Integer
 
@@ -47,6 +46,7 @@ Public Class MomentumReversalUserInputs
         Public Property FirstMovementSL As Decimal
         Public Property OnwardMovementLTP As Decimal
         Public Property OnwardMovementSL As Decimal
+        Public Property Percentage As Boolean
     End Class
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
         If filePath IsNot Nothing Then
@@ -58,9 +58,9 @@ Public Class MomentumReversalUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "NUMBER OF LOTS", "BUFFER", "SL", "FIRST MOVEMENT LTP", "FIRST MOVEMENT SL", "ONWARD MOVEMENT LTP", "ONWARD MOVEMENT SL"}
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "NUMBER OF LOTS", "BUFFER", "SL", "FIRST MOVEMENT LTP", "FIRST MOVEMENT SL", "ONWARD MOVEMENT LTP", "ONWARD MOVEMENT SL", "PERCENTAGE"}
 
-                        For colCtr = 0 To 7
+                        For colCtr = 0 To 8
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -78,6 +78,7 @@ Public Class MomentumReversalUserInputs
                             Dim firstSL As Decimal = Decimal.MinValue
                             Dim onwardLTP As Decimal = Decimal.MinValue
                             Dim onwardSL As Decimal = Decimal.MinValue
+                            Dim percentage As Boolean = False
 
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
@@ -167,6 +168,15 @@ Public Class MomentumReversalUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("Onward Movement SL cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                     End If
+                                ElseIf columnCtr = 8 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
+                                        If instrumentDetails(rowCtr, columnCtr).ToString.ToUpper = "TRUE" Then
+                                            percentage = True
+                                        End If
+                                    Else
+                                        Throw New ApplicationException(String.Format("Percentage cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
+                                    End If
                                 End If
                             Next
                             If trdngSymbl IsNot Nothing Then
@@ -179,6 +189,7 @@ Public Class MomentumReversalUserInputs
                                 instrumentData.FirstMovementSL = firstSL
                                 instrumentData.OnwardMovementLTP = onwardLTP
                                 instrumentData.OnwardMovementSL = onwardSL
+                                instrumentData.Percentage = percentage
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
                                 If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then
                                     Throw New ApplicationException(String.Format("Duplicate Trading Symbol {0}", instrumentData.TradingSymbol))

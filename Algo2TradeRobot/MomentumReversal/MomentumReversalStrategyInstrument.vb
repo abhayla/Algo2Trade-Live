@@ -15,6 +15,7 @@ Public Class MomentumReversalStrategyInstrument
 #End Region
 
     Private _lastPrevPayloadPlaceOrder As String = ""
+    Private _previousRSIWasBelowLevel As Boolean = False
     Private ReadOnly _dummyRSIConsumer As RSIConsumer
 
     Public Sub New(ByVal associatedInstrument As IInstrument,
@@ -137,7 +138,11 @@ Public Class MomentumReversalStrategyInstrument
                     If GetLastOrderExitTime() = Date.MinValue OrElse currentTime >= GetLastOrderExitTime().AddSeconds(userSettings.TimeGapBetweenBackToBackTrades) Then
                         Dim triggerPrice As Decimal = signal.Item2 + userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Buffer
                         Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                        Dim stoploss As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
+                        Dim sl As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
+                        If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
+                            sl = triggerPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL / 100
+                        End If
+                        Dim stoploss As Decimal = ConvertFloorCeling(sl, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                         Dim target As Decimal = ConvertFloorCeling(triggerPrice * 10 / 100, Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
                         If triggerPrice < 300 AndAlso currentTick.LastPrice < triggerPrice Then
@@ -211,8 +216,18 @@ Public Class MomentumReversalStrategyInstrument
                 If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
                     Dim entryPrice As Decimal = bussinessOrder.ParentOrder.AveragePrice
                     Dim potentialSL As Decimal = ConvertFloorCeling(entryPrice - userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                    Dim firstTarget As Decimal = entryPrice + userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementLTP
-                    Dim firstSL As Decimal = ConvertFloorCeling(potentialSL + userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementSL, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+
+                    Dim firstMovementLTP As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementLTP
+                    If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
+                        firstMovementLTP = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementLTP / 100
+                    End If
+                    Dim firstTarget As Decimal = entryPrice + ConvertFloorCeling(firstMovementLTP, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+
+                    Dim firstMovementSL As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementSL
+                    If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
+                        firstMovementSL = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementSL / 100
+                    End If
+                    Dim firstSL As Decimal = ConvertFloorCeling(potentialSL + firstMovementSL, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     For Each slOrder In bussinessOrder.SLOrder
                         If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
                             Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
@@ -221,9 +236,17 @@ Public Class MomentumReversalStrategyInstrument
                             Dim reason As String = Nothing
                             If slOrder.TriggerPrice >= firstSL Then
                                 Dim gain As Decimal = currentTick.LastPrice - firstTarget
-                                Dim multiplier As Integer = Math.Floor(gain / userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP)
+                                Dim onwardMovementLTP As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP
+                                If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
+                                    onwardMovementLTP = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP / 100
+                                End If
+                                Dim multiplier As Integer = Math.Floor(gain / onwardMovementLTP)
                                 If multiplier > 0 Then
-                                    triggerPrice = firstSL + ConvertFloorCeling(userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL * multiplier, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                                    Dim onwardMovementSL As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL
+                                    If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
+                                        onwardMovementSL = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL / 100
+                                    End If
+                                    triggerPrice = firstSL + ConvertFloorCeling(onwardMovementSL * multiplier, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                                     reason = String.Format("Onward movement {0}", multiplier)
                                 End If
                             Else
@@ -279,13 +302,21 @@ Public Class MomentumReversalStrategyInstrument
                     Dim parentBussinessOrder As IBusinessOrder = OrderDetails(parentOrder.OrderIdentifier)
                     If parentOrder.Status = IOrder.TypeOfStatus.TriggerPending OrElse
                         parentOrder.Status = IOrder.TypeOfStatus.Open Then
+                        Dim exitTrade As Boolean = False
                         If Now() >= parentOrder.TimeStamp.AddMinutes(userSettings.TradeOpenTime) Then
+                            exitTrade = True
+                        ElseIf runningCandlePayload IsNot Nothing AndAlso
+                            (runningCandlePayload.OpenPrice.Value > parentOrder.TriggerPrice OrElse
+                            runningCandlePayload.OpenPrice.Value > parentOrder.Price) Then
+                            exitTrade = True
+                        End If
+                        If exitTrade Then
                             'Below portion have to be done in every cancel order trigger
                             Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(parentOrder.Tag)
                             If currentSignalActivities IsNot Nothing Then
                                 If currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                    currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
-                                    currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
                                     Continue For
                                 End If
                             End If
@@ -330,8 +361,8 @@ Public Class MomentumReversalStrategyInstrument
             Dim rsiConsumer As RSIConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRSIConsumer)
             If rsiConsumer.ConsumerPayloads IsNot Nothing AndAlso rsiConsumer.ConsumerPayloads.Count > 0 AndAlso
                 rsiConsumer.ConsumerPayloads.ContainsKey(candle.SnapshotDateTime) Then
-                If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSIOverSold AndAlso
-                    CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value < userSettings.RSIOverBought Then
+                If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSILevel AndAlso
+                    _previousRSIWasBelowLevel Then
                     If Utilities.Time.IsDateTimeEqualTillMinutes(candle.SnapshotDateTime, userSettings.TradeStartTime) Then
                         ret = New Tuple(Of Boolean, Decimal)(True, candle.PreviousPayload.HighPrice.Value)
                     Else
@@ -340,10 +371,17 @@ Public Class MomentumReversalStrategyInstrument
                             candle.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
                             candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload IsNot Nothing AndAlso
                             candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload.SnapshotDateTime.Date = Now.Date Then
-                            Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.PreviousPayload.HighPrice.Value, candle.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value), candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
+                            Dim entryPrice As Decimal = Math.Max(Math.Max(Math.Max(candle.PreviousPayload.HighPrice.Value,
+                                                                                   candle.PreviousPayload.PreviousPayload.HighPrice.Value),
+                                                                          candle.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value),
+                                                                 candle.PreviousPayload.PreviousPayload.PreviousPayload.PreviousPayload.HighPrice.Value)
                             ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
                         End If
                     End If
+                    _previousRSIWasBelowLevel = False
+                    If executeCommand Then _previousRSIWasBelowLevel = False
+                ElseIf CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value <= userSettings.RSILevel Then
+                    _previousRSIWasBelowLevel = True
                 End If
             End If
         End If
