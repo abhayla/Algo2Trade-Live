@@ -382,7 +382,6 @@ Public Class MomentumReversalStrategyInstrument
                             ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
                         End If
                     End If
-                    _previousRSIWasBelowLevel = False
                     If executeCommand Then _previousRSIWasBelowLevel = False
                 ElseIf CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value <= userSettings.RSILevel Then
                     _previousRSIWasBelowLevel = True
