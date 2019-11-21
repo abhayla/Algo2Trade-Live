@@ -550,14 +550,25 @@ Public Class PetDGandhiStrategyInstrument
     Private Function CalculateSlab(ByVal price As Decimal) As Decimal
         Dim ret As Decimal = 0.5
         Dim slabList As List(Of Decimal) = New List(Of Decimal) From {0.5, 1, 2.5, 5, 10, 15}
-        Dim supportedLowerSlab As Decimal = price * 0.2 / 100
-        Dim supportedUpperSlab As Decimal = price * 0.5 / 100
+        'Dim supportedLowerSlab As Decimal = price * 0.2 / 100
+        'Dim supportedUpperSlab As Decimal = price * 0.5 / 100
+        'Dim supportedSlabList As List(Of Decimal) = slabList.FindAll(Function(x)
+        '                                                                 Return x >= supportedLowerSlab AndAlso
+        '                                                                 x <= supportedUpperSlab
+        '                                                             End Function)
+        'If supportedSlabList IsNot Nothing AndAlso supportedSlabList.Count > 0 Then
+        '    ret = supportedSlabList.Min
+        'End If
+        Dim atrPer As Decimal = CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).InstrumentsData(Me.TradableInstrument.TradingSymbol).ATRPercentage
+        Dim atr As Decimal = (atrPer / 100) * price
         Dim supportedSlabList As List(Of Decimal) = slabList.FindAll(Function(x)
-                                                                         Return x >= supportedLowerSlab AndAlso
-                                                                         x <= supportedUpperSlab
+                                                                         Return x <= atr / 8
                                                                      End Function)
         If supportedSlabList IsNot Nothing AndAlso supportedSlabList.Count > 0 Then
-            ret = supportedSlabList.Min
+            ret = supportedSlabList.Max
+        End If
+        If Me.TradableInstrument.TradingSymbol.ToUpper = "IBULHSGFIN" Then
+            ret = 1
         End If
         Return ret
     End Function
