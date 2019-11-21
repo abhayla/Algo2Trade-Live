@@ -194,7 +194,7 @@ Public Class PetDGandhiStrategyInstrument
             End If
             If _firstTradedQuantity = Integer.MinValue Then
                 If userSettings.CashInstrument Then
-                    _firstTradedQuantity = CalculateQuantityFromStoploss(runningCandlePayload.OpenPrice.Value, runningCandlePayload.OpenPrice.Value - Me.Slab, -50)
+                    _firstTradedQuantity = CalculateQuantityFromStoploss(runningCandlePayload.OpenPrice.Value, runningCandlePayload.OpenPrice.Value - Me.Slab, -1)
                 ElseIf userSettings.FutureInstrument Then
                     _firstTradedQuantity = CalculateQuantityFromInvestment(runningCandlePayload.OpenPrice.Value, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapitalPerStock, userSettings.AllowToIncreaseQuantity)
                 End If
@@ -600,11 +600,11 @@ Public Class PetDGandhiStrategyInstrument
                     Next
                     If currentDayFirstCandle IsNot Nothing AndAlso currentDayFirstCandle.PreviousPayload IsNot Nothing Then
                         If currentDayFirstCandle.OpenPrice.Value < currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
-                            If currentDayFirstCandle.HighPrice.Value >= currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
+                            If currentDayFirstCandle.HighPrice.Value >= currentDayFirstCandle.PreviousPayload.LowPrice.Value Then
                                 Me.FilledPreviousClose = True
                             End If
                         ElseIf currentDayFirstCandle.OpenPrice.Value >= currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
-                            If currentDayFirstCandle.LowPrice.Value <= currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
+                            If currentDayFirstCandle.LowPrice.Value <= currentDayFirstCandle.PreviousPayload.HighPrice.Value Then
                                 Me.FilledPreviousClose = True
                             End If
                         End If
