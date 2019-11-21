@@ -215,7 +215,11 @@ Public Class MomentumReversalStrategyInstrument
                 Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
                 If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
                     Dim entryPrice As Decimal = bussinessOrder.ParentOrder.AveragePrice
-                    Dim potentialSL As Decimal = ConvertFloorCeling(entryPrice - userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    Dim sl As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
+                    If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
+                        sl = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL / 100
+                    End If
+                    Dim potentialSL As Decimal = ConvertFloorCeling(entryPrice - sl, Me.TradableInstrument.TickSize, RoundOfType.Floor)
 
                     Dim firstMovementLTP As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementLTP
                     If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
