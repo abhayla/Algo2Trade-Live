@@ -525,13 +525,15 @@ Public Class PetDGandhiStrategyInstrument
                             End If
                             If _breakevenMovedOrders IsNot Nothing AndAlso _breakevenMovedOrders.Contains(bussinessOrder.ParentOrderIdentifier) Then
                                 Dim exitTrade As Boolean = False
-                                If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                    If runningCandle.PreviousPayload.ClosePrice.Value < bussinessOrder.ParentOrder.TriggerPrice - buffer Then
-                                        exitTrade = True
-                                    End If
-                                ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                    If runningCandle.PreviousPayload.ClosePrice.Value > bussinessOrder.ParentOrder.TriggerPrice + buffer Then
-                                        exitTrade = True
+                                If runningCandle.PreviousPayload.SnapshotDateTime >= bussinessOrder.ParentOrder.TimeStamp Then
+                                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                        If runningCandle.PreviousPayload.ClosePrice.Value < bussinessOrder.ParentOrder.TriggerPrice - buffer Then
+                                            exitTrade = True
+                                        End If
+                                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                        If runningCandle.PreviousPayload.ClosePrice.Value > bussinessOrder.ParentOrder.TriggerPrice + buffer Then
+                                            exitTrade = True
+                                        End If
                                     End If
                                 End If
                                 If exitTrade Then
