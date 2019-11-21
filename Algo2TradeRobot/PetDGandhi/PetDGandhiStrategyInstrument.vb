@@ -527,11 +527,11 @@ Public Class PetDGandhiStrategyInstrument
                                 Dim exitTrade As Boolean = False
                                 If runningCandle.PreviousPayload.SnapshotDateTime >= bussinessOrder.ParentOrder.TimeStamp Then
                                     If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                        If runningCandle.PreviousPayload.ClosePrice.Value < bussinessOrder.ParentOrder.TriggerPrice - buffer Then
+                                        If runningCandle.PreviousPayload.ClosePrice.Value < bussinessOrder.ParentOrder.TriggerPrice - 2 * buffer Then
                                             exitTrade = True
                                         End If
                                     ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                        If runningCandle.PreviousPayload.ClosePrice.Value > bussinessOrder.ParentOrder.TriggerPrice + buffer Then
+                                        If runningCandle.PreviousPayload.ClosePrice.Value > bussinessOrder.ParentOrder.TriggerPrice + 2 * buffer Then
                                             exitTrade = True
                                         End If
                                     End If
@@ -745,16 +745,18 @@ Public Class PetDGandhiStrategyInstrument
         If order IsNot Nothing Then
             If order.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
                 If order.AllOrder IsNot Nothing AndAlso order.AllOrder.Count > 0 Then
+                    Dim buffer As Decimal = CalculateBuffer(order.ParentOrder.TriggerPrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     For Each runningOrder In order.AllOrder
-                        If runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss AndAlso
-                            runningOrder.Status = IOrder.TypeOfStatus.Complete Then
+                        If runningOrder.Status = IOrder.TypeOfStatus.Complete Then
                             If order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                If runningOrder.AveragePrice > runningOrder.TriggerPrice Then
+                                If runningOrder.AveragePrice > order.ParentOrder.TriggerPrice - buffer - Me.Slab AndAlso
+                                    runningOrder.AveragePrice < order.ParentOrder.TriggerPrice + Me.Slab Then
                                     ret = True
                                     Exit For
                                 End If
                             ElseIf order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                If runningOrder.AveragePrice < runningOrder.TriggerPrice Then
+                                If runningOrder.AveragePrice < order.ParentOrder.TriggerPrice + buffer + Me.Slab AndAlso
+                                    runningOrder.AveragePrice > order.ParentOrder.TriggerPrice - Me.Slab Then
                                     ret = True
                                     Exit For
                                 End If
