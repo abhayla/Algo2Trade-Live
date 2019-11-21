@@ -307,12 +307,15 @@ Public Class MomentumReversalStrategyInstrument
                     If parentOrder.Status = IOrder.TypeOfStatus.TriggerPending OrElse
                         parentOrder.Status = IOrder.TypeOfStatus.Open Then
                         Dim exitTrade As Boolean = False
+                        Dim reason As String = Nothing
                         If Now() >= parentOrder.TimeStamp.AddMinutes(userSettings.TradeOpenTime) Then
                             exitTrade = True
+                            reason = "Trade not triggerd in max open time"
                         ElseIf runningCandlePayload IsNot Nothing AndAlso
                             (runningCandlePayload.OpenPrice.Value > parentOrder.TriggerPrice OrElse
                             runningCandlePayload.OpenPrice.Value > parentOrder.Price) Then
                             exitTrade = True
+                            reason = "Candle open above trigger price"
                         End If
                         If exitTrade Then
                             'Below portion have to be done in every cancel order trigger
@@ -325,7 +328,7 @@ Public Class MomentumReversalStrategyInstrument
                                 End If
                             End If
                             If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, String))
-                            ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, parentBussinessOrder.ParentOrder, "Trade not triggerd in max open time"))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, parentBussinessOrder.ParentOrder, reason))
                         End If
                     End If
                 Next
