@@ -51,15 +51,16 @@ Public Class frmPetDGandhiSettings
             dtpckrEODExitTime.Value = _settings.EODExitTime
             txtNumberOfTradePerStock.Text = _settings.NumberOfTradePerStock
             txtTargetMultiplier.Text = _settings.TargetMultiplier
+            txtMaxLossPerTrade.Text = _settings.MaxLossPerTrade
+            txtStockMaxLossPerDay.Text = _settings.StockMaxLossPerDay
+            txtStockMaxProfitPerDay.Text = _settings.StockMaxProfitPerDay
             txtMaxLossPerDay.Text = _settings.MaxLossPerDay
             txtMaxProfitPerDay.Text = _settings.MaxProfitPerDay
             txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
 
             chbAutoSelectStock.Checked = _settings.AutoSelectStock
-            chbCash.Checked = _settings.CashInstrument
-            chbFuture.Checked = _settings.FutureInstrument
-            chbAllowToIncreaseQuantity.Checked = _settings.AllowToIncreaseQuantity
-            txtMinCapitalPerStock.Text = _settings.MinCapitalPerStock
+            rdbCash.Checked = _settings.CashInstrument
+            rdbFuture.Checked = _settings.FutureInstrument
 
             txtMinPrice.Text = _settings.MinPrice
             txtMaxPrice.Text = _settings.MaxPrice
@@ -76,15 +77,16 @@ Public Class frmPetDGandhiSettings
         _settings.EODExitTime = dtpckrEODExitTime.Value
         _settings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
         _settings.TargetMultiplier = txtTargetMultiplier.Text
+        _settings.MaxLossPerTrade = Math.Abs(CDec(txtMaxLossPerTrade.Text)) * -1
+        _settings.StockMaxLossPerDay = Math.Abs(CDec(txtStockMaxLossPerDay.Text)) * -1
+        _settings.StockMaxProfitPerDay = txtStockMaxProfitPerDay.Text
         _settings.MaxLossPerDay = Math.Abs(CDec(txtMaxLossPerDay.Text)) * -1
         _settings.MaxProfitPerDay = txtMaxProfitPerDay.Text
         _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         _settings.AutoSelectStock = chbAutoSelectStock.Checked
-        _settings.CashInstrument = chbCash.Checked
-        _settings.FutureInstrument = chbFuture.Checked
-        _settings.AllowToIncreaseQuantity = chbAllowToIncreaseQuantity.Checked
-        _settings.MinCapitalPerStock = txtMinCapitalPerStock.Text
+        _settings.CashInstrument = rdbCash.Checked
+        _settings.FutureInstrument = rdbFuture.Checked
 
         _settings.MinPrice = txtMinPrice.Text
         _settings.MaxPrice = txtMaxPrice.Text

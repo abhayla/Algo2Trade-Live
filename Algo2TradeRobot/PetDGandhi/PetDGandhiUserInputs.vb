@@ -11,14 +11,15 @@ Public Class PetDGandhiUserInputs
     Public Property NumberOfTradePerStock As Integer
     Public Property MaxProfitPerDay As Decimal
     Public Property MaxLossPerDay As Decimal
+    Public Property StockMaxProfitPerDay As Decimal
+    Public Property StockMaxLossPerDay As Decimal
+    Public Property MaxLossPerTrade As Decimal
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 
     Public Property AutoSelectStock As Boolean
     Public Property CashInstrument As Boolean
     Public Property FutureInstrument As Boolean
-    Public Property AllowToIncreaseQuantity As Boolean
-    Public Property MinCapitalPerStock As Decimal
 
     Public Property MinPrice As Decimal
     Public Property MaxPrice As Decimal

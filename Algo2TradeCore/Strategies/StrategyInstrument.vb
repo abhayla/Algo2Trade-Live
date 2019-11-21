@@ -815,44 +815,8 @@ Namespace Strategies
                         If currentXMinute <> Date.MaxValue Then
                             Dim c As Integer = 1
                             If runningRawPayloadConsumer.OnwardLevelConsumers IsNot Nothing AndAlso runningRawPayloadConsumer.OnwardLevelConsumers.Count > 0 Then
-                                ''EMA Supertrend Strategy
-                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                '    If c < 3 Then
-                                '        candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
-                                '    Else
-                                '        candleCreator.IndicatorCreator.CalculateSupertrend(currentXMinute, consumer)
-                                '    End If
-                                '    c += 1
-                                'Next
-
-                                ''PetDGandhi Strategy
-                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                '    If c = 1 Then
-                                '        candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
-                                '    Else
-                                '        candleCreator.IndicatorCreator.CalculatePivotHighLow(currentXMinute, consumer)
-                                '    End If
-                                '    c += 1
-                                'Next
-
-                                ''EMA Crossover Strategy
-                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                '    candleCreator.IndicatorCreator.CalculateEMA(currentXMinute, consumer)
-                                'Next
-
-                                ''Joy Maa Strategy
-                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                '    If c = 1 Then
-                                '        candleCreator.IndicatorCreator.CalculateFractal(currentXMinute, consumer)
-                                '    ElseIf c = 2 Then
-                                '        candleCreator.IndicatorCreator.CalculateATR(currentXMinute, consumer)
-                                '    End If
-                                '    c += 1
-                                'Next
-
-                                'TwoThird Strategy
                                 For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                    candleCreator.IndicatorCreator.CalculateATR(currentXMinute, consumer)
+                                    candleCreator.IndicatorCreator.CalculateVWAP(currentXMinute, consumer)
                                 Next
                             End If
 
