@@ -497,7 +497,7 @@ Namespace ChartHandler.ChartStyle
                         Else
                             .Volume.Value = tickData.Volume - volumeOffset
                         End If
-                        .DailyVolume = tickData.Volume
+                        .DailyVolume = tickData.Volume - volumeOffset
                         .NumberOfTicks += 1
                         .PayloadGeneratedBy = OHLCPayload.PayloadSource.Tick
                     End With
@@ -536,7 +536,7 @@ Namespace ChartHandler.ChartStyle
                         Else
                             .Volume.Value = tickData.Volume - volumeOffset
                         End If
-                        .DailyVolume = tickData.Volume
+                        .DailyVolume = tickData.Volume - volumeOffset
                         .SnapshotDateTime = Utilities.Time.GetDateTimeTillMinutes(tickData.Timestamp.Value)
                         .PreviousPayload = previousCandle
                         .NumberOfTicks = 1
