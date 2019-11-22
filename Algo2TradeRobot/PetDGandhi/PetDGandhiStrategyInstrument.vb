@@ -141,6 +141,7 @@ Public Class PetDGandhiStrategyInstrument
         Dim vwapConsumer As VWAPConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyVWAPConsumer)
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
         Dim currentTime As Date = Now()
+        Dim lastExecutedOrder As IBusinessOrder = GetLastExecutedOrder()
 
         If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime Then
             If Me.Slab = Decimal.MinValue Then
@@ -159,7 +160,7 @@ Public Class PetDGandhiStrategyInstrument
             If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
                 (Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder OrElse forcePrint) Then
                 _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Previous Candle:{5}, Is Active Instrument:{6}, Number Of Trade:{7}, OverAll PL:{8}, Stock PL:{9}, Strategy Exit All Triggerd:{10}, Strategy Instrument Exit:{11}, {12}, Current Time:{13}, Current LTP:{14}, TradingSymbol:{15}",
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Previous Candle:{5}, Is Active Instrument:{6}, Number Of Trade:{7}, OverAll PL:{8}, Stock PL:{9}, Strategy Exit All Triggerd:{10}, Strategy Instrument Exit:{11}, {12}, Last Trade Exited at SL Level:{13}, Last Trade Direction:{14}, Current Time:{15}, Current LTP:{16}, TradingSymbol:{17}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             runningCandlePayload.SnapshotDateTime.ToString,
@@ -173,6 +174,8 @@ Public Class PetDGandhiStrategyInstrument
                             Me.StrategyExitAllTriggerd,
                             _strategyInstrumentExit,
                             vwapConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
+                            IsTradeExitAtOppositeLevel(lastExecutedOrder),
+                            If(lastExecutedOrder IsNot Nothing, lastExecutedOrder.ParentOrder.RawTransactionType, "Nothing"),
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
@@ -192,29 +195,43 @@ Public Class PetDGandhiStrategyInstrument
             Not Me.StrategyExitAllTriggerd AndAlso Not _strategyInstrumentExit Then
             Dim signal As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick)
             If signal IsNot Nothing AndAlso signal.Item1 Then
-                If signal.Item4 = IOrder.TypeOfTransaction.Buy Then
-                    Dim price As Decimal = signal.Item2
-                    Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    If currentTick.LastPrice > price Then
-                        parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                Dim eligilbleToTakeTrade As Boolean = True
+                If lastExecutedOrder IsNot Nothing AndAlso IsTradeExitAtOppositeLevel(lastExecutedOrder) Then
+                    If lastExecutedOrder.ParentOrder.TransactionType <> signal.Item4 Then
+                        If lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                            Dim oppositeLevel As Decimal = lastExecutedOrder.ParentOrder.Price - Me.Slab
+                            If signal.Item2 = oppositeLevel Then eligilbleToTakeTrade = False
+                        ElseIf lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                            Dim oppositeLevel As Decimal = lastExecutedOrder.ParentOrder.Price + Me.Slab
+                            If signal.Item2 = oppositeLevel Then eligilbleToTakeTrade = False
+                        End If
+                    End If
+                End If
+                If eligilbleToTakeTrade Then
+                    If signal.Item4 = IOrder.TypeOfTransaction.Buy Then
+                        Dim price As Decimal = signal.Item2
+                        Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                        Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                        If currentTick.LastPrice > price Then
+                            parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                      .Price = price,
                                      .StoplossValue = stoploss,
                                      .SquareOffValue = target,
                                      .Quantity = _firstTradedQuantity}
-                    End If
-                ElseIf signal.Item4 = IOrder.TypeOfTransaction.Sell Then
-                    Dim price As Decimal = signal.Item2
-                    Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    If currentTick.LastPrice < price Then
-                        parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                        End If
+                    ElseIf signal.Item4 = IOrder.TypeOfTransaction.Sell Then
+                        Dim price As Decimal = signal.Item2
+                        Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                        Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                        If currentTick.LastPrice < price Then
+                            parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                                      .Price = price,
                                      .StoplossValue = stoploss,
                                      .SquareOffValue = target,
                                      .Quantity = _firstTradedQuantity}
+                        End If
                     End If
                 End If
             End If
@@ -503,6 +520,31 @@ Public Class PetDGandhiStrategyInstrument
                     ElseIf tradeDirection = IOrder.TypeOfTransaction.Sell Then
                         ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, potentialLowEntryPrice, potentialLowEntryPrice + Me.Slab, IOrder.TypeOfTransaction.Sell)
                     End If
+                End If
+            End If
+        End If
+        Return ret
+    End Function
+
+    Private Function IsTradeExitAtOppositeLevel(ByVal order As IBusinessOrder) As Boolean
+        Dim ret As Boolean = False
+        If order IsNot Nothing Then
+            If order.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                If order.AllOrder IsNot Nothing AndAlso order.AllOrder.Count > 0 Then
+                    For Each ruuningOrder In order.AllOrder
+                        If ruuningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss AndAlso
+                            ruuningOrder.Status = IOrder.TypeOfStatus.Complete Then
+                            If order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                If order.ParentOrder.Price - ruuningOrder.TriggerPrice >= Me.Slab Then
+                                    ret = True
+                                End If
+                            ElseIf order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                If ruuningOrder.TriggerPrice - order.ParentOrder.Price >= Me.Slab Then
+                                    ret = True
+                                End If
+                            End If
+                        End If
+                    Next
                 End If
             End If
         End If
