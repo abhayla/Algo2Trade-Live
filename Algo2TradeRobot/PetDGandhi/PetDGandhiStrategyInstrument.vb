@@ -408,57 +408,8 @@ Public Class PetDGandhiStrategyInstrument
         Return ret
     End Function
 
-    Protected Overrides Async Function IsTriggerReceivedForModifyTargetOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
-        Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Nothing
-        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
-        Dim userSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
-        Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
-        Dim currentTick As ITick = Me.TradableInstrument.LastTick
-        If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
-            OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 AndAlso Me.Slab <> Decimal.MinValue Then
-            For Each runningOrderID In OrderDetails.Keys
-                Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
-                If bussinessOrder.TargetOrder IsNot Nothing AndAlso bussinessOrder.TargetOrder.Count > 0 Then
-                    For Each targetOrder In bussinessOrder.TargetOrder
-                        If Not targetOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
-                            Not targetOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
-                            Not targetOrder.Status = IOrder.TypeOfStatus.Rejected Then
-                            Dim price As Decimal = Decimal.MinValue
-                            Dim reason As String = Nothing
-                            Dim buffer As Decimal = CalculateBuffer(bussinessOrder.ParentOrder.TriggerPrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                            If bussinessOrder.ParentOrder.AveragePrice <> bussinessOrder.ParentOrder.TriggerPrice Then
-                                Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                                If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                    price = (bussinessOrder.ParentOrder.TriggerPrice - buffer) + target
-                                    reason = "Slippage"
-                                ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                    If targetOrder.TriggerPrice > bussinessOrder.ParentOrder.AveragePrice Then
-                                        price = (bussinessOrder.ParentOrder.TriggerPrice + buffer) - target
-                                        reason = "Slippage"
-                                    End If
-                                End If
-                            End If
-                            If price <> Decimal.MinValue AndAlso targetOrder.Price <> price Then
-                                'Below portion have to be done in every modify stoploss order trigger
-                                Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(targetOrder.Tag)
-                                If currentSignalActivities IsNot Nothing Then
-                                    If currentSignalActivities.TargetModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                        currentSignalActivities.TargetModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
-                                        currentSignalActivities.TargetModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
-                                        If Val(currentSignalActivities.TargetModifyActivity.Supporting) = price Then
-                                            Continue For
-                                        End If
-                                    End If
-                                End If
-                                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
-                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, targetOrder, price, reason))
-                            End If
-                        End If
-                    Next
-                End If
-            Next
-        End If
-        Return ret
+    Protected Overrides Function IsTriggerReceivedForModifyTargetOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
+        Throw New NotImplementedException()
     End Function
 
     Protected Overrides Async Function IsTriggerReceivedForExitOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, String)))
