@@ -193,11 +193,7 @@ Public Class PetDGandhiStrategyInstrument
                 End If
             End If
             If _firstTradedQuantity = Integer.MinValue Then
-                If userSettings.CashInstrument Then
-                    _firstTradedQuantity = CalculateQuantityFromStoploss(runningCandlePayload.OpenPrice.Value, runningCandlePayload.OpenPrice.Value - Me.Slab, -50)
-                ElseIf userSettings.FutureInstrument Then
-                    _firstTradedQuantity = CalculateQuantityFromInvestment(runningCandlePayload.OpenPrice.Value, userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).MarginMultiplier, userSettings.MinCapitalPerStock, userSettings.AllowToIncreaseQuantity)
-                End If
+                _firstTradedQuantity = CalculateQuantityFromStoploss(runningCandlePayload.OpenPrice.Value, runningCandlePayload.OpenPrice.Value - Me.Slab, userSettings.MaxLossPerTrade)
             End If
         End If
 
@@ -211,17 +207,6 @@ Public Class PetDGandhiStrategyInstrument
             Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay AndAlso Not Me.StrategyExitAllTriggerd Then
 
             Dim lastExuctedOrder As IBusinessOrder = GetLastExecutedOrder()
-            'If lastExuctedOrder IsNot Nothing AndAlso IsOrderExitedAtBreakeven(lastExuctedOrder) Then
-            '    Dim buffer As Decimal = CalculateBuffer(lastExuctedOrder.ParentOrder.TriggerPrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-            '    Dim price As Decimal = Decimal.MinValue
-            '    If lastExuctedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-            '        price = lastExuctedOrder.ParentOrder.TriggerPrice - buffer
-            '    ElseIf lastExuctedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-            '        price = lastExuctedOrder.ParentOrder.TriggerPrice + buffer
-            '    End If
-            '    _potentialHighEntryPrice = price + Me.Slab
-            '    _potentialLowEntryPrice = price - Me.Slab
-            'End If
             If lastExuctedOrder IsNot Nothing AndAlso IsOrderForceExitedForBreakeven(lastExuctedOrder) Then
                 _potentialHighEntryPrice = Decimal.MinValue
                 _potentialLowEntryPrice = Decimal.MinValue
@@ -604,30 +589,6 @@ Public Class PetDGandhiStrategyInstrument
         Return ret
     End Function
 
-    Private Function GetRunningOrders(ByVal signalDirection As IOrder.TypeOfTransaction) As List(Of IOrder)
-        Dim ret As List(Of IOrder) = Nothing
-        If OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 Then
-            For Each parentOrderId In OrderDetails.Keys
-                Dim parentBusinessOrder As IBusinessOrder = OrderDetails(parentOrderId)
-                If parentBusinessOrder IsNot Nothing AndAlso parentBusinessOrder.ParentOrder IsNot Nothing Then
-                    If signalDirection = IOrder.TypeOfTransaction.None OrElse parentBusinessOrder.ParentOrder.TransactionType = signalDirection Then
-                        If Not parentBusinessOrder.ParentOrder.Status = IOrder.TypeOfStatus.Rejected Then
-                            If parentBusinessOrder.SLOrder IsNot Nothing AndAlso parentBusinessOrder.SLOrder.Count > 0 Then
-                                For Each slOrder In parentBusinessOrder.SLOrder
-                                    If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso Not slOrder.Status = IOrder.TypeOfStatus.Cancelled Then
-                                        If ret Is Nothing Then ret = New List(Of IOrder)
-                                        ret.Add(parentBusinessOrder.ParentOrder)
-                                    End If
-                                Next
-                            End If
-                        End If
-                    End If
-                End If
-            Next
-        End If
-        Return ret
-    End Function
-
     Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick) As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)
         Dim ret As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction) = Nothing
         If candle IsNot Nothing AndAlso candle.PreviousPayload IsNot Nothing AndAlso
@@ -665,26 +626,6 @@ Public Class PetDGandhiStrategyInstrument
                     ElseIf tradeDirection = IOrder.TypeOfTransaction.Sell Then
                         ret = New Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction)(True, _potentialLowEntryPrice, _potentialLowEntryPrice + Me.Slab, IOrder.TypeOfTransaction.Sell)
                     End If
-                End If
-            End If
-        End If
-        Return ret
-    End Function
-
-    Private Function IsOrderExitedAtBreakeven(ByVal order As IBusinessOrder) As Boolean
-        Dim ret As Boolean = False
-        If order IsNot Nothing Then
-            If order.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
-                If order.AllOrder IsNot Nothing AndAlso order.AllOrder.Count > 0 Then
-                    For Each runningOrder In order.AllOrder
-                        If runningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss AndAlso
-                            runningOrder.Status = IOrder.TypeOfStatus.Complete Then
-                            If Math.Abs(runningOrder.AveragePrice - order.ParentOrder.AveragePrice) < Me.Slab Then
-                                ret = True
-                                Exit For
-                            End If
-                        End If
-                    Next
                 End If
             End If
         End If
