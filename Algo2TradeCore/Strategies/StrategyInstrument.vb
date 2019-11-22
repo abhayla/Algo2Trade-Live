@@ -456,6 +456,37 @@ Namespace Strategies
             End If
             Return ret
         End Function
+        Public Function GetBlockDateTime(ByVal time As Date, ByVal timeframe As Integer) As Date
+            Dim ret As Date = Date.MinValue
+            If Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute Mod timeframe = 0 Then
+                ret = New Date(time.Year, time.Month, time.Day, time.Hour, Math.Floor(time.Minute / timeframe) * timeframe, 0)
+            Else
+                Dim exchangeStartTime As Date = New Date(time.Year, time.Month, time.Day,
+                                                         Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Hour,
+                                                         Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute, 0)
+                Dim currentTime As Date = New Date(time.Year, time.Month, time.Day, time.Hour, time.Minute, 0)
+                Dim timeDifference As Double = currentTime.Subtract(exchangeStartTime).TotalMinutes
+                Dim adjustedTimeDifference As Integer = Math.Floor(timeDifference / timeframe) * timeframe
+                Dim currentMinute As Date = exchangeStartTime.AddMinutes(adjustedTimeDifference)
+                ret = New Date(time.Year, time.Month, time.Day, currentMinute.Hour, currentMinute.Minute, 0)
+            End If
+            Return ret
+        End Function
+        Public Function GetOrderExitTime(ByVal order As IBusinessOrder) As Date
+            Dim ret As Date = Date.MinValue
+            If order IsNot Nothing AndAlso order.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                If order.AllOrder IsNot Nothing AndAlso order.AllOrder.Count > 0 Then
+                    For Each runningOrder In order.AllOrder
+                        If runningOrder.Status = IOrder.TypeOfStatus.Complete Then
+                            If runningOrder.TimeStamp > ret Then
+                                ret = runningOrder.TimeStamp
+                            End If
+                        End If
+                    Next
+                End If
+            End If
+            Return ret
+        End Function
 #End Region
 
 #Region "Public Functions"
