@@ -1601,7 +1601,7 @@ Public Class frmMainTabbed
             End If 'Common controller
             EnableDisableUIEx(UIMode.ReleaseOther, GetType(PetDGandhiStrategy))
 
-            _PetDGandhiStrategyToExecute = New PetDGandhiStrategy(_commonController, 5, _PetDGandhiUserInputs, 5, _cts)
+            _PetDGandhiStrategyToExecute = New PetDGandhiStrategy(_commonController, 9, _PetDGandhiUserInputs, 5, _cts)
             OnHeartbeatEx(String.Format("Running strategy:{0}", _PetDGandhiStrategyToExecute.ToString), New List(Of Object) From {_PetDGandhiStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()
