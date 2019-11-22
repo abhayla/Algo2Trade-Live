@@ -24,6 +24,7 @@ Public Class PetDGandhiStrategyInstrument
     Private _lastPrevPayloadPlaceOrder As String = ""
     Private _strategyInstrumentExit As Boolean = False
     Private _firstTradedQuantity As Integer = Integer.MinValue
+    Private _slMovedOnCandle As Concurrent.ConcurrentBag(Of String) = Nothing
 
     Private ReadOnly _dummyVWAPConsumer As VWAPConsumer
     Public Sub New(ByVal associatedInstrument As IInstrument,
@@ -228,7 +229,7 @@ Public Class PetDGandhiStrategyInstrument
                     If signal.Item4 = IOrder.TypeOfTransaction.Buy Then
                         Dim price As Decimal = signal.Item2
                         Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                        If currentTick.LastPrice > price Then
+                        If currentTick.LastPrice > price AndAlso currentTick.LastPrice < price + Me.Slab Then
                             parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                      .Price = price,
@@ -239,7 +240,7 @@ Public Class PetDGandhiStrategyInstrument
                     ElseIf signal.Item4 = IOrder.TypeOfTransaction.Sell Then
                         Dim price As Decimal = signal.Item2
                         Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                        If currentTick.LastPrice < price Then
+                        If currentTick.LastPrice < price AndAlso currentTick.LastPrice > price + Me.Slab Then
                             parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                                      .Price = price,
@@ -343,9 +344,13 @@ Public Class PetDGandhiStrategyInstrument
                                         If runningCandlePayload.PreviousPayload.ClosePrice.Value < vwap.VWAP.Value Then
                                             If currentTick.LastPrice > runningCandlePayload.PreviousPayload.LowPrice.Value AndAlso
                                                 runningCandlePayload.PreviousPayload.LowPrice.Value > slOrder.TriggerPrice Then
-                                                triggerPrice = runningCandlePayload.PreviousPayload.LowPrice.Value
-                                                reason = "Candle Low Below VWAP"
-                                                moved = True
+                                                If _slMovedOnCandle Is Nothing OrElse Not _slMovedOnCandle.Contains(slOrder.OrderIdentifier) Then
+                                                    triggerPrice = runningCandlePayload.PreviousPayload.LowPrice.Value
+                                                    reason = "Candle Low Below VWAP"
+                                                    moved = True
+                                                    If _slMovedOnCandle Is Nothing Then _slMovedOnCandle = New Concurrent.ConcurrentBag(Of String)
+                                                    _slMovedOnCandle.Add(slOrder.OrderIdentifier)
+                                                End If
                                             End If
                                         End If
                                         If Not moved Then
@@ -361,9 +366,13 @@ Public Class PetDGandhiStrategyInstrument
                                         If runningCandlePayload.PreviousPayload.ClosePrice.Value > vwap.VWAP.Value Then
                                             If currentTick.LastPrice < runningCandlePayload.PreviousPayload.HighPrice.Value AndAlso
                                                 runningCandlePayload.PreviousPayload.HighPrice.Value < slOrder.TriggerPrice Then
-                                                triggerPrice = runningCandlePayload.PreviousPayload.HighPrice.Value
-                                                reason = "Candle High Above VWAP"
-                                                moved = True
+                                                If _slMovedOnCandle Is Nothing OrElse Not _slMovedOnCandle.Contains(slOrder.OrderIdentifier) Then
+                                                    triggerPrice = runningCandlePayload.PreviousPayload.HighPrice.Value
+                                                    reason = "Candle High Above VWAP"
+                                                    moved = True
+                                                    If _slMovedOnCandle Is Nothing Then _slMovedOnCandle = New Concurrent.ConcurrentBag(Of String)
+                                                    _slMovedOnCandle.Add(slOrder.OrderIdentifier)
+                                                End If
                                             End If
                                         End If
                                         If Not moved Then
