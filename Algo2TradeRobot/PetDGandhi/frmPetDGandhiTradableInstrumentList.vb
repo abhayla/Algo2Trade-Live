@@ -17,15 +17,27 @@
             dt.Columns.Add("Lot Size")
             dt.Columns.Add("Tick Size")
             For Each instrument In _TradableInstruments
-                Dim row As DataRow = dt.NewRow
-                row("Instrument Name") = instrument.TradableInstrument.TradingSymbol
-                row("Slab") = instrument.Slab
-                row("Exchange") = instrument.TradableInstrument.RawExchange
-                row("Instrument Type") = instrument.TradableInstrument.RawInstrumentType
-                row("Expiry") = instrument.TradableInstrument.Expiry
-                row("Lot Size") = instrument.TradableInstrument.LotSize
-                row("Tick Size") = instrument.TradableInstrument.TickSize
-                dt.Rows.Add(row)
+                If instrument.ProcessingDone AndAlso instrument.EligibleToTakeTrade Then
+                    Dim row As DataRow = dt.NewRow
+                    row("Instrument Name") = instrument.TradableInstrument.TradingSymbol
+                    row("Slab") = instrument.Slab
+                    row("Exchange") = instrument.TradableInstrument.RawExchange
+                    row("Instrument Type") = instrument.TradableInstrument.RawInstrumentType
+                    row("Expiry") = instrument.TradableInstrument.Expiry
+                    row("Lot Size") = instrument.TradableInstrument.LotSize
+                    row("Tick Size") = instrument.TradableInstrument.TickSize
+                    dt.Rows.Add(row)
+                ElseIf Not instrument.ProcessingDone Then
+                    Dim row As DataRow = dt.NewRow
+                    row("Instrument Name") = instrument.TradableInstrument.TradingSymbol
+                    row("Slab") = instrument.Slab
+                    row("Exchange") = instrument.TradableInstrument.RawExchange
+                    row("Instrument Type") = instrument.TradableInstrument.RawInstrumentType
+                    row("Expiry") = instrument.TradableInstrument.Expiry
+                    row("Lot Size") = instrument.TradableInstrument.LotSize
+                    row("Tick Size") = instrument.TradableInstrument.TickSize
+                    dt.Rows.Add(row)
+                End If
             Next
             dgvTradableInstruments.DataSource = dt
             dgvTradableInstruments.Refresh()

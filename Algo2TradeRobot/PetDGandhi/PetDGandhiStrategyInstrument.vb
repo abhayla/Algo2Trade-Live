@@ -21,6 +21,7 @@ Public Class PetDGandhiStrategyInstrument
     Public ProcessingDone As Boolean
 
     Private _lastPrevPayloadPlaceOrder As String = ""
+    Private _strategyInstrumentExit As Boolean = False
     Private _potentialHighEntryPrice As Decimal = Decimal.MinValue
     Private _potentialLowEntryPrice As Decimal = Decimal.MinValue
     Private _entryChanged As Boolean = False
@@ -66,10 +67,16 @@ Public Class PetDGandhiStrategyInstrument
     Public Overrides Function HandleTickTriggerToUIETCAsync() As Task
         If Me.ParentStrategy.GetTotalPLAfterBrokerage <= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).MaxLossPerDay Then
             Me.StrategyExitAllTriggerd = True
-            ForceExitAllTradesAsync("Max Profit reached")
+            ForceExitAllTradesAsync("Max Loss reached")
         ElseIf Me.ParentStrategy.GetTotalPLAfterBrokerage >= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
             Me.StrategyExitAllTriggerd = True
-            ForceExitAllTradesAsync("Max Loss reached")
+            ForceExitAllTradesAsync("Max Profit reached")
+        ElseIf Me.GetOverallPLAfterBrokerage <= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).StockMaxLossPerDay Then
+            _strategyInstrumentExit = True
+            ForceExitAllTradesAsync("Instrument Max Loss reached")
+        ElseIf Me.GetOverallPLAfterBrokerage >= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).StockMaxProfitPerDay Then
+            _strategyInstrumentExit = True
+            ForceExitAllTradesAsync("Instrument Max Profit reached")
         End If
         Return MyBase.HandleTickTriggerToUIETCAsync()
     End Function
@@ -109,10 +116,6 @@ Public Class PetDGandhiStrategyInstrument
                     Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
                     If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
                         Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
-                    End If
-                    Dim modifyTargetOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyTargetOrderAsync(False).ConfigureAwait(False)
-                    If modifyTargetOrderTrigger IsNot Nothing AndAlso modifyTargetOrderTrigger.Count > 0 Then
-                        Await ExecuteCommandAsync(ExecuteCommands.ModifyTargetOrder, Nothing).ConfigureAwait(False)
                     End If
                     'Modify Order block end
                     _cts.Token.ThrowIfCancellationRequested()
@@ -203,8 +206,9 @@ Public Class PetDGandhiStrategyInstrument
             runningCandlePayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
             runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso
             Not IsActiveInstrument() AndAlso GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock AndAlso
-            Me.ParentStrategy.GetTotalPLAfterBrokerage() > userSettings.MaxLossPerDay AndAlso
-            Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay AndAlso Not Me.StrategyExitAllTriggerd Then
+            Me.GetOverallPLAfterBrokerage() > userSettings.StockMaxLossPerDay AndAlso Me.GetOverallPLAfterBrokerage() < userSettings.StockMaxProfitPerDay AndAlso
+            Me.ParentStrategy.GetTotalPLAfterBrokerage() > userSettings.MaxLossPerDay AndAlso Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay AndAlso
+            Not Me.StrategyExitAllTriggerd AndAlso Not _strategyInstrumentExit Then
 
             Dim lastExuctedOrder As IBusinessOrder = GetLastExecutedOrder()
             If lastExuctedOrder IsNot Nothing AndAlso IsOrderForceExitedForBreakeven(lastExuctedOrder) Then
@@ -217,12 +221,17 @@ Public Class PetDGandhiStrategyInstrument
             Dim signal As Tuple(Of Boolean, Decimal, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick)
             If signal IsNot Nothing AndAlso signal.Item1 Then
                 Dim buffer As Decimal = CalculateBuffer(signal.Item2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                Dim targetPL As Decimal = userSettings.StockMaxProfitPerDay - Me.GetOverallPLAfterBrokerage()
+                If Me.GetOverallPLAfterBrokerage() <= 3 * userSettings.MaxLossPerTrade Then
+                    targetPL = Math.Abs(userSettings.MaxLossPerTrade)
+                End If
+                Dim targetPrice As Decimal = CalculateTargetFromPL(signal.Item2, _firstTradedQuantity, targetPL)
+                Dim target As Decimal = targetPrice - signal.Item2
                 If signal.Item4 = IOrder.TypeOfTransaction.Buy Then
                     Dim triggerPrice As Decimal = signal.Item2 + buffer
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(Me.Slab / 2, TradableInstrument.TickSize, RoundOfType.Celing)
                     Dim stoplossPrice As Decimal = signal.Item3 - buffer
                     Dim stoploss As Decimal = ConvertFloorCeling(triggerPrice - stoplossPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing) - buffer
                     If currentTick.LastPrice < triggerPrice Then
                         parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
@@ -237,7 +246,6 @@ Public Class PetDGandhiStrategyInstrument
                     Dim price As Decimal = triggerPrice - ConvertFloorCeling(Me.Slab / 2, TradableInstrument.TickSize, RoundOfType.Celing)
                     Dim stoplossPrice As Decimal = signal.Item3 + buffer
                     Dim stoploss As Decimal = ConvertFloorCeling(stoplossPrice - triggerPrice, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                    Dim target As Decimal = ConvertFloorCeling(Me.Slab * userSettings.TargetMultiplier, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing) - buffer
                     If currentTick.LastPrice > triggerPrice Then
                         parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Sell,
@@ -566,15 +574,6 @@ Public Class PetDGandhiStrategyInstrument
     Private Function CalculateSlab(ByVal price As Decimal) As Decimal
         Dim ret As Decimal = 0.5
         Dim slabList As List(Of Decimal) = New List(Of Decimal) From {0.5, 1, 2.5, 5, 10, 15}
-        'Dim supportedLowerSlab As Decimal = price * 0.2 / 100
-        'Dim supportedUpperSlab As Decimal = price * 0.5 / 100
-        'Dim supportedSlabList As List(Of Decimal) = slabList.FindAll(Function(x)
-        '                                                                 Return x >= supportedLowerSlab AndAlso
-        '                                                                 x <= supportedUpperSlab
-        '                                                             End Function)
-        'If supportedSlabList IsNot Nothing AndAlso supportedSlabList.Count > 0 Then
-        '    ret = supportedSlabList.Min
-        'End If
         Dim atrPer As Decimal = CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).InstrumentsData(Me.TradableInstrument.TradingSymbol).ATRPercentage
         Dim atr As Decimal = (atrPer / 100) * price
         Dim supportedSlabList As List(Of Decimal) = slabList.FindAll(Function(x)
@@ -582,9 +581,14 @@ Public Class PetDGandhiStrategyInstrument
                                                                      End Function)
         If supportedSlabList IsNot Nothing AndAlso supportedSlabList.Count > 0 Then
             ret = supportedSlabList.Max
-        End If
-        If Me.TradableInstrument.TradingSymbol.ToUpper = "IBULHSGFIN" Then
-            ret = 1
+            If price * 1 / 100 < ret Then
+                Dim newSupportedSlabList As List(Of Decimal) = supportedSlabList.FindAll(Function(x)
+                                                                                             Return x <= price * 1 / 100
+                                                                                         End Function)
+                If newSupportedSlabList IsNot Nothing AndAlso newSupportedSlabList.Count > 0 Then
+                    ret = newSupportedSlabList.Max
+                End If
+            End If
         End If
         Return ret
     End Function

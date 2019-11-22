@@ -15,7 +15,7 @@ Public Class frmPetDGandhiSettings
         LoadSettings()
     End Sub
 
-    Private Sub btnSavePetDGandhiSettings_Click(sender As Object, e As EventArgs)
+    Private Sub btnSavePetDGandhiSettings_Click(sender As Object, e As EventArgs) Handles btnSavePetDGandhiSettings.Click
         Try
             _cts = New CancellationTokenSource
             If _settings Is Nothing Then _settings = New PetDGandhiUserInputs
@@ -28,12 +28,12 @@ Public Class frmPetDGandhiSettings
         End Try
     End Sub
 
-    Private Sub btnBrowse_Click(sender As Object, e As EventArgs)
+    Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
         opnFileSettings.Filter = "|*.csv"
         opnFileSettings.ShowDialog()
     End Sub
 
-    Private Sub opnFileSettings_FileOk(sender As Object, e As System.ComponentModel.CancelEventArgs)
+    Private Sub opnFileSettings_FileOk(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles opnFileSettings.FileOk
         Dim extension As String = Path.GetExtension(opnFileSettings.FileName)
         If extension = ".csv" Then
             txtInstrumentDetalis.Text = opnFileSettings.FileName
