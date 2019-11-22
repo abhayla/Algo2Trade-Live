@@ -205,12 +205,16 @@ Public Class PetDGandhiStrategyInstrument
                 Dim eligilbleToTakeTrade As Boolean = True
                 If lastExecutedOrder IsNot Nothing AndAlso IsTradeExitAtOppositeLevel(lastExecutedOrder) Then
                     If lastExecutedOrder.ParentOrder.TransactionType <> signal.Item4 Then
-                        If lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                            Dim oppositeLevel As Decimal = lastExecutedOrder.ParentOrder.Price - Me.Slab
-                            If signal.Item2 = oppositeLevel Then eligilbleToTakeTrade = False
-                        ElseIf lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                            Dim oppositeLevel As Decimal = lastExecutedOrder.ParentOrder.Price + Me.Slab
-                            If signal.Item2 = oppositeLevel Then eligilbleToTakeTrade = False
+                        Dim lastorderExitTime As Date = GetOrderExitTime(lastExecutedOrder)
+                        If lastorderExitTime <> Date.MinValue AndAlso Utilities.Time.IsDateTimeEqualTillMinutes(lastorderExitTime, runningCandlePayload.SnapshotDateTime) Then
+                            'If lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                            '    Dim oppositeLevel As Decimal = lastExecutedOrder.ParentOrder.Price - Me.Slab
+                            '    If signal.Item2 = oppositeLevel Then eligilbleToTakeTrade = False
+                            'ElseIf lastExecutedOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                            '    Dim oppositeLevel As Decimal = lastExecutedOrder.ParentOrder.Price + Me.Slab
+                            '    If signal.Item2 = oppositeLevel Then eligilbleToTakeTrade = False
+                            'End If
+                            eligilbleToTakeTrade = False
                         End If
                     End If
                 End If

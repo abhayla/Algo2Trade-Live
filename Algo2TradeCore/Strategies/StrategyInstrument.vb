@@ -472,6 +472,21 @@ Namespace Strategies
             End If
             Return ret
         End Function
+        Public Function GetOrderExitTime(ByVal order As IBusinessOrder) As Date
+            Dim ret As Date = Date.MinValue
+            If order IsNot Nothing AndAlso order.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                If order.AllOrder IsNot Nothing AndAlso order.AllOrder.Count > 0 Then
+                    For Each runningOrder In order.AllOrder
+                        If runningOrder.Status = IOrder.TypeOfStatus.Complete Then
+                            If runningOrder.TimeStamp > ret Then
+                                ret = runningOrder.TimeStamp
+                            End If
+                        End If
+                    Next
+                End If
+            End If
+            Return ret
+        End Function
 #End Region
 
 #Region "Public Functions"
