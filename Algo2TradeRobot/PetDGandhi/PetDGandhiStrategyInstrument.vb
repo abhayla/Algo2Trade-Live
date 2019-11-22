@@ -240,7 +240,7 @@ Public Class PetDGandhiStrategyInstrument
                     ElseIf signal.Item4 = IOrder.TypeOfTransaction.Sell Then
                         Dim price As Decimal = signal.Item2
                         Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
-                        If currentTick.LastPrice < price AndAlso currentTick.LastPrice > price + Me.Slab Then
+                        If currentTick.LastPrice < price AndAlso currentTick.LastPrice > price - Me.Slab Then
                             parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                                      .Price = price,
@@ -349,7 +349,7 @@ Public Class PetDGandhiStrategyInstrument
                                                     reason = "Candle Low Below VWAP"
                                                     moved = True
                                                     If _slMovedOnCandle Is Nothing Then _slMovedOnCandle = New Concurrent.ConcurrentBag(Of String)
-                                                    _slMovedOnCandle.Add(slOrder.OrderIdentifier)
+                                                    If forcePrint Then _slMovedOnCandle.Add(slOrder.OrderIdentifier)
                                                 End If
                                             End If
                                         End If
@@ -371,7 +371,7 @@ Public Class PetDGandhiStrategyInstrument
                                                     reason = "Candle High Above VWAP"
                                                     moved = True
                                                     If _slMovedOnCandle Is Nothing Then _slMovedOnCandle = New Concurrent.ConcurrentBag(Of String)
-                                                    _slMovedOnCandle.Add(slOrder.OrderIdentifier)
+                                                    If forcePrint Then _slMovedOnCandle.Add(slOrder.OrderIdentifier)
                                                 End If
                                             End If
                                         End If
@@ -452,6 +452,18 @@ Public Class PetDGandhiStrategyInstrument
                                 ElseIf signal.Item2 <> parentOrder.Price Then
                                     exitTrade = True
                                     reason = "Trade Level Changed"
+                                ElseIf signal.Item4 = parentOrder.TransactionType Then
+                                    If parentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                        If currentTick.LastPrice > parentOrder.Price + Me.Slab Then
+                                            exitTrade = True
+                                            reason = "Capital Preservation"
+                                        End If
+                                    ElseIf parentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                        If currentTick.LastPrice < parentOrder.Price - Me.Slab Then
+                                            exitTrade = True
+                                            reason = "Capital Preservation"
+                                        End If
+                                    End If
                                 End If
                                 If exitTrade Then
                                     'Below portion have to be done in every cancel order trigger
@@ -555,9 +567,14 @@ Public Class PetDGandhiStrategyInstrument
                                                                      End Function)
         If supportedSlabList IsNot Nothing AndAlso supportedSlabList.Count > 0 Then
             ret = supportedSlabList.Max
-        End If
-        If Me.TradableInstrument.RawInstrumentName.ToUpper = "IBULHSGFIN" Then
-            ret = 1
+            If price * 1 / 100 < ret Then
+                Dim newSupportedSlabList As List(Of Decimal) = supportedSlabList.FindAll(Function(x)
+                                                                                             Return x <= price * 1 / 100
+                                                                                         End Function)
+                If newSupportedSlabList IsNot Nothing AndAlso newSupportedSlabList.Count > 0 Then
+                    ret = newSupportedSlabList.Max
+                End If
+            End If
         End If
         Return ret
     End Function
