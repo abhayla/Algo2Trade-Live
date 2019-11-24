@@ -368,8 +368,8 @@ Public Class MomentumReversalStrategyInstrument
             Dim rsiConsumer As RSIConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyRSIConsumer)
             If rsiConsumer.ConsumerPayloads IsNot Nothing AndAlso rsiConsumer.ConsumerPayloads.Count > 0 AndAlso
                 rsiConsumer.ConsumerPayloads.ContainsKey(candle.SnapshotDateTime) Then
-                If CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value > userSettings.RSILevel AndAlso
-                    _previousRSIWasBelowLevel Then
+                Dim rsiValue As Decimal = CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value
+                If rsiValue > userSettings.RSILevel AndAlso _previousRSIWasBelowLevel Then
                     If Utilities.Time.IsDateTimeEqualTillMinutes(candle.SnapshotDateTime, userSettings.TradeStartTime) Then
                         ret = New Tuple(Of Boolean, Decimal)(True, candle.PreviousPayload.HighPrice.Value)
                     Else
@@ -385,8 +385,15 @@ Public Class MomentumReversalStrategyInstrument
                             ret = New Tuple(Of Boolean, Decimal)(True, entryPrice)
                         End If
                     End If
-                    If executeCommand Then _previousRSIWasBelowLevel = False
-                ElseIf CType(rsiConsumer.ConsumerPayloads(candle.SnapshotDateTime), RSIConsumer.RSIPayload).RSI.Value <= userSettings.RSILevel Then
+                    If executeCommand Then
+                        _previousRSIWasBelowLevel = False
+                        Try
+                            logger.Debug("RSI Value:{0}, Trading Symbol:{1}, Time:{2}", rsiValue, Me.TradableInstrument.TradingSymbol, currentTick.Timestamp.Value)
+                        Catch ex As Exception
+                            logger.Error(ex.ToString)
+                        End Try
+                    End If
+                ElseIf rsiValue <= userSettings.RSILevel Then
                     _previousRSIWasBelowLevel = True
                 End If
             End If
@@ -408,34 +415,6 @@ Public Class MomentumReversalStrategyInstrument
         End If
         Return ret
     End Function
-
-    Private Function IsLastTradeExitedAtCurrentCandle(ByVal currentCandleTime As Date) As Boolean
-        Dim ret As Boolean = False
-        Dim lastTradeExitTime As Date = GetLastOrderExitTime()
-        If lastTradeExitTime <> Date.MinValue Then
-            Dim blockDateInThisTimeframe As Date = Date.MinValue
-            Dim timeframe As Integer = Me.ParentStrategy.UserSettings.SignalTimeFrame
-            If Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute Mod timeframe = 0 Then
-                blockDateInThisTimeframe = New Date(lastTradeExitTime.Year,
-                                                    lastTradeExitTime.Month,
-                                                    lastTradeExitTime.Day,
-                                                    lastTradeExitTime.Hour,
-                                                    Math.Floor(lastTradeExitTime.Minute / timeframe) * timeframe, 0)
-            Else
-                Dim exchangeStartTime As Date = New Date(lastTradeExitTime.Year, lastTradeExitTime.Month, lastTradeExitTime.Day, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Hour, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute, 0)
-                Dim currentTime As Date = New Date(lastTradeExitTime.Year, lastTradeExitTime.Month, lastTradeExitTime.Day, lastTradeExitTime.Hour, lastTradeExitTime.Minute, 0)
-                Dim timeDifference As Double = currentTime.Subtract(exchangeStartTime).TotalMinutes
-                Dim adjustedTimeDifference As Integer = Math.Floor(timeDifference / timeframe) * timeframe
-                Dim currentMinute As Date = exchangeStartTime.AddMinutes(adjustedTimeDifference)
-                blockDateInThisTimeframe = New Date(lastTradeExitTime.Year, lastTradeExitTime.Month, lastTradeExitTime.Day, currentMinute.Hour, currentMinute.Minute, 0)
-            End If
-            If blockDateInThisTimeframe <> Date.MinValue Then
-                ret = Utilities.Time.IsDateTimeEqualTillMinutes(blockDateInThisTimeframe, currentCandleTime)
-            End If
-        End If
-        Return ret
-    End Function
-
 #Region "IDisposable Support"
     Private disposedValue As Boolean ' To detect redundant calls
 
