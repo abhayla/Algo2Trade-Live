@@ -22,6 +22,7 @@ Public Class PetDGandhiStrategyInstrument
 
     Private _lastPrevPayloadPlaceOrder As String = ""
     Private _strategyInstrumentExit As Boolean = False
+    Private _takeSingleTargetTrade As Boolean = False
     Private _potentialHighEntryPrice As Decimal = Decimal.MinValue
     Private _potentialLowEntryPrice As Decimal = Decimal.MinValue
     Private _entryChanged As Boolean = False
@@ -223,10 +224,15 @@ Public Class PetDGandhiStrategyInstrument
                 Dim buffer As Decimal = CalculateBuffer(signal.Item2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                 Dim targetPL As Decimal = userSettings.StockMaxProfitPerDay - Me.GetOverallPLAfterBrokerage()
                 If Me.GetOverallPLAfterBrokerage() <= 3 * userSettings.MaxLossPerTrade Then
-                    targetPL = Math.Abs(userSettings.MaxLossPerTrade)
+                    _takeSingleTargetTrade = True
+                ElseIf Me.GetOverallPLAfterBrokerage() > userSettings.MaxLossPerTrade AndAlso _takeSingleTargetTrade Then
+                    _takeSingleTargetTrade = False
                 End If
                 Dim targetPrice As Decimal = CalculateTargetFromPL(signal.Item2, _firstTradedQuantity, targetPL)
                 Dim target As Decimal = targetPrice - signal.Item2
+                If _takeSingleTargetTrade Then
+                    target = Me.Slab
+                End If
                 If signal.Item4 = IOrder.TypeOfTransaction.Buy Then
                     Dim triggerPrice As Decimal = signal.Item2 + buffer
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(Me.Slab / 2, TradableInstrument.TickSize, RoundOfType.Celing)
