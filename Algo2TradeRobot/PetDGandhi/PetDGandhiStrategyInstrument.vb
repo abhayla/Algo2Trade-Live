@@ -23,6 +23,7 @@ Public Class PetDGandhiStrategyInstrument
 
     Private _lastPrevPayloadPlaceOrder As String = ""
     Private _strategyInstrumentExit As Boolean = False
+    Private _takeSingleTargetTrade As Boolean = False
     Private _firstTradedQuantity As Integer = Integer.MinValue
     Private _slMovedOnCandle As Concurrent.ConcurrentBag(Of String) = Nothing
 
@@ -222,10 +223,15 @@ Public Class PetDGandhiStrategyInstrument
                 If eligilbleToTakeTrade Then
                     Dim targetPL As Decimal = userSettings.StockMaxProfitPerDay - Me.GetOverallPLAfterBrokerage()
                     If Me.GetOverallPLAfterBrokerage() <= 3 * userSettings.MaxLossPerTrade Then
-                        targetPL = Math.Abs(userSettings.MaxLossPerTrade)
+                        _takeSingleTargetTrade = True
+                    ElseIf Me.GetOverallPLAfterBrokerage() > userSettings.MaxLossPerTrade AndAlso _takeSingleTargetTrade Then
+                        _takeSingleTargetTrade = False
                     End If
                     Dim targetPrice As Decimal = CalculateTargetFromPL(signal.Item2, _firstTradedQuantity, targetPL)
                     Dim target As Decimal = targetPrice - signal.Item2
+                    If _takeSingleTargetTrade Then
+                        target = Me.Slab
+                    End If
                     If signal.Item4 = IOrder.TypeOfTransaction.Buy Then
                         Dim price As Decimal = signal.Item2
                         Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
