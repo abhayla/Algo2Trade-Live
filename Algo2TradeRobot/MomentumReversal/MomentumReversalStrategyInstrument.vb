@@ -394,6 +394,13 @@ Public Class MomentumReversalStrategyInstrument
                         End Try
                     End If
                 ElseIf rsiValue <= userSettings.RSILevel Then
+                    If Not _previousRSIWasBelowLevel Then
+                        Try
+                            logger.Debug("Crossdown RSI Value:{0}, Trading Symbol:{1}, Time:{2}", rsiValue, Me.TradableInstrument.TradingSymbol, currentTick.Timestamp.Value)
+                        Catch ex As Exception
+                            logger.Error(ex.ToString)
+                        End Try
+                    End If
                     _previousRSIWasBelowLevel = True
                 End If
             End If
