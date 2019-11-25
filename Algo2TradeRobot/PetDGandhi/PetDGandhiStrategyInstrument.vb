@@ -186,7 +186,7 @@ Public Class PetDGandhiStrategyInstrument
             If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
                 (Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder OrElse forcePrint) Then
                 _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Previous Candle:{5}, Is Active Instrument:{6}, Number Of Trade:{7}, OverAll PL:{8}, Stock PL:{9}, Strategy Exit All Triggerd:{10}, Strategy Instrument Exit:{11}, Last Trade Breakeven Exit:{12}, Last Trade Target Exit:{13}, Last Trade Direction:{14}, Current Time:{15}, Current LTP:{16}, TradingSymbol:{17}",
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Previous Candle:{5}, Is Active Instrument:{6}, Number Of Trade:{7}, OverAll PL:{8}, Stock PL:{9}, Strategy Exit All Triggerd:{10}, Strategy Instrument Exit:{11}, Last Trade Breakeven Exit:{12}, Last Trade Target Exit:{13}, High Entry Price:{14}, Low Entry Price:{15}, Current Time:{16}, Current LTP:{17}, TradingSymbol:{18}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             runningCandlePayload.SnapshotDateTime.ToString,
@@ -201,7 +201,8 @@ Public Class PetDGandhiStrategyInstrument
                             _strategyInstrumentExit,
                             IsOrderForceExitedForBreakeven(lastExecutedOrder),
                             IsOrderExitedForTarget(lastExecutedOrder),
-                            If(lastExecutedOrder IsNot Nothing, lastExecutedOrder.ParentOrder.RawTransactionType, "Nothing"),
+                            If(_potentialHighEntryPrice <> Decimal.MinValue, _potentialHighEntryPrice, "Nothing"),
+                            If(_potentialLowEntryPrice <> Decimal.MinValue, _potentialLowEntryPrice, "Nothing"),
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
