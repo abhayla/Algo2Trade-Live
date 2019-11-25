@@ -353,16 +353,18 @@ Public Class PetDGandhiStrategyInstrument
                             Dim triggerPrice As Decimal = Decimal.MinValue
                             Dim reason As String = Nothing
                             Dim buffer As Decimal = CalculateBuffer(bussinessOrder.ParentOrder.TriggerPrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                            If bussinessOrder.ParentOrder.AveragePrice <> bussinessOrder.ParentOrder.TriggerPrice Then
-                                If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                    If slOrder.TriggerPrice < bussinessOrder.ParentOrder.AveragePrice Then
-                                        triggerPrice = bussinessOrder.ParentOrder.TriggerPrice - Me.Slab - 2 * buffer
-                                        reason = "Slippage"
-                                    End If
-                                ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                    If slOrder.TriggerPrice > bussinessOrder.ParentOrder.AveragePrice Then
-                                        triggerPrice = bussinessOrder.ParentOrder.TriggerPrice + Me.Slab + 2 * buffer
-                                        reason = "Slippage"
+                            If _slMovedOnCandle Is Nothing OrElse Not _slMovedOnCandle.Contains(slOrder.OrderIdentifier) Then
+                                If bussinessOrder.ParentOrder.AveragePrice <> bussinessOrder.ParentOrder.TriggerPrice Then
+                                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                        If slOrder.TriggerPrice < bussinessOrder.ParentOrder.AveragePrice Then
+                                            triggerPrice = bussinessOrder.ParentOrder.TriggerPrice - Me.Slab - 2 * buffer
+                                            reason = "Slippage"
+                                        End If
+                                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                        If slOrder.TriggerPrice > bussinessOrder.ParentOrder.AveragePrice Then
+                                            triggerPrice = bussinessOrder.ParentOrder.TriggerPrice + Me.Slab + 2 * buffer
+                                            reason = "Slippage"
+                                        End If
                                     End If
                                 End If
                             End If
@@ -380,7 +382,7 @@ Public Class PetDGandhiStrategyInstrument
                             If _breakevenMovedOrders IsNot Nothing AndAlso _breakevenMovedOrders.Contains(bussinessOrder.ParentOrderIdentifier) Then
                                 If runningCandlePayload.SnapshotDateTime >= bussinessOrder.ParentOrder.TimeStamp Then
                                     If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                        If runningCandlePayload.PreviousPayload.ClosePrice.Value < bussinessOrder.ParentOrder.TriggerPrice - 2 * buffer Then
+                                        If runningCandlePayload.PreviousPayload.LowPrice.Value <= bussinessOrder.ParentOrder.TriggerPrice - 2 * buffer Then
                                             If _slMovedOnCandle Is Nothing OrElse Not _slMovedOnCandle.Contains(slOrder.OrderIdentifier) Then
                                                 triggerPrice = runningCandlePayload.PreviousPayload.LowPrice.Value - buffer
                                                 reason = "Candle Low Below VWAP"
@@ -389,7 +391,7 @@ Public Class PetDGandhiStrategyInstrument
                                             End If
                                         End If
                                     ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                        If runningCandlePayload.PreviousPayload.ClosePrice.Value > bussinessOrder.ParentOrder.TriggerPrice + 2 * buffer Then
+                                        If runningCandlePayload.PreviousPayload.HighPrice.Value >= bussinessOrder.ParentOrder.TriggerPrice + 2 * buffer Then
                                             If _slMovedOnCandle Is Nothing OrElse Not _slMovedOnCandle.Contains(slOrder.OrderIdentifier) Then
                                                 triggerPrice = runningCandlePayload.PreviousPayload.HighPrice.Value + buffer
                                                 reason = "Candle High Above VWAP"
@@ -405,8 +407,8 @@ Public Class PetDGandhiStrategyInstrument
                                 Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(slOrder.Tag)
                                 If currentSignalActivities IsNot Nothing Then
                                     If currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
-                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                    currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                    currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
                                         If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
                                             Continue For
                                         End If
@@ -622,13 +624,13 @@ Public Class PetDGandhiStrategyInstrument
                         If runningOrder.Status = IOrder.TypeOfStatus.Complete Then
                             If order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
                                 If runningOrder.AveragePrice > order.ParentOrder.TriggerPrice - buffer - Me.Slab AndAlso
-                                    runningOrder.AveragePrice < order.ParentOrder.TriggerPrice + buffer Then
+                                    runningOrder.AveragePrice <= order.ParentOrder.TriggerPrice + buffer Then
                                     ret = True
                                     Exit For
                                 End If
                             ElseIf order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
                                 If runningOrder.AveragePrice < order.ParentOrder.TriggerPrice + buffer + Me.Slab AndAlso
-                                    runningOrder.AveragePrice > order.ParentOrder.TriggerPrice - buffer Then
+                                    runningOrder.AveragePrice >= order.ParentOrder.TriggerPrice - buffer Then
                                     ret = True
                                     Exit For
                                 End If
