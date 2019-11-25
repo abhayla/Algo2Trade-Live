@@ -154,17 +154,13 @@ Public Class PetDGandhiStrategy
                                                                                                                  Return CType(z, PetDGandhiStrategyInstrument).ProcessingDone
                                                                                                              End Function).Count = Me.TradableStrategyInstruments.Count Then
                     Dim counter As Integer = 0
-                    Dim ctr As Integer = 0
                     For Each runningCashInstrument In Me.TradableStrategyInstruments
                         If CType(runningCashInstrument, PetDGandhiStrategyInstrument).FilledPreviousClose Then
-                            ctr += 1
-                            If ctr >= 5 Then
-                                CType(runningCashInstrument, PetDGandhiStrategyInstrument).EligibleToTakeTrade = True
-                                runningCashInstrument.TradableInstrument.FetchHistorical = True
-                                counter += 1
-                                If counter = CType(Me.UserSettings, PetDGandhiUserInputs).NumberOfStock Then
-                                    Exit For
-                                End If
+                            CType(runningCashInstrument, PetDGandhiStrategyInstrument).EligibleToTakeTrade = True
+                            runningCashInstrument.TradableInstrument.FetchHistorical = True
+                            counter += 1
+                            If counter = CType(Me.UserSettings, PetDGandhiUserInputs).NumberOfStock Then
+                                Exit For
                             End If
                         End If
                     Next
