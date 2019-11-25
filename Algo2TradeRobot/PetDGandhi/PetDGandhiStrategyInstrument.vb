@@ -161,7 +161,8 @@ Public Class PetDGandhiStrategyInstrument
                 End If
             End If
             If _firstTradedQuantity = Integer.MinValue Then
-                _firstTradedQuantity = CalculateQuantityFromStoploss(runningCandlePayload.OpenPrice.Value, runningCandlePayload.OpenPrice.Value - Me.Slab, userSettings.MaxLossPerTrade)
+                Dim buffer As Decimal = CalculateBuffer(runningCandlePayload.OpenPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                _firstTradedQuantity = CalculateQuantityFromStoploss(runningCandlePayload.OpenPrice.Value, runningCandlePayload.OpenPrice.Value - Me.Slab - buffer, userSettings.MaxLossPerTrade)
             End If
         End If
 
@@ -221,6 +222,7 @@ Public Class PetDGandhiStrategyInstrument
                     End If
                 End If
                 If eligilbleToTakeTrade Then
+                    Dim buffer As Decimal = CalculateBuffer(signal.Item2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     Dim targetPL As Decimal = userSettings.StockMaxProfitPerDay - Me.GetOverallPLAfterBrokerage()
                     If Me.GetOverallPLAfterBrokerage() <= 3 * userSettings.MaxLossPerTrade Then
                         _takeSingleTargetTrade = True
@@ -234,7 +236,7 @@ Public Class PetDGandhiStrategyInstrument
                     End If
                     If signal.Item4 = IOrder.TypeOfTransaction.Buy Then
                         Dim price As Decimal = signal.Item2
-                        Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                        Dim stoploss As Decimal = Me.Slab + buffer
                         If currentTick.LastPrice > price AndAlso currentTick.LastPrice < price + Me.Slab Then
                             parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
@@ -245,7 +247,7 @@ Public Class PetDGandhiStrategyInstrument
                         End If
                     ElseIf signal.Item4 = IOrder.TypeOfTransaction.Sell Then
                         Dim price As Decimal = signal.Item2
-                        Dim stoploss As Decimal = ConvertFloorCeling(Me.Slab, Me.TradableInstrument.TickSize, NumberManipulation.RoundOfType.Celing)
+                        Dim stoploss As Decimal = Me.Slab + buffer
                         If currentTick.LastPrice < price AndAlso currentTick.LastPrice > price - Me.Slab Then
                             parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Sell,
@@ -337,6 +339,7 @@ Public Class PetDGandhiStrategyInstrument
                 For Each runningOrderID In OrderDetails.Keys
                     Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
                     If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
+                        Dim buffer As Decimal = CalculateBuffer(bussinessOrder.ParentOrder.AveragePrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                         For Each slOrder In bussinessOrder.SLOrder
                             If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
                             Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
@@ -351,7 +354,7 @@ Public Class PetDGandhiStrategyInstrument
                                             If currentTick.LastPrice > runningCandlePayload.PreviousPayload.LowPrice.Value AndAlso
                                                 runningCandlePayload.PreviousPayload.LowPrice.Value > slOrder.TriggerPrice Then
                                                 If _slMovedOnCandle Is Nothing OrElse Not _slMovedOnCandle.Contains(slOrder.OrderIdentifier) Then
-                                                    triggerPrice = runningCandlePayload.PreviousPayload.LowPrice.Value
+                                                    triggerPrice = runningCandlePayload.PreviousPayload.LowPrice.Value - buffer
                                                     reason = "Candle Low Below VWAP"
                                                     moved = True
                                                     If _slMovedOnCandle Is Nothing Then _slMovedOnCandle = New Concurrent.ConcurrentBag(Of String)
@@ -362,7 +365,7 @@ Public Class PetDGandhiStrategyInstrument
                                         If Not moved Then
                                             If currentTick.LastPrice > slabLvl AndAlso
                                                 slabLvl > slOrder.TriggerPrice Then
-                                                triggerPrice = slabLvl
+                                                triggerPrice = slabLvl - buffer
                                                 reason = "Slab Below VWAP"
                                             End If
                                         End If
@@ -373,7 +376,7 @@ Public Class PetDGandhiStrategyInstrument
                                             If currentTick.LastPrice < runningCandlePayload.PreviousPayload.HighPrice.Value AndAlso
                                                 runningCandlePayload.PreviousPayload.HighPrice.Value < slOrder.TriggerPrice Then
                                                 If _slMovedOnCandle Is Nothing OrElse Not _slMovedOnCandle.Contains(slOrder.OrderIdentifier) Then
-                                                    triggerPrice = runningCandlePayload.PreviousPayload.HighPrice.Value
+                                                    triggerPrice = runningCandlePayload.PreviousPayload.HighPrice.Value + buffer
                                                     reason = "Candle High Above VWAP"
                                                     moved = True
                                                     If _slMovedOnCandle Is Nothing Then _slMovedOnCandle = New Concurrent.ConcurrentBag(Of String)
@@ -384,7 +387,7 @@ Public Class PetDGandhiStrategyInstrument
                                         If Not moved Then
                                             If currentTick.LastPrice < slabLvl AndAlso
                                                 slabLvl < slOrder.TriggerPrice Then
-                                                triggerPrice = slabLvl
+                                                triggerPrice = slabLvl + buffer
                                                 reason = "Slab Above VWAP"
                                             End If
                                         End If
@@ -622,15 +625,16 @@ Public Class PetDGandhiStrategyInstrument
         If order IsNot Nothing Then
             If order.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
                 If order.AllOrder IsNot Nothing AndAlso order.AllOrder.Count > 0 Then
+                    Dim buffer As Decimal = CalculateBuffer(order.ParentOrder.AveragePrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     For Each ruuningOrder In order.AllOrder
                         If ruuningOrder.LogicalOrderType = IOrder.LogicalTypeOfOrder.Stoploss AndAlso
                             ruuningOrder.Status = IOrder.TypeOfStatus.Complete Then
                             If order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                If order.ParentOrder.Price - ruuningOrder.TriggerPrice >= Me.Slab Then
+                                If order.ParentOrder.Price - ruuningOrder.TriggerPrice >= Me.Slab + buffer Then
                                     ret = True
                                 End If
                             ElseIf order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                If ruuningOrder.TriggerPrice - order.ParentOrder.Price >= Me.Slab Then
+                                If ruuningOrder.TriggerPrice - order.ParentOrder.Price >= Me.Slab + buffer Then
                                     ret = True
                                 End If
                             End If
