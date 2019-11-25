@@ -689,16 +689,18 @@ Namespace ChartHandler.Indicator
                     Dim avgPrice As Decimal = (currentPayload.HighPrice.Value + currentPayload.LowPrice.Value + currentPayload.ClosePrice.Value) / 3
                     Dim avgPriceVolume As Decimal = avgPrice * currentPayload.Volume.Value
 
-                    If previousVWAPValue.Key <> Date.MinValue AndAlso previousVWAPValue.Value IsNot Nothing AndAlso
+                    If currentPayload.DailyVolume <> 0 Then
+                        If previousVWAPValue.Key <> Date.MinValue AndAlso previousVWAPValue.Value IsNot Nothing AndAlso
                         previousVWAPValue.Key.Date = runningInputDate.Date Then
-                        Dim previousPayload As OHLCPayload = outputConsumer.ParentConsumer.ConsumerPayloads(previousVWAPValue.Key)
-                        Dim cumAvgPriceStarVolume As Decimal = CType(previousVWAPValue.Value, VWAPConsumer.VWAPPayload).VWAP.Value * previousPayload.DailyVolume
-                        vwapValue.VWAP.Value = (cumAvgPriceStarVolume + avgPriceVolume) / currentPayload.DailyVolume
-                    Else
-                        vwapValue.VWAP.Value = avgPriceVolume / currentPayload.DailyVolume
-                    End If
+                            Dim previousPayload As OHLCPayload = outputConsumer.ParentConsumer.ConsumerPayloads(previousVWAPValue.Key)
+                            Dim cumAvgPriceStarVolume As Decimal = CType(previousVWAPValue.Value, VWAPConsumer.VWAPPayload).VWAP.Value * previousPayload.DailyVolume
+                            vwapValue.VWAP.Value = (cumAvgPriceStarVolume + avgPriceVolume) / currentPayload.DailyVolume
+                        Else
+                            vwapValue.VWAP.Value = avgPriceVolume / currentPayload.DailyVolume
+                        End If
 
-                    outputConsumer.ConsumerPayloads.AddOrUpdate(runningInputDate, vwapValue, Function(key, value) vwapValue)
+                        outputConsumer.ConsumerPayloads.AddOrUpdate(runningInputDate, vwapValue, Function(key, value) vwapValue)
+                    End If
                 Next
             End If
         End Sub

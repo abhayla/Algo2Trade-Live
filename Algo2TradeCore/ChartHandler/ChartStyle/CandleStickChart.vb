@@ -455,7 +455,6 @@ Namespace ChartHandler.ChartStyle
             End If
 
             Dim volumeOffset As Long = GetVolumeOffset()
-            If tickData.Volume <= volumeOffset Then volumeOffset = 0
             Try
                 While 1 = Interlocked.Exchange(_tickLock, 1)
                     Await Task.Delay(10, _cts.Token).ConfigureAwait(False)
