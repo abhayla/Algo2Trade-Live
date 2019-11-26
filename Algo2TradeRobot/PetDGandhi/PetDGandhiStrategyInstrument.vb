@@ -552,9 +552,9 @@ Public Class PetDGandhiStrategyInstrument
                                 Me.ProcessingDone = True
                             End If
                         End If
-                        If Now >= userSettings.TradeStartTime Then
-                            Me.ProcessingDone = True
-                        End If
+                    End If
+                    If Now >= userSettings.TradeStartTime Then
+                        Me.ProcessingDone = True
                     End If
                 End If
             End If
