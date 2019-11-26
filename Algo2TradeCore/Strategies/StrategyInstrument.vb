@@ -156,6 +156,9 @@ Namespace Strategies
             Dim bufferPrice As Double = Nothing
             'Assuming 1% target, we can afford to have buffer as 2.5% of that 1% target
             bufferPrice = ConvertFloorCeling(price * 0.01 * 0.025, tickSize, floorOrCeiling)
+            If Me.TradableInstrument.RawInstrumentName = "USDINR" Then
+                bufferPrice = Me.TradableInstrument.TickSize
+            End If
             Return bufferPrice
         End Function
         Public Function GetXMinuteCurrentCandle(ByVal timeFrame As Integer) As OHLCPayload
