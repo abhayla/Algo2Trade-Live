@@ -540,16 +540,21 @@ Public Class PetDGandhiStrategyInstrument
                         End If
                     Next
                     If currentDayFirstCandle IsNot Nothing AndAlso currentDayFirstCandle.PreviousPayload IsNot Nothing Then
+                        Dim buffer As Decimal = CalculateBuffer(currentDayFirstCandle.OpenPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                         If currentDayFirstCandle.OpenPrice.Value < currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
-                            If currentDayFirstCandle.HighPrice.Value >= currentDayFirstCandle.PreviousPayload.LowPrice.Value Then
+                            If currentDayFirstCandle.HighPrice.Value + buffer >= currentDayFirstCandle.PreviousPayload.LowPrice.Value Then
                                 Me.FilledPreviousClose = True
+                                Me.ProcessingDone = True
                             End If
                         ElseIf currentDayFirstCandle.OpenPrice.Value >= currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
-                            If currentDayFirstCandle.LowPrice.Value <= currentDayFirstCandle.PreviousPayload.HighPrice.Value Then
+                            If currentDayFirstCandle.LowPrice.Value - buffer <= currentDayFirstCandle.PreviousPayload.HighPrice.Value Then
                                 Me.FilledPreviousClose = True
+                                Me.ProcessingDone = True
                             End If
                         End If
-                        Me.ProcessingDone = True
+                        If Now >= userSettings.TradeStartTime Then
+                            Me.ProcessingDone = True
+                        End If
                     End If
                 End If
             End If
