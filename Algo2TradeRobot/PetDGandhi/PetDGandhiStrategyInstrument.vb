@@ -369,24 +369,46 @@ Public Class PetDGandhiStrategyInstrument
                                     End If
                                 End If
                             End If
-                            If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
-                                If runningCandlePayload.PreviousPayload.HighPrice.Value - (bussinessOrder.ParentOrder.TriggerPrice - buffer) >= Me.Slab Then
-                                    If _breakevenMovedOrders Is Nothing Then _breakevenMovedOrders = New Concurrent.ConcurrentBag(Of String)
-                                    If Not _breakevenMovedOrders.Contains(bussinessOrder.ParentOrderIdentifier) Then _breakevenMovedOrders.Add(bussinessOrder.ParentOrderIdentifier)
+                            If runningCandlePayload.SnapshotDateTime >= bussinessOrder.ParentOrder.TimeStamp Then
+                                If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                    If runningCandlePayload.PreviousPayload.HighPrice.Value - (bussinessOrder.ParentOrder.TriggerPrice - buffer) >= Me.Slab Then
+                                        If _breakevenMovedOrders Is Nothing Then _breakevenMovedOrders = New Concurrent.ConcurrentBag(Of String)
+                                        If Not _breakevenMovedOrders.Contains(bussinessOrder.ParentOrderIdentifier) Then
+                                            _breakevenMovedOrders.Add(bussinessOrder.ParentOrderIdentifier)
+                                            Try
+                                                logger.Debug("Moved to Breakeven. Previous Candle High:{0}, Order ID:{1}, Time:{2}, Trading Symbol:{3}",
+                                                             runningCandlePayload.PreviousPayload.HighPrice.Value,
+                                                             bussinessOrder.ParentOrder.OrderIdentifier,
+                                                             runningCandlePayload.SnapshotDateTime.ToString("HH:mm:ss"),
+                                                             Me.TradableInstrument.TradingSymbol)
+                                            Catch ex As Exception
+                                                logger.Error(ex.ToString)
+                                            End Try
+                                        End If
+                                    End If
+                                ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                    If (bussinessOrder.ParentOrder.TriggerPrice + buffer) - runningCandlePayload.PreviousPayload.LowPrice.Value >= Me.Slab Then
+                                        If _breakevenMovedOrders Is Nothing Then _breakevenMovedOrders = New Concurrent.ConcurrentBag(Of String)
+                                        If Not _breakevenMovedOrders.Contains(bussinessOrder.ParentOrderIdentifier) Then
+                                            _breakevenMovedOrders.Add(bussinessOrder.ParentOrderIdentifier)
+                                            Try
+                                                logger.Debug("Moved to Breakeven. Previous Candle Low:{0}, Order ID:{1}, Time:{2}, Trading Symbol:{3}",
+                                                             runningCandlePayload.PreviousPayload.LowPrice.Value,
+                                                             bussinessOrder.ParentOrder.OrderIdentifier,
+                                                             runningCandlePayload.SnapshotDateTime.ToString("HH:mm:ss"),
+                                                             Me.TradableInstrument.TradingSymbol)
+                                            Catch ex As Exception
+                                                logger.Error(ex.ToString)
+                                            End Try
+                                        End If
+                                    End If
                                 End If
-                            ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
-                                If (bussinessOrder.ParentOrder.TriggerPrice + buffer) - runningCandlePayload.PreviousPayload.LowPrice.Value >= Me.Slab Then
-                                    If _breakevenMovedOrders Is Nothing Then _breakevenMovedOrders = New Concurrent.ConcurrentBag(Of String)
-                                    If Not _breakevenMovedOrders.Contains(bussinessOrder.ParentOrderIdentifier) Then _breakevenMovedOrders.Add(bussinessOrder.ParentOrderIdentifier)
-                                End If
-                            End If
-                            If _breakevenMovedOrders IsNot Nothing AndAlso _breakevenMovedOrders.Contains(bussinessOrder.ParentOrderIdentifier) Then
-                                If runningCandlePayload.SnapshotDateTime >= bussinessOrder.ParentOrder.TimeStamp Then
+                                If _breakevenMovedOrders IsNot Nothing AndAlso _breakevenMovedOrders.Contains(bussinessOrder.ParentOrderIdentifier) Then
                                     If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
                                         If runningCandlePayload.PreviousPayload.LowPrice.Value <= bussinessOrder.ParentOrder.TriggerPrice - 2 * buffer Then
                                             If _slMovedOnCandle Is Nothing OrElse Not _slMovedOnCandle.Contains(slOrder.OrderIdentifier) Then
                                                 triggerPrice = runningCandlePayload.PreviousPayload.LowPrice.Value - buffer
-                                                reason = "Candle Low Below VWAP"
+                                                reason = "Candle Low Below Entry"
                                                 If _slMovedOnCandle Is Nothing Then _slMovedOnCandle = New Concurrent.ConcurrentBag(Of String)
                                                 If forcePrint Then _slMovedOnCandle.Add(slOrder.OrderIdentifier)
                                             End If
@@ -395,7 +417,7 @@ Public Class PetDGandhiStrategyInstrument
                                         If runningCandlePayload.PreviousPayload.HighPrice.Value >= bussinessOrder.ParentOrder.TriggerPrice + 2 * buffer Then
                                             If _slMovedOnCandle Is Nothing OrElse Not _slMovedOnCandle.Contains(slOrder.OrderIdentifier) Then
                                                 triggerPrice = runningCandlePayload.PreviousPayload.HighPrice.Value + buffer
-                                                reason = "Candle High Above VWAP"
+                                                reason = "Candle High Above Entry"
                                                 If _slMovedOnCandle Is Nothing Then _slMovedOnCandle = New Concurrent.ConcurrentBag(Of String)
                                                 If forcePrint Then _slMovedOnCandle.Add(slOrder.OrderIdentifier)
                                             End If
@@ -524,15 +546,20 @@ Public Class PetDGandhiStrategyInstrument
                         End If
                     Next
                     If currentDayFirstCandle IsNot Nothing AndAlso currentDayFirstCandle.PreviousPayload IsNot Nothing Then
+                        Dim buffer As Decimal = CalculateBuffer(currentDayFirstCandle.OpenPrice.Value, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                         If currentDayFirstCandle.OpenPrice.Value < currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
-                            If currentDayFirstCandle.HighPrice.Value >= currentDayFirstCandle.PreviousPayload.LowPrice.Value Then
+                            If currentDayFirstCandle.HighPrice.Value + buffer >= currentDayFirstCandle.PreviousPayload.LowPrice.Value Then
                                 Me.FilledPreviousClose = True
+                                Me.ProcessingDone = True
                             End If
                         ElseIf currentDayFirstCandle.OpenPrice.Value >= currentDayFirstCandle.PreviousPayload.ClosePrice.Value Then
-                            If currentDayFirstCandle.LowPrice.Value <= currentDayFirstCandle.PreviousPayload.HighPrice.Value Then
+                            If currentDayFirstCandle.LowPrice.Value - buffer <= currentDayFirstCandle.PreviousPayload.HighPrice.Value Then
                                 Me.FilledPreviousClose = True
+                                Me.ProcessingDone = True
                             End If
                         End If
+                    End If
+                    If Now() >= userSettings.TradeStartTime Then
                         Me.ProcessingDone = True
                     End If
                 End If
