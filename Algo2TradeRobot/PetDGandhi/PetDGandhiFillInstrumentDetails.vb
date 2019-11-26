@@ -315,27 +315,27 @@ Public Class PetDGandhiFillInstrumentDetails
                                     Dim counter As Integer = 0
                                     For Each stock In todayStockList
                                         counter += 1
-                                        If (counter Mod 2) <> 0 Then
-                                            If _userInputs.CashInstrument Then
-                                                Dim row As DataRow = allStockData.NewRow
-                                                row("Trading Symbol") = stock.Key.Remove(stock.Key.Count - 8)
-                                                row("Margin Multiplier") = 13
-                                                row("ATR %") = stock.Value.ATR
-                                                row("Change %") = 0
-                                                row("Take") = "Y"
-                                                row("Slab") = 0
-                                                allStockData.Rows.Add(row)
-                                            ElseIf _userInputs.FutureInstrument Then
-                                                Dim row As DataRow = allStockData.NewRow
-                                                row("Trading Symbol") = stock.Key
-                                                row("Margin Multiplier") = 30
-                                                row("ATR %") = stock.Value.ATR
-                                                row("Change %") = 0
-                                                row("Take") = "Y"
-                                                row("Slab") = 0
-                                                allStockData.Rows.Add(row)
-                                            End If
+                                        'If (counter Mod 2) <> 0 Then
+                                        If _userInputs.CashInstrument Then
+                                            Dim row As DataRow = allStockData.NewRow
+                                            row("Trading Symbol") = stock.Key.Remove(stock.Key.Count - 8)
+                                            row("Margin Multiplier") = 13
+                                            row("ATR %") = stock.Value.ATR
+                                            row("Change %") = 0
+                                            row("Take") = "Y"
+                                            row("Slab") = 0
+                                            allStockData.Rows.Add(row)
+                                        ElseIf _userInputs.FutureInstrument Then
+                                            Dim row As DataRow = allStockData.NewRow
+                                            row("Trading Symbol") = stock.Key
+                                            row("Margin Multiplier") = 30
+                                            row("ATR %") = stock.Value.ATR
+                                            row("Change %") = 0
+                                            row("Take") = "Y"
+                                            row("Slab") = 0
+                                            allStockData.Rows.Add(row)
                                         End If
+                                        'End If
                                     Next
                                     csv.GetCSVFromDataTable(allStockData)
                                 End Using
