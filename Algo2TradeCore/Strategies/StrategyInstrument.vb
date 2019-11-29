@@ -2575,6 +2575,73 @@ Namespace Strategies
             End If
             Return ret
         End Function
+
+        Protected Async Function CheckPaperTrade() As Task
+            Dim lastTick As ITick = Nothing
+            While True
+                Dim currentTick As ITick = Me.TradableInstrument.LastTick
+                If lastTick Is Nothing OrElse lastTick.LastTradeTime.Value <> currentTick.LastTradeTime.Value Then
+                    If Me.OrderDetails IsNot Nothing AndAlso Me.OrderDetails.Count > 0 Then
+                        For Each order In Me.OrderDetails.Values
+                            If order.ParentOrder IsNot Nothing Then
+                                If order.ParentOrder.Status = IOrder.TypeOfStatus.Open Then
+                                    If IsTradeExecuted(order, currentTick) Then
+
+                                    End If
+                                ElseIf order.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+
+                                End If
+                            End If
+                        Next
+                    End If
+                End If
+                lastTick = currentTick
+                Await Task.Delay(100, _cts.Token).ConfigureAwait(False)
+            End While
+        End Function
+
+        Private Function IsTradeExecuted(ByVal order As IBusinessOrder, ByVal currentTick As ITick) As Boolean
+            Dim ret As Boolean = False
+            If order IsNot Nothing AndAlso order.ParentOrder IsNot Nothing AndAlso order.ParentOrder.Status = IOrder.TypeOfStatus.Open Then
+                Dim price As Decimal = order.ParentOrder.Price
+                If order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                    If currentTick.LastPrice <= price Then ret = True
+                ElseIf order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                    If currentTick.LastPrice >= price Then ret = True
+                End If
+            End If
+            Return ret
+        End Function
+
+        Private Function IsTradeTargetReached(ByVal order As IBusinessOrder, ByVal currentTick As ITick) As Boolean
+            Dim ret As Boolean = False
+            If order IsNot Nothing AndAlso order.ParentOrder IsNot Nothing AndAlso order.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                If order.TargetOrder IsNot Nothing AndAlso order.TargetOrder.Count > 0 Then
+                    Dim targetPrice As Decimal = order.TargetOrder.FirstOrDefault.Price
+                    If order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        If currentTick.LastPrice >= targetPrice Then ret = True
+                    ElseIf order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        If currentTick.LastPrice <= targetPrice Then ret = True
+                    End If
+                End If
+            End If
+            Return ret
+        End Function
+
+        Private Function IsTradeStoplossReached(ByVal order As IBusinessOrder, ByVal currentTick As ITick) As Boolean
+            Dim ret As Boolean = False
+            If order IsNot Nothing AndAlso order.ParentOrder IsNot Nothing AndAlso order.ParentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                If order.SLOrder IsNot Nothing AndAlso order.SLOrder.Count > 0 Then
+                    Dim stoplossPrice As Decimal = order.SLOrder.FirstOrDefault.Price
+                    If order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        If currentTick.LastPrice <= stoplossPrice Then ret = True
+                    ElseIf order.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        If currentTick.LastPrice >= stoplossPrice Then ret = True
+                    End If
+                End If
+            End If
+            Return ret
+        End Function
 #End Region
 
     End Class
