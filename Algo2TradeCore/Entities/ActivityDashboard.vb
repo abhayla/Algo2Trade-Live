@@ -46,7 +46,7 @@ Namespace Entities
         End Function
 
         Private _StrategyOverAllPLAfterBrokerage As Decimal
-        <Display(Name:="Strategy PL After Brokerage", Order:=2, AutoGenerateField:=False)>
+        <Display(Name:="Strategy PL After Brokerage", Order:=2)>
         Public ReadOnly Property StrategyOverAllPLAfterBrokerage As Decimal
             Get
                 _StrategyOverAllPLAfterBrokerage = ParentStrategyInstrument.ParentStrategy.GetTotalPLAfterBrokerage

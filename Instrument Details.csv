@@ -1,3 +1,2 @@
-Trading Symbol,Number of Lots,Buffer,SL,First Movement LTP,First Movement SL,Onward Movement LTP,Onward Movement SL,Percentage
-BANKNIFTY19N2131100CE,1,0.05,6,2,8,1.2,0.8,TRUE
-BANKNIFTY19N2131500PE,1,0.05,6,2,8,1.2,0.8,TRUE
+Trading Symbol,Quantity,Buffer,Direction,Distance,SL,First Movement LTP,First Movement SL,Onward Movement LTP,Onward Movement SL,Percentage
+JSWSTEEL,1,0.05,SELL,0.5,0.6,0.2,0.7,0.18,0.12,TRUE

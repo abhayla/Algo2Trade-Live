@@ -36,12 +36,9 @@ Public Class frmMomentumReversalSettings
             dtpckrEODExitTime.Value = _MRSettings.EODExitTime
             dtpckrIdleTimeStart.Value = _MRSettings.IdleTimeStart
             dtpckrIdleTimeEnd.Value = _MRSettings.IdleTimeEnd
-            txtTradeOpenTime.Text = _MRSettings.TradeOpenTime
-            txtBackToBackTradeTimeGap.Text = _MRSettings.TimeGapBetweenBackToBackTrades
             txtInstrumentDetalis.Text = _MRSettings.InstrumentDetailsFilePath
-
-            txtRSIPeriod.Text = _MRSettings.RSIPeriod
-            txtRSILevel.Text = _MRSettings.RSILevel
+            txtMaxLossPerDay.Text = _MRSettings.MaxLossPerDay
+            txtMaxProfitPerDay.Text = _MRSettings.MaxProfitPerDay
         End If
     End Sub
     Private Sub SaveSettings()
@@ -51,12 +48,9 @@ Public Class frmMomentumReversalSettings
         _MRSettings.EODExitTime = dtpckrEODExitTime.Value
         _MRSettings.IdleTimeStart = dtpckrIdleTimeStart.Value
         _MRSettings.IdleTimeEnd = dtpckrIdleTimeEnd.Value
-        _MRSettings.TradeOpenTime = txtTradeOpenTime.Text
-        _MRSettings.TimeGapBetweenBackToBackTrades = txtBackToBackTradeTimeGap.Text
         _MRSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
-
-        _MRSettings.RSIPeriod = txtRSIPeriod.Text
-        _MRSettings.RSILevel = txtRSILevel.Text
+        _MRSettings.MaxLossPerDay = Math.Abs(CDec(txtMaxLossPerDay.Text)) * -1
+        _MRSettings.MaxProfitPerDay = txtMaxProfitPerDay.Text
 
         Utilities.Strings.SerializeFromCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename, _MRSettings)
     End Sub
@@ -80,10 +74,6 @@ Public Class frmMomentumReversalSettings
     End Sub
     Private Sub ValidateInputs()
         ValidateNumbers(1, 60, txtSignalTimeFrame, True)
-        ValidateNumbers(1, 60, txtTradeOpenTime, True)
-        ValidateNumbers(1, 3600, txtBackToBackTradeTimeGap, True)
-        ValidateNumbers(1, Integer.MaxValue, txtRSIPeriod, True)
-        ValidateNumbers(1, Integer.MaxValue, txtRSILevel, True)
         ValidateFile()
     End Sub
 

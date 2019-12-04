@@ -8,11 +8,6 @@ Imports Algo2TradeCore.Entities
 Public Class MomentumReversalUserInputs
     Inherits StrategyUserInputs
 
-    Public Property RSIPeriod As Integer
-    Public Property RSILevel As Integer
-    Public Property TradeOpenTime As Integer
-    Public Property TimeGapBetweenBackToBackTrades As Integer
-
     Private _IdleTimeStart As Date
     Public Property IdleTimeStart As Date
         Get
@@ -33,14 +28,18 @@ Public Class MomentumReversalUserInputs
         End Set
     End Property
 
+    Public Property MaxLossPerDay As Decimal
+    Public Property MaxProfitPerDay As Decimal
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 
     <Serializable>
     Public Class InstrumentDetails
         Public Property TradingSymbol As String
-        Public Property NumberOfLots As Integer
+        Public Property Quantity As Integer
         Public Property Buffer As Decimal
+        Public Property Direction As IOrder.TypeOfTransaction
+        Public Property Distance As Decimal
         Public Property SL As Decimal
         Public Property FirstMovementLTP As Decimal
         Public Property FirstMovementSL As Decimal
@@ -58,9 +57,9 @@ Public Class MomentumReversalUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "NUMBER OF LOTS", "BUFFER", "SL", "FIRST MOVEMENT LTP", "FIRST MOVEMENT SL", "ONWARD MOVEMENT LTP", "ONWARD MOVEMENT SL", "PERCENTAGE"}
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "QUANTITY", "BUFFER", "DIRECTION", "DISTANCE", "SL", "FIRST MOVEMENT LTP", "FIRST MOVEMENT SL", "ONWARD MOVEMENT LTP", "ONWARD MOVEMENT SL", "PERCENTAGE"}
 
-                        For colCtr = 0 To 8
+                        For colCtr = 0 To 10
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -71,8 +70,10 @@ Public Class MomentumReversalUserInputs
                         Next
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim trdngSymbl As String = Nothing
-                            Dim nmbrOfLots As Integer = Integer.MinValue
+                            Dim qnty As Integer = Integer.MinValue
                             Dim bfr As Decimal = Decimal.MinValue
+                            Dim drctn As IOrder.TypeOfTransaction = IOrder.TypeOfTransaction.None
+                            Dim dstnc As Decimal = Decimal.MinValue
                             Dim stoploss As Decimal = Decimal.MinValue
                             Dim firstLTP As Decimal = Decimal.MinValue
                             Dim firstSL As Decimal = Decimal.MinValue
@@ -95,12 +96,12 @@ Public Class MomentumReversalUserInputs
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) AndAlso
                                             Math.Round(Val(instrumentDetails(rowCtr, columnCtr)), 0) = Val(instrumentDetails(rowCtr, columnCtr)) Then
-                                            nmbrOfLots = instrumentDetails(rowCtr, columnCtr)
+                                            qnty = instrumentDetails(rowCtr, columnCtr)
                                         Else
-                                            Throw New ApplicationException(String.Format("Number Of Lots cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
+                                            Throw New ApplicationException(String.Format("Quantity cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                         End If
                                     Else
-                                        Throw New ApplicationException(String.Format("Number Of Lots cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
+                                        Throw New ApplicationException(String.Format("Quantity cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                     End If
                                 ElseIf columnCtr = 2 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
@@ -116,6 +117,30 @@ Public Class MomentumReversalUserInputs
                                 ElseIf columnCtr = 3 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
+                                        If instrumentDetails(rowCtr, columnCtr).ToString.ToUpper = "BUY" Then
+                                            drctn = IOrder.TypeOfTransaction.Buy
+                                        ElseIf instrumentDetails(rowCtr, columnCtr).ToString.ToUpper = "SELL" Then
+                                            drctn = IOrder.TypeOfTransaction.Sell
+                                        Else
+                                            Throw New ApplicationException(String.Format("Only 'BUY' or 'SELL' is allowed as Direction for {0}", trdngSymbl))
+                                        End If
+                                    Else
+                                        Throw New ApplicationException(String.Format("Direction cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
+                                    End If
+                                ElseIf columnCtr = 4 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
+                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
+                                            dstnc = instrumentDetails(rowCtr, columnCtr)
+                                        Else
+                                            Throw New ApplicationException(String.Format("Distance cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
+                                        End If
+                                    Else
+                                        Throw New ApplicationException(String.Format("Distance cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
+                                    End If
+                                ElseIf columnCtr = 5 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
                                             stoploss = instrumentDetails(rowCtr, columnCtr)
                                         Else
@@ -124,7 +149,7 @@ Public Class MomentumReversalUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("Stoploss cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                     End If
-                                ElseIf columnCtr = 4 Then
+                                ElseIf columnCtr = 6 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
@@ -135,7 +160,7 @@ Public Class MomentumReversalUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("First Movement LTP cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                     End If
-                                ElseIf columnCtr = 5 Then
+                                ElseIf columnCtr = 7 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
@@ -146,7 +171,7 @@ Public Class MomentumReversalUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("First Movement SL cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                     End If
-                                ElseIf columnCtr = 6 Then
+                                ElseIf columnCtr = 8 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
@@ -157,7 +182,7 @@ Public Class MomentumReversalUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("Onward Movement LTP cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                     End If
-                                ElseIf columnCtr = 7 Then
+                                ElseIf columnCtr = 9 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
@@ -168,7 +193,7 @@ Public Class MomentumReversalUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("Onward Movement SL cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                     End If
-                                ElseIf columnCtr = 8 Then
+                                ElseIf columnCtr = 10 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If instrumentDetails(rowCtr, columnCtr).ToString.ToUpper = "TRUE" Then
@@ -180,23 +205,26 @@ Public Class MomentumReversalUserInputs
                                 End If
                             Next
                             If trdngSymbl IsNot Nothing Then
-                                Dim instrumentData As New InstrumentDetails
-                                instrumentData.TradingSymbol = trdngSymbl.ToUpper
-                                instrumentData.NumberOfLots = nmbrOfLots
-                                instrumentData.Buffer = bfr
-                                instrumentData.SL = stoploss
-                                instrumentData.FirstMovementLTP = firstLTP
-                                instrumentData.FirstMovementSL = firstSL
-                                instrumentData.OnwardMovementLTP = onwardLTP
-                                instrumentData.OnwardMovementSL = onwardSL
-                                instrumentData.Percentage = percentage
+                                Dim instrumentData As New InstrumentDetails With {
+                                    .TradingSymbol = trdngSymbl.ToUpper,
+                                    .Quantity = qnty,
+                                    .Buffer = bfr,
+                                    .Direction = drctn,
+                                    .Distance = dstnc,
+                                    .SL = stoploss,
+                                    .FirstMovementLTP = firstLTP,
+                                    .FirstMovementSL = firstSL,
+                                    .OnwardMovementLTP = onwardLTP,
+                                    .OnwardMovementSL = onwardSL,
+                                    .Percentage = percentage
+                                }
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
                                 If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then
                                     Throw New ApplicationException(String.Format("Duplicate Trading Symbol {0}", instrumentData.TradingSymbol))
                                 End If
                                 Me.InstrumentsData.Add(instrumentData.TradingSymbol, instrumentData)
-                                If Me.InstrumentsData IsNot Nothing AndAlso Me.InstrumentsData.Count > 2 Then
-                                    Throw New ApplicationException(String.Format("Only two instrument can be added"))
+                                If Me.InstrumentsData IsNot Nothing AndAlso Me.InstrumentsData.Count > 7 Then
+                                    Throw New ApplicationException(String.Format("Only seven instrument can be added"))
                                 End If
                             End If
                         Next

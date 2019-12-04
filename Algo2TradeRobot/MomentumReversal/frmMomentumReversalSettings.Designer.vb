@@ -28,14 +28,10 @@ Partial Class frmMomentumReversalSettings
         Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
         Me.opnFileSettings = New System.Windows.Forms.OpenFileDialog()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.txtBackToBackTradeTimeGap = New System.Windows.Forms.TextBox()
-        Me.lblBackToBackTradeTimeGap = New System.Windows.Forms.Label()
         Me.dtpckrIdleTimeEnd = New System.Windows.Forms.DateTimePicker()
         Me.dtpckrIdleTimeStart = New System.Windows.Forms.DateTimePicker()
         Me.lblIdleTimeEnd = New System.Windows.Forms.Label()
         Me.lblIdleTimeStart = New System.Windows.Forms.Label()
-        Me.txtTradeOpenTime = New System.Windows.Forms.TextBox()
-        Me.lblTradeOpenTime = New System.Windows.Forms.Label()
         Me.dtpckrEODExitTime = New System.Windows.Forms.DateTimePicker()
         Me.dtpckrLastTradeEntryTime = New System.Windows.Forms.DateTimePicker()
         Me.dtpckrTradeStartTime = New System.Windows.Forms.DateTimePicker()
@@ -47,13 +43,11 @@ Partial Class frmMomentumReversalSettings
         Me.lblInstrumentDetails = New System.Windows.Forms.Label()
         Me.txtSignalTimeFrame = New System.Windows.Forms.TextBox()
         Me.lblSignalTimeFrame = New System.Windows.Forms.Label()
-        Me.lblRSIPeriod = New System.Windows.Forms.Label()
-        Me.txtRSIPeriod = New System.Windows.Forms.TextBox()
-        Me.lblRSILevel = New System.Windows.Forms.Label()
-        Me.txtRSILevel = New System.Windows.Forms.TextBox()
-        Me.grpRSI = New System.Windows.Forms.GroupBox()
+        Me.txtMaxProfitPerDay = New System.Windows.Forms.TextBox()
+        Me.lblMaxProfitPercentagePerDay = New System.Windows.Forms.Label()
+        Me.txtMaxLossPerDay = New System.Windows.Forms.TextBox()
+        Me.lblMaxLossPercentagePerDay = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
-        Me.grpRSI.SuspendLayout()
         Me.SuspendLayout()
         '
         'btnSaveMomentumReversalSettings
@@ -81,14 +75,14 @@ Partial Class frmMomentumReversalSettings
         '
         'GroupBox1
         '
-        Me.GroupBox1.Controls.Add(Me.txtBackToBackTradeTimeGap)
-        Me.GroupBox1.Controls.Add(Me.lblBackToBackTradeTimeGap)
+        Me.GroupBox1.Controls.Add(Me.txtMaxProfitPerDay)
+        Me.GroupBox1.Controls.Add(Me.lblMaxProfitPercentagePerDay)
+        Me.GroupBox1.Controls.Add(Me.txtMaxLossPerDay)
+        Me.GroupBox1.Controls.Add(Me.lblMaxLossPercentagePerDay)
         Me.GroupBox1.Controls.Add(Me.dtpckrIdleTimeEnd)
         Me.GroupBox1.Controls.Add(Me.dtpckrIdleTimeStart)
         Me.GroupBox1.Controls.Add(Me.lblIdleTimeEnd)
         Me.GroupBox1.Controls.Add(Me.lblIdleTimeStart)
-        Me.GroupBox1.Controls.Add(Me.txtTradeOpenTime)
-        Me.GroupBox1.Controls.Add(Me.lblTradeOpenTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrEODExitTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrLastTradeEntryTime)
         Me.GroupBox1.Controls.Add(Me.dtpckrTradeStartTime)
@@ -104,34 +98,14 @@ Partial Class frmMomentumReversalSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(451, 328)
+        Me.GroupBox1.Size = New System.Drawing.Size(451, 331)
         Me.GroupBox1.TabIndex = 22
         Me.GroupBox1.TabStop = False
-        '
-        'txtBackToBackTradeTimeGap
-        '
-        Me.txtBackToBackTradeTimeGap.Location = New System.Drawing.Point(189, 85)
-        Me.txtBackToBackTradeTimeGap.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtBackToBackTradeTimeGap.Name = "txtBackToBackTradeTimeGap"
-        Me.txtBackToBackTradeTimeGap.Size = New System.Drawing.Size(241, 22)
-        Me.txtBackToBackTradeTimeGap.TabIndex = 3
-        Me.txtBackToBackTradeTimeGap.Tag = "Back To Back Trade Time Gap"
-        '
-        'lblBackToBackTradeTimeGap
-        '
-        Me.lblBackToBackTradeTimeGap.AutoSize = True
-        Me.lblBackToBackTradeTimeGap.Location = New System.Drawing.Point(8, 90)
-        Me.lblBackToBackTradeTimeGap.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblBackToBackTradeTimeGap.Name = "lblBackToBackTradeTimeGap"
-        Me.lblBackToBackTradeTimeGap.Size = New System.Drawing.Size(174, 17)
-        Me.lblBackToBackTradeTimeGap.TabIndex = 39
-        Me.lblBackToBackTradeTimeGap.Tag = ""
-        Me.lblBackToBackTradeTimeGap.Text = "B2B Trade Time Gap(sec)"
         '
         'dtpckrIdleTimeEnd
         '
         Me.dtpckrIdleTimeEnd.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrIdleTimeEnd.Location = New System.Drawing.Point(189, 264)
+        Me.dtpckrIdleTimeEnd.Location = New System.Drawing.Point(189, 195)
         Me.dtpckrIdleTimeEnd.Name = "dtpckrIdleTimeEnd"
         Me.dtpckrIdleTimeEnd.ShowUpDown = True
         Me.dtpckrIdleTimeEnd.Size = New System.Drawing.Size(242, 22)
@@ -141,7 +115,7 @@ Partial Class frmMomentumReversalSettings
         'dtpckrIdleTimeStart
         '
         Me.dtpckrIdleTimeStart.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrIdleTimeStart.Location = New System.Drawing.Point(189, 227)
+        Me.dtpckrIdleTimeStart.Location = New System.Drawing.Point(189, 158)
         Me.dtpckrIdleTimeStart.Name = "dtpckrIdleTimeStart"
         Me.dtpckrIdleTimeStart.ShowUpDown = True
         Me.dtpckrIdleTimeStart.Size = New System.Drawing.Size(241, 22)
@@ -151,7 +125,7 @@ Partial Class frmMomentumReversalSettings
         'lblIdleTimeEnd
         '
         Me.lblIdleTimeEnd.AutoSize = True
-        Me.lblIdleTimeEnd.Location = New System.Drawing.Point(9, 265)
+        Me.lblIdleTimeEnd.Location = New System.Drawing.Point(9, 196)
         Me.lblIdleTimeEnd.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblIdleTimeEnd.Name = "lblIdleTimeEnd"
         Me.lblIdleTimeEnd.Size = New System.Drawing.Size(94, 17)
@@ -161,37 +135,17 @@ Partial Class frmMomentumReversalSettings
         'lblIdleTimeStart
         '
         Me.lblIdleTimeStart.AutoSize = True
-        Me.lblIdleTimeStart.Location = New System.Drawing.Point(9, 229)
+        Me.lblIdleTimeStart.Location = New System.Drawing.Point(9, 160)
         Me.lblIdleTimeStart.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblIdleTimeStart.Name = "lblIdleTimeStart"
         Me.lblIdleTimeStart.Size = New System.Drawing.Size(99, 17)
         Me.lblIdleTimeStart.TabIndex = 36
         Me.lblIdleTimeStart.Text = "Idle Time Start"
         '
-        'txtTradeOpenTime
-        '
-        Me.txtTradeOpenTime.Location = New System.Drawing.Point(189, 50)
-        Me.txtTradeOpenTime.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtTradeOpenTime.Name = "txtTradeOpenTime"
-        Me.txtTradeOpenTime.Size = New System.Drawing.Size(241, 22)
-        Me.txtTradeOpenTime.TabIndex = 2
-        Me.txtTradeOpenTime.Tag = "Trade Open Time"
-        '
-        'lblTradeOpenTime
-        '
-        Me.lblTradeOpenTime.AutoSize = True
-        Me.lblTradeOpenTime.Location = New System.Drawing.Point(8, 55)
-        Me.lblTradeOpenTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblTradeOpenTime.Name = "lblTradeOpenTime"
-        Me.lblTradeOpenTime.Size = New System.Drawing.Size(152, 17)
-        Me.lblTradeOpenTime.TabIndex = 33
-        Me.lblTradeOpenTime.Tag = ""
-        Me.lblTradeOpenTime.Text = "Trade Open Time(min)"
-        '
         'dtpckrEODExitTime
         '
         Me.dtpckrEODExitTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrEODExitTime.Location = New System.Drawing.Point(189, 189)
+        Me.dtpckrEODExitTime.Location = New System.Drawing.Point(189, 120)
         Me.dtpckrEODExitTime.Name = "dtpckrEODExitTime"
         Me.dtpckrEODExitTime.ShowUpDown = True
         Me.dtpckrEODExitTime.Size = New System.Drawing.Size(241, 22)
@@ -201,7 +155,7 @@ Partial Class frmMomentumReversalSettings
         'dtpckrLastTradeEntryTime
         '
         Me.dtpckrLastTradeEntryTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrLastTradeEntryTime.Location = New System.Drawing.Point(189, 154)
+        Me.dtpckrLastTradeEntryTime.Location = New System.Drawing.Point(189, 85)
         Me.dtpckrLastTradeEntryTime.Name = "dtpckrLastTradeEntryTime"
         Me.dtpckrLastTradeEntryTime.ShowUpDown = True
         Me.dtpckrLastTradeEntryTime.Size = New System.Drawing.Size(242, 22)
@@ -211,7 +165,7 @@ Partial Class frmMomentumReversalSettings
         'dtpckrTradeStartTime
         '
         Me.dtpckrTradeStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrTradeStartTime.Location = New System.Drawing.Point(189, 119)
+        Me.dtpckrTradeStartTime.Location = New System.Drawing.Point(189, 50)
         Me.dtpckrTradeStartTime.Name = "dtpckrTradeStartTime"
         Me.dtpckrTradeStartTime.ShowUpDown = True
         Me.dtpckrTradeStartTime.Size = New System.Drawing.Size(241, 22)
@@ -221,7 +175,7 @@ Partial Class frmMomentumReversalSettings
         'lblEODExitTime
         '
         Me.lblEODExitTime.AutoSize = True
-        Me.lblEODExitTime.Location = New System.Drawing.Point(9, 190)
+        Me.lblEODExitTime.Location = New System.Drawing.Point(9, 121)
         Me.lblEODExitTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblEODExitTime.Name = "lblEODExitTime"
         Me.lblEODExitTime.Size = New System.Drawing.Size(99, 17)
@@ -231,7 +185,7 @@ Partial Class frmMomentumReversalSettings
         'lblLastTradeEntryTime
         '
         Me.lblLastTradeEntryTime.AutoSize = True
-        Me.lblLastTradeEntryTime.Location = New System.Drawing.Point(9, 155)
+        Me.lblLastTradeEntryTime.Location = New System.Drawing.Point(9, 86)
         Me.lblLastTradeEntryTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblLastTradeEntryTime.Name = "lblLastTradeEntryTime"
         Me.lblLastTradeEntryTime.Size = New System.Drawing.Size(149, 17)
@@ -241,7 +195,7 @@ Partial Class frmMomentumReversalSettings
         'lblTradeStartTime
         '
         Me.lblTradeStartTime.AutoSize = True
-        Me.lblTradeStartTime.Location = New System.Drawing.Point(9, 121)
+        Me.lblTradeStartTime.Location = New System.Drawing.Point(9, 52)
         Me.lblTradeStartTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblTradeStartTime.Name = "lblTradeStartTime"
         Me.lblTradeStartTime.Size = New System.Drawing.Size(115, 17)
@@ -251,7 +205,7 @@ Partial Class frmMomentumReversalSettings
         'btnBrowse
         '
         Me.btnBrowse.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnBrowse.Location = New System.Drawing.Point(404, 298)
+        Me.btnBrowse.Location = New System.Drawing.Point(404, 229)
         Me.btnBrowse.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(40, 23)
@@ -261,7 +215,7 @@ Partial Class frmMomentumReversalSettings
         '
         'txtInstrumentDetalis
         '
-        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(189, 299)
+        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(189, 230)
         Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
         Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
         Me.txtInstrumentDetalis.ReadOnly = True
@@ -271,7 +225,7 @@ Partial Class frmMomentumReversalSettings
         'lblInstrumentDetails
         '
         Me.lblInstrumentDetails.AutoSize = True
-        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 302)
+        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 233)
         Me.lblInstrumentDetails.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblInstrumentDetails.Name = "lblInstrumentDetails"
         Me.lblInstrumentDetails.Size = New System.Drawing.Size(121, 17)
@@ -298,63 +252,47 @@ Partial Class frmMomentumReversalSettings
         Me.lblSignalTimeFrame.Tag = ""
         Me.lblSignalTimeFrame.Text = "Signal Time Frame(min)"
         '
-        'lblRSIPeriod
+        'txtMaxProfitPerDay
         '
-        Me.lblRSIPeriod.AutoSize = True
-        Me.lblRSIPeriod.Location = New System.Drawing.Point(9, 26)
-        Me.lblRSIPeriod.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblRSIPeriod.Name = "lblRSIPeriod"
-        Me.lblRSIPeriod.Size = New System.Drawing.Size(75, 17)
-        Me.lblRSIPeriod.TabIndex = 35
-        Me.lblRSIPeriod.Text = "RSI Period"
+        Me.txtMaxProfitPerDay.Location = New System.Drawing.Point(189, 301)
+        Me.txtMaxProfitPerDay.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxProfitPerDay.Name = "txtMaxProfitPerDay"
+        Me.txtMaxProfitPerDay.Size = New System.Drawing.Size(241, 22)
+        Me.txtMaxProfitPerDay.TabIndex = 39
         '
-        'txtRSIPeriod
+        'lblMaxProfitPercentagePerDay
         '
-        Me.txtRSIPeriod.Location = New System.Drawing.Point(189, 21)
-        Me.txtRSIPeriod.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtRSIPeriod.Name = "txtRSIPeriod"
-        Me.txtRSIPeriod.Size = New System.Drawing.Size(241, 22)
-        Me.txtRSIPeriod.TabIndex = 10
-        Me.txtRSIPeriod.Tag = "RSI Period"
+        Me.lblMaxProfitPercentagePerDay.AutoSize = True
+        Me.lblMaxProfitPercentagePerDay.Location = New System.Drawing.Point(9, 305)
+        Me.lblMaxProfitPercentagePerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxProfitPercentagePerDay.Name = "lblMaxProfitPercentagePerDay"
+        Me.lblMaxProfitPercentagePerDay.Size = New System.Drawing.Size(125, 17)
+        Me.lblMaxProfitPercentagePerDay.TabIndex = 41
+        Me.lblMaxProfitPercentagePerDay.Text = "Max Profit Per Day"
         '
-        'lblRSILevel
+        'txtMaxLossPerDay
         '
-        Me.lblRSILevel.AutoSize = True
-        Me.lblRSILevel.Location = New System.Drawing.Point(9, 58)
-        Me.lblRSILevel.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblRSILevel.Name = "lblRSILevel"
-        Me.lblRSILevel.Size = New System.Drawing.Size(68, 17)
-        Me.lblRSILevel.TabIndex = 37
-        Me.lblRSILevel.Text = "RSI Level"
+        Me.txtMaxLossPerDay.Location = New System.Drawing.Point(189, 266)
+        Me.txtMaxLossPerDay.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtMaxLossPerDay.Name = "txtMaxLossPerDay"
+        Me.txtMaxLossPerDay.Size = New System.Drawing.Size(241, 22)
+        Me.txtMaxLossPerDay.TabIndex = 38
         '
-        'txtRSILevel
+        'lblMaxLossPercentagePerDay
         '
-        Me.txtRSILevel.Location = New System.Drawing.Point(189, 53)
-        Me.txtRSILevel.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtRSILevel.Name = "txtRSILevel"
-        Me.txtRSILevel.Size = New System.Drawing.Size(241, 22)
-        Me.txtRSILevel.TabIndex = 11
-        Me.txtRSILevel.Tag = "RSI Level"
-        '
-        'grpRSI
-        '
-        Me.grpRSI.Controls.Add(Me.txtRSILevel)
-        Me.grpRSI.Controls.Add(Me.lblRSILevel)
-        Me.grpRSI.Controls.Add(Me.txtRSIPeriod)
-        Me.grpRSI.Controls.Add(Me.lblRSIPeriod)
-        Me.grpRSI.Location = New System.Drawing.Point(2, 332)
-        Me.grpRSI.Name = "grpRSI"
-        Me.grpRSI.Size = New System.Drawing.Size(451, 87)
-        Me.grpRSI.TabIndex = 23
-        Me.grpRSI.TabStop = False
-        Me.grpRSI.Text = "RSI Settings"
+        Me.lblMaxLossPercentagePerDay.AutoSize = True
+        Me.lblMaxLossPercentagePerDay.Location = New System.Drawing.Point(9, 270)
+        Me.lblMaxLossPercentagePerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblMaxLossPercentagePerDay.Name = "lblMaxLossPercentagePerDay"
+        Me.lblMaxLossPercentagePerDay.Size = New System.Drawing.Size(122, 17)
+        Me.lblMaxLossPercentagePerDay.TabIndex = 40
+        Me.lblMaxLossPercentagePerDay.Text = "Max Loss Per Day"
         '
         'frmMomentumReversalSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(576, 422)
-        Me.Controls.Add(Me.grpRSI)
+        Me.ClientSize = New System.Drawing.Size(576, 337)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnSaveMomentumReversalSettings)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -366,8 +304,6 @@ Partial Class frmMomentumReversalSettings
         Me.Text = "Settings"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
-        Me.grpRSI.ResumeLayout(False)
-        Me.grpRSI.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -380,8 +316,6 @@ Partial Class frmMomentumReversalSettings
     Friend WithEvents dtpckrIdleTimeStart As DateTimePicker
     Friend WithEvents lblIdleTimeEnd As Label
     Friend WithEvents lblIdleTimeStart As Label
-    Friend WithEvents txtTradeOpenTime As TextBox
-    Friend WithEvents lblTradeOpenTime As Label
     Friend WithEvents dtpckrEODExitTime As DateTimePicker
     Friend WithEvents dtpckrLastTradeEntryTime As DateTimePicker
     Friend WithEvents dtpckrTradeStartTime As DateTimePicker
@@ -393,11 +327,8 @@ Partial Class frmMomentumReversalSettings
     Friend WithEvents lblInstrumentDetails As Label
     Friend WithEvents txtSignalTimeFrame As TextBox
     Friend WithEvents lblSignalTimeFrame As Label
-    Friend WithEvents txtBackToBackTradeTimeGap As TextBox
-    Friend WithEvents lblBackToBackTradeTimeGap As Label
-    Friend WithEvents lblRSIPeriod As Label
-    Friend WithEvents txtRSIPeriod As TextBox
-    Friend WithEvents lblRSILevel As Label
-    Friend WithEvents txtRSILevel As TextBox
-    Friend WithEvents grpRSI As GroupBox
+    Friend WithEvents txtMaxProfitPerDay As TextBox
+    Friend WithEvents lblMaxProfitPercentagePerDay As Label
+    Friend WithEvents txtMaxLossPerDay As TextBox
+    Friend WithEvents lblMaxLossPercentagePerDay As Label
 End Class
