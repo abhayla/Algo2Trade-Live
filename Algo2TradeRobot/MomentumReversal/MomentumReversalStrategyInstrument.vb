@@ -235,58 +235,118 @@ Public Class MomentumReversalStrategyInstrument
             For Each runningOrderID In OrderDetails.Keys
                 Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
                 If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
-                    Dim entryPrice As Decimal = bussinessOrder.ParentOrder.AveragePrice
+                    Dim entryPrice As Decimal = ConvertFloorCeling(bussinessOrder.ParentOrder.AveragePrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     Dim sl As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL
                     If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
                         sl = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).SL / 100
                     End If
-                    Dim potentialSL As Decimal = ConvertFloorCeling(entryPrice - sl, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    Dim potentialSL As Decimal = Decimal.MinValue
+                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        potentialSL = ConvertFloorCeling(entryPrice - sl, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        potentialSL = ConvertFloorCeling(entryPrice + sl, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    End If
 
                     Dim firstMovementLTP As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementLTP
                     If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
                         firstMovementLTP = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementLTP / 100
                     End If
-                    Dim firstTarget As Decimal = entryPrice + ConvertFloorCeling(firstMovementLTP, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    Dim firstTarget As Decimal = Decimal.MinValue
+                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        firstTarget = entryPrice + ConvertFloorCeling(firstMovementLTP, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        firstTarget = entryPrice - ConvertFloorCeling(firstMovementLTP, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    End If
 
                     Dim firstMovementSL As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementSL
                     If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
                         firstMovementSL = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).FirstMovementSL / 100
                     End If
-                    Dim firstSL As Decimal = ConvertFloorCeling(potentialSL + firstMovementSL, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    Dim firstSL As Decimal = Decimal.MinValue
+                    If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                        firstSL = ConvertFloorCeling(potentialSL + firstMovementSL, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                        firstSL = ConvertFloorCeling(potentialSL - firstMovementSL, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                    End If
+
                     For Each slOrder In bussinessOrder.SLOrder
                         If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
                             Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
                             Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
                             Dim triggerPrice As Decimal = Decimal.MinValue
                             Dim reason As String = Nothing
-                            If slOrder.TriggerPrice >= firstSL Then
-                                Dim gain As Decimal = currentTick.LastPrice - firstTarget
-                                Dim onwardMovementLTP As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP
-                                If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
-                                    onwardMovementLTP = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP / 100
-                                End If
-                                Dim multiplier As Integer = Math.Floor(gain / onwardMovementLTP)
-                                If multiplier > 0 Then
-                                    Dim onwardMovementSL As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL
+                            If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                If slOrder.TriggerPrice >= firstSL Then
+                                    Dim gain As Decimal = currentTick.LastPrice - firstTarget
+                                    Dim onwardMovementLTP As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP
                                     If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
-                                        onwardMovementSL = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL / 100
+                                        onwardMovementLTP = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP / 100
                                     End If
-                                    triggerPrice = firstSL + ConvertFloorCeling(onwardMovementSL * multiplier, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                                    reason = String.Format("Onward movement {0}", multiplier)
+                                    Dim multiplier As Integer = Math.Floor(gain / onwardMovementLTP)
+                                    If multiplier > 0 Then
+                                        Dim onwardMovementSL As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL
+                                        If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
+                                            onwardMovementSL = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL / 100
+                                        End If
+                                        triggerPrice = firstSL + ConvertFloorCeling(onwardMovementSL * multiplier, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                                        reason = String.Format("Onward movement {0}", multiplier)
+                                    End If
+                                Else
+                                    If currentTick.LastPrice >= firstTarget Then
+                                        triggerPrice = firstSL
+                                        reason = "First movement"
+                                    End If
                                 End If
-                            Else
-                                If currentTick.LastPrice >= firstTarget Then
-                                    triggerPrice = firstSL
-                                    reason = "First movement"
+                            ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                If slOrder.TriggerPrice <= firstSL Then
+                                    Dim gain As Decimal = firstTarget - currentTick.LastPrice
+                                    Dim onwardMovementLTP As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP
+                                    If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
+                                        onwardMovementLTP = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementLTP / 100
+                                    End If
+                                    Dim multiplier As Integer = Math.Floor(gain / onwardMovementLTP)
+                                    If multiplier > 0 Then
+                                        Dim onwardMovementSL As Decimal = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL
+                                        If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Percentage Then
+                                            onwardMovementSL = entryPrice * userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).OnwardMovementSL / 100
+                                        End If
+                                        If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                            triggerPrice = firstSL + ConvertFloorCeling(onwardMovementSL * multiplier, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                                        ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                            triggerPrice = firstSL - ConvertFloorCeling(onwardMovementSL * multiplier, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                                        End If
+                                        reason = String.Format("Onward movement {0}", multiplier)
+                                    End If
+                                Else
+                                    If currentTick.LastPrice <= firstTarget Then
+                                        triggerPrice = firstSL
+                                        reason = "First movement"
+                                    End If
                                 End If
                             End If
-                            If triggerPrice <> Decimal.MinValue AndAlso slOrder.TriggerPrice < triggerPrice Then
+                            If triggerPrice <> Decimal.MinValue AndAlso bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy AndAlso
+                                slOrder.TriggerPrice < triggerPrice Then
                                 'Below portion have to be done in every modify stoploss order trigger
                                 Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(slOrder.Tag)
                                 If currentSignalActivities IsNot Nothing Then
                                     If currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
-                                        currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                    currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                    currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                        If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
+                                            Continue For
+                                        End If
+                                    End If
+                                End If
+                                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, reason))
+                            ElseIf triggerPrice <> Decimal.MinValue AndAlso bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell AndAlso
+                                slOrder.TriggerPrice > triggerPrice Then
+                                'Below portion have to be done in every modify stoploss order trigger
+                                Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(slOrder.Tag)
+                                If currentSignalActivities IsNot Nothing Then
+                                    If currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
+                                    currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                    currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
                                         If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
                                             Continue For
                                         End If
