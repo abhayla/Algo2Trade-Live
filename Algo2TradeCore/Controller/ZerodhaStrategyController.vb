@@ -649,12 +649,12 @@ Namespace Controller
             _cts.Token.ThrowIfCancellationRequested()
             Await FillQuantityMultiplierMapAsync().ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
-            Using bannedStock As New BannedStockDataFetcher(_cts)
-                AddHandler bannedStock.Heartbeat, AddressOf OnHeartbeat
-                AddHandler bannedStock.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
-                AddHandler bannedStock.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
-                _AllBannedStock = Await bannedStock.GetBannedStocksData.ConfigureAwait(False)
-            End Using
+            'Using bannedStock As New BannedStockDataFetcher(_cts)
+            '    AddHandler bannedStock.Heartbeat, AddressOf OnHeartbeat
+            '    AddHandler bannedStock.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+            '    AddHandler bannedStock.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+            '    _AllBannedStock = Await bannedStock.GetBannedStocksData.ConfigureAwait(False)
+            'End Using
 
             Return _AllInstruments IsNot Nothing AndAlso _AllInstruments.Count > 0 AndAlso
                 Me._currentUser.DaysStartingCapitals IsNot Nothing AndAlso Me._currentUser.DaysStartingCapitals.Count > 0
@@ -1127,23 +1127,23 @@ Namespace Controller
         End Sub
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
             Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
-            'Try
-            '    logger.Fatal("TickData, Tkn,{0},Dt,{1},Tm,{2},LTP,{3},BQn,{4},SQn,{5},%,{6},Bid,{7},Off,{8},OIH,{9},OIL,{10},OI,{11}",
-            '                 tickData.InstrumentToken,
-            '                 tickData.Timestamp.Value.ToShortDateString,
-            '                 tickData.Timestamp.Value.ToShortTimeString,
-            '                 tickData.LastPrice,
-            '                 tickData.BuyQuantity,
-            '                 tickData.SellQuantity,
-            '                 If(tickData.BuyQuantity > tickData.SellQuantity, ((tickData.BuyQuantity / tickData.SellQuantity) - 1) * 100, ((tickData.SellQuantity / tickData.BuyQuantity) - 1) * -100),
-            '                 Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Bids), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "Qty"), "Price", "Prc"), "Orders", "Ord"),
-            '                 Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Offers), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "Qty"), "Price", "Prc"), "Orders", "Ord"),
-            '                 tickData.OIDayHigh,
-            '                 tickData.OIDayLow,
-            '                 tickData.OI)
-            'Catch ex As Exception
-            '    logger.Error("Tick log error:{0}", ex.ToString)
-            'End Try
+            Try
+                logger.Fatal("TickData, Tkn,{0},Dt,{1},Tm,{2},LTP,{3},BQn,{4},SQn,{5},%,{6},Bid,{7},Off,{8},OIH,{9},OIL,{10},OI,{11}",
+                             tickData.InstrumentToken,
+                             tickData.Timestamp.Value.ToShortDateString,
+                             tickData.Timestamp.Value.ToShortTimeString,
+                             tickData.LastPrice,
+                             tickData.BuyQuantity,
+                             tickData.SellQuantity,
+                             If(tickData.BuyQuantity > tickData.SellQuantity, ((tickData.BuyQuantity / tickData.SellQuantity) - 1) * 100, ((tickData.SellQuantity / tickData.BuyQuantity) - 1) * -100),
+                             Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Bids), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "Qty"), "Price", "Prc"), "Orders", "Ord"),
+                             Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Offers), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "Qty"), "Price", "Prc"), "Orders", "Ord"),
+                             tickData.OIDayHigh,
+                             tickData.OIDayLow,
+                             tickData.OI)
+            Catch ex As Exception
+                logger.Error("Tick log error:{0}", ex.ToString)
+            End Try
             Dim runningTick As New ZerodhaTick() With {.WrappedTick = tickData}
             Dim runningInstruments As IEnumerable(Of IInstrument) = _AllStrategyUniqueInstruments.Where(Function(x)
                                                                                                             Return x.InstrumentIdentifier = tickData.InstrumentToken
