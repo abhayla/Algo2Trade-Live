@@ -65,9 +65,16 @@ Namespace Adapter
                     AddHandler browser.WaitingFor, AddressOf OnWaitingFor
                     AddHandler browser.Heartbeat, AddressOf OnHeartbeat
 
+                    browser.KeepAlive = True
+                    Dim headersToBeSent As New Dictionary(Of String, String)
+                    headersToBeSent.Add("Host", "www.nseindia.com")
+                    headersToBeSent.Add("Upgrade-Insecure-Requests", "1")
+                    headersToBeSent.Add("Sec-Fetch-Mode", "navigate")
+                    headersToBeSent.Add("Sec-Fetch-Site", "none")
+
                     Dim targetURL As String = GetBannedStockURL()
                     If targetURL IsNot Nothing Then
-                        Dim innerRet As Boolean = Await browser.GetFileAsync(targetURL, _bannedStockFileName, True, Nothing).ConfigureAwait(False)
+                        Dim innerRet As Boolean = Await browser.GetFileAsync(targetURL, _bannedStockFileName, False, headersToBeSent).ConfigureAwait(False)
                         If innerRet AndAlso File.ReadAllText(_bannedStockFileName).ToUpper.Contains("Not Found".ToUpper) Then
                             ret = False
                         ElseIf innerRet Then
