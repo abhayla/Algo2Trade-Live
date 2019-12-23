@@ -256,6 +256,7 @@
     <Compile Include="OHL\frmOHLTradableInstrumentList.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="OHL\OHLFillInstrumentDetails.vb" />
     <Compile Include="OHL\OHLStrategy.vb" />
     <Compile Include="OHL\OHLStrategyInstrument.vb" />
     <Compile Include="OHL\OHLUserInputs.vb" />

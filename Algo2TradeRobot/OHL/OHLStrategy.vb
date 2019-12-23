@@ -41,47 +41,19 @@ Public Class OHLStrategy
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             'Get OHL Strategy Instruments
+            Using fillInstrumentDetails As New OHLFillInstrumentDetails(_cts, Me)
+                Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+            End Using
+            logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
+
             Dim ohlUserInputs As OHLUserInputs = CType(Me.UserSettings, OHLUserInputs)
             If ohlUserInputs.InstrumentsData IsNot Nothing AndAlso ohlUserInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
-                Dim cashInstrumentList As IEnumerable(Of KeyValuePair(Of String, OHLUserInputs.InstrumentDetails)) =
-                    ohlUserInputs.InstrumentsData.Where(Function(x)
-                                                            Return x.Value.MarketType = IInstrument.TypeOfInstrument.Cash OrElse
-                                                           x.Value.MarketType = IInstrument.TypeOfInstrument.None
-                                                        End Function)
-                Dim futureInstrumentList As IEnumerable(Of KeyValuePair(Of String, OHLUserInputs.InstrumentDetails)) =
-                    ohlUserInputs.InstrumentsData.Where(Function(x)
-                                                            Return x.Value.MarketType = IInstrument.TypeOfInstrument.Futures OrElse
-                                                           x.Value.MarketType = IInstrument.TypeOfInstrument.None
-                                                        End Function)
-                For Each instrument In cashInstrumentList.ToList
+                For Each instrument In ohlUserInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
                                                                                                 Return x.TradingSymbol = instrument.Key
                                                                                             End Function)
-                    _cts.Token.ThrowIfCancellationRequested()
-                    ret = True
-                    If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
-                    If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
-                Next
-                For Each instrument In futureInstrumentList.ToList
-                    _cts.Token.ThrowIfCancellationRequested()
-                    Dim runningTradableInstrument As IInstrument = Nothing
-                    Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
-                                                                                                         Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
-                                                                                                             x.RawInstrumentType = "FUT" AndAlso (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX")
-                                                                                                     End Function)
-
-                    Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date <= Now.Date Then
-                                                                               Return x.Expiry.Value
-                                                                           Else
-                                                                               Return Date.MaxValue
-                                                                           End If
-                                                                       End Function)
-                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
-                                                                                Return x.Expiry = minExpiry
-                                                                            End Function)
                     _cts.Token.ThrowIfCancellationRequested()
                     ret = True
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
