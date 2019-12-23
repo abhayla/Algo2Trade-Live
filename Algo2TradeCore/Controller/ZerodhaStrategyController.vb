@@ -1128,16 +1128,21 @@ Namespace Controller
         Public Async Sub OnTickerTickAsync(ByVal tickData As Tick)
             Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
             Try
-                logger.Fatal("TickData, Tkn,{0},Dt,{1},Tm,{2},LTP,{3},BQn,{4},SQn,{5},%,{6},Bid,{7},Off,{8},OIH,{9},OIL,{10},OI,{11}",
+                logger.Fatal("TickData, Tkn,{0},Dt,{1},Tm,{2},LTP,{3},Opn,{4},Hgh,{5},Lw,{6},Cls,{7},Volume,{8},BQn,{9},SQn,{10},%,{11},{12},{13},OIH,{14},OIL,{15},OI,{15}",
                              tickData.InstrumentToken,
-                             tickData.Timestamp.Value.ToShortDateString,
-                             tickData.Timestamp.Value.ToShortTimeString,
+                             tickData.Timestamp.Value.ToString("dd-MM-yyyy"),
+                             tickData.Timestamp.Value.ToString("hh:mm:ss"),
                              tickData.LastPrice,
+                             tickData.Open,
+                             tickData.High,
+                             tickData.Low,
+                             tickData.Close,
+                             tickData.Volume,
                              tickData.BuyQuantity,
                              tickData.SellQuantity,
                              If(tickData.BuyQuantity > tickData.SellQuantity, ((tickData.BuyQuantity / tickData.SellQuantity) - 1) * 100, ((tickData.SellQuantity / tickData.BuyQuantity) - 1) * -100),
-                             Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Bids), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "Qty"), "Price", "Prc"), "Orders", "Ord"),
-                             Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Offers), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "Qty"), "Price", "Prc"), "Orders", "Ord"),
+                             Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Bids), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "BQty"), "Price", "BPrc"), "Orders", "BOrd"),
+                             Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Utils.JsonSerialize(tickData.Offers), "[", ""), "{", ""), "}", ""), "]", ""), ":", ","), """", ""), "Quantity", "OQty"), "Price", "OPrc"), "Orders", "OOrd"),
                              tickData.OIDayHigh,
                              tickData.OIDayLow,
                              tickData.OI)
