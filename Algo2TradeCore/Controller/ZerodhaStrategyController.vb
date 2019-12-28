@@ -1131,7 +1131,7 @@ Namespace Controller
                 logger.Fatal("TickData, Tkn,{0},Dt,{1},Tm,{2},LTP,{3},Opn,{4},Hgh,{5},Lw,{6},Cls,{7},Volume,{8},BQn,{9},SQn,{10},%,{11},{12},{13},OIH,{14},OIL,{15},OI,{16}",
                              tickData.InstrumentToken,
                              tickData.Timestamp.Value.ToString("dd-MM-yyyy"),
-                             tickData.Timestamp.Value.ToString("hh:mm:ss"),
+                             tickData.Timestamp.Value.ToString("HH:mm:ss"),
                              tickData.LastPrice,
                              tickData.Open,
                              tickData.High,
