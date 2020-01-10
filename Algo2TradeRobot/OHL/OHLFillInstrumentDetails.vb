@@ -57,46 +57,31 @@ Public Class OHLFillInstrumentDetails
         End Select
         OnHeartbeat(String.Format("Fetching historical Data: {0}", historicalDataURL))
 
-        Try
-            ServicePointManager.Expect100Continue = False
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-            ServicePointManager.ServerCertificateValidationCallback = Function(s, Ca, CaC, sslPE)
-                                                                          Return True
-                                                                      End Function
-
-            Dim proxyToBeUsed As HttpProxy = Nothing
-            Using browser As New HttpBrowser(proxyToBeUsed, Net.DecompressionMethods.GZip, New TimeSpan(0, 1, 0), _cts)
-                AddHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
-                AddHandler browser.Heartbeat, AddressOf OnHeartbeat
-                AddHandler browser.WaitingFor, AddressOf OnWaitingFor
-                AddHandler browser.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
-                'Get to the landing page first
-                Dim l As Tuple(Of Uri, Object) = Await browser.NonPOSTRequestAsync(historicalDataURL,
-                                                                                    HttpMethod.Get,
-                                                                                    Nothing,
-                                                                                    True,
-                                                                                    Nothing,
-                                                                                    True,
-                                                                                    "application/json").ConfigureAwait(False)
-                If l Is Nothing OrElse l.Item2 Is Nothing Then
-                    Throw New ApplicationException(String.Format("No response while getting historical data for: {0}", historicalDataURL))
-                End If
-                If l IsNot Nothing AndAlso l.Item2 IsNot Nothing Then
-                    ret = l.Item2
-                End If
-                RemoveHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
-                RemoveHandler browser.Heartbeat, AddressOf OnHeartbeat
-                RemoveHandler browser.WaitingFor, AddressOf OnWaitingFor
-                RemoveHandler browser.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
-            End Using
-        Catch ex As Exception
-            logger.Error(ex.ToString)
-            If ex.Message.Contains("400 (Bad Request)") Then
-                'Error no need to throw as instrument token can be wrong
-            Else
-                Throw ex
+        Dim proxyToBeUsed As HttpProxy = Nothing
+        Using browser As New HttpBrowser(proxyToBeUsed, Net.DecompressionMethods.GZip, New TimeSpan(0, 1, 0), _cts)
+            AddHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+            AddHandler browser.Heartbeat, AddressOf OnHeartbeat
+            AddHandler browser.WaitingFor, AddressOf OnWaitingFor
+            AddHandler browser.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+            'Get to the landing page first
+            Dim l As Tuple(Of Uri, Object) = Await browser.NonPOSTRequestAsync(historicalDataURL,
+                                                                                HttpMethod.Get,
+                                                                                Nothing,
+                                                                                True,
+                                                                                Nothing,
+                                                                                True,
+                                                                                "application/json").ConfigureAwait(False)
+            If l Is Nothing OrElse l.Item2 Is Nothing Then
+                Throw New ApplicationException(String.Format("No response while getting historical data for: {0}", historicalDataURL))
             End If
-        End Try
+            If l IsNot Nothing AndAlso l.Item2 IsNot Nothing Then
+                ret = l.Item2
+            End If
+            RemoveHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+            RemoveHandler browser.Heartbeat, AddressOf OnHeartbeat
+            RemoveHandler browser.WaitingFor, AddressOf OnWaitingFor
+            RemoveHandler browser.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+        End Using
         Return ret
     End Function
 
