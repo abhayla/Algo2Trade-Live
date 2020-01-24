@@ -39,32 +39,29 @@ Public Class PetDGandhiStrategy
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             Dim userInputs As PetDGandhiUserInputs = CType(Me.UserSettings, PetDGandhiUserInputs)
-            If userInputs.AutoSelectStock Then
-                Using fillInstrumentDetails As New PetDGandhiFillInstrumentDetails(_cts, Me)
-                    Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
-                End Using
-                logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
-            End If
+            'If userInputs.AutoSelectStock Then
+            '    Using fillInstrumentDetails As New PetDGandhiFillInstrumentDetails(_cts, Me)
+            '        Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+            '    End Using
+            '    logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
+            'End If
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
-                    If instrument.Value.Take Then
-                        Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
-                                                                                                    Return x.TradingSymbol = instrument.Value.TradingSymbol
-                                                                                                End Function)
-                        _cts.Token.ThrowIfCancellationRequested()
-                        If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
-                        If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
-                        ret = True
-                    End If
+                    Dim runningTradableInstrument As IInstrument = dummyAllInstruments.Find(Function(x)
+                                                                                                Return x.TradingSymbol = instrument.Value.TradingSymbol
+                                                                                            End Function)
+                    _cts.Token.ThrowIfCancellationRequested()
+                    If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
+                    If runningTradableInstrument IsNot Nothing Then retTradableInstrumentsAsPerStrategy.Add(runningTradableInstrument)
+                    ret = True
                 Next
                 TradableInstrumentsAsPerStrategy = retTradableInstrumentsAsPerStrategy
             End If
         End If
 
         If retTradableInstrumentsAsPerStrategy IsNot Nothing AndAlso retTradableInstrumentsAsPerStrategy.Count > 0 Then
-            'tradableInstrumentsAsPerStrategy = tradableInstrumentsAsPerStrategy.Take(5).ToList
             'Now create the strategy tradable instruments
             Dim retTradableStrategyInstruments As List(Of PetDGandhiStrategyInstrument) = Nothing
             logger.Debug("Creating strategy tradable instruments, _tradableInstruments.count:{0}", retTradableInstrumentsAsPerStrategy.Count)
@@ -115,7 +112,6 @@ Public Class PetDGandhiStrategy
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
-            If CType(Me.UserSettings, PetDGandhiUserInputs).AutoSelectStock Then tasks.Add(Task.Run(AddressOf CompleteProcessAsync, _cts.Token))
             Await Task.WhenAll(tasks).ConfigureAwait(False)
         Catch ex As Exception
             lastException = ex
@@ -140,87 +136,5 @@ Public Class PetDGandhiStrategy
             ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
-    End Function
-
-    Private Async Function CompleteProcessAsync() As Task
-        Try
-            Dim delayCtr As Integer = 0
-            While True
-                If Me.ParentController.OrphanException IsNot Nothing Then
-                    Throw Me.ParentController.OrphanException
-                End If
-                _cts.Token.ThrowIfCancellationRequested()
-                If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Where(Function(z)
-                                                                                                                 Return CType(z, PetDGandhiStrategyInstrument).ProcessingDone
-                                                                                                             End Function).Count = Me.TradableStrategyInstruments.Count Then
-                    Dim counter As Integer = 0
-                    For Each runningCashInstrument In Me.TradableStrategyInstruments
-                        If CType(runningCashInstrument, PetDGandhiStrategyInstrument).FilledPreviousClose Then
-                            CType(runningCashInstrument, PetDGandhiStrategyInstrument).EligibleToTakeTrade = True
-                            runningCashInstrument.TradableInstrument.FetchHistorical = True
-                            counter += 1
-                            If counter = CType(Me.UserSettings, PetDGandhiUserInputs).NumberOfStock Then
-                                Exit For
-                            End If
-                        End If
-                    Next
-                    WriteCSV()
-                    For Each runningInstrument In Me.TradableStrategyInstruments
-                        If Not CType(runningInstrument, PetDGandhiStrategyInstrument).EligibleToTakeTrade Then
-                            runningInstrument.TradableInstrument.FetchHistorical = False
-                            Await Me.ParentController.UnSubscribeTicker(runningInstrument.TradableInstrument.InstrumentIdentifier).ConfigureAwait(False)
-                            CType(runningInstrument, PetDGandhiStrategyInstrument).StopStrategyInstrument = True
-                        End If
-                    Next
-                    Exit While
-                End If
-                Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
-            End While
-        Catch ex As Exception
-            'To log exceptions getting created from this function as the bubble up of the exception
-            'will anyways happen to Strategy.MonitorAsync but it will not be shown until all tasks exit
-            logger.Error("Strategy:{0}, error:{1}", Me.ToString, ex.ToString)
-            Throw ex
-        End Try
-    End Function
-
-    Private Async Function WriteCSV() As Task
-        Await Task.Delay(0).ConfigureAwait(False)
-        Try
-            If Me.TradableStrategyInstruments IsNot Nothing AndAlso Me.TradableStrategyInstruments.Count > 0 Then
-                Dim allStockData As DataTable = Nothing
-                If CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentDetailsFilePath IsNot Nothing AndAlso
-                    File.Exists(CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentDetailsFilePath) Then
-                    File.Delete(CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentDetailsFilePath)
-                    Using csv As New CSVHelper(CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentDetailsFilePath, ",", _cts)
-                        _cts.Token.ThrowIfCancellationRequested()
-                        allStockData = New DataTable
-                        allStockData.Columns.Add("Trading Symbol")
-                        allStockData.Columns.Add("Margin Multiplier")
-                        allStockData.Columns.Add("ATR %")
-                        allStockData.Columns.Add("Change %")
-                        allStockData.Columns.Add("Take")
-                        allStockData.Columns.Add("Slab")
-                        For Each runningInstrument In Me.TradableStrategyInstruments
-                            If CType(runningInstrument, PetDGandhiStrategyInstrument).EligibleToTakeTrade Then
-                                Dim instrumentData As PetDGandhiUserInputs.InstrumentDetails =
-                                    CType(Me.UserSettings, PetDGandhiUserInputs).InstrumentsData(runningInstrument.TradableInstrument.TradingSymbol)
-                                Dim row As DataRow = allStockData.NewRow
-                                row("Trading Symbol") = runningInstrument.TradableInstrument.TradingSymbol
-                                row("Margin Multiplier") = instrumentData.MarginMultiplier
-                                row("ATR %") = instrumentData.ATRPercentage
-                                row("Change %") = instrumentData.ChangePercentage
-                                row("Take") = "Y"
-                                row("Slab") = If(instrumentData.Slab = Decimal.MinValue, 0, instrumentData.Slab)
-                                allStockData.Rows.Add(row)
-                            End If
-                        Next
-                        csv.GetCSVFromDataTable(allStockData)
-                    End Using
-                End If
-            End If
-        Catch ex As Exception
-            logger.Error(ex.ToString)
-        End Try
     End Function
 End Class

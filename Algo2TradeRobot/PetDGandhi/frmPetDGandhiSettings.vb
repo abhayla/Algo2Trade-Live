@@ -50,8 +50,7 @@ Public Class frmPetDGandhiSettings
             dtpckrLastTradeEntryTime.Value = _settings.LastTradeEntryTime
             dtpckrEODExitTime.Value = _settings.EODExitTime
             txtNumberOfTradePerStock.Text = _settings.NumberOfTradePerStock
-            txtTargetMultiplier.Text = _settings.TargetMultiplier
-            txtMaxLossPerTrade.Text = _settings.MaxLossPerTrade
+            txtMaxProfitPerTrade.Text = _settings.MaxProfitPerTrade
             txtStockMaxLossPerDay.Text = _settings.StockMaxLossPerDay
             txtStockMaxProfitPerDay.Text = _settings.StockMaxProfitPerDay
             txtMaxLossPerDay.Text = _settings.MaxLossPerDay
@@ -76,8 +75,7 @@ Public Class frmPetDGandhiSettings
         _settings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
         _settings.EODExitTime = dtpckrEODExitTime.Value
         _settings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
-        _settings.TargetMultiplier = txtTargetMultiplier.Text
-        _settings.MaxLossPerTrade = Math.Abs(CDec(txtMaxLossPerTrade.Text)) * -1
+        _settings.MaxProfitPerTrade = txtMaxProfitPerTrade.Text
         _settings.StockMaxLossPerDay = Math.Abs(CDec(txtStockMaxLossPerDay.Text)) * -1
         _settings.StockMaxProfitPerDay = txtStockMaxProfitPerDay.Text
         _settings.MaxLossPerDay = Math.Abs(CDec(txtMaxLossPerDay.Text)) * -1

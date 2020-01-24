@@ -13,7 +13,7 @@ Public Class PetDGandhiUserInputs
     Public Property MaxLossPerDay As Decimal
     Public Property StockMaxProfitPerDay As Decimal
     Public Property StockMaxLossPerDay As Decimal
-    Public Property MaxLossPerTrade As Decimal
+    Public Property MaxProfitPerTrade As Decimal
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 
@@ -31,11 +31,7 @@ Public Class PetDGandhiUserInputs
     <Serializable>
     Public Class InstrumentDetails
         Public Property TradingSymbol As String
-        Public Property MarginMultiplier As Decimal
         Public Property ATRPercentage As Decimal
-        Public Property ChangePercentage As Decimal
-        Public Property Take As Boolean
-        Public Property Slab As Decimal
     End Class
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
         If filePath IsNot Nothing Then
@@ -47,9 +43,9 @@ Public Class PetDGandhiUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "MARGIN MULTIPLIER", "ATR %", "CHANGE %", "TAKE", "SLAB"}
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "ATR %"}
 
-                        For colCtr = 0 To 5
+                        For colCtr = 0 To 1
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -60,11 +56,7 @@ Public Class PetDGandhiUserInputs
                         Next
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim instrumentName As String = Nothing
-                            Dim margin As Decimal = Decimal.MinValue
                             Dim atr As Decimal = Decimal.MinValue
-                            Dim change As Decimal = Decimal.MinValue
-                            Dim takeIt As Boolean = False
-                            Dim slab As Decimal = Decimal.MinValue
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
@@ -79,17 +71,6 @@ Public Class PetDGandhiUserInputs
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            margin = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("Margin Multiplier cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Margin Multiplier cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                    End If
-                                ElseIf columnCtr = 2 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
                                             atr = instrumentDetails(rowCtr, columnCtr)
                                         Else
                                             Throw New ApplicationException(String.Format("ATR % cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
@@ -97,50 +78,13 @@ Public Class PetDGandhiUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("ATR % cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
-                                ElseIf columnCtr = 3 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            change = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("Change % cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Change % cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                    End If
-                                ElseIf columnCtr = 4 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If instrumentDetails(rowCtr, columnCtr) = "Y" Then
-                                            takeIt = True
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Take cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                    End If
-                                ElseIf columnCtr = 5 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            If instrumentDetails(rowCtr, columnCtr) <> 0 Then
-                                                slab = instrumentDetails(rowCtr, columnCtr)
-                                            End If
-                                        Else
-                                            Throw New ApplicationException(String.Format("Slab cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Slab cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
-                                    End If
                                 End If
                             Next
                             If instrumentName IsNot Nothing Then
                                 Dim instrumentData As New InstrumentDetails
                                 With instrumentData
                                     .TradingSymbol = instrumentName.ToUpper
-                                    .MarginMultiplier = margin
                                     .ATRPercentage = atr
-                                    .ChangePercentage = change
-                                    .Take = takeIt
-                                    .Slab = slab
                                 End With
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
                                 If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then

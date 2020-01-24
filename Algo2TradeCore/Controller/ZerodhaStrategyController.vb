@@ -649,12 +649,12 @@ Namespace Controller
             _cts.Token.ThrowIfCancellationRequested()
             Await FillQuantityMultiplierMapAsync().ConfigureAwait(False)
             _cts.Token.ThrowIfCancellationRequested()
-            Using bannedStock As New BannedStockDataFetcher(_cts)
-                AddHandler bannedStock.Heartbeat, AddressOf OnHeartbeat
-                AddHandler bannedStock.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
-                AddHandler bannedStock.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
-                _AllBannedStock = Await bannedStock.GetBannedStocksData.ConfigureAwait(False)
-            End Using
+            'Using bannedStock As New BannedStockDataFetcher(_cts)
+            '    AddHandler bannedStock.Heartbeat, AddressOf OnHeartbeat
+            '    AddHandler bannedStock.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
+            '    AddHandler bannedStock.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
+            '    _AllBannedStock = Await bannedStock.GetBannedStocksData.ConfigureAwait(False)
+            'End Using
 
             Return _AllInstruments IsNot Nothing AndAlso _AllInstruments.Count > 0 AndAlso
                 Me._currentUser.DaysStartingCapitals IsNot Nothing AndAlso Me._currentUser.DaysStartingCapitals.Count > 0
