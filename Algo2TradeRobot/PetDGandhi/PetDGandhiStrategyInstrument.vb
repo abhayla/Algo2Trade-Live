@@ -162,8 +162,8 @@ Public Class PetDGandhiStrategyInstrument
             Not Me.StrategyExitAllTriggerd AndAlso Not _strategyInstrumentExit Then
 
             Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload, currentTick)
-
-            If signal IsNot Nothing AndAlso signal.Item1 Then
+            If signal IsNot Nothing AndAlso signal.Item1 AndAlso
+                Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime, lastExecutedOrder) Then
                 Dim quantity As Decimal = CalculateQuantityFromTarget(signal.Item2, signal.Item2 + Me.Slab, userSettings.MaxProfitPerTrade)
 
                 If lastExecutedOrder IsNot Nothing AndAlso GetTotalPLOfAnOrderAfterBrokerage(lastExecutedOrder.ParentOrderIdentifier) < 0 Then
@@ -424,6 +424,33 @@ Public Class PetDGandhiStrategyInstrument
             ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, potentialBuyPrice, IOrder.TypeOfTransaction.Buy)
         ElseIf currentTick.LastPrice <= middlePoint - range * 30 / 100 Then
             ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, potentialSellPrice, IOrder.TypeOfTransaction.Sell)
+        End If
+        Return ret
+    End Function
+
+    Private Function IsLastTradeExitedAtCurrentCandle(ByVal currentCandleTime As Date, ByVal order As IBusinessOrder) As Boolean
+        Dim ret As Boolean = False
+        Dim tradeExitTime As Date = GetOrderExitTime(order)
+        If tradeExitTime <> Date.MinValue Then
+            Dim blockDateInThisTimeframe As Date = Date.MinValue
+            Dim timeframe As Integer = Me.ParentStrategy.UserSettings.SignalTimeFrame
+            If Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute Mod timeframe = 0 Then
+                blockDateInThisTimeframe = New Date(tradeExitTime.Year,
+                                                    tradeExitTime.Month,
+                                                    tradeExitTime.Day,
+                                                    tradeExitTime.Hour,
+                                                    Math.Floor(tradeExitTime.Minute / timeframe) * timeframe, 0)
+            Else
+                Dim exchangeStartTime As Date = New Date(tradeExitTime.Year, tradeExitTime.Month, tradeExitTime.Day, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Hour, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute, 0)
+                Dim currentTime As Date = New Date(tradeExitTime.Year, tradeExitTime.Month, tradeExitTime.Day, tradeExitTime.Hour, tradeExitTime.Minute, 0)
+                Dim timeDifference As Double = currentTime.Subtract(exchangeStartTime).TotalMinutes
+                Dim adjustedTimeDifference As Integer = Math.Floor(timeDifference / timeframe) * timeframe
+                Dim currentMinute As Date = exchangeStartTime.AddMinutes(adjustedTimeDifference)
+                blockDateInThisTimeframe = New Date(tradeExitTime.Year, tradeExitTime.Month, tradeExitTime.Day, currentMinute.Hour, currentMinute.Minute, 0)
+            End If
+            If blockDateInThisTimeframe <> Date.MinValue Then
+                ret = Utilities.Time.IsDateTimeEqualTillMinutes(blockDateInThisTimeframe, currentCandleTime)
+            End If
         End If
         Return ret
     End Function
