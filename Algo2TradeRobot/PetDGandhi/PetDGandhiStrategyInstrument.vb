@@ -192,7 +192,7 @@ Public Class PetDGandhiStrategyInstrument
                     End If
                 ElseIf signal.Item3 = IOrder.TypeOfTransaction.Sell Then
                     Dim triggerPrice As Decimal = signal.Item2 - buffer
-                    Dim price As Decimal = triggerPrice - ConvertFloorCeling(Me.Slab / 2, TradableInstrument.TickSize, RoundOfType.Celing)
+                    Dim price As Decimal = triggerPrice - ConvertFloorCeling(Me.Slab * 20 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
                     If currentTick.LastPrice > triggerPrice Then
                         parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Sell,
