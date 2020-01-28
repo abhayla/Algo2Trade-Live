@@ -289,7 +289,8 @@ Public Class PetDGandhiStrategyInstrument
                     If runningCandle IsNot Nothing AndAlso runningCandle.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick Then
                         Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandle, currentTick)
                         If signal IsNot Nothing Then
-                            If signal.Item3 <> parentOrder.TransactionType OrElse signal.Item2 <> parentOrder.Price Then
+                            If signal.Item3 <> parentOrder.TransactionType OrElse
+                                (signal.Item2 <> parentOrder.Price AndAlso parentOrder.Status = IOrder.TypeOfStatus.Open) Then
                                 'Below portion have to be done in every cancel order trigger
                                 Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(parentOrder.Tag)
                                 If currentSignalActivities IsNot Nothing Then
@@ -300,7 +301,7 @@ Public Class PetDGandhiStrategyInstrument
                                     End If
                                 End If
                                 If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, String))
-                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, parentBussinessOrder.ParentOrder, "Opposite Direction trade"))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, parentBussinessOrder.ParentOrder, "Invalid Signal"))
                             End If
                         End If
                     End If
@@ -361,18 +362,26 @@ Public Class PetDGandhiStrategyInstrument
 
     Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick) As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)
         Dim ret As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = Nothing
-        Dim buffer As Decimal = CalculateBuffer(currentTick.LastPrice, Me.TradableInstrument.TickSize, RoundOfType.Floor)
-        Dim highLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Buy)
-        Dim lowLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Sell)
-        If candle.HighPrice.Value >= highLevel Then
-            If (candle.CandleColor = Color.Green AndAlso candle.ClosePrice.Value <= highLevel) OrElse
-                (candle.CandleColor = Color.Red AndAlso candle.OpenPrice.Value <= highLevel) Then
+        Dim closeHighLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Buy)
+        Dim closeLowLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Sell)
+        Dim openHighLevel As Decimal = GetSlabBasedLevel(candle.OpenPrice.Value, IOrder.TypeOfTransaction.Buy)
+        Dim openLowLevel As Decimal = GetSlabBasedLevel(candle.OpenPrice.Value, IOrder.TypeOfTransaction.Sell)
 
+        If candle.HighPrice.Value > closeHighLevel Then
+            If candle.CandleColor = Color.Red Then
+                If openHighLevel >= closeHighLevel AndAlso candle.HighPrice.Value > openHighLevel Then
+                    ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, openHighLevel, IOrder.TypeOfTransaction.Sell)
+                End If
+            Else
+                ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeHighLevel, IOrder.TypeOfTransaction.Sell)
             End If
-        ElseIf candle.LowPrice.Value <= lowLevel Then
-            If (candle.CandleColor = Color.Green AndAlso candle.OpenPrice.Value >= lowLevel) OrElse
-                (candle.CandleColor = Color.Red AndAlso candle.ClosePrice.Value >= lowLevel) Then
-
+        ElseIf candle.LowPrice.Value < closeLowLevel Then
+            If candle.CandleColor = Color.Green Then
+                If openLowLevel <= closeLowLevel AndAlso candle.LowPrice.Value < openLowLevel Then
+                    ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, openLowLevel, IOrder.TypeOfTransaction.Buy)
+                End If
+            Else
+                ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeLowLevel, IOrder.TypeOfTransaction.Buy)
             End If
         End If
         Return ret
