@@ -130,7 +130,11 @@ Public Class PetDGandhiStrategyInstrument
         Dim lastExecutedOrder As IBusinessOrder = GetLastExecutedOrder()
 
         If runningCandlePayload IsNot Nothing AndAlso Me.Slab = Decimal.MinValue Then
-            Me.Slab = CalculateSlab(runningCandlePayload.OpenPrice.Value)
+            If userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Slab <> 0 Then
+                Me.Slab = userSettings.InstrumentsData(Me.TradableInstrument.TradingSymbol).Slab
+            Else
+                Me.Slab = CalculateSlab(runningCandlePayload.OpenPrice.Value)
+            End If
         End If
 
         Try

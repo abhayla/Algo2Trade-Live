@@ -67,9 +67,6 @@ Public Class frmPetDGandhiSettings
             txtMinVolume.Text = _settings.MinVolume
             txtBlankCandlePercentage.Text = _settings.BlankCandlePercentage
             txtNumberOfStock.Text = _settings.NumberOfStock
-
-            txtSupertrendPeriod.Text = _settings.SupertrendPeriod
-            txtSupertrendMultiplier.Text = _settings.SupertrendMultiplier
         End If
     End Sub
     Private Sub SaveSettings()
@@ -95,9 +92,6 @@ Public Class frmPetDGandhiSettings
         _settings.MinVolume = txtMinVolume.Text
         _settings.BlankCandlePercentage = txtBlankCandlePercentage.Text
         _settings.NumberOfStock = txtNumberOfStock.Text
-
-        _settings.SupertrendPeriod = txtSupertrendPeriod.Text
-        _settings.SupertrendMultiplier = txtSupertrendMultiplier.Text
 
         Utilities.Strings.SerializeFromCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename, _settings)
     End Sub
