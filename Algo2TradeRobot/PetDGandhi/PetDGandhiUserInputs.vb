@@ -28,10 +28,14 @@ Public Class PetDGandhiUserInputs
     Public Property BlankCandlePercentage As Decimal
     Public Property NumberOfStock As Integer
 
+    Public Property SupertrendPeriod As Decimal
+    Public Property SupertrendMultiplier As Decimal
+
     <Serializable>
     Public Class InstrumentDetails
         Public Property TradingSymbol As String
         Public Property ATRPercentage As Decimal
+        Public Property Slab As Decimal
     End Class
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
         If filePath IsNot Nothing Then
@@ -43,9 +47,9 @@ Public Class PetDGandhiUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "ATR %"}
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "ATR %", "SLAB"}
 
-                        For colCtr = 0 To 1
+                        For colCtr = 0 To 2
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -57,6 +61,7 @@ Public Class PetDGandhiUserInputs
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim instrumentName As String = Nothing
                             Dim atr As Decimal = Decimal.MinValue
+                            Dim slab As Decimal = Decimal.MinValue
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
                                     If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
@@ -78,6 +83,17 @@ Public Class PetDGandhiUserInputs
                                     Else
                                         Throw New ApplicationException(String.Format("ATR % cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
                                     End If
+                                ElseIf columnCtr = 2 Then
+                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
+                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
+                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
+                                            slab = instrumentDetails(rowCtr, columnCtr)
+                                        Else
+                                            Throw New ApplicationException(String.Format("Slab cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                        End If
+                                    Else
+                                        Throw New ApplicationException(String.Format("Slab cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, instrumentName))
+                                    End If
                                 End If
                             Next
                             If instrumentName IsNot Nothing Then
@@ -85,6 +101,7 @@ Public Class PetDGandhiUserInputs
                                 With instrumentData
                                     .TradingSymbol = instrumentName.ToUpper
                                     .ATRPercentage = atr
+                                    .Slab = slab
                                 End With
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
                                 If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then

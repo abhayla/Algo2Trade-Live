@@ -62,13 +62,19 @@ Partial Class frmPetDGandhiSettings
         Me.btnBrowse = New System.Windows.Forms.Button()
         Me.txtInstrumentDetalis = New System.Windows.Forms.TextBox()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.txtNumberOfTradePerStock = New System.Windows.Forms.TextBox()
+        Me.lblNumberOfTradePerStock = New System.Windows.Forms.Label()
         Me.lblInstrumentDetails = New System.Windows.Forms.Label()
         Me.txtSignalTimeFrame = New System.Windows.Forms.TextBox()
         Me.lblSignalTimeFrame = New System.Windows.Forms.Label()
-        Me.txtNumberOfTradePerStock = New System.Windows.Forms.TextBox()
-        Me.lblNumberOfTradePerStock = New System.Windows.Forms.Label()
+        Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.txtSupertrendMultiplier = New System.Windows.Forms.TextBox()
+        Me.lblSupertrendMultiplier = New System.Windows.Forms.Label()
+        Me.txtSupertrendPeriod = New System.Windows.Forms.TextBox()
+        Me.lblSupertrendPeriod = New System.Windows.Forms.Label()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
+        Me.GroupBox2.SuspendLayout()
         Me.SuspendLayout()
         '
         'GroupBox3
@@ -468,6 +474,25 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox1.TabIndex = 41
         Me.GroupBox1.TabStop = False
         '
+        'txtNumberOfTradePerStock
+        '
+        Me.txtNumberOfTradePerStock.Location = New System.Drawing.Point(174, 163)
+        Me.txtNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtNumberOfTradePerStock.Name = "txtNumberOfTradePerStock"
+        Me.txtNumberOfTradePerStock.Size = New System.Drawing.Size(255, 22)
+        Me.txtNumberOfTradePerStock.TabIndex = 5
+        Me.txtNumberOfTradePerStock.Tag = "Max Loss Per Day"
+        '
+        'lblNumberOfTradePerStock
+        '
+        Me.lblNumberOfTradePerStock.AutoSize = True
+        Me.lblNumberOfTradePerStock.Location = New System.Drawing.Point(9, 166)
+        Me.lblNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblNumberOfTradePerStock.Name = "lblNumberOfTradePerStock"
+        Me.lblNumberOfTradePerStock.Size = New System.Drawing.Size(152, 17)
+        Me.lblNumberOfTradePerStock.TabIndex = 36
+        Me.lblNumberOfTradePerStock.Text = "No Of Trade Per Stock"
+        '
         'lblInstrumentDetails
         '
         Me.lblInstrumentDetails.AutoSize = True
@@ -496,30 +521,61 @@ Partial Class frmPetDGandhiSettings
         Me.lblSignalTimeFrame.TabIndex = 3
         Me.lblSignalTimeFrame.Text = "Signal Time Frame(min)"
         '
-        'txtNumberOfTradePerStock
+        'GroupBox2
         '
-        Me.txtNumberOfTradePerStock.Location = New System.Drawing.Point(174, 163)
-        Me.txtNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtNumberOfTradePerStock.Name = "txtNumberOfTradePerStock"
-        Me.txtNumberOfTradePerStock.Size = New System.Drawing.Size(255, 22)
-        Me.txtNumberOfTradePerStock.TabIndex = 5
-        Me.txtNumberOfTradePerStock.Tag = "Max Loss Per Day"
+        Me.GroupBox2.Controls.Add(Me.txtSupertrendMultiplier)
+        Me.GroupBox2.Controls.Add(Me.lblSupertrendMultiplier)
+        Me.GroupBox2.Controls.Add(Me.txtSupertrendPeriod)
+        Me.GroupBox2.Controls.Add(Me.lblSupertrendPeriod)
+        Me.GroupBox2.Location = New System.Drawing.Point(452, 265)
+        Me.GroupBox2.Name = "GroupBox2"
+        Me.GroupBox2.Size = New System.Drawing.Size(358, 137)
+        Me.GroupBox2.TabIndex = 43
+        Me.GroupBox2.TabStop = False
+        Me.GroupBox2.Text = "Indicator Settings"
         '
-        'lblNumberOfTradePerStock
+        'txtSupertrendMultiplier
         '
-        Me.lblNumberOfTradePerStock.AutoSize = True
-        Me.lblNumberOfTradePerStock.Location = New System.Drawing.Point(9, 166)
-        Me.lblNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblNumberOfTradePerStock.Name = "lblNumberOfTradePerStock"
-        Me.lblNumberOfTradePerStock.Size = New System.Drawing.Size(152, 17)
-        Me.lblNumberOfTradePerStock.TabIndex = 36
-        Me.lblNumberOfTradePerStock.Text = "No Of Trade Per Stock"
+        Me.txtSupertrendMultiplier.Location = New System.Drawing.Point(156, 54)
+        Me.txtSupertrendMultiplier.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtSupertrendMultiplier.Name = "txtSupertrendMultiplier"
+        Me.txtSupertrendMultiplier.Size = New System.Drawing.Size(191, 22)
+        Me.txtSupertrendMultiplier.TabIndex = 34
+        '
+        'lblSupertrendMultiplier
+        '
+        Me.lblSupertrendMultiplier.AutoSize = True
+        Me.lblSupertrendMultiplier.Location = New System.Drawing.Point(9, 58)
+        Me.lblSupertrendMultiplier.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblSupertrendMultiplier.Name = "lblSupertrendMultiplier"
+        Me.lblSupertrendMultiplier.Size = New System.Drawing.Size(139, 17)
+        Me.lblSupertrendMultiplier.TabIndex = 37
+        Me.lblSupertrendMultiplier.Text = "Supertrend Multiplier"
+        '
+        'txtSupertrendPeriod
+        '
+        Me.txtSupertrendPeriod.Location = New System.Drawing.Point(156, 20)
+        Me.txtSupertrendPeriod.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtSupertrendPeriod.Name = "txtSupertrendPeriod"
+        Me.txtSupertrendPeriod.Size = New System.Drawing.Size(191, 22)
+        Me.txtSupertrendPeriod.TabIndex = 33
+        '
+        'lblSupertrendPeriod
+        '
+        Me.lblSupertrendPeriod.AutoSize = True
+        Me.lblSupertrendPeriod.Location = New System.Drawing.Point(9, 24)
+        Me.lblSupertrendPeriod.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblSupertrendPeriod.Name = "lblSupertrendPeriod"
+        Me.lblSupertrendPeriod.Size = New System.Drawing.Size(124, 17)
+        Me.lblSupertrendPeriod.TabIndex = 36
+        Me.lblSupertrendPeriod.Text = "Supertrend Period"
         '
         'frmPetDGandhiSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(947, 408)
+        Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.GroupBox3)
         Me.Controls.Add(Me.btnSavePetDGandhiSettings)
         Me.Controls.Add(Me.GroupBox1)
@@ -533,6 +589,8 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox3.PerformLayout()
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
+        Me.GroupBox2.ResumeLayout(False)
+        Me.GroupBox2.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -580,4 +638,9 @@ Partial Class frmPetDGandhiSettings
     Friend WithEvents lblSignalTimeFrame As Label
     Friend WithEvents txtNumberOfTradePerStock As TextBox
     Friend WithEvents lblNumberOfTradePerStock As Label
+    Friend WithEvents GroupBox2 As GroupBox
+    Friend WithEvents txtSupertrendMultiplier As TextBox
+    Friend WithEvents lblSupertrendMultiplier As Label
+    Friend WithEvents txtSupertrendPeriod As TextBox
+    Friend WithEvents lblSupertrendPeriod As Label
 End Class
