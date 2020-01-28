@@ -13,7 +13,6 @@ Public Class PetDGandhiUserInputs
     Public Property MaxLossPerDay As Decimal
     Public Property StockMaxProfitPerDay As Decimal
     Public Property StockMaxLossPerDay As Decimal
-    Public Property MaxProfitPerTrade As Decimal
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 
@@ -27,9 +26,6 @@ Public Class PetDGandhiUserInputs
     Public Property MinVolume As Decimal
     Public Property BlankCandlePercentage As Decimal
     Public Property NumberOfStock As Integer
-
-    Public Property SupertrendPeriod As Decimal
-    Public Property SupertrendMultiplier As Decimal
 
     <Serializable>
     Public Class InstrumentDetails

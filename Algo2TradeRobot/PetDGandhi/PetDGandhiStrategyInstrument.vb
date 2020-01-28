@@ -175,35 +175,28 @@ Public Class PetDGandhiStrategyInstrument
             Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload, currentTick)
             If signal IsNot Nothing AndAlso signal.Item1 AndAlso
                 Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime, lastExecutedOrder) Then
-                Dim quantity As Decimal = CalculateQuantityFromTarget(signal.Item2, signal.Item2 + Me.Slab, userSettings.MaxProfitPerTrade)
+                Dim quantity As Decimal = CalculateQuantityFromTarget(signal.Item2, signal.Item2 + Me.Slab, userSettings.StockMaxProfitPerDay)
 
-                If lastExecutedOrder IsNot Nothing AndAlso GetTotalPLOfAnOrderAfterBrokerage(lastExecutedOrder.ParentOrderIdentifier) < 0 Then
-                    quantity = 2 * lastExecutedOrder.ParentOrder.Quantity
-                End If
-
-                Dim buffer As Decimal = CalculateBuffer(signal.Item2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                 If signal.Item3 = IOrder.TypeOfTransaction.Buy Then
-                    Dim triggerPrice As Decimal = signal.Item2 + buffer
-                    Dim price As Decimal = triggerPrice + ConvertFloorCeling(Me.Slab * 20 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                    If currentTick.LastPrice < triggerPrice Then
+                    Dim price As Decimal = signal.Item2
+                    Dim targetPrice As Decimal = CalculateTargetFromPL(price, quantity, userSettings.StockMaxProfitPerDay - Me.GetOverallPLAfterBrokerage())
+                    If currentTick.LastPrice > price Then
                         parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                     .TriggerPrice = triggerPrice,
                                      .Price = price,
-                                     .StoplossValue = Me.Slab + 2 * buffer,
-                                     .SquareOffValue = Me.Slab,
+                                     .StoplossValue = Me.Slab,
+                                     .SquareOffValue = targetPrice - price,
                                      .Quantity = quantity}
                     End If
                 ElseIf signal.Item3 = IOrder.TypeOfTransaction.Sell Then
-                    Dim triggerPrice As Decimal = signal.Item2 - buffer
-                    Dim price As Decimal = triggerPrice - ConvertFloorCeling(Me.Slab * 20 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                    If currentTick.LastPrice > triggerPrice Then
+                    Dim price As Decimal = signal.Item2
+                    Dim targetPrice As Decimal = CalculateTargetFromPL(price, quantity, userSettings.StockMaxProfitPerDay - Me.GetOverallPLAfterBrokerage())
+                    If currentTick.LastPrice < price Then
                         parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
                                     {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                     .TriggerPrice = triggerPrice,
                                      .Price = price,
-                                     .StoplossValue = Me.Slab + 2 * buffer,
-                                     .SquareOffValue = Me.Slab,
+                                     .StoplossValue = Me.Slab,
+                                     .SquareOffValue = targetPrice - price,
                                      .Quantity = quantity}
                     End If
                 End If
