@@ -318,7 +318,7 @@ Public Class PetDGandhiStrategyInstrument
             Try
                 If ret IsNot Nothing AndAlso ret.Count > 0 Then
                     For Each runningAction In ret
-                        logger.Debug("Modify Order: Order ID:{0}, Trigger Price:{1}, Reason:{2}, Trading Symbol:{3}",
+                        logger.Debug("Modify Stoploss Order: Order ID:{0}, Trigger Price:{1}, Reason:{2}, Trading Symbol:{3}",
                                      runningAction.Item2.OrderIdentifier, runningAction.Item3, runningAction.Item4, Me.TradableInstrument.TradingSymbol)
                     Next
                 End If
@@ -379,7 +379,7 @@ Public Class PetDGandhiStrategyInstrument
             Try
                 If ret IsNot Nothing AndAlso ret.Count > 0 Then
                     For Each runningAction In ret
-                        logger.Debug("Modify Order: Order ID:{0}, Trigger Price:{1}, Reason:{2}, Trading Symbol:{3}",
+                        logger.Debug("Modify Target Order: Order ID:{0}, Price:{1}, Reason:{2}, Trading Symbol:{3}",
                                      runningAction.Item2.OrderIdentifier, runningAction.Item3, runningAction.Item4, Me.TradableInstrument.TradingSymbol)
                     Next
                 End If
