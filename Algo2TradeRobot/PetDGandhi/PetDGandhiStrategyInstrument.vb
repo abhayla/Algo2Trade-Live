@@ -360,8 +360,7 @@ Public Class PetDGandhiStrategyInstrument
                                 Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(runningOrder.Tag)
                                 If currentSignalActivities IsNot Nothing Then
                                     If currentSignalActivities.TargetModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                    currentSignalActivities.TargetModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
-                                    currentSignalActivities.TargetModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                    currentSignalActivities.TargetModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated Then
                                         If Val(currentSignalActivities.TargetModifyActivity.Supporting) = price Then
                                             Continue For
                                         End If
