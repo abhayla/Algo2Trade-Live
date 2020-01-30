@@ -85,12 +85,12 @@ Public Class PetDGandhiStrategyInstrument
                 End If
                 'Place Order block end
                 _cts.Token.ThrowIfCancellationRequested()
-                'Modify sl Order block start
-                Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
-                If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
-                    Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
-                End If
-                'Modify sl Order block end
+                ''Modify sl Order block start
+                'Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
+                'If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
+                '    Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
+                'End If
+                ''Modify sl Order block end
                 '_cts.Token.ThrowIfCancellationRequested()
                 ''Modify target Order block start
                 'Dim modifyTargetOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyTargetOrderAsync(False).ConfigureAwait(False)
@@ -98,13 +98,13 @@ Public Class PetDGandhiStrategyInstrument
                 '    Await ExecuteCommandAsync(ExecuteCommands.ModifyTargetOrder, Nothing).ConfigureAwait(False)
                 'End If
                 ''Modify target Order block end
-                _cts.Token.ThrowIfCancellationRequested()
-                'Exit Order block start
-                Dim exitOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Await IsTriggerReceivedForExitOrderAsync(False).ConfigureAwait(False)
-                If exitOrderTrigger IsNot Nothing AndAlso exitOrderTrigger.Count > 0 Then
-                    Await ExecuteCommandAsync(ExecuteCommands.CancelBOOrder, Nothing).ConfigureAwait(False)
-                End If
-                'Exit Order block end
+                '_cts.Token.ThrowIfCancellationRequested()
+                ''Exit Order block start
+                'Dim exitOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, String)) = Await IsTriggerReceivedForExitOrderAsync(False).ConfigureAwait(False)
+                'If exitOrderTrigger IsNot Nothing AndAlso exitOrderTrigger.Count > 0 Then
+                '    Await ExecuteCommandAsync(ExecuteCommands.CancelBOOrder, Nothing).ConfigureAwait(False)
+                'End If
+                ''Exit Order block end
                 _cts.Token.ThrowIfCancellationRequested()
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While
@@ -165,7 +165,8 @@ Public Class PetDGandhiStrategyInstrument
             logger.Error(ex.ToString)
         End Try
 
-        Dim parameter As PlaceOrderParameters = Nothing
+        Dim parameter1 As PlaceOrderParameters = Nothing
+        Dim parameter2 As PlaceOrderParameters = Nothing
         If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
             runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.SnapshotDateTime >= userSettings.TradeStartTime AndAlso
             runningCandlePayload.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick AndAlso
@@ -175,58 +176,45 @@ Public Class PetDGandhiStrategyInstrument
             Me.ParentStrategy.GetTotalPLAfterBrokerage() > userSettings.MaxLossPerDay AndAlso Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay AndAlso
             Not Me.StrategyExitAllTriggerd AndAlso Not _strategyInstrumentExit Then
 
-            Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick, forcePrint)
-            If signal IsNot Nothing AndAlso signal.Item1 Then
-                Dim quantity As Decimal = CalculateQuantityFromTarget(signal.Item2, signal.Item2 + Me.Slab, userSettings.StockMaxProfitPerDay)
+            'Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick, forcePrint)
+            'If signal IsNot Nothing AndAlso signal.Item1 Then
+            Dim slPoint As Decimal = ConvertFloorCeling(currentTick.LastPrice * 0.65 / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+            Dim targetPoint As Decimal = ConvertFloorCeling(slPoint * 1.5, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+            Dim quantity As Decimal = CalculateQuantityFromStoploss(currentTick.LastPrice, currentTick.LastPrice - slPoint, -250)
 
-                If signal.Item3 = IOrder.TypeOfTransaction.Buy Then
-                    Dim price As Decimal = signal.Item2
-                    Dim targetPrice As Decimal = CalculateTargetFromPL(price, quantity, userSettings.StockMaxProfitPerDay - Me.GetOverallPLAfterBrokerage())
-                    If currentTick.LastPrice > price Then
-                        parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
-                                    {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                                     .Price = price,
-                                     .StoplossValue = Me.Slab,
-                                     .SquareOffValue = Math.Min(targetPrice - price, Me.Slab * 2),
-                                     .Quantity = quantity,
-                                     .OrderType = IOrder.TypeOfOrder.Limit}
-                        'ElseIf currentTick.LastPrice < price AndAlso currentTick.LastPrice > price - Me.Slab Then
-                        '    parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
-                        '                {.EntryDirection = IOrder.TypeOfTransaction.Buy,
-                        '                 .Price = price,
-                        '                 .StoplossValue = Me.Slab,
-                        '                 .SquareOffValue = Math.Min(targetPrice - price, Me.Slab * 2),
-                        '                 .Quantity = quantity,
-                        '                 .OrderType = IOrder.TypeOfOrder.Market}
-                    End If
-                ElseIf signal.Item3 = IOrder.TypeOfTransaction.Sell Then
-                    Dim price As Decimal = signal.Item2
-                    Dim targetPrice As Decimal = CalculateTargetFromPL(price, quantity, userSettings.StockMaxProfitPerDay - Me.GetOverallPLAfterBrokerage())
-                    If currentTick.LastPrice < price Then
-                        parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
-                                    {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                                     .Price = price,
-                                     .StoplossValue = Me.Slab,
-                                     .SquareOffValue = Math.Min(targetPrice - price, Me.Slab * 2),
-                                     .Quantity = quantity,
-                                     .OrderType = IOrder.TypeOfOrder.Limit}
-                        'ElseIf currentTick.LastPrice > price AndAlso currentTick.LastPrice < price + Me.Slab Then
-                        '    parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
-                        '                {.EntryDirection = IOrder.TypeOfTransaction.Sell,
-                        '                 .Price = price,
-                        '                 .StoplossValue = Me.Slab,
-                        '                 .SquareOffValue = Math.Min(targetPrice - price, Me.Slab * 2),
-                        '                 .Quantity = quantity,
-                        '                 .OrderType = IOrder.TypeOfOrder.Market}
-                    End If
-                End If
+            'If signal.Item3 = IOrder.TypeOfTransaction.Buy Then
+            If True Then
+                Dim price As Decimal = ConvertFloorCeling(currentTick.LastPrice + currentTick.LastPrice * 1 / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                'If currentTick.LastPrice > price Then
+                parameter1 = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                                {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                 .Price = price,
+                                 .StoplossValue = slPoint,
+                                 .SquareOffValue = targetPoint,
+                                 .Quantity = quantity,
+                                 .OrderType = IOrder.TypeOfOrder.Limit}
+                'End If
             End If
+            'If signal.Item3 = IOrder.TypeOfTransaction.Sell Then
+            If True Then
+                Dim price As Decimal = ConvertFloorCeling(currentTick.LastPrice - currentTick.LastPrice * 1 / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
+                'If currentTick.LastPrice < price Then
+                parameter2 = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                                {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                                 .Price = price,
+                                 .StoplossValue = slPoint,
+                                 .SquareOffValue = targetPoint,
+                                 .Quantity = quantity,
+                                 .OrderType = IOrder.TypeOfOrder.Limit}
+                'End If
+            End If
+            'End If
         End If
 
         'Below portion have to be done in every place order trigger
-        If parameter IsNot Nothing Then
+        If parameter1 IsNot Nothing Then
             Try
-                If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}, {1}", parameter.ToString, Me.TradableInstrument.TradingSymbol)
+                If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}, {1}", parameter1.ToString, Me.TradableInstrument.TradingSymbol)
             Catch ex As Exception
                 logger.Error(ex.ToString)
             End Try
@@ -247,34 +235,87 @@ Public Class PetDGandhiStrategyInstrument
                         lastPlacedActivity.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
                         If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                         If currentTime >= lastPlacedActivity.EntryActivity.RequestTime.AddSeconds(Me.ParentStrategy.ParentController.UserInputs.BackToBackOrderCoolOffDelay) Then
-                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter, parameter.ToString))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter1, parameter1.ToString))
                         Else
-                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter, parameter.ToString))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter1, parameter1.ToString))
                         End If
                     ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled Then
                         If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter, parameter.ToString))
+                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter1, parameter1.ToString))
                     ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated Then
                         If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
                         If currentTime >= lastPlacedActivity.EntryActivity.RequestTime.AddSeconds(Me.ParentStrategy.ParentController.UserInputs.BackToBackOrderCoolOffDelay) Then
-                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter, parameter.ToString))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter1, parameter1.ToString))
                         Else
-                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter, parameter.ToString))
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter1, parameter1.ToString))
                         End If
                     ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
                         If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter, parameter.ToString))
+                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter1, parameter1.ToString))
                     Else
                         If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter, parameter.ToString))
+                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter1, parameter1.ToString))
                     End If
                 Else
                     If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-                    ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter, parameter.ToString))
+                    ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter1, parameter1.ToString))
                 End If
             Else
                 If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
-                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter, parameter.ToString))
+                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter1, parameter1.ToString))
+            End If
+        End If
+        If parameter2 IsNot Nothing Then
+            Try
+                If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}, {1}", parameter2.ToString, Me.TradableInstrument.TradingSymbol)
+            Catch ex As Exception
+                logger.Error(ex.ToString)
+            End Try
+
+            Dim allSignalActivities As IEnumerable(Of KeyValuePair(Of String, ActivityDashboard)) = Me.ParentStrategy.SignalManager.GetAllSignalActivitiesForInstrument(Me.TradableInstrument.InstrumentIdentifier)
+            If allSignalActivities IsNot Nothing AndAlso allSignalActivities.Count > 0 Then
+                Dim placedActivities As List(Of ActivityDashboard) = Nothing
+                For Each runningActivity In allSignalActivities
+                    If placedActivities Is Nothing Then placedActivities = New List(Of ActivityDashboard)
+                    placedActivities.Add(runningActivity.Value)
+                Next
+                If placedActivities IsNot Nothing AndAlso placedActivities.Count > 0 Then
+                    Dim lastPlacedActivity As ActivityDashboard = placedActivities.OrderBy(Function(x)
+                                                                                               Return x.EntryActivity.RequestTime
+                                                                                           End Function).LastOrDefault
+                    If lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Discarded AndAlso
+                        lastPlacedActivity.EntryActivity.LastException IsNot Nothing AndAlso
+                        lastPlacedActivity.EntryActivity.LastException.Message.ToUpper.Contains("TIME") Then
+                        If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                        If currentTime >= lastPlacedActivity.EntryActivity.RequestTime.AddSeconds(Me.ParentStrategy.ParentController.UserInputs.BackToBackOrderCoolOffDelay) Then
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter2, parameter2.ToString))
+                        Else
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter2, parameter2.ToString))
+                        End If
+                    ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled Then
+                        If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter2, parameter2.ToString))
+                    ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated Then
+                        If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                        If currentTime >= lastPlacedActivity.EntryActivity.RequestTime.AddSeconds(Me.ParentStrategy.ParentController.UserInputs.BackToBackOrderCoolOffDelay) Then
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter2, parameter2.ToString))
+                        Else
+                            ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter2, parameter2.ToString))
+                        End If
+                    ElseIf lastPlacedActivity.EntryActivity.RequestStatus = ActivityDashboard.SignalStatusType.Rejected Then
+                        If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.DonotTake, parameter2, parameter2.ToString))
+                    Else
+                        If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                        ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter2, parameter2.ToString))
+                    End If
+                Else
+                    If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                    ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter2, parameter2.ToString))
+                End If
+            Else
+                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String))
+                ret.Add(New Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)(ExecuteCommandAction.Take, parameter2, parameter2.ToString))
             End If
         End If
         Return ret
