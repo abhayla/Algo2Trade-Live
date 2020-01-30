@@ -85,12 +85,12 @@ Public Class PetDGandhiStrategyInstrument
                 End If
                 'Place Order block end
                 _cts.Token.ThrowIfCancellationRequested()
-                ''Modify sl Order block start
-                'Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
-                'If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
-                '    Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
-                'End If
-                ''Modify sl Order block end
+                'Modify sl Order block start
+                Dim modifyStoplossOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyStoplossOrderAsync(False).ConfigureAwait(False)
+                If modifyStoplossOrderTrigger IsNot Nothing AndAlso modifyStoplossOrderTrigger.Count > 0 Then
+                    Await ExecuteCommandAsync(ExecuteCommands.ModifyStoplossOrder, Nothing).ConfigureAwait(False)
+                End If
+                'Modify sl Order block end
                 '_cts.Token.ThrowIfCancellationRequested()
                 ''Modify target Order block start
                 'Dim modifyTargetOrderTrigger As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Await IsTriggerReceivedForModifyTargetOrderAsync(False).ConfigureAwait(False)
@@ -283,8 +283,65 @@ Public Class PetDGandhiStrategyInstrument
         Throw New NotImplementedException()
     End Function
 
-    Protected Overrides Function IsTriggerReceivedForModifyStoplossOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
-        Throw New NotImplementedException
+    Protected Overrides Async Function IsTriggerReceivedForModifyStoplossOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
+        Dim ret As List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)) = Nothing
+        Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
+        Dim userSettings As PetDGandhiUserInputs = Me.ParentStrategy.UserSettings
+        Dim runningCandlePayload As OHLCPayload = GetXMinuteCurrentCandle(userSettings.SignalTimeFrame)
+        Dim currentTick As ITick = Me.TradableInstrument.LastTick
+        If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
+            OrderDetails IsNot Nothing AndAlso OrderDetails.Count > 0 AndAlso Me.Slab <> Decimal.MinValue Then
+            For Each runningOrderID In OrderDetails.Keys
+                Dim bussinessOrder As IBusinessOrder = OrderDetails(runningOrderID)
+                If bussinessOrder.SLOrder IsNot Nothing AndAlso bussinessOrder.SLOrder.Count > 0 Then
+                    For Each slOrder In bussinessOrder.SLOrder
+                        If Not slOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
+                            Not slOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
+                            Not slOrder.Status = IOrder.TypeOfStatus.Rejected Then
+                            Dim triggerPrice As Decimal = Decimal.MinValue
+                            Dim reason As String = Nothing
+                            If bussinessOrder.ParentOrder.AveragePrice <> bussinessOrder.ParentOrder.Price Then
+                                If bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Buy Then
+                                    triggerPrice = bussinessOrder.ParentOrder.Price - Me.Slab
+                                    reason = "Reverse Slippage"
+                                ElseIf bussinessOrder.ParentOrder.TransactionType = IOrder.TypeOfTransaction.Sell Then
+                                    triggerPrice = bussinessOrder.ParentOrder.Price + Me.Slab
+                                    reason = "Reverse Slippage"
+                                End If
+                            End If
+                            If triggerPrice <> Decimal.MinValue AndAlso slOrder.TriggerPrice <> triggerPrice Then
+                                'Below portion have to be done in every modify stoploss order trigger
+                                Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(slOrder.Tag)
+                                If currentSignalActivities IsNot Nothing Then
+                                    If currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
+                                    currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                    currentSignalActivities.StoplossModifyActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                        If Val(currentSignalActivities.StoplossModifyActivity.Supporting) = triggerPrice Then
+                                            Continue For
+                                        End If
+                                    End If
+                                End If
+                                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String))
+                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)(ExecuteCommandAction.Take, slOrder, triggerPrice, reason))
+                            End If
+                        End If
+                    Next
+                End If
+            Next
+        End If
+        If forcePrint Then
+            Try
+                If ret IsNot Nothing AndAlso ret.Count > 0 Then
+                    For Each runningAction In ret
+                        logger.Debug("Modify Stoploss Order: Order ID:{0}, Trigger Price:{1}, Reason:{2}, Trading Symbol:{3}",
+                                     runningAction.Item2.OrderIdentifier, runningAction.Item3, runningAction.Item4, Me.TradableInstrument.TradingSymbol)
+                    Next
+                End If
+            Catch ex As Exception
+                logger.Error(ex.ToString)
+            End Try
+        End If
+        Return ret
     End Function
 
     Protected Overrides Function IsTriggerReceivedForModifyTargetOrderAsync(forcePrint As Boolean) As Task(Of List(Of Tuple(Of ExecuteCommandAction, IOrder, Decimal, String)))
