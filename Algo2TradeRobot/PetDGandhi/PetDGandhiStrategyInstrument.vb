@@ -186,8 +186,17 @@ Public Class PetDGandhiStrategyInstrument
                                     {.EntryDirection = IOrder.TypeOfTransaction.Buy,
                                      .Price = price,
                                      .StoplossValue = Me.Slab,
-                                     .SquareOffValue = targetPrice - price,
-                                     .Quantity = quantity}
+                                     .SquareOffValue = Math.Min(targetPrice - price, Me.Slab * 2),
+                                     .Quantity = quantity,
+                                     .OrderType = IOrder.TypeOfOrder.Limit}
+                        'ElseIf currentTick.LastPrice < price AndAlso currentTick.LastPrice > price - Me.Slab Then
+                        '    parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                        '                {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                        '                 .Price = price,
+                        '                 .StoplossValue = Me.Slab,
+                        '                 .SquareOffValue = Math.Min(targetPrice - price, Me.Slab * 2),
+                        '                 .Quantity = quantity,
+                        '                 .OrderType = IOrder.TypeOfOrder.Market}
                     End If
                 ElseIf signal.Item3 = IOrder.TypeOfTransaction.Sell Then
                     Dim price As Decimal = signal.Item2
@@ -197,8 +206,17 @@ Public Class PetDGandhiStrategyInstrument
                                     {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                                      .Price = price,
                                      .StoplossValue = Me.Slab,
-                                     .SquareOffValue = targetPrice - price,
-                                     .Quantity = quantity}
+                                     .SquareOffValue = Math.Min(targetPrice - price, Me.Slab * 2),
+                                     .Quantity = quantity,
+                                     .OrderType = IOrder.TypeOfOrder.Limit}
+                        'ElseIf currentTick.LastPrice > price AndAlso currentTick.LastPrice < price + Me.Slab Then
+                        '    parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
+                        '                {.EntryDirection = IOrder.TypeOfTransaction.Sell,
+                        '                 .Price = price,
+                        '                 .StoplossValue = Me.Slab,
+                        '                 .SquareOffValue = Math.Min(targetPrice - price, Me.Slab * 2),
+                        '                 .Quantity = quantity,
+                        '                 .OrderType = IOrder.TypeOfOrder.Market}
                     End If
                 End If
             End If
@@ -289,18 +307,49 @@ Public Class PetDGandhiStrategyInstrument
                     If runningCandle IsNot Nothing AndAlso runningCandle.PreviousPayload IsNot Nothing AndAlso runningCandle.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick Then
                         Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandle.PreviousPayload, currentTick, forcePrint)
                         If signal IsNot Nothing Then
-                            If signal.Item3 <> parentOrder.TransactionType OrElse
-                                (signal.Item2 <> parentOrder.Price AndAlso parentOrder.Status = IOrder.TypeOfStatus.Open) Then
+                            If (signal.Item3 <> parentOrder.TransactionType OrElse signal.Item2 <> parentOrder.Price) AndAlso
+                                parentOrder.Status = IOrder.TypeOfStatus.Open Then
                                 'Below portion have to be done in every cancel order trigger
                                 Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(parentOrder.Tag)
                                 If currentSignalActivities IsNot Nothing Then
                                     If currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                        currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated Then
+                                        currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                        currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
                                         Continue For
                                     End If
                                 End If
                                 If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, String))
                                 ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, parentBussinessOrder.ParentOrder, "Invalid Signal"))
+                            ElseIf signal.Item3 <> parentOrder.TransactionType AndAlso parentOrder.Status = IOrder.TypeOfStatus.Complete Then
+                                Dim cancelTrade As Boolean = False
+                                If signal.Item3 = IOrder.TypeOfTransaction.Buy AndAlso currentTick.LastPrice <= signal.Item2 Then
+                                    cancelTrade = True
+                                ElseIf signal.Item3 = IOrder.TypeOfTransaction.Sell AndAlso currentTick.LastPrice >= signal.Item2 Then
+                                    cancelTrade = True
+                                End If
+                                If cancelTrade Then
+                                    If parentBussinessOrder.SLOrder IsNot Nothing AndAlso parentBussinessOrder.SLOrder.Count > 0 Then
+                                        For Each runningSLOrder In parentBussinessOrder.SLOrder
+                                            If Not runningSLOrder.Status = IOrder.TypeOfStatus.Complete AndAlso
+                                                Not runningSLOrder.Status = IOrder.TypeOfStatus.Cancelled AndAlso
+                                                Not runningSLOrder.Status = IOrder.TypeOfStatus.Rejected Then
+
+                                                'Below portion have to be done in every cancel order trigger
+                                                Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(parentOrder.Tag)
+                                                If currentSignalActivities IsNot Nothing Then
+                                                    If currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
+                                                        currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                                        currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                                        Continue For
+                                                    End If
+                                                End If
+
+                                                If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, String))
+                                                ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, runningSLOrder, "Opposite direction trade"))
+                                            End If
+                                        Next
+                                    End If
+                                End If
                             End If
                         End If
                     End If
@@ -364,39 +413,54 @@ Public Class PetDGandhiStrategyInstrument
         Return ret
     End Function
 
-    Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick, ByVal forcePrint As Boolean) As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)
+    Private Function GetSignalCandle(ByVal candleToCheck As OHLCPayload, ByVal currentTick As ITick, ByVal forcePrint As Boolean) As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)
         Dim ret As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = Nothing
-        Dim closeHighLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Buy)
-        Dim closeLowLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Sell)
-        Dim openHighLevel As Decimal = GetSlabBasedLevel(candle.OpenPrice.Value, IOrder.TypeOfTransaction.Buy)
-        Dim openLowLevel As Decimal = GetSlabBasedLevel(candle.OpenPrice.Value, IOrder.TypeOfTransaction.Sell)
 
-        If candle.HighPrice.Value > closeHighLevel Then
-            If candle.CandleColor = Color.Red Then
-                If openHighLevel >= closeHighLevel AndAlso candle.HighPrice.Value > openHighLevel Then
-                    ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, openHighLevel, IOrder.TypeOfTransaction.Sell)
-                End If
-            Else
-                ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeHighLevel, IOrder.TypeOfTransaction.Sell)
-            End If
-        ElseIf candle.LowPrice.Value < closeLowLevel Then
-            If candle.CandleColor = Color.Green Then
-                If openLowLevel <= closeLowLevel AndAlso candle.LowPrice.Value < openLowLevel Then
-                    ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, openLowLevel, IOrder.TypeOfTransaction.Buy)
-                End If
-            Else
-                ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeLowLevel, IOrder.TypeOfTransaction.Buy)
-            End If
-        End If
+        Dim candle As OHLCPayload = candleToCheck
+        While True
+            If candle IsNot Nothing Then
+                Dim closeHighLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Buy)
+                Dim closeLowLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Sell)
+                Dim openHighLevel As Decimal = GetSlabBasedLevel(candle.OpenPrice.Value, IOrder.TypeOfTransaction.Buy)
+                Dim openLowLevel As Decimal = GetSlabBasedLevel(candle.OpenPrice.Value, IOrder.TypeOfTransaction.Sell)
 
-        If ret IsNot Nothing AndAlso forcePrint Then
-            Try
-                logger.Debug("Close High Level:{0}, Close Low Level:{1}, Open High Level:{2}, Open Low Level:{3}, Direction:{4}",
-                             closeHighLevel, closeLowLevel, openHighLevel, openLowLevel, ret.Item3)
-            Catch ex As Exception
-                logger.Error(ex.ToString)
-            End Try
-        End If
+                If candle.HighPrice.Value > closeHighLevel Then
+                    If candle.CandleColor = Color.Red Then
+                        If openHighLevel >= closeHighLevel AndAlso candle.HighPrice.Value > openHighLevel Then
+                            ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, openHighLevel, IOrder.TypeOfTransaction.Sell)
+                        End If
+                    Else
+                        ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeHighLevel, IOrder.TypeOfTransaction.Sell)
+                    End If
+                ElseIf candle.LowPrice.Value < closeLowLevel Then
+                    If candle.CandleColor = Color.Green Then
+                        If openLowLevel <= closeLowLevel AndAlso candle.LowPrice.Value < openLowLevel Then
+                            ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, openLowLevel, IOrder.TypeOfTransaction.Buy)
+                        End If
+                    Else
+                        ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeLowLevel, IOrder.TypeOfTransaction.Buy)
+                    End If
+                End If
+
+                If ret IsNot Nothing AndAlso forcePrint Then
+                    Try
+                        logger.Debug("Close High Level:{0}, Close Low Level:{1}, Open High Level:{2}, Open Low Level:{3}, Direction:{4}, Signal Candle:{5}",
+                                     closeHighLevel, closeLowLevel, openHighLevel, openLowLevel, ret.Item3, candle.SnapshotDateTime)
+                    Catch ex As Exception
+                        logger.Error(ex.ToString)
+                    End Try
+                End If
+            End If
+            If ret IsNot Nothing Then
+                Exit While
+            Else
+                If candle.PreviousPayload IsNot Nothing Then
+                    candle = candle.PreviousPayload
+                Else
+                    Exit While
+                End If
+            End If
+        End While
 
         Return ret
     End Function
