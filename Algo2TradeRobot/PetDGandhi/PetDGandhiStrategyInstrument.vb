@@ -173,7 +173,7 @@ Public Class PetDGandhiStrategyInstrument
             Me.ParentStrategy.GetTotalPLAfterBrokerage() > userSettings.MaxLossPerDay AndAlso Me.ParentStrategy.GetTotalPLAfterBrokerage() < userSettings.MaxProfitPerDay AndAlso
             Not Me.StrategyExitAllTriggerd AndAlso Not _strategyInstrumentExit Then
 
-            Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload, currentTick)
+            Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick, forcePrint)
             If signal IsNot Nothing AndAlso signal.Item1 AndAlso
                 Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime, lastExecutedOrder) Then
                 Dim quantity As Decimal = CalculateQuantityFromTarget(signal.Item2, signal.Item2 + Me.Slab, userSettings.StockMaxProfitPerDay)
@@ -287,7 +287,7 @@ Public Class PetDGandhiStrategyInstrument
                 For Each parentOrder In parentOrders
                     Dim parentBussinessOrder As IBusinessOrder = OrderDetails(parentOrder.OrderIdentifier)
                     If runningCandle IsNot Nothing AndAlso runningCandle.PayloadGeneratedBy = OHLCPayload.PayloadSource.CalculatedTick Then
-                        Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandle, currentTick)
+                        Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandle.PreviousPayload, currentTick, forcePrint)
                         If signal IsNot Nothing Then
                             If signal.Item3 <> parentOrder.TransactionType OrElse
                                 (signal.Item2 <> parentOrder.Price AndAlso parentOrder.Status = IOrder.TypeOfStatus.Open) Then
@@ -306,6 +306,11 @@ Public Class PetDGandhiStrategyInstrument
                     End If
                 Next
             End If
+        End If
+        If forcePrint AndAlso ret IsNot Nothing AndAlso ret.Count > 0 Then
+            For Each runningOrder In ret
+                logger.Debug("***** Exit Order ***** Order ID:{0}, {1}", runningOrder.Item2.OrderIdentifier, Me.TradableInstrument.TradingSymbol)
+            Next
         End If
         Return ret
     End Function
@@ -359,7 +364,7 @@ Public Class PetDGandhiStrategyInstrument
         Return ret
     End Function
 
-    Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick) As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)
+    Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick, ByVal forcePrint As Boolean) As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)
         Dim ret As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = Nothing
         Dim closeHighLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Buy)
         Dim closeLowLevel As Decimal = GetSlabBasedLevel(candle.ClosePrice.Value, IOrder.TypeOfTransaction.Sell)
@@ -383,6 +388,16 @@ Public Class PetDGandhiStrategyInstrument
                 ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeLowLevel, IOrder.TypeOfTransaction.Buy)
             End If
         End If
+
+        If ret IsNot Nothing AndAlso forcePrint Then
+            Try
+                logger.Debug("Close High Level:{0}, Close Low Level:{1}, Open High Level:{2}, Open Low Level:{3}, Direction:{4}",
+                             closeHighLevel, closeLowLevel, openHighLevel, openLowLevel, ret.Item3)
+            Catch ex As Exception
+                logger.Error(ex.ToString)
+            End Try
+        End If
+
         Return ret
     End Function
 
