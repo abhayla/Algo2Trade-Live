@@ -278,8 +278,7 @@ Public Class PetDGandhiStrategyInstrument
         Dim allActiveOrders As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.None)
         If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 Then
             Dim parentOrders As List(Of IOrder) = allActiveOrders.FindAll(Function(x)
-                                                                              Return x.ParentOrderIdentifier Is Nothing AndAlso
-                                                                              x.Status = IOrder.TypeOfStatus.TriggerPending
+                                                                              Return x.ParentOrderIdentifier Is Nothing
                                                                           End Function)
             If parentOrders IsNot Nothing AndAlso parentOrders.Count > 0 Then
                 Dim currentTick As ITick = Me.TradableInstrument.LastTick
@@ -295,8 +294,7 @@ Public Class PetDGandhiStrategyInstrument
                                 Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(parentOrder.Tag)
                                 If currentSignalActivities IsNot Nothing Then
                                     If currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
-                                        currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
-                                        currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                        currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated Then
                                         Continue For
                                     End If
                                 End If
