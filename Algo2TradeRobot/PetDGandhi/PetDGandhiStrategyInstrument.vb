@@ -158,6 +158,8 @@ Public Class PetDGandhiStrategyInstrument
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
+
+                GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick, True)
             End If
         Catch ex As Exception
             logger.Error(ex.ToString)
@@ -174,8 +176,7 @@ Public Class PetDGandhiStrategyInstrument
             Not Me.StrategyExitAllTriggerd AndAlso Not _strategyInstrumentExit Then
 
             Dim signal As Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload.PreviousPayload, currentTick, forcePrint)
-            If signal IsNot Nothing AndAlso signal.Item1 AndAlso
-                Not IsLastTradeExitedAtCurrentCandle(runningCandlePayload.SnapshotDateTime, lastExecutedOrder) Then
+            If signal IsNot Nothing AndAlso signal.Item1 Then
                 Dim quantity As Decimal = CalculateQuantityFromTarget(signal.Item2, signal.Item2 + Me.Slab, userSettings.StockMaxProfitPerDay)
 
                 If signal.Item3 = IOrder.TypeOfTransaction.Buy Then
@@ -489,19 +490,30 @@ Public Class PetDGandhiStrategyInstrument
                     Else
                         ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeHighLevel, IOrder.TypeOfTransaction.Sell)
                     End If
-                ElseIf candle.LowPrice.Value < closeLowLevel Then
+                End If
+                If candle.LowPrice.Value < closeLowLevel Then
                     If candle.CandleColor = Color.Green Then
                         If openLowLevel <= closeLowLevel AndAlso candle.LowPrice.Value < openLowLevel Then
-                            ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, openLowLevel, IOrder.TypeOfTransaction.Buy)
+                            If ret Is Nothing Then
+                                ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, openLowLevel, IOrder.TypeOfTransaction.Buy)
+                            Else
+                                ret = Nothing
+                                Exit While
+                            End If
                         End If
                     Else
-                        ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeLowLevel, IOrder.TypeOfTransaction.Buy)
+                        If ret Is Nothing Then
+                            ret = New Tuple(Of Boolean, Decimal, IOrder.TypeOfTransaction)(True, closeLowLevel, IOrder.TypeOfTransaction.Buy)
+                        Else
+                            ret = Nothing
+                            Exit While
+                        End If
                     End If
                 End If
 
                 If ret IsNot Nothing AndAlso forcePrint Then
                     Try
-                        logger.Debug("Close High Level:{0}, Close Low Level:{1}, Open High Level:{2}, Open Low Level:{3}, Direction:{4}, Signal Candle:{5}",
+                        logger.Debug("Get Signal Candle -> Close High Level:{0}, Close Low Level:{1}, Open High Level:{2}, Open Low Level:{3}, Direction:{4}, Signal Candle:{5}",
                                      closeHighLevel, closeLowLevel, openHighLevel, openLowLevel, ret.Item3, candle.SnapshotDateTime)
                     Catch ex As Exception
                         logger.Error(ex.ToString)
@@ -519,33 +531,6 @@ Public Class PetDGandhiStrategyInstrument
             End If
         End While
 
-        Return ret
-    End Function
-
-    Private Function IsLastTradeExitedAtCurrentCandle(ByVal currentCandleTime As Date, ByVal order As IBusinessOrder) As Boolean
-        Dim ret As Boolean = False
-        Dim tradeExitTime As Date = GetOrderExitTime(order)
-        If tradeExitTime <> Date.MinValue Then
-            Dim blockDateInThisTimeframe As Date = Date.MinValue
-            Dim timeframe As Integer = Me.ParentStrategy.UserSettings.SignalTimeFrame
-            If Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute Mod timeframe = 0 Then
-                blockDateInThisTimeframe = New Date(tradeExitTime.Year,
-                                                    tradeExitTime.Month,
-                                                    tradeExitTime.Day,
-                                                    tradeExitTime.Hour,
-                                                    Math.Floor(tradeExitTime.Minute / timeframe) * timeframe, 0)
-            Else
-                Dim exchangeStartTime As Date = New Date(tradeExitTime.Year, tradeExitTime.Month, tradeExitTime.Day, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Hour, Me.TradableInstrument.ExchangeDetails.ExchangeStartTime.Minute, 0)
-                Dim currentTime As Date = New Date(tradeExitTime.Year, tradeExitTime.Month, tradeExitTime.Day, tradeExitTime.Hour, tradeExitTime.Minute, 0)
-                Dim timeDifference As Double = currentTime.Subtract(exchangeStartTime).TotalMinutes
-                Dim adjustedTimeDifference As Integer = Math.Floor(timeDifference / timeframe) * timeframe
-                Dim currentMinute As Date = exchangeStartTime.AddMinutes(adjustedTimeDifference)
-                blockDateInThisTimeframe = New Date(tradeExitTime.Year, tradeExitTime.Month, tradeExitTime.Day, currentMinute.Hour, currentMinute.Minute, 0)
-            End If
-            If blockDateInThisTimeframe <> Date.MinValue Then
-                ret = Utilities.Time.IsDateTimeEqualTillMinutes(blockDateInThisTimeframe, currentCandleTime)
-            End If
-        End If
         Return ret
     End Function
 
