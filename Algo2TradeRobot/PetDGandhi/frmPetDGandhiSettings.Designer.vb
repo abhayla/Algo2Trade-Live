@@ -37,12 +37,8 @@ Partial Class frmPetDGandhiSettings
         Me.btnBrowse = New System.Windows.Forms.Button()
         Me.txtInstrumentDetalis = New System.Windows.Forms.TextBox()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.txtTargetMultiplier = New System.Windows.Forms.TextBox()
-        Me.lblTargetMultiplier = New System.Windows.Forms.Label()
         Me.txtNumberOfTradePerStock = New System.Windows.Forms.TextBox()
         Me.lblNumberOfTradePerStock = New System.Windows.Forms.Label()
-        Me.txtATRPeriod = New System.Windows.Forms.TextBox()
-        Me.lblATRPeriod = New System.Windows.Forms.Label()
         Me.lblInstrumentDetails = New System.Windows.Forms.Label()
         Me.txtSignalTimeFrame = New System.Windows.Forms.TextBox()
         Me.lblSignalTimeFrame = New System.Windows.Forms.Label()
@@ -62,7 +58,7 @@ Partial Class frmPetDGandhiSettings
         '
         'txtMaxProfitPerDay
         '
-        Me.txtMaxProfitPerDay.Location = New System.Drawing.Point(174, 301)
+        Me.txtMaxProfitPerDay.Location = New System.Drawing.Point(174, 226)
         Me.txtMaxProfitPerDay.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMaxProfitPerDay.Name = "txtMaxProfitPerDay"
         Me.txtMaxProfitPerDay.Size = New System.Drawing.Size(255, 22)
@@ -71,7 +67,7 @@ Partial Class frmPetDGandhiSettings
         'lblMaxProfitPercentagePerDay
         '
         Me.lblMaxProfitPercentagePerDay.AutoSize = True
-        Me.lblMaxProfitPercentagePerDay.Location = New System.Drawing.Point(8, 305)
+        Me.lblMaxProfitPercentagePerDay.Location = New System.Drawing.Point(8, 230)
         Me.lblMaxProfitPercentagePerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblMaxProfitPercentagePerDay.Name = "lblMaxProfitPercentagePerDay"
         Me.lblMaxProfitPercentagePerDay.Size = New System.Drawing.Size(125, 17)
@@ -80,7 +76,7 @@ Partial Class frmPetDGandhiSettings
         '
         'txtMaxLossPerDay
         '
-        Me.txtMaxLossPerDay.Location = New System.Drawing.Point(174, 266)
+        Me.txtMaxLossPerDay.Location = New System.Drawing.Point(174, 191)
         Me.txtMaxLossPerDay.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMaxLossPerDay.Name = "txtMaxLossPerDay"
         Me.txtMaxLossPerDay.Size = New System.Drawing.Size(255, 22)
@@ -89,7 +85,7 @@ Partial Class frmPetDGandhiSettings
         'lblMaxLossPercentagePerDay
         '
         Me.lblMaxLossPercentagePerDay.AutoSize = True
-        Me.lblMaxLossPercentagePerDay.Location = New System.Drawing.Point(8, 270)
+        Me.lblMaxLossPercentagePerDay.Location = New System.Drawing.Point(8, 195)
         Me.lblMaxLossPercentagePerDay.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblMaxLossPercentagePerDay.Name = "lblMaxLossPercentagePerDay"
         Me.lblMaxLossPercentagePerDay.Size = New System.Drawing.Size(122, 17)
@@ -99,7 +95,7 @@ Partial Class frmPetDGandhiSettings
         'dtpckrEODExitTime
         '
         Me.dtpckrEODExitTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrEODExitTime.Location = New System.Drawing.Point(175, 158)
+        Me.dtpckrEODExitTime.Location = New System.Drawing.Point(175, 121)
         Me.dtpckrEODExitTime.Name = "dtpckrEODExitTime"
         Me.dtpckrEODExitTime.ShowUpDown = True
         Me.dtpckrEODExitTime.Size = New System.Drawing.Size(255, 22)
@@ -109,7 +105,7 @@ Partial Class frmPetDGandhiSettings
         'dtpckrLastTradeEntryTime
         '
         Me.dtpckrLastTradeEntryTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrLastTradeEntryTime.Location = New System.Drawing.Point(176, 123)
+        Me.dtpckrLastTradeEntryTime.Location = New System.Drawing.Point(176, 86)
         Me.dtpckrLastTradeEntryTime.Name = "dtpckrLastTradeEntryTime"
         Me.dtpckrLastTradeEntryTime.ShowUpDown = True
         Me.dtpckrLastTradeEntryTime.Size = New System.Drawing.Size(255, 22)
@@ -119,7 +115,7 @@ Partial Class frmPetDGandhiSettings
         'dtpckrTradeStartTime
         '
         Me.dtpckrTradeStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Time
-        Me.dtpckrTradeStartTime.Location = New System.Drawing.Point(175, 86)
+        Me.dtpckrTradeStartTime.Location = New System.Drawing.Point(175, 49)
         Me.dtpckrTradeStartTime.Name = "dtpckrTradeStartTime"
         Me.dtpckrTradeStartTime.ShowUpDown = True
         Me.dtpckrTradeStartTime.Size = New System.Drawing.Size(255, 22)
@@ -129,7 +125,7 @@ Partial Class frmPetDGandhiSettings
         'lblEODExitTime
         '
         Me.lblEODExitTime.AutoSize = True
-        Me.lblEODExitTime.Location = New System.Drawing.Point(9, 159)
+        Me.lblEODExitTime.Location = New System.Drawing.Point(9, 122)
         Me.lblEODExitTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblEODExitTime.Name = "lblEODExitTime"
         Me.lblEODExitTime.Size = New System.Drawing.Size(99, 17)
@@ -139,7 +135,7 @@ Partial Class frmPetDGandhiSettings
         'lblLastTradeEntryTime
         '
         Me.lblLastTradeEntryTime.AutoSize = True
-        Me.lblLastTradeEntryTime.Location = New System.Drawing.Point(9, 124)
+        Me.lblLastTradeEntryTime.Location = New System.Drawing.Point(9, 87)
         Me.lblLastTradeEntryTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblLastTradeEntryTime.Name = "lblLastTradeEntryTime"
         Me.lblLastTradeEntryTime.Size = New System.Drawing.Size(149, 17)
@@ -149,7 +145,7 @@ Partial Class frmPetDGandhiSettings
         'lblTradeStartTime
         '
         Me.lblTradeStartTime.AutoSize = True
-        Me.lblTradeStartTime.Location = New System.Drawing.Point(9, 88)
+        Me.lblTradeStartTime.Location = New System.Drawing.Point(9, 51)
         Me.lblTradeStartTime.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblTradeStartTime.Name = "lblTradeStartTime"
         Me.lblTradeStartTime.Size = New System.Drawing.Size(115, 17)
@@ -159,7 +155,7 @@ Partial Class frmPetDGandhiSettings
         'btnBrowse
         '
         Me.btnBrowse.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnBrowse.Location = New System.Drawing.Point(404, 333)
+        Me.btnBrowse.Location = New System.Drawing.Point(404, 258)
         Me.btnBrowse.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnBrowse.Name = "btnBrowse"
         Me.btnBrowse.Size = New System.Drawing.Size(40, 23)
@@ -169,7 +165,7 @@ Partial Class frmPetDGandhiSettings
         '
         'txtInstrumentDetalis
         '
-        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(174, 334)
+        Me.txtInstrumentDetalis.Location = New System.Drawing.Point(174, 259)
         Me.txtInstrumentDetalis.Margin = New System.Windows.Forms.Padding(4)
         Me.txtInstrumentDetalis.Name = "txtInstrumentDetalis"
         Me.txtInstrumentDetalis.ReadOnly = True
@@ -178,12 +174,8 @@ Partial Class frmPetDGandhiSettings
         '
         'GroupBox1
         '
-        Me.GroupBox1.Controls.Add(Me.txtTargetMultiplier)
-        Me.GroupBox1.Controls.Add(Me.lblTargetMultiplier)
         Me.GroupBox1.Controls.Add(Me.txtNumberOfTradePerStock)
         Me.GroupBox1.Controls.Add(Me.lblNumberOfTradePerStock)
-        Me.GroupBox1.Controls.Add(Me.txtATRPeriod)
-        Me.GroupBox1.Controls.Add(Me.lblATRPeriod)
         Me.GroupBox1.Controls.Add(Me.txtMaxProfitPerDay)
         Me.GroupBox1.Controls.Add(Me.lblMaxProfitPercentagePerDay)
         Me.GroupBox1.Controls.Add(Me.txtMaxLossPerDay)
@@ -203,32 +195,13 @@ Partial Class frmPetDGandhiSettings
         Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(451, 368)
+        Me.GroupBox1.Size = New System.Drawing.Size(451, 290)
         Me.GroupBox1.TabIndex = 15
         Me.GroupBox1.TabStop = False
         '
-        'txtTargetMultiplier
-        '
-        Me.txtTargetMultiplier.Location = New System.Drawing.Point(174, 230)
-        Me.txtTargetMultiplier.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtTargetMultiplier.Name = "txtTargetMultiplier"
-        Me.txtTargetMultiplier.Size = New System.Drawing.Size(255, 22)
-        Me.txtTargetMultiplier.TabIndex = 35
-        Me.txtTargetMultiplier.Tag = "Max Profit Per Day"
-        '
-        'lblTargetMultiplier
-        '
-        Me.lblTargetMultiplier.AutoSize = True
-        Me.lblTargetMultiplier.Location = New System.Drawing.Point(8, 233)
-        Me.lblTargetMultiplier.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblTargetMultiplier.Name = "lblTargetMultiplier"
-        Me.lblTargetMultiplier.Size = New System.Drawing.Size(110, 17)
-        Me.lblTargetMultiplier.TabIndex = 37
-        Me.lblTargetMultiplier.Text = "Target Multiplier"
-        '
         'txtNumberOfTradePerStock
         '
-        Me.txtNumberOfTradePerStock.Location = New System.Drawing.Point(174, 195)
+        Me.txtNumberOfTradePerStock.Location = New System.Drawing.Point(174, 158)
         Me.txtNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4)
         Me.txtNumberOfTradePerStock.Name = "txtNumberOfTradePerStock"
         Me.txtNumberOfTradePerStock.Size = New System.Drawing.Size(255, 22)
@@ -238,35 +211,17 @@ Partial Class frmPetDGandhiSettings
         'lblNumberOfTradePerStock
         '
         Me.lblNumberOfTradePerStock.AutoSize = True
-        Me.lblNumberOfTradePerStock.Location = New System.Drawing.Point(9, 198)
+        Me.lblNumberOfTradePerStock.Location = New System.Drawing.Point(9, 161)
         Me.lblNumberOfTradePerStock.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblNumberOfTradePerStock.Name = "lblNumberOfTradePerStock"
         Me.lblNumberOfTradePerStock.Size = New System.Drawing.Size(152, 17)
         Me.lblNumberOfTradePerStock.TabIndex = 36
         Me.lblNumberOfTradePerStock.Text = "No Of Trade Per Stock"
         '
-        'txtATRPeriod
-        '
-        Me.txtATRPeriod.Location = New System.Drawing.Point(176, 14)
-        Me.txtATRPeriod.Margin = New System.Windows.Forms.Padding(4)
-        Me.txtATRPeriod.Name = "txtATRPeriod"
-        Me.txtATRPeriod.Size = New System.Drawing.Size(253, 22)
-        Me.txtATRPeriod.TabIndex = 32
-        '
-        'lblATRPeriod
-        '
-        Me.lblATRPeriod.AutoSize = True
-        Me.lblATRPeriod.Location = New System.Drawing.Point(9, 19)
-        Me.lblATRPeriod.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.lblATRPeriod.Name = "lblATRPeriod"
-        Me.lblATRPeriod.Size = New System.Drawing.Size(81, 17)
-        Me.lblATRPeriod.TabIndex = 33
-        Me.lblATRPeriod.Text = "ATR Period"
-        '
         'lblInstrumentDetails
         '
         Me.lblInstrumentDetails.AutoSize = True
-        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 337)
+        Me.lblInstrumentDetails.Location = New System.Drawing.Point(8, 262)
         Me.lblInstrumentDetails.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblInstrumentDetails.Name = "lblInstrumentDetails"
         Me.lblInstrumentDetails.Size = New System.Drawing.Size(121, 17)
@@ -275,7 +230,7 @@ Partial Class frmPetDGandhiSettings
         '
         'txtSignalTimeFrame
         '
-        Me.txtSignalTimeFrame.Location = New System.Drawing.Point(175, 49)
+        Me.txtSignalTimeFrame.Location = New System.Drawing.Point(175, 12)
         Me.txtSignalTimeFrame.Margin = New System.Windows.Forms.Padding(4)
         Me.txtSignalTimeFrame.Name = "txtSignalTimeFrame"
         Me.txtSignalTimeFrame.Size = New System.Drawing.Size(255, 22)
@@ -284,7 +239,7 @@ Partial Class frmPetDGandhiSettings
         'lblSignalTimeFrame
         '
         Me.lblSignalTimeFrame.AutoSize = True
-        Me.lblSignalTimeFrame.Location = New System.Drawing.Point(9, 52)
+        Me.lblSignalTimeFrame.Location = New System.Drawing.Point(9, 15)
         Me.lblSignalTimeFrame.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblSignalTimeFrame.Name = "lblSignalTimeFrame"
         Me.lblSignalTimeFrame.Size = New System.Drawing.Size(158, 17)
@@ -322,7 +277,7 @@ Partial Class frmPetDGandhiSettings
         Me.grpTelegram.Controls.Add(Me.lblTelegramChatID)
         Me.grpTelegram.Controls.Add(Me.txtTelegramAPI)
         Me.grpTelegram.Controls.Add(Me.lblTelegramAPI)
-        Me.grpTelegram.Location = New System.Drawing.Point(5, 381)
+        Me.grpTelegram.Location = New System.Drawing.Point(5, 297)
         Me.grpTelegram.Name = "grpTelegram"
         Me.grpTelegram.Size = New System.Drawing.Size(451, 120)
         Me.grpTelegram.TabIndex = 19
@@ -387,7 +342,7 @@ Partial Class frmPetDGandhiSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(581, 505)
+        Me.ClientSize = New System.Drawing.Size(581, 424)
         Me.Controls.Add(Me.grpTelegram)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnSavePetDGandhiSettings)
@@ -430,10 +385,6 @@ Partial Class frmPetDGandhiSettings
     Friend WithEvents lblTelegramChatID As Label
     Friend WithEvents txtTelegramAPI As TextBox
     Friend WithEvents lblTelegramAPI As Label
-    Friend WithEvents txtATRPeriod As TextBox
-    Friend WithEvents lblATRPeriod As Label
-    Friend WithEvents txtTargetMultiplier As TextBox
-    Friend WithEvents lblTargetMultiplier As Label
     Friend WithEvents txtNumberOfTradePerStock As TextBox
     Friend WithEvents lblNumberOfTradePerStock As Label
 End Class

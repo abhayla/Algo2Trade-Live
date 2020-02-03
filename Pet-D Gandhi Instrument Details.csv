@@ -1,3 +1,3 @@
-Instrument Name,Quantity,Buffer
-BANKNIFTY,80,2
-NIFTY,300,0.5
+Instrument Name,Quantity,Direction
+KOTAKBANK,1,BUY
+RBLBANK,1,SELL

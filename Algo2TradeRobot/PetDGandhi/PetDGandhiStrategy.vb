@@ -41,21 +41,9 @@ Public Class PetDGandhiStrategy
                 For Each instrument In petDGandhiUserInputs.InstrumentsData
                     _cts.Token.ThrowIfCancellationRequested()
                     Dim runningTradableInstrument As IInstrument = Nothing
-                    Dim allTradableInstruments As List(Of IInstrument) = dummyAllInstruments.FindAll(Function(x)
-                                                                                                         Return Regex.Replace(x.TradingSymbol, "[0-9]+[A-Z]+FUT", "") = instrument.Key AndAlso
-                                                                                                             x.RawInstrumentType = "FUT" AndAlso (x.RawExchange = "NFO" OrElse x.RawExchange = "MCX" OrElse x.RawExchange = "CDS")
-                                                                                                     End Function)
-
-                    Dim minExpiry As Date = allTradableInstruments.Min(Function(x)
-                                                                           If Not x.Expiry.Value.Date <= Now.Date Then
-                                                                               Return x.Expiry.Value
-                                                                           Else
-                                                                               Return Date.MaxValue
-                                                                           End If
-                                                                       End Function)
-                    runningTradableInstrument = allTradableInstruments.Find(Function(x)
-                                                                                Return x.Expiry = minExpiry
-                                                                            End Function)
+                    runningTradableInstrument = dummyAllInstruments.Find(Function(x)
+                                                                             Return x.TradingSymbol = instrument.Value.TradingSymbol
+                                                                         End Function)
                     _cts.Token.ThrowIfCancellationRequested()
                     ret = True
                     If retTradableInstrumentsAsPerStrategy Is Nothing Then retTradableInstrumentsAsPerStrategy = New List(Of IInstrument)
@@ -117,6 +105,8 @@ Public Class PetDGandhiStrategy
                 tasks.Add(Task.Run(AddressOf tradableStrategyInstrument.MonitorAsync, _cts.Token))
             Next
             tasks.Add(Task.Run(AddressOf ForceExitAllTradesAsync, _cts.Token))
+            tasks.Add(Task.Run(AddressOf SendNotification, _cts.Token))
+
             Await Task.WhenAll(tasks).ConfigureAwait(False)
         Catch ex As Exception
             lastException = ex
@@ -135,11 +125,39 @@ Public Class PetDGandhiStrategy
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
-        ElseIf Me.GetTotalPLAfterBrokerage <= Math.Abs(CType(Me.UserSettings, PetDGandhiUserInputs).MaxLossPerDay) * -1 Then
+        ElseIf Me.GetTotalPLAfterBrokerage <= CType(Me.UserSettings, PetDGandhiUserInputs).MaxLossPerDay Then
             ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
         ElseIf Me.GetTotalPLAfterBrokerage >= CType(Me.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
             ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
         End If
         Return ret
+    End Function
+
+    Private Async Function SendNotification() As Task
+        Try
+            While True
+                Dim message As String = String.Format("Pair Total PL:{0}, Time:{1}", Me.GetTotalPLAfterBrokerage, Now.ToString("HH:mm:ss"))
+                Await GenerateTelegramMessageAsync(message).ConfigureAwait(False)
+
+                Await Task.Delay(60000, _cts.Token).ConfigureAwait(False)
+            End While
+        Catch ex As Exception
+            logger.Error(ex.ToString)
+        End Try
+    End Function
+
+    Private Async Function GenerateTelegramMessageAsync(ByVal message As String) As Task
+        If message.Contains("&") Then
+            message = message.Replace("&", "_")
+        End If
+        Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+        Dim userInputs As PetDGandhiUserInputs = Me.UserSettings
+        If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
+            userInputs.TelegramChatID IsNot Nothing AndAlso Not userInputs.TelegramChatID.Trim = "" Then
+            Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramChatID, _cts)
+                Dim encodedString As String = Utilities.Strings.EncodeString(message)
+                Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
+            End Using
+        End If
     End Function
 End Class

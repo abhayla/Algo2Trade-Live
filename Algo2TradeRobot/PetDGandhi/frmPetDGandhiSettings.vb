@@ -51,9 +51,7 @@ Public Class frmPetDGandhiSettings
             dtpckrEODExitTime.Value = _PetDGandhiSettings.EODExitTime
             txtMaxLossPerDay.Text = _PetDGandhiSettings.MaxLossPerDay
             txtMaxProfitPerDay.Text = _PetDGandhiSettings.MaxProfitPerDay
-            txtATRPeriod.Text = _PetDGandhiSettings.ATRPeriod
             txtNumberOfTradePerStock.Text = _PetDGandhiSettings.NumberOfTradePerStock
-            txtTargetMultiplier.Text = _PetDGandhiSettings.TargetMultiplier
             txtInstrumentDetalis.Text = _PetDGandhiSettings.InstrumentDetailsFilePath
 
             txtTelegramAPI.Text = _PetDGandhiSettings.TelegramAPIKey
@@ -66,11 +64,9 @@ Public Class frmPetDGandhiSettings
         _PetDGandhiSettings.TradeStartTime = dtpckrTradeStartTime.Value
         _PetDGandhiSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
         _PetDGandhiSettings.EODExitTime = dtpckrEODExitTime.Value
-        _PetDGandhiSettings.MaxLossPerDay = txtMaxLossPerDay.Text
-        _PetDGandhiSettings.MaxProfitPerDay = txtMaxProfitPerDay.Text
-        _PetDGandhiSettings.ATRPeriod = txtATRPeriod.Text
+        _PetDGandhiSettings.MaxLossPerDay = Math.Abs(Val(txtMaxLossPerDay.Text)) * -1
+        _PetDGandhiSettings.MaxProfitPerDay = Math.Abs(Val(txtMaxProfitPerDay.Text))
         _PetDGandhiSettings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
-        _PetDGandhiSettings.TargetMultiplier = txtTargetMultiplier.Text
         _PetDGandhiSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         _PetDGandhiSettings.TelegramAPIKey = txtTelegramAPI.Text
@@ -96,7 +92,6 @@ Public Class frmPetDGandhiSettings
         ValidateNumbers(1, 60, txtSignalTimeFrame)
         ValidateNumbers(Decimal.MinValue, Decimal.MaxValue, txtMaxLossPerDay)
         ValidateNumbers(0, Decimal.MaxValue, txtMaxProfitPerDay)
-        ValidateNumbers(1, Integer.MaxValue, txtATRPeriod)
         ValidateFile()
     End Sub
 
