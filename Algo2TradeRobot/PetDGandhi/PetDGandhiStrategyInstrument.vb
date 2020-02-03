@@ -144,6 +144,7 @@ Public Class PetDGandhiStrategyInstrument
                             Me.GetOverallPLAfterBrokerage(),
                             Me.StrategyExitAllTriggerd,
                             _strategyInstrumentExit,
+                            IsAnyTradeTargetReached(),
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
