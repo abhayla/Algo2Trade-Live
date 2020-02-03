@@ -195,9 +195,9 @@ Public Class PetDGandhiStrategyInstrument
                     Dim quantity As Integer = CalculateQuantityFromStoploss(stoplossPrice, triggerPrice, userSettings.MaxLossPerTrade)
                     Dim targetPrice As Decimal = CalculateTargetFromPL(triggerPrice, quantity, userSettings.MaxProfitPerTrade)
 
-                    If currentTick.LastPrice < triggerPrice Then
+                    If currentTick.LastPrice > triggerPrice Then
                         parameter = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
-                                    {.EntryDirection = IOrder.TypeOfTransaction.Buy,
+                                    {.EntryDirection = IOrder.TypeOfTransaction.Sell,
                                      .TriggerPrice = triggerPrice,
                                      .Price = price,
                                      .StoplossValue = stoplossPrice - triggerPrice,
