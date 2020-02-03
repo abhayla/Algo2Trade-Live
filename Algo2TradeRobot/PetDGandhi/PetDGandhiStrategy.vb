@@ -136,7 +136,7 @@ Public Class PetDGandhiStrategy
     Private Async Function SendNotification() As Task
         Try
             While True
-                Dim message As String = String.Format("Pair Total PL:{0}, Time:{1}", Me.GetTotalPLAfterBrokerage, Now.ToString("HH:mm:ss"))
+                Dim message As String = String.Format("Pair Total PL:{0}, Time:{1}", Math.Round(Me.GetTotalPLAfterBrokerage, 2), Now.ToString("HH:mm:ss"))
                 Await GenerateTelegramMessageAsync(message).ConfigureAwait(False)
 
                 Await Task.Delay(60000, _cts.Token).ConfigureAwait(False)
