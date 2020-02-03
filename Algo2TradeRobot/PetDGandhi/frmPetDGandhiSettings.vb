@@ -51,10 +51,11 @@ Public Class frmPetDGandhiSettings
             dtpckrEODExitTime.Value = _settings.EODExitTime
             txtNumberOfTradePerStock.Text = _settings.NumberOfTradePerStock
             txtMaxProfitPerTrade.Text = _settings.MaxProfitPerTrade
-            txtStockMaxLossPerDay.Text = _settings.StockMaxLossPerDay
+            txtMaxLossPerTrade.Text = _settings.MaxLossPerTrade
             txtStockMaxProfitPerDay.Text = _settings.StockMaxProfitPerDay
-            txtMaxLossPerDay.Text = _settings.MaxLossPerDay
+            txtStockMaxLossPerDay.Text = _settings.StockMaxLossPerDay
             txtMaxProfitPerDay.Text = _settings.MaxProfitPerDay
+            txtMaxLossPerDay.Text = _settings.MaxLossPerDay
             txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
 
             chbAutoSelectStock.Checked = _settings.AutoSelectStock
@@ -76,10 +77,11 @@ Public Class frmPetDGandhiSettings
         _settings.EODExitTime = dtpckrEODExitTime.Value
         _settings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
         _settings.MaxProfitPerTrade = txtMaxProfitPerTrade.Text
-        _settings.StockMaxLossPerDay = Math.Abs(CDec(txtStockMaxLossPerDay.Text)) * -1
+        _settings.MaxLossPerTrade = Math.Abs(CDec(txtMaxLossPerTrade.Text)) * -1
         _settings.StockMaxProfitPerDay = txtStockMaxProfitPerDay.Text
-        _settings.MaxLossPerDay = Math.Abs(CDec(txtMaxLossPerDay.Text)) * -1
+        _settings.StockMaxLossPerDay = Math.Abs(CDec(txtStockMaxLossPerDay.Text)) * -1
         _settings.MaxProfitPerDay = txtMaxProfitPerDay.Text
+        _settings.MaxLossPerDay = Math.Abs(CDec(txtMaxLossPerDay.Text)) * -1
         _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
         _settings.AutoSelectStock = chbAutoSelectStock.Checked

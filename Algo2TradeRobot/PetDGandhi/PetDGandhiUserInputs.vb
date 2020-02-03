@@ -14,6 +14,7 @@ Public Class PetDGandhiUserInputs
     Public Property StockMaxProfitPerDay As Decimal
     Public Property StockMaxLossPerDay As Decimal
     Public Property MaxProfitPerTrade As Decimal
+    Public Property MaxLossPerTrade As Decimal
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 

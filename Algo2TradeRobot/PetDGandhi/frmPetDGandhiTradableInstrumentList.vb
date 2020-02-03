@@ -10,7 +10,6 @@
         If _TradableInstruments IsNot Nothing AndAlso _TradableInstruments.Count > 0 Then
             Dim dt As New DataTable
             dt.Columns.Add("Instrument Name")
-            dt.Columns.Add("Slab")
             dt.Columns.Add("Exchange")
             dt.Columns.Add("Instrument Type")
             dt.Columns.Add("Expiry")
@@ -19,7 +18,6 @@
             For Each instrument In _TradableInstruments
                 Dim row As DataRow = dt.NewRow
                 row("Instrument Name") = instrument.TradableInstrument.TradingSymbol
-                row("Slab") = instrument.Slab
                 row("Exchange") = instrument.TradableInstrument.RawExchange
                 row("Instrument Type") = instrument.TradableInstrument.RawInstrumentType
                 row("Expiry") = instrument.TradableInstrument.Expiry
