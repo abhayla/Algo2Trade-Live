@@ -89,20 +89,20 @@ Public Class PetDGandhiStrategyInstrument
                     Await ExecuteCommandAsync(ExecuteCommands.CancelBOOrder, Nothing).ConfigureAwait(False)
                 End If
                 'Exit Order block end
-                _cts.Token.ThrowIfCancellationRequested()
-                'Force Exit Start
-                If GetTotalExecutedOrders() >= userSettings.NumberOfTradePerStock Then
-                    Dim allActiveOrders As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.None)
-                    If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 Then
-                        Dim parentOrders As List(Of IOrder) = allActiveOrders.FindAll(Function(x)
-                                                                                          Return x.ParentOrderIdentifier Is Nothing
-                                                                                      End Function)
-                        If parentOrders IsNot Nothing AndAlso parentOrders.Count = 1 Then
-                            Await ForceExitAllTradesAsync("Another two trades exited").ConfigureAwait(False)
-                        End If
-                    End If
-                End If
-                'Force Exit End
+                '_cts.Token.ThrowIfCancellationRequested()
+                ''Force Exit Start
+                'If GetTotalExecutedOrders() >= userSettings.NumberOfTradePerStock Then
+                '    Dim allActiveOrders As List(Of IOrder) = GetAllActiveOrders(IOrder.TypeOfTransaction.None)
+                '    If allActiveOrders IsNot Nothing AndAlso allActiveOrders.Count > 0 Then
+                '        Dim parentOrders As List(Of IOrder) = allActiveOrders.FindAll(Function(x)
+                '                                                                          Return x.ParentOrderIdentifier Is Nothing
+                '                                                                      End Function)
+                '        If parentOrders IsNot Nothing AndAlso parentOrders.Count = 1 Then
+                '            Await ForceExitAllTradesAsync("Another two trades exited").ConfigureAwait(False)
+                '        End If
+                '    End If
+                'End If
+                ''Force Exit End
                 _cts.Token.ThrowIfCancellationRequested()
                 Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While
@@ -314,6 +314,19 @@ Public Class PetDGandhiStrategyInstrument
                             End If
                         End If
                     End If
+                    If ret Is Nothing AndAlso IsAnyTradeTargetReached() Then
+                        'Below portion have to be done in every cancel order trigger
+                        Dim currentSignalActivities As ActivityDashboard = Me.ParentStrategy.SignalManager.GetSignalActivities(parentOrder.Tag)
+                        If currentSignalActivities IsNot Nothing Then
+                            If currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Handled OrElse
+                                currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Activated OrElse
+                                currentSignalActivities.CancelActivity.RequestStatus = ActivityDashboard.SignalStatusType.Completed Then
+                                Continue For
+                            End If
+                        End If
+                        If ret Is Nothing Then ret = New List(Of Tuple(Of ExecuteCommandAction, IOrder, String))
+                        ret.Add(New Tuple(Of ExecuteCommandAction, IOrder, String)(ExecuteCommandAction.Take, parentBussinessOrder.ParentOrder, "One Trade Target Reached"))
+                    End If
                 Next
             End If
         End If
@@ -340,6 +353,14 @@ Public Class PetDGandhiStrategyInstrument
     Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick, ByVal direction As IOrder.TypeOfTransaction) As Tuple(Of Boolean, Decimal)
         Dim ret As Tuple(Of Boolean, Decimal) = Nothing
         If candle IsNot Nothing AndAlso candle.PreviousPayload IsNot Nothing Then
+            If candle.HighPrice.Value < candle.PreviousPayload.HighPrice.Value AndAlso
+                candle.LowPrice.Value > candle.PreviousPayload.LowPrice.Value Then
+                If currentTick.Open > currentTick.Close AndAlso currentTick.Low > currentTick.Close Then
+                    If direction = IOrder.TypeOfTransaction.Buy Then direction = IOrder.TypeOfTransaction.None
+                ElseIf currentTick.Open < currentTick.Close AndAlso currentTick.High < currentTick.Close Then
+                    If direction = IOrder.TypeOfTransaction.Sell Then direction = IOrder.TypeOfTransaction.None
+                End If
+            End If
             If direction = IOrder.TypeOfTransaction.Buy Then
                 If candle.HighPrice.Value < candle.PreviousPayload.HighPrice.Value Then
                     ret = New Tuple(Of Boolean, Decimal)(True, candle.HighPrice.Value)
