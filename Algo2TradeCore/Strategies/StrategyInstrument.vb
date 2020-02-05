@@ -883,7 +883,7 @@ Namespace Strategies
 
                                 'TwoThird Strategy
                                 For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                    candleCreator.IndicatorCreator.CalculateATR(currentXMinute, consumer)
+                                    candleCreator.IndicatorCreator.CalculateFractal(currentXMinute, consumer)
                                 Next
                             End If
 
