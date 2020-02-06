@@ -50,7 +50,7 @@ Public Class PetDGandhiFillInstrumentDetails
         Dim ret As Dictionary(Of String, Object) = Nothing
         _cts.Token.ThrowIfCancellationRequested()
         Dim historicalDataURL As String = "https://www1.nseindia.com/live_market/dynaContent/live_watch/stock_watch/bankNiftyStockWatch.json"
-        OnHeartbeat(String.Format("Fetching top gainer Data: {0}", historicalDataURL))
+        OnHeartbeat(String.Format("Fetching Nifty Bank Stock Data: {0}", historicalDataURL))
         Dim proxyToBeUsed As HttpProxy = Nothing
         Using browser As New HttpBrowser(proxyToBeUsed, Net.DecompressionMethods.GZip, New TimeSpan(0, 1, 0), _cts)
             'AddHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
@@ -78,7 +78,7 @@ Public Class PetDGandhiFillInstrumentDetails
                                                                                 True,
                                                                                 "application/json").ConfigureAwait(False)
             If l Is Nothing OrElse l.Item2 Is Nothing Then
-                Throw New ApplicationException(String.Format("No response while getting top gainer data for: {0}", historicalDataURL))
+                Throw New ApplicationException(String.Format("No response while getting Nifty Bank stock data for: {0}", historicalDataURL))
             End If
             If l IsNot Nothing AndAlso l.Item2 IsNot Nothing Then
                 ret = l.Item2
