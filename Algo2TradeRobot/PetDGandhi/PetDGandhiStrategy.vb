@@ -35,6 +35,12 @@ Public Class PetDGandhiStrategy
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
+            Using fillInstrumentDetails As New PetDGandhiFillInstrumentDetails(_cts, Me)
+                AddHandler fillInstrumentDetails.Heartbeat, AddressOf OnHeartbeat
+
+                Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+            End Using
+            logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
             Dim petDGandhiUserInputs As PetDGandhiUserInputs = CType(Me.UserSettings, PetDGandhiUserInputs)
             If petDGandhiUserInputs.InstrumentsData IsNot Nothing AndAlso petDGandhiUserInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
@@ -136,8 +142,10 @@ Public Class PetDGandhiStrategy
     Private Async Function SendNotification() As Task
         Try
             While True
-                Dim message As String = String.Format("Pair Total PL:{0}, Time:{1}", Math.Round(Me.GetTotalPLAfterBrokerage, 2), Now.ToString("HH:mm:ss"))
-                Await GenerateTelegramMessageAsync(message).ConfigureAwait(False)
+                If Now >= Me.UserSettings.TradeStartTime AndAlso Now <= Me.UserSettings.EODExitTime Then
+                    Dim message As String = String.Format("Pair Total PL:{0}, Time:{1}", Math.Round(Me.GetTotalPLAfterBrokerage, 2), Now.ToString("HH:mm:ss"))
+                    Await GenerateTelegramMessageAsync(message).ConfigureAwait(False)
+                End If
 
                 Await Task.Delay(60000, _cts.Token).ConfigureAwait(False)
             End While
