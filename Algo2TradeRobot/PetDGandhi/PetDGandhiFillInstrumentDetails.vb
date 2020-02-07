@@ -100,6 +100,7 @@ Public Class PetDGandhiFillInstrumentDetails
             Try
                 Dim instrumentsMargin As Dictionary(Of String, Decimal) = Await GetMISMarginDataAsync().ConfigureAwait(False)
                 If instrumentsMargin IsNot Nothing AndAlso instrumentsMargin.Count > 0 Then
+                    OnHeartbeat("Fetching Nifty Bank stocks data")
                     While True
                         If Now >= _userInputs.TradeStartTime Then
                             Dim bankNiftyStocks As Dictionary(Of String, Object) = Await GetBankNiftyStockDataAsync().ConfigureAwait(False)
