@@ -82,6 +82,11 @@ Public Class PetDGandhiFillInstrumentDetails
             End If
             If l IsNot Nothing AndAlso l.Item2 IsNot Nothing Then
                 ret = l.Item2
+                Try
+                    logger.Debug(Utilities.Strings.JsonSerialize(ret))
+                Catch ex As Exception
+                    logger.Error(ex.ToString)
+                End Try
             End If
             'RemoveHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
             'RemoveHandler browser.Heartbeat, AddressOf OnHeartbeat
