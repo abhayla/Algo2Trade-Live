@@ -38,6 +38,8 @@ Public Class PetDGandhiStrategy
             Dim userInputs As PetDGandhiUserInputs = CType(Me.UserSettings, PetDGandhiUserInputs)
             If userInputs.AutoSelectStock Then
                 Using fillInstrumentDetails As New PetDGandhiFillInstrumentDetails(_cts, Me)
+                    AddHandler fillInstrumentDetails.Heartbeat, AddressOf OnHeartbeat
+
                     Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
                 End Using
                 logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))

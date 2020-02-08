@@ -141,73 +141,92 @@ Public Class PetDGandhiFillInstrumentDetails
             Try
                 Dim instrumentsMargin As Dictionary(Of String, Decimal) = Await GetMISMarginDataAsync().ConfigureAwait(False)
                 If instrumentsMargin IsNot Nothing AndAlso instrumentsMargin.Count > 0 Then
-                    Dim timeToCheck As Date = New Date(_tradingDay.Year, _tradingDay.Month, _tradingDay.Day, 9, 19, 0)
-                    While True
-                        If Now >= timeToCheck Then
-                            Dim todayStockList As List(Of String) = Nothing
-                            Dim topGainers As Dictionary(Of String, Object) = Await GetTopGainerDataAsync().ConfigureAwait(False)
-                            Dim topLossers As Dictionary(Of String, Object) = Await GetTopLooserDataAsync().ConfigureAwait(False)
+                    OnHeartbeat("Fetching Top Gainer Losser Data")
+                    Dim todayStockList As List(Of String) = Nothing
+                    Dim topGainers As Dictionary(Of String, Object) = Await GetTopGainerDataAsync().ConfigureAwait(False)
+                    Dim topLossers As Dictionary(Of String, Object) = Await GetTopLooserDataAsync().ConfigureAwait(False)
 
-                            Dim gainerStockCount As Integer = Math.Ceiling(_userInputs.NumberOfStock / 2)
-                            If topGainers IsNot Nothing AndAlso topGainers.Count > 0 Then
-                                If topGainers.ContainsKey("data") Then
-                                    Dim allGainers As ArrayList = topGainers("data")
-                                    If allGainers IsNot Nothing AndAlso allGainers.Count > 0 Then
-                                        Dim ctr As Integer = 0
-                                        For Each runningGainer In allGainers
-                                            Dim symbol As String = runningGainer("symbol").ToString.Trim.ToUpper
-                                            Dim ltp As Decimal = runningGainer("ltp")
-                                            If symbol IsNot Nothing AndAlso
-                                                (bannedStock Is Nothing OrElse bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(symbol)) Then
-                                                Dim margin As Decimal = 0
-                                                If instrumentsMargin.ContainsKey(symbol) Then margin = instrumentsMargin(symbol)
-                                                If ltp >= _userInputs.MinPrice AndAlso ltp <= _userInputs.MaxPrice AndAlso margin >= _userInputs.MinMargin Then
-                                                    If todayStockList Is Nothing Then todayStockList = New List(Of String)
-                                                    todayStockList.Add(symbol)
+                    Dim gainerStockCount As Integer = Math.Ceiling(_userInputs.NumberOfStock / 2)
+                    If topGainers IsNot Nothing AndAlso topGainers.Count > 0 Then
+                        If topGainers.ContainsKey("data") Then
+                            Dim allGainers As ArrayList = topGainers("data")
+                            If allGainers IsNot Nothing AndAlso allGainers.Count > 0 Then
+                                Dim ctr As Integer = 0
+                                For Each runningGainer In allGainers
+                                    Dim symbol As String = runningGainer("symbol").ToString.Trim.ToUpper
+                                    Dim ltp As Decimal = runningGainer("ltp")
+                                    If symbol IsNot Nothing AndAlso
+                                        (bannedStock Is Nothing OrElse bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(symbol)) Then
+                                        Dim margin As Decimal = 0
+                                        If instrumentsMargin.ContainsKey(symbol) Then margin = instrumentsMargin(symbol)
+                                        If ltp >= _userInputs.MinPrice AndAlso ltp <= _userInputs.MaxPrice AndAlso margin >= _userInputs.MinMargin Then
+                                            If todayStockList Is Nothing Then todayStockList = New List(Of String)
+                                            todayStockList.Add(symbol)
 
-                                                    ctr += 1
-                                                    If ctr >= gainerStockCount Then Exit For
-                                                End If
-                                            End If
-                                        Next
-                                        gainerStockCount = ctr
+                                            ctr += 1
+                                            If ctr >= gainerStockCount Then Exit For
+                                        End If
                                     End If
-                                End If
-                            End If
-
-                            Dim losserStockCount As Integer = _userInputs.NumberOfStock - gainerStockCount
-                            If topLossers IsNot Nothing AndAlso topLossers.Count > 0 Then
-                                If topLossers.ContainsKey("data") Then
-                                    Dim allLoosers As ArrayList = topLossers("data")
-                                    If allLoosers IsNot Nothing AndAlso allLoosers.Count > 0 Then
-                                        Dim ctr As Integer = 0
-                                        For Each runningLooser In allLoosers
-                                            Dim symbol As String = runningLooser("symbol").ToString.Trim.ToUpper
-                                            Dim ltp As Decimal = runningLooser("ltp")
-                                            If symbol IsNot Nothing AndAlso
-                                                (bannedStock Is Nothing OrElse bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(symbol)) Then
-                                                Dim margin As Decimal = 0
-                                                If instrumentsMargin.ContainsKey(symbol) Then margin = instrumentsMargin(symbol)
-                                                If ltp >= _userInputs.MinPrice AndAlso ltp <= _userInputs.MaxPrice AndAlso margin >= _userInputs.MinMargin Then
-                                                    If todayStockList Is Nothing Then todayStockList = New List(Of String)
-                                                    todayStockList.Add(symbol)
-
-                                                    ctr += 1
-                                                    If ctr >= losserStockCount Then Exit For
-                                                End If
-                                            End If
-                                        Next
-                                        losserStockCount = ctr
-                                    End If
-                                End If
-                            End If
-
-                            If todayStockList IsNot Nothing AndAlso todayStockList.Count > 0 Then
-
+                                Next
+                                gainerStockCount = ctr
                             End If
                         End If
-                        Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
-                    End While
+                    End If
+
+                    Dim losserStockCount As Integer = _userInputs.NumberOfStock - gainerStockCount
+                    If topLossers IsNot Nothing AndAlso topLossers.Count > 0 Then
+                        If topLossers.ContainsKey("data") Then
+                            Dim allLoosers As ArrayList = topLossers("data")
+                            If allLoosers IsNot Nothing AndAlso allLoosers.Count > 0 Then
+                                Dim ctr As Integer = 0
+                                For Each runningLooser In allLoosers
+                                    Dim symbol As String = runningLooser("symbol").ToString.Trim.ToUpper
+                                    Dim ltp As Decimal = runningLooser("ltp")
+                                    If symbol IsNot Nothing AndAlso
+                                        (bannedStock Is Nothing OrElse bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(symbol)) Then
+                                        Dim margin As Decimal = 0
+                                        If instrumentsMargin.ContainsKey(symbol) Then margin = instrumentsMargin(symbol)
+                                        If ltp >= _userInputs.MinPrice AndAlso ltp <= _userInputs.MaxPrice AndAlso margin >= _userInputs.MinMargin Then
+                                            If todayStockList Is Nothing Then todayStockList = New List(Of String)
+                                            todayStockList.Add(symbol)
+
+                                            ctr += 1
+                                            If ctr >= losserStockCount Then Exit For
+                                        End If
+                                    End If
+                                Next
+                                losserStockCount = ctr
+                            End If
+                        End If
+                    End If
+
+                    If todayStockList IsNot Nothing AndAlso todayStockList.Count > 0 Then
+                        If _userInputs.InstrumentDetailsFilePath IsNot Nothing AndAlso
+                                    File.Exists(_userInputs.InstrumentDetailsFilePath) Then
+                            File.Delete(_userInputs.InstrumentDetailsFilePath)
+                            Dim allStockData As DataTable = Nothing
+                            allStockData = New DataTable
+                            allStockData.Columns.Add("TRADING SYMBOL")
+                            allStockData.Columns.Add("ATR %")
+
+                            For Each runningStock In todayStockList
+                                Dim row As DataRow = allStockData.NewRow
+                                row("TRADING SYMBOL") = runningStock
+                                row("ATR %") = 0
+                                allStockData.Rows.Add(row)
+                            Next
+
+                            Using csv As New CSVHelper(_userInputs.InstrumentDetailsFilePath, ",", _cts)
+                                _cts.Token.ThrowIfCancellationRequested()
+                                csv.GetCSVFromDataTable(allStockData)
+                            End Using
+                            If _userInputs.InstrumentsData IsNot Nothing Then
+                                _userInputs.InstrumentsData.Clear()
+                                _userInputs.InstrumentsData = Nothing
+                                _userInputs.FillInstrumentDetails(_userInputs.InstrumentDetailsFilePath, _cts)
+                            End If
+                        End If
+                    End If
                 End If
             Catch ex As Exception
                 logger.Error(ex.ToString)
