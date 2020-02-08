@@ -57,6 +57,10 @@
     <Reference Include="Bulb">
       <HintPath>..\..\LEDBulb\Bulb\bin\Debug\Bulb.exe</HintPath>
     </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.8.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Utilities\bin\Debug\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="NLog">
       <HintPath>..\packages\NLog.4.5.10\lib\net45\NLog.dll</HintPath>
     </Reference>

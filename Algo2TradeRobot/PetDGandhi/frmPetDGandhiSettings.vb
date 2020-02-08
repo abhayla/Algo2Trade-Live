@@ -64,9 +64,7 @@ Public Class frmPetDGandhiSettings
 
             txtMinPrice.Text = _settings.MinPrice
             txtMaxPrice.Text = _settings.MaxPrice
-            txtATRPercentage.Text = _settings.ATRPercentage
-            txtMinVolume.Text = _settings.MinVolume
-            txtBlankCandlePercentage.Text = _settings.BlankCandlePercentage
+            txtMinMargin.Text = _settings.MinMargin
             txtNumberOfStock.Text = _settings.NumberOfStock
         End If
     End Sub
@@ -90,9 +88,7 @@ Public Class frmPetDGandhiSettings
 
         _settings.MinPrice = txtMinPrice.Text
         _settings.MaxPrice = txtMaxPrice.Text
-        _settings.ATRPercentage = txtATRPercentage.Text
-        _settings.MinVolume = txtMinVolume.Text
-        _settings.BlankCandlePercentage = txtBlankCandlePercentage.Text
+        _settings.MinMargin = txtMinMargin.Text
         _settings.NumberOfStock = txtNumberOfStock.Text
 
         Utilities.Strings.SerializeFromCollection(Of PetDGandhiUserInputs)(_PetDGandhiSettingsFilename, _settings)

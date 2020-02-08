@@ -36,12 +36,12 @@ Public Class PetDGandhiStrategy
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
             Dim userInputs As PetDGandhiUserInputs = CType(Me.UserSettings, PetDGandhiUserInputs)
-            'If userInputs.AutoSelectStock Then
-            '    Using fillInstrumentDetails As New PetDGandhiFillInstrumentDetails(_cts, Me)
-            '        Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
-            '    End Using
-            '    logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
-            'End If
+            If userInputs.AutoSelectStock Then
+                Using fillInstrumentDetails As New PetDGandhiFillInstrumentDetails(_cts, Me)
+                    Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+                End Using
+                logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
+            End If
             If userInputs.InstrumentsData IsNot Nothing AndAlso userInputs.InstrumentsData.Count > 0 Then
                 Dim dummyAllInstruments As List(Of IInstrument) = allInstruments.ToList
                 For Each instrument In userInputs.InstrumentsData

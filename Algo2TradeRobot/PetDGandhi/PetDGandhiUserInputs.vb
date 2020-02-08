@@ -24,9 +24,7 @@ Public Class PetDGandhiUserInputs
 
     Public Property MinPrice As Decimal
     Public Property MaxPrice As Decimal
-    Public Property ATRPercentage As Decimal
-    Public Property MinVolume As Decimal
-    Public Property BlankCandlePercentage As Decimal
+    Public Property MinMargin As Decimal
     Public Property NumberOfStock As Integer
 
     <Serializable>
