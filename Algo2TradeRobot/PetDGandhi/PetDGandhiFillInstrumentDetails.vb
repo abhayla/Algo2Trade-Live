@@ -107,14 +107,20 @@ Public Class PetDGandhiFillInstrumentDetails
                 If instrumentsMargin IsNot Nothing AndAlso instrumentsMargin.Count > 0 Then
                     OnHeartbeat("Fetching Nifty Bank stocks data")
                     While True
-                        If Now >= _userInputs.TradeStartTime Then
+                        If _parentStrategy.ParentController.OrphanException IsNot Nothing Then
+                            Throw _parentStrategy.ParentController.OrphanException
+                        End If
+                        _cts.Token.ThrowIfCancellationRequested()
+                        If Now >= _userInputs.TradeStartTime.AddSeconds(-5) Then
                             Dim bankNiftyStocks As Dictionary(Of String, Object) = Await GetBankNiftyStockDataAsync().ConfigureAwait(False)
+                            _cts.Token.ThrowIfCancellationRequested()
                             Dim allBankStocks As List(Of StockData) = Nothing
                             If bankNiftyStocks IsNot Nothing AndAlso bankNiftyStocks.Count > 0 Then
                                 If bankNiftyStocks.ContainsKey("data") Then
                                     Dim allGainers As ArrayList = bankNiftyStocks("data")
                                     If allGainers IsNot Nothing AndAlso allGainers.Count > 0 Then
                                         For Each runningGainer In allGainers
+                                            _cts.Token.ThrowIfCancellationRequested()
                                             Dim symbol As String = runningGainer("symbol").ToString.Trim.ToUpper
                                             Dim ltp As Decimal = runningGainer("ltP")
                                             Dim change As Decimal = runningGainer("ptsC")
@@ -137,6 +143,7 @@ Public Class PetDGandhiFillInstrumentDetails
                                 For Each runningStock In allBankStocks.OrderByDescending(Function(x)
                                                                                              Return x.Change
                                                                                          End Function)
+                                    _cts.Token.ThrowIfCancellationRequested()
                                     If runningStock.Symbol IsNot Nothing AndAlso
                                        (bannedStock Is Nothing OrElse bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(runningStock.Symbol)) Then
                                         Dim margin As Decimal = 0
@@ -152,6 +159,7 @@ Public Class PetDGandhiFillInstrumentDetails
                                     For Each runningStock In allBankStocks.OrderBy(Function(x)
                                                                                        Return x.Change
                                                                                    End Function)
+                                        _cts.Token.ThrowIfCancellationRequested()
                                         If runningStock.Symbol IsNot Nothing AndAlso
                                            (bannedStock Is Nothing OrElse bannedStock IsNot Nothing AndAlso Not bannedStock.Contains(runningStock.Symbol)) Then
                                             Dim margin As Decimal = 0
