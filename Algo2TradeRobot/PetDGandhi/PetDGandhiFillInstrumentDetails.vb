@@ -123,7 +123,7 @@ Public Class PetDGandhiFillInstrumentDetails
                                             _cts.Token.ThrowIfCancellationRequested()
                                             Dim symbol As String = runningGainer("symbol").ToString.Trim.ToUpper
                                             Dim ltp As Decimal = runningGainer("ltP")
-                                            Dim change As Decimal = runningGainer("ptsC")
+                                            Dim change As Decimal = runningGainer("per")
 
                                             Dim stock As StockData = New StockData With {
                                                 .Symbol = symbol,
@@ -139,7 +139,9 @@ Public Class PetDGandhiFillInstrumentDetails
                             End If
                             If allBankStocks IsNot Nothing AndAlso allBankStocks.Count > 0 Then
                                 Dim topGainerStock As StockData = Nothing
+                                Dim secondTopGainerStock As StockData = Nothing
                                 Dim topLooserStock As StockData = Nothing
+                                Dim secondTopLooserStock As StockData = Nothing
                                 For Each runningStock In allBankStocks.OrderByDescending(Function(x)
                                                                                              Return x.Change
                                                                                          End Function)
@@ -149,9 +151,14 @@ Public Class PetDGandhiFillInstrumentDetails
                                         Dim margin As Decimal = 0
                                         If instrumentsMargin.ContainsKey(runningStock.Symbol) Then margin = instrumentsMargin(runningStock.Symbol)
                                         If runningStock.LTP >= 100 AndAlso runningStock.LTP <= 3000 AndAlso margin >= 12 Then
-                                            topGainerStock = runningStock
-                                            topGainerStock.Direction = "SELL"
-                                            Exit For
+                                            If topGainerStock Is Nothing Then
+                                                topGainerStock = runningStock
+                                                topGainerStock.Direction = "SELL"
+                                            Else
+                                                secondTopGainerStock = runningStock
+                                                secondTopGainerStock.Direction = "SELL"
+                                                Exit For
+                                            End If
                                         End If
                                     End If
                                 Next
@@ -165,9 +172,14 @@ Public Class PetDGandhiFillInstrumentDetails
                                             Dim margin As Decimal = 0
                                             If instrumentsMargin.ContainsKey(runningStock.Symbol) Then margin = instrumentsMargin(runningStock.Symbol)
                                             If runningStock.LTP >= 100 AndAlso runningStock.LTP <= 3000 AndAlso margin >= 12 Then
-                                                topLooserStock = runningStock
-                                                topLooserStock.Direction = "BUY"
-                                                Exit For
+                                                If topLooserStock Is Nothing Then
+                                                    topLooserStock = runningStock
+                                                    topLooserStock.Direction = "BUY"
+                                                Else
+                                                    secondTopLooserStock = runningStock
+                                                    secondTopLooserStock.Direction = "BUY"
+                                                    Exit For
+                                                End If
                                             End If
                                         End If
                                     Next
@@ -209,17 +221,45 @@ Public Class PetDGandhiFillInstrumentDetails
                                             row2("Direction") = lowerPriceStock.Direction
                                             allStockData.Rows.Add(row2)
 
+                                            If secondTopGainerStock IsNot Nothing AndAlso secondTopLooserStock IsNot Nothing AndAlso
+                                                secondTopGainerStock.Symbol.ToUpper <> secondTopLooserStock.Symbol.ToUpper Then
+                                                Dim secondHigherPriceStock As StockData = secondTopGainerStock
+                                                Dim secondLowerPriceStock As StockData = secondTopLooserStock
+                                                If secondTopGainerStock.LTP < secondTopLooserStock.LTP Then
+                                                    secondHigherPriceStock = secondTopLooserStock
+                                                    secondLowerPriceStock = secondTopGainerStock
+                                                End If
+                                                Dim secondInstruments As IEnumerable(Of IInstrument) = nfoInstruments.Where(Function(x)
+                                                                                                                                Return x.RawInstrumentName = secondHigherPriceStock.Symbol
+                                                                                                                            End Function)
+                                                If secondInstruments IsNot Nothing AndAlso secondInstruments.Count > 0 Then
+                                                    Dim secondHigherPriceQty As Integer = secondInstruments.FirstOrDefault.LotSize
+                                                    Dim secondLowerPriceQty As Integer = Math.Ceiling(secondHigherPriceQty * (secondHigherPriceStock.LTP / secondLowerPriceStock.LTP))
+
+                                                    Dim row3 As DataRow = allStockData.NewRow
+                                                    row3("Instrument Name") = secondHigherPriceStock.Symbol
+                                                    row3("Quantity") = secondHigherPriceQty
+                                                    row3("Direction") = secondHigherPriceStock.Direction
+                                                    allStockData.Rows.Add(row3)
+
+                                                    Dim row4 As DataRow = allStockData.NewRow
+                                                    row4("Instrument Name") = secondLowerPriceStock.Symbol
+                                                    row4("Quantity") = secondLowerPriceQty
+                                                    row4("Direction") = secondLowerPriceStock.Direction
+                                                    allStockData.Rows.Add(row4)
+                                                End If
+                                            End If
                                             Using csv As New CSVHelper(_userInputs.InstrumentDetailsFilePath, ",", _cts)
-                                                _cts.Token.ThrowIfCancellationRequested()
-                                                csv.GetCSVFromDataTable(allStockData)
-                                            End Using
-                                            If _userInputs.InstrumentsData IsNot Nothing Then
-                                                _userInputs.InstrumentsData.Clear()
-                                                _userInputs.InstrumentsData = Nothing
-                                                _userInputs.FillInstrumentDetails(_userInputs.InstrumentDetailsFilePath, _cts)
+                                                    _cts.Token.ThrowIfCancellationRequested()
+                                                    csv.GetCSVFromDataTable(allStockData)
+                                                End Using
+                                                If _userInputs.InstrumentsData IsNot Nothing Then
+                                                    _userInputs.InstrumentsData.Clear()
+                                                    _userInputs.InstrumentsData = Nothing
+                                                    _userInputs.FillInstrumentDetails(_userInputs.InstrumentDetailsFilePath, _cts)
+                                                End If
                                             End If
                                         End If
-                                    End If
                                 Else
                                     Throw New ApplicationException("Unable to get 2 stock for trading")
                                 End If
