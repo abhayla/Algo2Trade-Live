@@ -18,6 +18,7 @@ Public Class PetDGandhiStrategyInstrument
     Private _lastPrevPayloadPlaceOrder As String = ""
     Private _strategyInstrumentExit As Boolean = False
     Private ReadOnly _dummyFractalConsumer As FractalConsumer
+    Private ReadOnly _dummyATRConsumer As ATRConsumer
 
     Public Sub New(ByVal associatedInstrument As IInstrument,
                    ByVal associatedParentStrategy As Strategy,
@@ -41,9 +42,11 @@ Public Class PetDGandhiStrategyInstrument
         If Me.ParentStrategy.UserSettings.SignalTimeFrame > 0 Then
             Dim chartConsumer As PayloadToChartConsumer = New PayloadToChartConsumer(Me.ParentStrategy.UserSettings.SignalTimeFrame)
             chartConsumer.OnwardLevelConsumers = New List(Of IPayloadConsumer) From
-                {New FractalConsumer(chartConsumer)}
+                {New FractalConsumer(chartConsumer),
+                 New ATRConsumer(chartConsumer, 14)}
             RawPayloadDependentConsumers.Add(chartConsumer)
             _dummyFractalConsumer = New FractalConsumer(chartConsumer)
+            _dummyATRConsumer = New ATRConsumer(chartConsumer, 14)
         Else
             Throw New ApplicationException(String.Format("Signal Timeframe is 0 or Nothing, does not adhere to the strategy:{0}", Me.ParentStrategy.ToString))
         End If
@@ -51,19 +54,33 @@ Public Class PetDGandhiStrategyInstrument
     End Sub
 
     Public Overrides Function HandleTickTriggerToUIETCAsync() As Task
+        Dim exitTriggered As Boolean = False
         If Me.ParentStrategy.GetTotalPLAfterBrokerage <= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).MaxLossPerDay Then
             Me.StrategyExitAllTriggerd = True
+            exitTriggered = True
             ForceExitAllTradesAsync("Max Loss reached")
         ElseIf Me.ParentStrategy.GetTotalPLAfterBrokerage >= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
             Me.StrategyExitAllTriggerd = True
+            exitTriggered = True
             ForceExitAllTradesAsync("Max Profit reached")
         ElseIf Me.GetOverallPLAfterBrokerage <= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).StockMaxLossPerDay Then
             _strategyInstrumentExit = True
+            exitTriggered = True
             ForceExitAllTradesAsync("Instrument Max Loss reached")
         ElseIf Me.GetOverallPLAfterBrokerage >= CType(Me.ParentStrategy.UserSettings, PetDGandhiUserInputs).StockMaxProfitPerDay Then
             _strategyInstrumentExit = True
+            exitTriggered = True
             ForceExitAllTradesAsync("Instrument Max Profit reached")
         End If
+        Try
+            If exitTriggered Then
+                logger.Debug("##########################################################################################")
+                logger.Debug("Total PL:{0}, LTP:{1}, Trading Symbol:{2}", Me.ParentStrategy.GetTotalPLAfterBrokerage, Me.TradableInstrument.LastTick.LastPrice, Me.TradableInstrument.TradingSymbol)
+                logger.Debug("##########################################################################################")
+            End If
+        Catch ex As Exception
+            logger.Error(ex.ToString)
+        End Try
         Return MyBase.HandleTickTriggerToUIETCAsync()
     End Function
 
@@ -131,13 +148,14 @@ Public Class PetDGandhiStrategyInstrument
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
         Dim currentTime As Date = Now()
         Dim fractal As FractalConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyFractalConsumer)
+        Dim atrConsumer As ATRConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyATRConsumer)
 
         Try
             If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
                 (Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder OrElse forcePrint) Then
                 _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
                 logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Previous Candle:{5}, Is Active Instrument:{6}, Number Of Trade:{7}, OverAll PL:{8}, Stock PL:{9}, Strategy Exit All Triggerd:{10}, Strategy Instrument Exit:{11}, Is Any Trade Target Reached:{12}, Time:{13},{14}, Time:{15},{16}, Current Time:{17}, Current LTP:{18}, TradingSymbol:{19}",
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Previous Candle:{5}, Is Active Instrument:{6}, Number Of Trade:{7}, OverAll PL:{8}, Stock PL:{9}, Strategy Exit All Triggerd:{10}, Strategy Instrument Exit:{11}, Is Any Trade Target Reached:{12}, Time:{13},{14},{15}, Time:{16},{17}, Current Time:{18}, Current LTP:{19}, TradingSymbol:{20}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             runningCandlePayload.SnapshotDateTime.ToString,
@@ -152,6 +170,7 @@ Public Class PetDGandhiStrategyInstrument
                             _strategyInstrumentExit,
                             IsAnyTradeTargetReached(),
                             runningCandlePayload.PreviousPayload.SnapshotDateTime.ToString("dd-MM-yyyy HH:mm:ss"),
+                            atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
                             fractal.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
                             runningCandlePayload.PreviousPayload.PreviousPayload.SnapshotDateTime.ToString("dd-MM-yyyy HH:mm:ss"),
                             fractal.ConsumerPayloads(runningCandlePayload.PreviousPayload.PreviousPayload.SnapshotDateTime).ToString,
@@ -182,8 +201,10 @@ Public Class PetDGandhiStrategyInstrument
                     Dim buffer As Decimal = CalculateBuffer(signal.Item2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     Dim triggerPrice As Decimal = signal.Item2 + buffer
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                    'Dim stoplossPrice As Decimal = runningCandlePayload.PreviousPayload.LowPrice.Value - buffer
+                    Dim atr As Decimal = CType(atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
                     Dim stoplossPrice As Decimal = CType(fractal.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), FractalConsumer.FractalPayload).FractalLow.Value - buffer
+                    Dim slPoint As Decimal = Math.Max(atr, triggerPrice - stoplossPrice)
+                    stoplossPrice = ConvertFloorCeling(triggerPrice - slPoint, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     If ((triggerPrice - stoplossPrice) / stoplossPrice) * 100 > 1 Then
                         stoplossPrice = ConvertFloorCeling(triggerPrice - triggerPrice * 1 / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     End If
@@ -207,8 +228,10 @@ Public Class PetDGandhiStrategyInstrument
                     Dim buffer As Decimal = CalculateBuffer(signal.Item2, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     Dim triggerPrice As Decimal = signal.Item2 - buffer
                     Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                    'Dim stoplossPrice As Decimal = runningCandlePayload.PreviousPayload.HighPrice.Value + buffer
+                    Dim atr As Decimal = CType(atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
                     Dim stoplossPrice As Decimal = CType(fractal.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), FractalConsumer.FractalPayload).FractalHigh.Value + buffer
+                    Dim slPoint As Decimal = Math.Max(atr, stoplossPrice - triggerPrice)
+                    stoplossPrice = ConvertFloorCeling(triggerPrice + slPoint, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     If ((stoplossPrice - triggerPrice) / triggerPrice) * 100 > 1 Then
                         stoplossPrice = ConvertFloorCeling(triggerPrice + triggerPrice * 1 / 100, Me.TradableInstrument.TickSize, RoundOfType.Floor)
                     End If
@@ -231,7 +254,12 @@ Public Class PetDGandhiStrategyInstrument
         'Below portion have to be done in every place order trigger
         If parameter IsNot Nothing Then
             Try
-                If forcePrint Then logger.Debug("***** Place Order Parameter ***** {0}, {1}", parameter.ToString, Me.TradableInstrument.TradingSymbol)
+                If forcePrint Then
+                    logger.Debug("***** Place Order Parameter ***** {0}, {1}", parameter.ToString, Me.TradableInstrument.TradingSymbol)
+
+                    Dim margin As Decimal = Await GetAvailableMargin().ConfigureAwait(False)
+                    logger.Debug("***** Place Order Margin ***** Available Margin:{0}, {1}", margin, Me.TradableInstrument.TradingSymbol)
+                End If
             Catch ex As Exception
                 logger.Error(ex.ToString)
             End Try
@@ -371,24 +399,6 @@ Public Class PetDGandhiStrategyInstrument
     Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick, ByVal direction As IOrder.TypeOfTransaction, ByVal forcePrint As Boolean) As Tuple(Of Boolean, Decimal)
         Dim ret As Tuple(Of Boolean, Decimal) = Nothing
         If candle IsNot Nothing AndAlso candle.PreviousPayload IsNot Nothing Then
-            'If candle.HighPrice.Value < candle.PreviousPayload.HighPrice.Value AndAlso
-            '    candle.LowPrice.Value > candle.PreviousPayload.LowPrice.Value Then
-            '    If currentTick.Open > currentTick.Close AndAlso currentTick.Low > currentTick.Close Then
-            '        If direction = IOrder.TypeOfTransaction.Buy Then direction = IOrder.TypeOfTransaction.None
-            '    ElseIf currentTick.Open < currentTick.Close AndAlso currentTick.High < currentTick.Close Then
-            '        If direction = IOrder.TypeOfTransaction.Sell Then direction = IOrder.TypeOfTransaction.None
-            '    End If
-            'End If
-            'If direction = IOrder.TypeOfTransaction.Buy Then
-            '    If candle.HighPrice.Value < candle.PreviousPayload.HighPrice.Value Then
-            '        ret = New Tuple(Of Boolean, Decimal)(True, candle.HighPrice.Value)
-            '    End If
-            'ElseIf direction = IOrder.TypeOfTransaction.Sell Then
-            '    If candle.LowPrice.Value > candle.PreviousPayload.LowPrice.Value Then
-            '        ret = New Tuple(Of Boolean, Decimal)(True, candle.LowPrice.Value)
-            '    End If
-            'End If
-
             Dim fractal As FractalConsumer = GetConsumer(Me.RawPayloadDependentConsumers, _dummyFractalConsumer)
             Dim candleFractalPayload As FractalConsumer.FractalPayload = fractal.ConsumerPayloads(candle.SnapshotDateTime)
             Dim previousCandleFractalPayload As FractalConsumer.FractalPayload = fractal.ConsumerPayloads(candle.PreviousPayload.SnapshotDateTime)
@@ -442,6 +452,15 @@ Public Class PetDGandhiStrategyInstrument
                 End If
                 If ret Then Exit For
             Next
+        End If
+        Return ret
+    End Function
+
+    Private Async Function GetAvailableMargin() As Task(Of Decimal)
+        Dim ret As Decimal = Decimal.MinValue
+        Dim marginDetails As Dictionary(Of TypeOfExchage, IUserMargin) = Await Me._APIAdapter.GetUserMarginsAsync().ConfigureAwait(False)
+        If marginDetails IsNot Nothing AndAlso marginDetails.ContainsKey(Me.TradableInstrument.ExchangeDetails.ExchangeType) Then
+            ret = marginDetails(Me.TradableInstrument.ExchangeDetails.ExchangeType).AvailableMargin
         End If
         Return ret
     End Function

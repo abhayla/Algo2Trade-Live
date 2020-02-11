@@ -881,9 +881,19 @@ Namespace Strategies
                                 '    c += 1
                                 'Next
 
-                                'TwoThird Strategy
+                                ''TwoThird Strategy
+                                'For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
+                                '    candleCreator.IndicatorCreator.CalculateATR(currentXMinute, consumer)
+                                'Next
+
+                                'Pet-D Gandhi
                                 For Each consumer In runningRawPayloadConsumer.OnwardLevelConsumers
-                                    candleCreator.IndicatorCreator.CalculateFractal(currentXMinute, consumer)
+                                    If c = 1 Then
+                                        candleCreator.IndicatorCreator.CalculateFractal(currentXMinute, consumer)
+                                    ElseIf c = 2 Then
+                                        candleCreator.IndicatorCreator.CalculateATR(currentXMinute, consumer)
+                                    End If
+                                    c += 1
                                 Next
                             End If
 
