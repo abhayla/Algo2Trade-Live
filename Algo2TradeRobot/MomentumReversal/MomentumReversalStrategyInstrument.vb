@@ -103,7 +103,7 @@ Public Class MomentumReversalStrategyInstrument
                 Dim atr As Decimal = Decimal.MinValue
                 If signal IsNot Nothing Then
                     logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", signal.Item3.ToString)
-                    atr = CType(atrConsumer.ConsumerPayloads(signal.Item3.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
+                    atr = Math.Round(CType(atrConsumer.ConsumerPayloads(signal.Item3.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value, 3)
                 End If
                 logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Is Active Instrument:{5}, Number Of Trade:{6}, Signal Candle Time:{7}, Signal Candle Color:{8}, Signal Direction:{9}, ATR:{10}, Current Time:{11}, Current LTP:{12}, TradingSymbol:{13}",
                             userSettings.TradeStartTime.ToString,
@@ -135,7 +135,7 @@ Public Class MomentumReversalStrategyInstrument
             Dim signal As Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload) = GetSignalCandle()
             If signal IsNot Nothing AndAlso signal.Item1 AndAlso atrConsumer.ConsumerPayloads IsNot Nothing AndAlso
                 atrConsumer.ConsumerPayloads.ContainsKey(signal.Item3.SnapshotDateTime) Then
-                Dim atr As Decimal = CType(atrConsumer.ConsumerPayloads(signal.Item3.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
+                Dim atr As Decimal = Math.Round(CType(atrConsumer.ConsumerPayloads(signal.Item3.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value, 3)
                 If signal.Item2 = IOrder.TypeOfTransaction.Buy Then
                     Dim triggerPrice As Decimal = currentTick.LastPrice
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
