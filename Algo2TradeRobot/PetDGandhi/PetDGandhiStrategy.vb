@@ -35,11 +35,11 @@ Public Class PetDGandhiStrategy
         Await Task.Delay(0, _cts.Token).ConfigureAwait(False)
         logger.Debug("Starting to fill strategy specific instruments, strategy:{0}", Me.ToString)
         If allInstruments IsNot Nothing AndAlso allInstruments.Count > 0 Then
-            'Using fillInstrumentDetails As New PetDGandhiFillInstrumentDetails(_cts, Me)
-            '    AddHandler fillInstrumentDetails.Heartbeat, AddressOf OnHeartbeat
+            Using fillInstrumentDetails As New PetDGandhiFillInstrumentDetails(_cts, Me)
+                AddHandler fillInstrumentDetails.Heartbeat, AddressOf OnHeartbeat
 
-            '    Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
-            'End Using
+                Await fillInstrumentDetails.GetInstrumentData(allInstruments, bannedInstruments).ConfigureAwait(False)
+            End Using
             logger.Debug(Utilities.Strings.JsonSerialize(Me.UserSettings))
             Dim petDGandhiUserInputs As PetDGandhiUserInputs = CType(Me.UserSettings, PetDGandhiUserInputs)
             If petDGandhiUserInputs.InstrumentsData IsNot Nothing AndAlso petDGandhiUserInputs.InstrumentsData.Count > 0 Then
