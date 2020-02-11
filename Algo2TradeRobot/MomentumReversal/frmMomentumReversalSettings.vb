@@ -4,12 +4,12 @@ Imports System.Threading
 Public Class frmMomentumReversalSettings
 
     Private _cts As CancellationTokenSource = Nothing
-    Private _MRSettings As MomentumReversalUserInputs = Nothing
-    Private _MRSettingsFilename As String = Path.Combine(My.Application.Info.DirectoryPath, "MomentumReversalSettings.Strategy.a2t")
+    Private _settings As MomentumReversalUserInputs = Nothing
+    Private _settingsFilename As String = Path.Combine(My.Application.Info.DirectoryPath, "Algo2Trade.Strategy.a2t")
 
     Public Sub New(ByRef MRUserInputs As MomentumReversalUserInputs)
         InitializeComponent()
-        _MRSettings = MRUserInputs
+        _settings = MRUserInputs
     End Sub
 
     Private Sub frmMomentumReversalSettings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -18,8 +18,8 @@ Public Class frmMomentumReversalSettings
     Private Sub btnSaveMomentumReversalSettings_Click(sender As Object, e As EventArgs) Handles btnSaveMomentumReversalSettings.Click
         Try
             _cts = New CancellationTokenSource
-            If _MRSettings Is Nothing Then _MRSettings = New MomentumReversalUserInputs
-            _MRSettings.InstrumentsData = Nothing
+            If _settings Is Nothing Then _settings = New MomentumReversalUserInputs
+            _settings.InstrumentsData = Nothing
             ValidateInputs()
             SaveSettings()
             Me.Close()
@@ -28,37 +28,35 @@ Public Class frmMomentumReversalSettings
         End Try
     End Sub
     Private Sub LoadSettings()
-        If File.Exists(_MRSettingsFilename) Then
-            _MRSettings = Utilities.Strings.DeserializeToCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename)
-            txtSignalTimeFrame.Text = _MRSettings.SignalTimeFrame
-            dtpckrTradeStartTime.Value = _MRSettings.TradeStartTime
-            dtpckrLastTradeEntryTime.Value = _MRSettings.LastTradeEntryTime
-            dtpckrEODExitTime.Value = _MRSettings.EODExitTime
-            dtpckrIdleTimeStart.Value = _MRSettings.IdleTimeStart
-            dtpckrIdleTimeEnd.Value = _MRSettings.IdleTimeEnd
-            txtTradeOpenTime.Text = _MRSettings.TradeOpenTime
-            txtBackToBackTradeTimeGap.Text = _MRSettings.TimeGapBetweenBackToBackTrades
-            txtInstrumentDetalis.Text = _MRSettings.InstrumentDetailsFilePath
+        If File.Exists(_settingsFilename) Then
+            _settings = Utilities.Strings.DeserializeToCollection(Of MomentumReversalUserInputs)(_settingsFilename)
+            txtSignalTimeFrame.Text = _settings.SignalTimeFrame
+            dtpckrTradeStartTime.Value = _settings.TradeStartTime
+            dtpckrLastTradeEntryTime.Value = _settings.LastTradeEntryTime
+            dtpckrEODExitTime.Value = _settings.EODExitTime
+            txtNumberOfTradePerStock.Text = _settings.NumberOfTradePerStock
+            txtMinStoploss.Text = _settings.MinStoplossPercentage
+            txtMinTarget.Text = _settings.MinTargetPercentage
+            txtCostToCostMovement.Text = _settings.CostToCostMovementPercentage
+            txtInstrumentDetalis.Text = _settings.InstrumentDetailsFilePath
 
-            txtRSIPeriod.Text = _MRSettings.RSIPeriod
-            txtRSILevel.Text = _MRSettings.RSILevel
+            txtATRPeriod.Text = _settings.ATRPeriod
         End If
     End Sub
     Private Sub SaveSettings()
-        _MRSettings.SignalTimeFrame = txtSignalTimeFrame.Text
-        _MRSettings.TradeStartTime = dtpckrTradeStartTime.Value
-        _MRSettings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
-        _MRSettings.EODExitTime = dtpckrEODExitTime.Value
-        _MRSettings.IdleTimeStart = dtpckrIdleTimeStart.Value
-        _MRSettings.IdleTimeEnd = dtpckrIdleTimeEnd.Value
-        _MRSettings.TradeOpenTime = txtTradeOpenTime.Text
-        _MRSettings.TimeGapBetweenBackToBackTrades = txtBackToBackTradeTimeGap.Text
-        _MRSettings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
+        _settings.SignalTimeFrame = txtSignalTimeFrame.Text
+        _settings.TradeStartTime = dtpckrTradeStartTime.Value
+        _settings.LastTradeEntryTime = dtpckrLastTradeEntryTime.Value
+        _settings.EODExitTime = dtpckrEODExitTime.Value
+        _settings.NumberOfTradePerStock = txtNumberOfTradePerStock.Text
+        _settings.MinStoplossPercentage = txtMinStoploss.Text
+        _settings.MinTargetPercentage = txtMinTarget.Text
+        _settings.CostToCostMovementPercentage = txtCostToCostMovement.Text
+        _settings.InstrumentDetailsFilePath = txtInstrumentDetalis.Text
 
-        _MRSettings.RSIPeriod = txtRSIPeriod.Text
-        _MRSettings.RSILevel = txtRSILevel.Text
+        _settings.ATRPeriod = txtATRPeriod.Text
 
-        Utilities.Strings.SerializeFromCollection(Of MomentumReversalUserInputs)(_MRSettingsFilename, _MRSettings)
+        Utilities.Strings.SerializeFromCollection(Of MomentumReversalUserInputs)(_settingsFilename, _settings)
     End Sub
     Private Function ValidateNumbers(ByVal startNumber As Decimal, ByVal endNumber As Decimal, ByVal inputTB As TextBox, Optional ByVal validateInteger As Boolean = False) As Boolean
         Dim ret As Boolean = False
@@ -76,14 +74,11 @@ Public Class frmMomentumReversalSettings
         Return ret
     End Function
     Private Sub ValidateFile()
-        _MRSettings.FillInstrumentDetails(txtInstrumentDetalis.Text, _cts)
+        _settings.FillInstrumentDetails(txtInstrumentDetalis.Text, _cts)
     End Sub
     Private Sub ValidateInputs()
         ValidateNumbers(1, 60, txtSignalTimeFrame, True)
-        ValidateNumbers(1, 60, txtTradeOpenTime, True)
-        ValidateNumbers(1, 3600, txtBackToBackTradeTimeGap, True)
-        ValidateNumbers(1, Integer.MaxValue, txtRSIPeriod, True)
-        ValidateNumbers(1, Integer.MaxValue, txtRSILevel, True)
+        ValidateNumbers(1, Integer.MaxValue, txtATRPeriod, True)
         ValidateFile()
     End Sub
 

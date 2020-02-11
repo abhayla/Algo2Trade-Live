@@ -1,3 +1,2 @@
-Trading Symbol,Number of Lots,Buffer,SL,First Movement LTP,First Movement SL,Onward Movement LTP,Onward Movement SL,Percentage
-BANKNIFTY19N2131100CE,1,0.05,6,2,8,1.2,0.8,TRUE
-BANKNIFTY19N2131500PE,1,0.05,6,2,8,1.2,0.8,TRUE
+Trading Symbol,Quantity
+IBULHSGFIN,1

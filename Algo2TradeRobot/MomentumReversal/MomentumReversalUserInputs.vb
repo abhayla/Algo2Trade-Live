@@ -8,45 +8,21 @@ Imports Algo2TradeCore.Entities
 Public Class MomentumReversalUserInputs
     Inherits StrategyUserInputs
 
-    Public Property RSIPeriod As Integer
-    Public Property RSILevel As Integer
-    Public Property TradeOpenTime As Integer
-    Public Property TimeGapBetweenBackToBackTrades As Integer
+    Public Property NumberOfTradePerStock As Integer
 
-    Private _IdleTimeStart As Date
-    Public Property IdleTimeStart As Date
-        Get
-            Return New Date(Now.Year, Now.Month, Now.Day, _IdleTimeStart.Hour, _IdleTimeStart.Minute, _IdleTimeStart.Second)
-        End Get
-        Set(value As Date)
-            _IdleTimeStart = value
-        End Set
-    End Property
-
-    Private _IdleTimeEnd As Date
-    Public Property IdleTimeEnd As Date
-        Get
-            Return New Date(Now.Year, Now.Month, Now.Day, _IdleTimeEnd.Hour, _IdleTimeEnd.Minute, _IdleTimeEnd.Second)
-        End Get
-        Set(value As Date)
-            _IdleTimeEnd = value
-        End Set
-    End Property
+    Public Property MinStoplossPercentage As Decimal
+    Public Property MinTargetPercentage As Decimal
+    Public Property CostToCostMovementPercentage As Decimal
 
     Public Property InstrumentDetailsFilePath As String
     Public Property InstrumentsData As Dictionary(Of String, InstrumentDetails)
 
+    Public Property ATRPeriod As Integer
+
     <Serializable>
     Public Class InstrumentDetails
         Public Property TradingSymbol As String
-        Public Property NumberOfLots As Integer
-        Public Property Buffer As Decimal
-        Public Property SL As Decimal
-        Public Property FirstMovementLTP As Decimal
-        Public Property FirstMovementSL As Decimal
-        Public Property OnwardMovementLTP As Decimal
-        Public Property OnwardMovementSL As Decimal
-        Public Property Percentage As Boolean
+        Public Property Quantity As Integer
     End Class
     Public Sub FillInstrumentDetails(ByVal filePath As String, ByVal canceller As CancellationTokenSource)
         If filePath IsNot Nothing Then
@@ -58,9 +34,9 @@ Public Class MomentumReversalUserInputs
                         instrumentDetails = csvReader.Get2DArrayFromCSV(0)
                     End Using
                     If instrumentDetails IsNot Nothing AndAlso instrumentDetails.Length > 0 Then
-                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "NUMBER OF LOTS", "BUFFER", "SL", "FIRST MOVEMENT LTP", "FIRST MOVEMENT SL", "ONWARD MOVEMENT LTP", "ONWARD MOVEMENT SL", "PERCENTAGE"}
+                        Dim excelColumnList As New List(Of String) From {"TRADING SYMBOL", "QUANTITY"}
 
-                        For colCtr = 0 To 8
+                        For colCtr = 0 To 1
                             If instrumentDetails(0, colCtr) Is Nothing OrElse Trim(instrumentDetails(0, colCtr).ToString) = "" Then
                                 Throw New ApplicationException(String.Format("Invalid format."))
                             Else
@@ -71,14 +47,7 @@ Public Class MomentumReversalUserInputs
                         Next
                         For rowCtr = 1 To instrumentDetails.GetLength(0) - 1
                             Dim trdngSymbl As String = Nothing
-                            Dim nmbrOfLots As Integer = Integer.MinValue
-                            Dim bfr As Decimal = Decimal.MinValue
-                            Dim stoploss As Decimal = Decimal.MinValue
-                            Dim firstLTP As Decimal = Decimal.MinValue
-                            Dim firstSL As Decimal = Decimal.MinValue
-                            Dim onwardLTP As Decimal = Decimal.MinValue
-                            Dim onwardSL As Decimal = Decimal.MinValue
-                            Dim percentage As Boolean = False
+                            Dim qty As Integer = Integer.MinValue
 
                             For columnCtr = 0 To instrumentDetails.GetLength(1)
                                 If columnCtr = 0 Then
@@ -95,122 +64,37 @@ Public Class MomentumReversalUserInputs
                                         Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
                                         If IsNumeric(instrumentDetails(rowCtr, columnCtr)) AndAlso
                                             Math.Round(Val(instrumentDetails(rowCtr, columnCtr)), 0) = Val(instrumentDetails(rowCtr, columnCtr)) Then
-                                            nmbrOfLots = instrumentDetails(rowCtr, columnCtr)
+                                            qty = instrumentDetails(rowCtr, columnCtr)
                                         Else
-                                            Throw New ApplicationException(String.Format("Number Of Lots cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
+                                            Throw New ApplicationException(String.Format("Quantity cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                         End If
                                     Else
-                                        Throw New ApplicationException(String.Format("Number Of Lots cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                    End If
-                                ElseIf columnCtr = 2 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            bfr = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("Buffer cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Buffer cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                    End If
-                                ElseIf columnCtr = 3 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            stoploss = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("Stoploss cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Stoploss cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                    End If
-                                ElseIf columnCtr = 4 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            firstLTP = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("First Movement LTP cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("First Movement LTP cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                    End If
-                                ElseIf columnCtr = 5 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            firstSL = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("First Movement SL cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("First Movement SL cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                    End If
-                                ElseIf columnCtr = 6 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            onwardLTP = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("Onward Movement LTP cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Onward Movement LTP cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                    End If
-                                ElseIf columnCtr = 7 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If IsNumeric(instrumentDetails(rowCtr, columnCtr)) Then
-                                            onwardSL = instrumentDetails(rowCtr, columnCtr)
-                                        Else
-                                            Throw New ApplicationException(String.Format("Onward Movement SL cannot be of type {0} for {1}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Onward Movement SL cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
-                                    End If
-                                ElseIf columnCtr = 8 Then
-                                    If instrumentDetails(rowCtr, columnCtr) IsNot Nothing AndAlso
-                                        Not Trim(instrumentDetails(rowCtr, columnCtr).ToString) = "" Then
-                                        If instrumentDetails(rowCtr, columnCtr).ToString.ToUpper = "TRUE" Then
-                                            percentage = True
-                                        End If
-                                    Else
-                                        Throw New ApplicationException(String.Format("Percentage cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
+                                        Throw New ApplicationException(String.Format("Quantity cannot be null for {0}", instrumentDetails(rowCtr, columnCtr).GetType, trdngSymbl))
                                     End If
                                 End If
                             Next
                             If trdngSymbl IsNot Nothing Then
                                 Dim instrumentData As New InstrumentDetails
                                 instrumentData.TradingSymbol = trdngSymbl.ToUpper
-                                instrumentData.NumberOfLots = nmbrOfLots
-                                instrumentData.Buffer = bfr
-                                instrumentData.SL = stoploss
-                                instrumentData.FirstMovementLTP = firstLTP
-                                instrumentData.FirstMovementSL = firstSL
-                                instrumentData.OnwardMovementLTP = onwardLTP
-                                instrumentData.OnwardMovementSL = onwardSL
-                                instrumentData.Percentage = percentage
+                                instrumentData.Quantity = qty
                                 If Me.InstrumentsData Is Nothing Then Me.InstrumentsData = New Dictionary(Of String, InstrumentDetails)
                                 If Me.InstrumentsData.ContainsKey(instrumentData.TradingSymbol) Then
                                     Throw New ApplicationException(String.Format("Duplicate Trading Symbol {0}", instrumentData.TradingSymbol))
                                 End If
                                 Me.InstrumentsData.Add(instrumentData.TradingSymbol, instrumentData)
-                                If Me.InstrumentsData IsNot Nothing AndAlso Me.InstrumentsData.Count > 2 Then
-                                    Throw New ApplicationException(String.Format("Only two instrument can be added"))
-                                End If
                             End If
                         Next
                     Else
-                        Throw New ApplicationException("No valid input in the file")
+                        Throw New ApplicationException("No valid input in the 'Instruments' file")
                     End If
                 Else
-                    Throw New ApplicationException("File Type not supported. Application only support .csv file.")
+                    Throw New ApplicationException("'Instruments' File Type not supported. Application only support .csv file.")
                 End If
             Else
-                Throw New ApplicationException("File does not exists. Please select valid file")
+                Throw New ApplicationException("'Instruments' File does not exists. Please select valid file")
             End If
         Else
-            Throw New ApplicationException("No valid file path exists")
+            Throw New ApplicationException("No valid 'Instruments' file path exists")
         End If
     End Sub
 
