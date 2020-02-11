@@ -131,10 +131,16 @@ Public Class PetDGandhiStrategy
         Dim currentTime As Date = Now
         If currentTime >= Me.UserSettings.EODExitTime Then
             ret = New Tuple(Of Boolean, String)(True, "EOD Exit")
+            Dim message As String = String.Format("Pair EOD Exit. PL:{0}, Time:{1}", Math.Round(Me.GetTotalPLAfterBrokerage, 2), Now.ToString("HH:mm:ss"))
+            GenerateMTMTelegramMessageAsync(message)
         ElseIf Me.GetTotalPLAfterBrokerage <= CType(Me.UserSettings, PetDGandhiUserInputs).MaxLossPerDay Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
+            'ret = New Tuple(Of Boolean, String)(True, "Max Loss Per Day Reached")
+            Dim message As String = String.Format("Pair Max Loss reached. PL:{0}, Time:{1}", Math.Round(Me.GetTotalPLAfterBrokerage, 2), Now.ToString("HH:mm:ss"))
+            GenerateMTMTelegramMessageAsync(message)
         ElseIf Me.GetTotalPLAfterBrokerage >= CType(Me.UserSettings, PetDGandhiUserInputs).MaxProfitPerDay Then
-            ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
+            'ret = New Tuple(Of Boolean, String)(True, "Max Profit Per Day Reached")
+            Dim message As String = String.Format("Pair Max Profit reached. PL:{0}, Time:{1}", Math.Round(Me.GetTotalPLAfterBrokerage, 2), Now.ToString("HH:mm:ss"))
+            GenerateMTMTelegramMessageAsync(message)
         End If
         Return ret
     End Function
@@ -162,10 +168,33 @@ Public Class PetDGandhiStrategy
         Dim userInputs As PetDGandhiUserInputs = Me.UserSettings
         If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
             userInputs.TelegramChatID IsNot Nothing AndAlso Not userInputs.TelegramChatID.Trim = "" Then
-            Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramChatID, _cts)
+            Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramChatID.Trim, _cts)
                 Dim encodedString As String = Utilities.Strings.EncodeString(message)
                 Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
             End Using
         End If
+    End Function
+
+    Private _send As Boolean = False
+    Private Async Function GenerateMTMTelegramMessageAsync(ByVal message As String) As Task
+        Try
+            If Not _send Then
+                If message.Contains("&") Then
+                    message = message.Replace("&", "_")
+                End If
+                Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
+                Dim userInputs As PetDGandhiUserInputs = Me.UserSettings
+                If userInputs.TelegramAPIKey IsNot Nothing AndAlso Not userInputs.TelegramAPIKey.Trim = "" AndAlso
+                    userInputs.TelegramChatID IsNot Nothing AndAlso Not userInputs.TelegramChatID.Trim = "" Then
+                    Using tSender As New Utilities.Notification.Telegram(userInputs.TelegramAPIKey.Trim, userInputs.TelegramPLChatID.Trim, _cts)
+                        Dim encodedString As String = Utilities.Strings.EncodeString(message)
+                        Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
+                        _send = True
+                    End Using
+                End If
+            End If
+        Catch ex As Exception
+            logger.Error(ex.ToString)
+        End Try
     End Function
 End Class
