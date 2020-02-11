@@ -439,7 +439,7 @@ Public Class frmMainTabbed
             End If 'Common controller
             EnableDisableUIEx(UIMode.ReleaseOther, GetType(MomentumReversalStrategy))
 
-            _MRStrategyToExecute = New MomentumReversalStrategy(_commonController, 9, _MRUserInputs, 5, _cts)
+            _MRStrategyToExecute = New MomentumReversalStrategy(_commonController, 0, _MRUserInputs, 10, _cts)
             OnHeartbeatEx(String.Format("Running strategy:{0}", _MRStrategyToExecute.ToString), New List(Of Object) From {_MRStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()

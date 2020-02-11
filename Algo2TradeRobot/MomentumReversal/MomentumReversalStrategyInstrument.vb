@@ -95,28 +95,35 @@ Public Class MomentumReversalStrategyInstrument
         Dim currentTick As ITick = Me.TradableInstrument.LastTick
         Dim currentTime As Date = Now()
 
-        'Try
-        '    If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
-        '        (Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder OrElse forcePrint) Then
-        '        _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
-        '        logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", runningCandlePayload.PreviousPayload.ToString)
-        '        logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, Idle Time Start:{2}, Idle Time End:{3}, RunningCandlePayloadSnapshotDateTime:{4}, PayloadGeneratedBy:{5}, IsHistoricalCompleted:{6}, Is Active Instrument:{7}, {8}, Current Time:{9}, Current LTP:{10}, TradingSymbol:{11}",
-        '                    userSettings.TradeStartTime.ToString,
-        '                    userSettings.LastTradeEntryTime.ToString,
-        '                    userSettings.IdleTimeStart.ToString,
-        '                    userSettings.IdleTimeEnd.ToString,
-        '                    runningCandlePayload.SnapshotDateTime.ToString,
-        '                    runningCandlePayload.PayloadGeneratedBy.ToString,
-        '                    Me.TradableInstrument.IsHistoricalCompleted,
-        '                    IsActiveInstrument(),
-        '                    rsiConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime).ToString,
-        '                    currentTime.ToString,
-        '                    currentTick.LastPrice,
-        '                    Me.TradableInstrument.TradingSymbol)
-        '    End If
-        'Catch ex As Exception
-        '    logger.Error(ex.ToString)
-        'End Try
+        Try
+            If runningCandlePayload IsNot Nothing AndAlso runningCandlePayload.PreviousPayload IsNot Nothing AndAlso
+                (Not runningCandlePayload.PreviousPayload.ToString = _lastPrevPayloadPlaceOrder OrElse forcePrint) Then
+                _lastPrevPayloadPlaceOrder = runningCandlePayload.PreviousPayload.ToString
+                Dim signal As Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload) = GetSignalCandle()
+                Dim atr As Decimal = Decimal.MinValue
+                If signal IsNot Nothing Then
+                    logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", signal.Item3.ToString)
+                    atr = CType(atrConsumer.ConsumerPayloads(signal.Item3.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
+                End If
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Is Active Instrument:{5}, Number Of Trade:{6}, Signal Candle Time:{7}, Signal Candle Color:{8}, Signal Direction:{9}, ATR:{10}, Current Time:{11}, Current LTP:{12}, TradingSymbol:{13}",
+                            userSettings.TradeStartTime.ToString,
+                            userSettings.LastTradeEntryTime.ToString,
+                            runningCandlePayload.SnapshotDateTime,
+                            runningCandlePayload.PayloadGeneratedBy.ToString,
+                            Me.TradableInstrument.IsHistoricalCompleted,
+                            IsActiveInstrument(),
+                            GetTotalExecutedOrders(),
+                            If(signal IsNot Nothing, signal.Item3.SnapshotDateTime, "Nothing"),
+                            If(signal IsNot Nothing, signal.Item3.CandleColor, "Nothing"),
+                            If(signal IsNot Nothing, signal.Item2, "Nothing"),
+                            If(atr <> Decimal.MinValue, atr, "Nothing"),
+                            currentTime.ToString,
+                            currentTick.LastPrice,
+                            Me.TradableInstrument.TradingSymbol)
+            End If
+        Catch ex As Exception
+            logger.Error(ex.ToString)
+        End Try
 
         Dim parameters As PlaceOrderParameters = Nothing
         If currentTime >= userSettings.TradeStartTime AndAlso currentTime <= userSettings.LastTradeEntryTime AndAlso
@@ -125,10 +132,10 @@ Public Class MomentumReversalStrategyInstrument
             Not IsActiveInstrument() AndAlso GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock AndAlso
             Not Me.StrategyExitAllTriggerd Then
 
-            Dim signal As Tuple(Of Boolean, IOrder.TypeOfTransaction) = GetSignalCandle(runningCandlePayload, currentTick, forcePrint)
+            Dim signal As Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload) = GetSignalCandle()
             If signal IsNot Nothing AndAlso signal.Item1 AndAlso atrConsumer.ConsumerPayloads IsNot Nothing AndAlso
-                atrConsumer.ConsumerPayloads.ContainsKey(runningCandlePayload.PreviousPayload.SnapshotDateTime) Then
-                Dim atr As Decimal = CType(atrConsumer.ConsumerPayloads(runningCandlePayload.PreviousPayload.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
+                atrConsumer.ConsumerPayloads.ContainsKey(signal.Item3.SnapshotDateTime) Then
+                Dim atr As Decimal = CType(atrConsumer.ConsumerPayloads(signal.Item3.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value
                 If signal.Item2 = IOrder.TypeOfTransaction.Buy Then
                     Dim triggerPrice As Decimal = currentTick.LastPrice
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
@@ -296,16 +303,14 @@ Public Class MomentumReversalStrategyInstrument
         End If
     End Function
 
-    Private Function GetSignalCandle(ByVal candle As OHLCPayload, ByVal currentTick As ITick, ByVal executeCommand As Boolean) As Tuple(Of Boolean, IOrder.TypeOfTransaction)
-        Dim ret As Tuple(Of Boolean, IOrder.TypeOfTransaction) = Nothing
-        If candle IsNot Nothing AndAlso candle.PreviousPayload IsNot Nothing Then
-            Dim firstCandle As OHLCPayload = GetFirstCandleOfTheDay()
-            If firstCandle IsNot Nothing Then
-                If firstCandle.CandleColor = Color.Green Then
-                    ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, IOrder.TypeOfTransaction.Buy)
-                ElseIf firstCandle.CandleColor = Color.Red Then
-                    ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction)(True, IOrder.TypeOfTransaction.Sell)
-                End If
+    Private Function GetSignalCandle() As Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload)
+        Dim ret As Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload) = Nothing
+        Dim firstCandle As OHLCPayload = GetFirstCandleOfTheDay()
+        If firstCandle IsNot Nothing Then
+            If firstCandle.CandleColor = Color.Green Then
+                ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload)(True, IOrder.TypeOfTransaction.Buy, firstCandle)
+            ElseIf firstCandle.CandleColor = Color.Red Then
+                ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload)(True, IOrder.TypeOfTransaction.Sell, firstCandle)
             End If
         End If
         Return ret
