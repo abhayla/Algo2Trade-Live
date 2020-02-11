@@ -3798,7 +3798,7 @@ Public Class frmMainTabbed
             If _commonControllerUserInput.FormRemarks IsNot Nothing Then
                 message = String.Format("{0}: {1}", _commonControllerUserInput.FormRemarks, message)
             End If
-            Using tSender As New Utilities.Notification.Telegram(_commonControllerUserInput.TelegramAPIKey.Trim, _commonControllerUserInput.TelegramChatID, _cts)
+            Using tSender As New Utilities.Notification.Telegram(_commonControllerUserInput.TelegramAPIKey.Trim, _commonControllerUserInput.TelegramChatID.Trim, _cts)
                 Dim encodedString As String = Utilities.Strings.EncodeString(message)
                 Await tSender.SendMessageGetAsync(encodedString).ConfigureAwait(False)
             End Using
