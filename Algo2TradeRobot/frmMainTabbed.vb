@@ -439,7 +439,7 @@ Public Class frmMainTabbed
             End If 'Common controller
             EnableDisableUIEx(UIMode.ReleaseOther, GetType(MomentumReversalStrategy))
 
-            _MRStrategyToExecute = New MomentumReversalStrategy(_commonController, 0, _MRUserInputs, 10, _cts)
+            _MRStrategyToExecute = New MomentumReversalStrategy(_commonController, 1, _MRUserInputs, 10, _cts)
             OnHeartbeatEx(String.Format("Running strategy:{0}", _MRStrategyToExecute.ToString), New List(Of Object) From {_MRStrategyToExecute})
 
             _cts.Token.ThrowIfCancellationRequested()
@@ -496,7 +496,7 @@ Public Class frmMainTabbed
         'End If
     End Function
     Private Async Sub btnMomentumReversalStart_Click(sender As Object, e As EventArgs) Handles btnMomentumReversalStart.Click
-        Dim authenticationUserId As String = "VN4433"
+        Dim authenticationUserId As String = "WJ4786"
         If Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper IsNot Nothing AndAlso
             Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper <> "" AndAlso
             (authenticationUserId <> Common.GetZerodhaCredentialsFromSettings(_commonControllerUserInput).UserId.ToUpper AndAlso

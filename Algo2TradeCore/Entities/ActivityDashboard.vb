@@ -46,7 +46,7 @@ Namespace Entities
         End Function
 
         Private _StrategyOverAllPLAfterBrokerage As Decimal
-        <Display(Name:="Strategy PL After Brokerage", Order:=2, AutoGenerateField:=False)>
+        <Display(Name:="Strategy PL After Brokerage", Order:=2)>
         Public ReadOnly Property StrategyOverAllPLAfterBrokerage As Decimal
             Get
                 _StrategyOverAllPLAfterBrokerage = ParentStrategyInstrument.ParentStrategy.GetTotalPLAfterBrokerage
@@ -106,7 +106,7 @@ Namespace Entities
         End Function
 
         Private _OverallPL As Decimal
-        <Display(Name:="Overall PL", Order:=7, AutoGenerateField:=False)>
+        <Display(Name:="Overall PL", Order:=7)>
         Public ReadOnly Property OverallPL As Decimal
             Get
                 _OverallPL = Math.Round(ParentStrategyInstrument.GetOverallPLAfterBrokerage(), 2)
@@ -118,7 +118,7 @@ Namespace Entities
         End Function
 
         Private _SignalPL As Decimal
-        <Display(Name:="Signal PL", Order:=8, AutoGenerateField:=False)>
+        <Display(Name:="Signal PL", Order:=8)>
         Public ReadOnly Property SignalPL As Decimal
             Get
                 If ParentOrderID IsNot Nothing Then
