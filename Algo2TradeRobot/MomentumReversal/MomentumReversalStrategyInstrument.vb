@@ -77,7 +77,7 @@ Public Class MomentumReversalStrategyInstrument
                 End If
                 'Modify Order block end
                 _cts.Token.ThrowIfCancellationRequested()
-                Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
+                Await Task.Delay(60000, _cts.Token).ConfigureAwait(False)
             End While
         Catch ex As Exception
             'To log exceptions getting created from this function as the bubble up of the exception
@@ -105,7 +105,7 @@ Public Class MomentumReversalStrategyInstrument
                     logger.Debug("PlaceOrder-> Potential Signal Candle is:{0}. Will check rest parameters.", signal.Item3.ToString)
                     atr = Math.Round(CType(atrConsumer.ConsumerPayloads(signal.Item3.SnapshotDateTime), ATRConsumer.ATRPayload).ATR.Value, 3)
                 End If
-                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Is Active Instrument:{5}, Number Of Trade:{6}, Signal Candle Time:{7}, Signal Candle Color:{8}, Signal Direction:{9}, ATR:{10}, Current Time:{11}, Current LTP:{12}, TradingSymbol:{13}",
+                logger.Debug("PlaceOrder-> Rest all parameters: Trade Start Time:{0}, Last Trade Entry Time:{1}, RunningCandlePayloadSnapshotDateTime:{2}, PayloadGeneratedBy:{3}, IsHistoricalCompleted:{4}, Is Active Instrument:{5}, Number Of Trade:{6}, Signal Candle Time:{7}, Signal Candle Color:{8}, Signal Direction:{9}, ATR:{10}, Day Open:{11}, Current Time:{12}, Current LTP:{13}, TradingSymbol:{14}",
                             userSettings.TradeStartTime.ToString,
                             userSettings.LastTradeEntryTime.ToString,
                             runningCandlePayload.SnapshotDateTime,
@@ -117,6 +117,7 @@ Public Class MomentumReversalStrategyInstrument
                             If(signal IsNot Nothing, signal.Item3.CandleColor, "Nothing"),
                             If(signal IsNot Nothing, signal.Item2, "Nothing"),
                             If(atr <> Decimal.MinValue, atr, "Nothing"),
+                            currentTick.Open,
                             currentTime.ToString,
                             currentTick.LastPrice,
                             Me.TradableInstrument.TradingSymbol)
@@ -308,9 +309,9 @@ Public Class MomentumReversalStrategyInstrument
         Dim ret As Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload) = Nothing
         Dim firstCandle As OHLCPayload = GetFirstCandleOfTheDay()
         If firstCandle IsNot Nothing Then
-            If firstCandle.CandleColor = Color.Green Then
+            If Me.TradableInstrument.LastTick.Open < firstCandle.ClosePrice.Value Then
                 ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload)(True, IOrder.TypeOfTransaction.Buy, firstCandle)
-            ElseIf firstCandle.CandleColor = Color.Red Then
+            ElseIf Me.TradableInstrument.LastTick.Open > firstCandle.ClosePrice.Value Then
                 ret = New Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload)(True, IOrder.TypeOfTransaction.Sell, firstCandle)
             End If
         End If
