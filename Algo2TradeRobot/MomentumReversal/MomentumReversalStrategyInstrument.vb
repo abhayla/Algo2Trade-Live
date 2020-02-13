@@ -77,7 +77,7 @@ Public Class MomentumReversalStrategyInstrument
                 End If
                 'Modify Order block end
                 _cts.Token.ThrowIfCancellationRequested()
-                Await Task.Delay(60000, _cts.Token).ConfigureAwait(False)
+                Await Task.Delay(1000, _cts.Token).ConfigureAwait(False)
             End While
         Catch ex As Exception
             'To log exceptions getting created from this function as the bubble up of the exception
