@@ -63,6 +63,12 @@ Namespace Controller
                     postContent.Add("password", _currentUser.Password)
                     postContent.Add("login", "")
 
+                    ServicePointManager.Expect100Continue = False
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+                    ServicePointManager.ServerCertificateValidationCallback = Function(s, Ca, CaC, sslPE)
+                                                                                  Return True
+                                                                              End Function
+
                     HttpBrowser.KillCookies()
                     _cts.Token.ThrowIfCancellationRequested()
 

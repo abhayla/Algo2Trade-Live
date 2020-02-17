@@ -64,8 +64,6 @@ Public Class MomentumReversalStrategyInstrument
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
 
-                If Me.TradableInstrument.IsHistoricalCompleted Then Me.TradableInstrument.FetchHistorical = False
-
                 'Place Order block start
                 Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
                 If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
@@ -135,7 +133,7 @@ Public Class MomentumReversalStrategyInstrument
             runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso
             Not IsActiveInstrument() AndAlso GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock AndAlso
             Not Me.StrategyExitAllTriggerd Then
-
+            If Me.TradableInstrument.IsHistoricalCompleted Then Me.TradableInstrument.FetchHistorical = False
             Dim signal As Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload) = GetSignalCandle()
             If signal IsNot Nothing AndAlso signal.Item1 AndAlso atrConsumer.ConsumerPayloads IsNot Nothing AndAlso
                 atrConsumer.ConsumerPayloads.ContainsKey(signal.Item3.SnapshotDateTime) Then
@@ -143,9 +141,11 @@ Public Class MomentumReversalStrategyInstrument
                 If signal.Item2 = IOrder.TypeOfTransaction.Buy Then
                     Dim triggerPrice As Decimal = currentTick.LastPrice
                     Dim price As Decimal = triggerPrice + ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                    Dim minSL As Decimal = price * userSettings.MinStoplossPercentage / 100
+                    'Dim minSL As Decimal = price * userSettings.MinStoplossPercentage / 100
+                    Dim minSL As Decimal = signal.Item3.ClosePrice.Value * userSettings.MinStoplossPercentage / 100
                     Dim stoplossPoint As Decimal = ConvertFloorCeling(Math.Max(atr, minSL), Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                    Dim minTgt As Decimal = price * userSettings.MinTargetPercentage / 100
+                    'Dim minTgt As Decimal = price * userSettings.MinTargetPercentage / 100
+                    Dim minTgt As Decimal = signal.Item3.ClosePrice.Value * userSettings.MinTargetPercentage / 100
                     Dim targetPoint As Decimal = ConvertFloorCeling(Math.Max(atr, minTgt), Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
                     parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
@@ -157,9 +157,11 @@ Public Class MomentumReversalStrategyInstrument
                 ElseIf signal.Item2 = IOrder.TypeOfTransaction.Sell Then
                     Dim triggerPrice As Decimal = currentTick.LastPrice
                     Dim price As Decimal = triggerPrice - ConvertFloorCeling(triggerPrice * 0.3 / 100, TradableInstrument.TickSize, RoundOfType.Celing)
-                    Dim minSL As Decimal = price * userSettings.MinStoplossPercentage / 100
+                    'Dim minSL As Decimal = price * userSettings.MinStoplossPercentage / 100
+                    Dim minSL As Decimal = signal.Item3.ClosePrice.Value * userSettings.MinStoplossPercentage / 100
                     Dim stoplossPoint As Decimal = ConvertFloorCeling(Math.Max(atr, minSL), Me.TradableInstrument.TickSize, RoundOfType.Floor)
-                    Dim minTgt As Decimal = price * userSettings.MinTargetPercentage / 100
+                    'Dim minTgt As Decimal = price * userSettings.MinTargetPercentage / 100
+                    Dim minTgt As Decimal = signal.Item3.ClosePrice.Value * userSettings.MinTargetPercentage / 100
                     Dim targetPoint As Decimal = ConvertFloorCeling(Math.Max(atr, minTgt), Me.TradableInstrument.TickSize, RoundOfType.Celing)
 
                     parameters = New PlaceOrderParameters(runningCandlePayload.PreviousPayload) With
