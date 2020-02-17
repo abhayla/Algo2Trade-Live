@@ -56,6 +56,7 @@ Namespace Controller
                 _cts.Token.ThrowIfCancellationRequested()
                 Try
                     Dim requestToken As String = Nothing
+                    Dim encToken As String = Nothing
 
                     Dim postContent As New Dictionary(Of String, String)
                     postContent.Add("user_id", _currentUser.UserId)
@@ -184,6 +185,14 @@ Namespace Controller
                                         requestToken = queryStrings("request_token")
                                         logger.Debug("2FA submission returned, requestToken:{0}", requestToken)
                                         logger.Debug("Authentication complete, requestToken:{0}", requestToken)
+
+                                        For Each cookie As Cookie In HttpBrowser.AllCookies.GetCookies(New Uri("http://kite.zerodha.com"))
+                                            Console.WriteLine("Name = {0} ; Value = {1} ; Domain = {2}", cookie.Name, cookie.Value,
+                                                      cookie.Domain)
+                                            If cookie.Name = "enctoken" Then
+                                                encToken = cookie.Value
+                                            End If
+                                        Next
                                     ElseIf tempRet IsNot Nothing AndAlso tempRet.Item2 IsNot Nothing AndAlso tempRet.Item2.GetType Is GetType(Dictionary(Of String, Object)) AndAlso
                                         tempRet.Item2.containskey("status") AndAlso tempRet.Item2("status") = "success" Then
                                         logger.Debug("2FA submission returned, redirection:true")
@@ -211,6 +220,14 @@ Namespace Controller
                                             redirectedURI = tempRet.Item1
                                             Dim queryStrings As NameValueCollection = HttpUtility.ParseQueryString(redirectedURI.Query)
                                             requestToken = queryStrings("request_token")
+
+                                            For Each cookie As Cookie In HttpBrowser.AllCookies.GetCookies(New Uri("http://kite.zerodha.com"))
+                                                Console.WriteLine("Name = {0} ; Value = {1} ; Domain = {2}", cookie.Name, cookie.Value,
+                                                      cookie.Domain)
+                                                If cookie.Name = "enctoken" Then
+                                                    encToken = cookie.Value
+                                                End If
+                                            Next
                                             logger.Debug("Redirection returned, requestToken:{0}", requestToken)
                                             logger.Debug("Authentication complete, requestToken:{0}", requestToken)
                                         Else
@@ -265,6 +282,7 @@ Namespace Controller
                     If requestToken IsNot Nothing Then
                         _cts.Token.ThrowIfCancellationRequested()
                         APIConnection = Await RequestAccessTokenAsync(requestToken).ConfigureAwait(False)
+                        APIConnection.ENCToken = encToken
                         _cts.Token.ThrowIfCancellationRequested()
 
                         'Now open the ticker

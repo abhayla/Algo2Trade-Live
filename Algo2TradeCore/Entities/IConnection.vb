@@ -1,6 +1,7 @@
 ﻿Namespace Entities
     Public Interface IConnection
         Property RequestToken As String
+        Property ENCToken As String
         ReadOnly Property AccessToken As String
         ReadOnly Property PublicToken As String
 
