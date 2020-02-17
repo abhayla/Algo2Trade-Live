@@ -5,6 +5,7 @@ Imports NLog
 Imports Utilities.Network
 Imports Utilities.DAL
 Imports System.IO
+Imports System.Net
 
 Namespace Adapter
     Public Class BannedStockDataFetcher
@@ -59,6 +60,13 @@ Namespace Adapter
                     ret = True
                 End If
             Else
+
+                ServicePointManager.Expect100Continue = False
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+                ServicePointManager.ServerCertificateValidationCallback = Function(s, Ca, CaC, sslPE)
+                                                                              Return True
+                                                                          End Function
+
                 Using browser As New HttpBrowser(Nothing, Net.DecompressionMethods.GZip, TimeSpan.FromSeconds(30), _cts)
                     AddHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
                     AddHandler browser.DocumentRetryStatus, AddressOf OnDocumentRetryStatus

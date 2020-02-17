@@ -1,4 +1,5 @@
-﻿Imports System.Net.Http
+﻿Imports System.Net
+Imports System.Net.Http
 Imports System.Threading
 Imports NLog
 Imports Utilities.Network
@@ -46,6 +47,12 @@ Namespace Notification
         Public Async Function SendMessageGetAsync(ByVal message As String) As Task
             Dim proxyToBeUsed As HttpProxy = Nothing
             Dim ret As List(Of String) = Nothing
+
+            ServicePointManager.Expect100Continue = False
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+            ServicePointManager.ServerCertificateValidationCallback = Function(s, Ca, CaC, sslPE)
+                                                                          Return True
+                                                                      End Function
 
             Using browser As New HttpBrowser(proxyToBeUsed, Net.DecompressionMethods.GZip, New TimeSpan(0, 1, 0), _canceller)
                 AddHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete

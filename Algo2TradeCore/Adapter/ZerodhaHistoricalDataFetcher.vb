@@ -65,6 +65,12 @@ Namespace Adapter
                                                                     Now.AddDays(-1 * _daysToGoBack).ToString("yyyy-MM-dd"),
                                                                     Now.ToString("yyyy-MM-dd"))
 
+                ServicePointManager.Expect100Continue = False
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+                ServicePointManager.ServerCertificateValidationCallback = Function(s, Ca, CaC, sslPE)
+                                                                              Return True
+                                                                          End Function
+
                 Console.WriteLine(historicalDataURL)
                 Dim request As HttpWebRequest = HttpWebRequest.Create(historicalDataURL)
                 request.Host = "kite.zerodha.com"

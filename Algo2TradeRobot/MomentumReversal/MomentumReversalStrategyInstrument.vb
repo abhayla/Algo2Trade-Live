@@ -133,7 +133,6 @@ Public Class MomentumReversalStrategyInstrument
             runningCandlePayload.PreviousPayload IsNot Nothing AndAlso Me.TradableInstrument.IsHistoricalCompleted AndAlso
             Not IsActiveInstrument() AndAlso GetTotalExecutedOrders() < userSettings.NumberOfTradePerStock AndAlso
             Not Me.StrategyExitAllTriggerd Then
-            If Me.TradableInstrument.IsHistoricalCompleted Then Me.TradableInstrument.FetchHistorical = False
             Dim signal As Tuple(Of Boolean, IOrder.TypeOfTransaction, OHLCPayload) = GetSignalCandle()
             If signal IsNot Nothing AndAlso signal.Item1 AndAlso atrConsumer.ConsumerPayloads IsNot Nothing AndAlso
                 atrConsumer.ConsumerPayloads.ContainsKey(signal.Item3.SnapshotDateTime) Then

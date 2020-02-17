@@ -589,7 +589,7 @@ Namespace Controller
                 AddHandler expiry.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
 
                 Dim expiryData As Dictionary(Of String, Date) = Nothing
-                'expiryData = Await expiry.GetToolExpiryDataAsync().ConfigureAwait(False)
+                expiryData = Await expiry.GetToolExpiryDataAsync().ConfigureAwait(False)
 
                 If expiryData IsNot Nothing AndAlso expiryData.Count > 0 AndAlso
                     expiryData.ContainsKey(toolID) Then

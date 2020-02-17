@@ -4,6 +4,7 @@ Imports Utilities.Network
 Imports Utilities.DAL
 Imports System.IO
 Imports System.Net.Http
+Imports System.Net
 
 Namespace Adapter
     Public Class ToolExpiryDataFetcher
@@ -48,6 +49,13 @@ Namespace Adapter
 
         Public Async Function GetToolExpiryDataAsync() As Task(Of Dictionary(Of String, Date))
             Dim ret As Dictionary(Of String, Date) = Nothing
+
+            ServicePointManager.Expect100Continue = False
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+            ServicePointManager.ServerCertificateValidationCallback = Function(s, Ca, CaC, sslPE)
+                                                                          Return True
+                                                                      End Function
+
             Dim proxyToBeUsed As HttpProxy = Nothing
             Using browser As New HttpBrowser(proxyToBeUsed, Net.DecompressionMethods.GZip, New TimeSpan(0, 1, 0), _cts)
                 AddHandler browser.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete

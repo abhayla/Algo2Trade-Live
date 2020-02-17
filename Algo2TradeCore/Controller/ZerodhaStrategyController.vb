@@ -688,6 +688,13 @@ Namespace Controller
 
         Protected Overrides Async Function FillQuantityMultiplierMapAsync() As Task
             Dim commodityMultiplierMap As Dictionary(Of String, Object) = Nothing
+
+            ServicePointManager.Expect100Continue = False
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+            ServicePointManager.ServerCertificateValidationCallback = Function(s, Ca, CaC, sslPE)
+                                                                          Return True
+                                                                      End Function
+
             Dim proxyToBeUsed As HttpProxy = Nothing
             Using browser As New HttpBrowser(proxyToBeUsed, Net.DecompressionMethods.GZip, New TimeSpan(0, 1, 0), _cts)
                 Dim l As Tuple(Of Uri, Object) = Await browser.NonPOSTRequestAsync("https://zerodha.com/static/app.js",

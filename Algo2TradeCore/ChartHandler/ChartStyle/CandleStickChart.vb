@@ -298,12 +298,6 @@ Namespace ChartHandler.ChartStyle
                 End While
                 Await Task.Delay(1, _cts.Token).ConfigureAwait(False)
 
-                Try
-                    logger.Fatal("#### Historical Candle: {0}", Utilities.Strings.JsonSerialize(historicalCandlesJSONDict))
-                Catch ex As Exception
-                    logger.Error(ex.ToString)
-                End Try
-
                 If historicalCandlesJSONDict.ContainsKey("data") Then
                     Dim historicalCandlesDict As Dictionary(Of String, Object) = historicalCandlesJSONDict("data")
                     If historicalCandlesDict.ContainsKey("candles") AndAlso historicalCandlesDict("candles").count > 0 Then
