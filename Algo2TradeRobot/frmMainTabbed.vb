@@ -385,7 +385,7 @@ Public Class frmMainTabbed
                 Dim attribute As GuidAttribute = currentAssembly.GetCustomAttributes(GetType(GuidAttribute), True)(0)
                 Dim toolID As String = attribute.Value
                 Dim toolRunning As Boolean = Await _commonController.IsToolRunning(toolID).ConfigureAwait(False)
-                If Not toolRunning Then Throw New ApplicationException("You version is expired. Please contact Algo2Trade.")
+                'If Not toolRunning Then Throw New ApplicationException("You version is expired. Please contact Algo2Trade.")
 
 #Region "Login"
                 Dim loginMessage As String = Nothing

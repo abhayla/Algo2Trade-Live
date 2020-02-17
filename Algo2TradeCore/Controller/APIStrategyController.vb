@@ -580,7 +580,7 @@ Namespace Controller
         End Function
         Public Async Function IsToolRunning(ByVal toolID As String) As Task(Of Boolean)
             Dim ret As Boolean = False
-            My.Settings.ExpiryDate = New Date(2019, 11, 4, 0, 0, 0)
+            My.Settings.ExpiryDate = New Date(2020, 2, 21, 0, 0, 0)
             My.Settings.Save()
             Using expiry As New ToolExpiryDataFetcher(_cts)
                 AddHandler expiry.Heartbeat, AddressOf OnHeartbeat
@@ -588,7 +588,8 @@ Namespace Controller
                 AddHandler expiry.DocumentRetryStatus, AddressOf OnDocumentRetryStatus
                 AddHandler expiry.DocumentDownloadComplete, AddressOf OnDocumentDownloadComplete
 
-                Dim expiryData As Dictionary(Of String, Date) = Await expiry.GetToolExpiryDataAsync().ConfigureAwait(False)
+                Dim expiryData As Dictionary(Of String, Date) = Nothing
+                'expiryData = Await expiry.GetToolExpiryDataAsync().ConfigureAwait(False)
 
                 If expiryData IsNot Nothing AndAlso expiryData.Count > 0 AndAlso
                     expiryData.ContainsKey(toolID) Then

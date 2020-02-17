@@ -1,6 +1,7 @@
 ﻿Namespace Entities
     Public Class ZerodhaConnection
         Implements IConnection
+
         Public Property RequestToken As String Implements IConnection.RequestToken
         Public ReadOnly Property AccessToken As String Implements IConnection.AccessToken
             Get
@@ -27,5 +28,7 @@
                 Return APISource.Zerodha
             End Get
         End Property
+
+        Public Property ENCToken As String Implements IConnection.ENCToken
     End Class
 End Namespace

@@ -63,6 +63,9 @@ Public Class MomentumReversalStrategyInstrument
                     Throw Me._RMSException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
+
+                If Me.TradableInstrument.IsHistoricalCompleted Then Me.TradableInstrument.FetchHistorical = False
+
                 'Place Order block start
                 Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
                 If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
