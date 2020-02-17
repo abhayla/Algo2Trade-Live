@@ -92,7 +92,8 @@ Namespace Adapter
                 request.Host = "kite.zerodha.com"
                 request.Accept = "*/*"
                 request.Headers.Add("Accept-Language", "en-US,en;q=0.9,hi;q=0.8,ko;q=0.7")
-                request.Headers.Add("Authorization", String.Format("enctoken {0}", Me.ParentController.APIConnection.ENCToken))
+                'request.Headers.Add("Authorization", String.Format("enctoken {0}", Me.ParentController.APIConnection.ENCToken))
+                request.Headers.Add("Authorization", String.Format("enctoken {0}", "UYR20NtuC4rNg0lf7NBNba0m/ytI5Pjd/TyETsjUjz03kJph/QcPP6klyUKY0oFIKs+UG0wp1pnioXkiZBTLhNxxFlBgFg=="))
                 request.Referer = "https://kite.zerodha.com/static/build/chart.html?v=2.4.0"
                 request.Headers.Add("sec-fetch-mode", "cors")
                 request.Headers.Add("sec-fetch-site", "same-origin")
