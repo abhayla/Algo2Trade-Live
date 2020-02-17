@@ -52,7 +52,8 @@ Public Class MomentumReversalStrategyInstrument
     End Function
     Public Overrides Async Function MonitorAsync() As Task
         Try
-            Dim MRUserSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
+            Dim userSettings As MomentumReversalUserInputs = Me.ParentStrategy.UserSettings
+            Dim historicalStopped As Boolean = False
             While True
                 If Me.ParentStrategy.ParentController.OrphanException IsNot Nothing Then
                     Throw Me.ParentStrategy.ParentController.OrphanException
@@ -63,7 +64,11 @@ Public Class MomentumReversalStrategyInstrument
                     Throw Me._RMSException
                 End If
                 _cts.Token.ThrowIfCancellationRequested()
-
+                If Me.TradableInstrument.IsHistoricalCompleted AndAlso
+                    Not historicalStopped AndAlso Now >= userSettings.TradeStartTime.AddSeconds(10) Then
+                    Await Me.ParentStrategy.ParentController.CloseFetcherIfConnectedAsync(True).ConfigureAwait(False)
+                    historicalStopped = True
+                End If
                 'Place Order block start
                 Dim placeOrderTriggers As List(Of Tuple(Of ExecuteCommandAction, PlaceOrderParameters, String)) = Await IsTriggerReceivedForPlaceOrderAsync(False).ConfigureAwait(False)
                 If placeOrderTriggers IsNot Nothing AndAlso placeOrderTriggers.Count > 0 Then
