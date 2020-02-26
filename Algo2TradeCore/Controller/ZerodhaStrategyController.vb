@@ -712,24 +712,26 @@ Namespace Controller
             If commodityMultiplierMap IsNot Nothing AndAlso commodityMultiplierMap.Count > 0 Then
                 If _AllInstruments IsNot Nothing AndAlso _AllInstruments.Count > 0 Then
                     For Each instrument In _AllInstruments
-                        instrument.ExchangeDetails = Me.UserInputs.ExchangeDetails(instrument.RawExchange)
+                        If Me.UserInputs.ExchangeDetails.ContainsKey(instrument.RawExchange) Then
+                            instrument.ExchangeDetails = Me.UserInputs.ExchangeDetails(instrument.RawExchange)
 
-                        If instrument.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
-                            instrument.ExchangeDetails.ExchangeType = Enums.TypeOfExchage.MCX Then
-                            Dim stockName As String = instrument.TradingSymbol.Remove(instrument.TradingSymbol.Count - 8)
-                            If commodityMultiplierMap.ContainsKey(stockName) Then
-                                instrument.QuantityMultiplier = Val(commodityMultiplierMap(stockName).ToString.Substring(0, commodityMultiplierMap(stockName).ToString.Length - 1))
-                                instrument.BrokerageCategory = commodityMultiplierMap(stockName).ToString.Substring(commodityMultiplierMap(stockName).ToString.Length - 1)
+                            If instrument.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
+                                instrument.ExchangeDetails.ExchangeType = Enums.TypeOfExchage.MCX Then
+                                Dim stockName As String = instrument.TradingSymbol.Remove(instrument.TradingSymbol.Count - 8)
+                                If commodityMultiplierMap.ContainsKey(stockName) Then
+                                    instrument.QuantityMultiplier = Val(commodityMultiplierMap(stockName).ToString.Substring(0, commodityMultiplierMap(stockName).ToString.Length - 1))
+                                    instrument.BrokerageCategory = commodityMultiplierMap(stockName).ToString.Substring(commodityMultiplierMap(stockName).ToString.Length - 1)
+                                Else
+                                    logger.Warn(String.Format("Commodity Multiplier Map doesn't have this MCX stock - {0}", stockName))
+                                End If
+                            ElseIf instrument.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
+                                    instrument.ExchangeDetails.ExchangeType = Enums.TypeOfExchage.CDS Then
+                                instrument.QuantityMultiplier = 1000
+                                instrument.BrokerageCategory = Nothing
                             Else
-                                logger.Warn(String.Format("Commodity Multiplier Map doesn't have this MCX stock - {0}", stockName))
+                                instrument.QuantityMultiplier = 1
+                                instrument.BrokerageCategory = Nothing
                             End If
-                        ElseIf instrument.InstrumentType = IInstrument.TypeOfInstrument.Futures AndAlso
-                                instrument.ExchangeDetails.ExchangeType = Enums.TypeOfExchage.CDS Then
-                            instrument.QuantityMultiplier = 1000
-                            instrument.BrokerageCategory = Nothing
-                        Else
-                            instrument.QuantityMultiplier = 1
-                            instrument.BrokerageCategory = Nothing
                         End If
                     Next
                 End If
